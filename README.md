@@ -5,7 +5,7 @@
 The `filing-history-data-api` is a service that transforms filing history deltas to a standardised
 structure then:
 
-* stores these to the company_filing_history collection in MongoDB, and
+* stores these to the `company_filing_history collection` in MongoDB, and
 * enqueues a resource changed message that triggers further downstream processing.
 
 The service is implemented in Java 21 using Spring Boot 3.2
@@ -52,6 +52,5 @@ in [Docker CHS Development](https://github.com/companieshouse/docker-chs-develop
 
     ./bin/chs-dev development enable filing-history-data-api
 
-This will clone the `filing-history-data-api` into the repositories folder. Any changes to the code,
-or resources will
-automatically trigger a rebuild and relaunch.
+This will clone the `filing-history-data-api` into the `./repositories` folder. Any changes to the
+code, or resources will automatically trigger a rebuild and relaunch.

@@ -141,8 +141,6 @@ class AuthenticationInterceptorTest {
         when(request.getHeader(
                 AuthenticationConstants.ERIC_AUTHORISED_KEY_PRIVILEGES_HEADER)).thenReturn(
                 AuthenticationConstants.INTERNAL_APP_PRIVILEGE);
-//        when(authenticationHelper.getApiKeyPrivileges(request))
-//                .thenReturn(new String[]{INTERNAL_APP});
 
         // when
         boolean actual = authenticationInterceptor.preHandle(request, response, handler);
@@ -159,8 +157,6 @@ class AuthenticationInterceptorTest {
         when(request.getHeader(AuthenticationConstants.ERIC_IDENTITY)).thenReturn(USER);
         when(request.getHeader(AuthenticationConstants.ERIC_IDENTITY_TYPE)).thenReturn(
                 AuthenticationConstants.OAUTH2_IDENTITY_TYPE);
-//        when(authenticationHelper.getApiKeyPrivileges(request))
-//                .thenReturn(new String[]{INTERNAL_APP});
 
         // when
         boolean actual = authenticationInterceptor.preHandle(request, response, handler);
