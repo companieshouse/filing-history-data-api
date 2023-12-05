@@ -239,10 +239,7 @@
         <configuration>
           <argLine>-Dfile.encoding=UTF-8</argLine>
           <argLine>${surefireArgLine}</argLine>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <excludes>
-            <exclude>**/*ITest.java</exclude>
-          </excludes>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile><!--          <excludes>-->
           <skipTests>${skip.unit.tests}</skipTests>
         </configuration>
       </plugin>
@@ -271,9 +268,6 @@
           <argLine>${failsafeArgLine}</argLine>
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
           <skipITs>${skip.integration.tests}</skipITs>
-          <includes>
-            <include>**/*ITest.java</include>
-          </includes>
         </configuration>
       </plugin>
 

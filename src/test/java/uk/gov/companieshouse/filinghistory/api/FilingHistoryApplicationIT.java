@@ -17,7 +17,7 @@ import uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstan
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes = FilingHistoryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class FilingHistoryApplicationITest {
+class FilingHistoryApplicationIT {
 
     @Autowired
     private MockMvc mockMvc;
