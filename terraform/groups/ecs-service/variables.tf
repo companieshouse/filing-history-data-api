@@ -114,7 +114,15 @@ variable "log_level" {
   type        = string
   description = "The log level for services to use: trace, debug, info or error"
 }
-variable "filing_history_delta_api_version" {
+variable "filing_history_data_api_version" {
   type        = string
-  description = "The version of the filing-history-delta-api container to run."
+  description = "The version of the filing-history-data-api container to run."
+}
+variable "chs_kafka_api_url" {
+  type        = string
+  description = "The url of chs-kafka-api which to send requests to Kafka."
+}
+variable "logger_namespace" {
+  type        = string
+  description = "The namespace of this application, useful for structured logging."
 }

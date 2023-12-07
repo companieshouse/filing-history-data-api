@@ -3,15 +3,15 @@ locals {
   stack_name                  = "data-sync" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
-  service_name                = "filing-history-delta-api"
+  service_name                = "filing-history-data-api"
   container_port              = "8080"
-  docker_repo                 = "filing-history-delta-api"
+  docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
-  healthcheck_path            = "/filing-history-delta-api/healthcheck" #healthcheck path for filing-history-delta-api
+  healthcheck_path            = "/filing-history-data-api/healthcheck" #healthcheck path for filing-history-data-api
   healthcheck_matcher         = "200-302"
   vpc_name                    = local.stack_secrets["vpc_name"]
   s3_config_bucket            = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
-  app_environment_filename    = "filing-history-delta-api.env"
+  app_environment_filename    = "filing-history-data-api.env"
   use_set_environment_files   = var.use_set_environment_files
   application_subnet_ids      = data.aws_subnets.application.ids
 
@@ -19,6 +19,7 @@ locals {
   application_subnet_pattern = local.stack_secrets["application_subnet_pattern"]
 
   service_secrets            = jsondecode(data.vault_generic_secret.service_secrets.data_json)
+  chs_api_key                = local.service_secrets["chs-api-key"]
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
@@ -58,10 +59,14 @@ locals {
   ]
 
   # secrets to go in list
-  task_secrets = concat(local.service_secret_list,local.global_secret_list,[])
+  task_secrets = concat(local.service_secret_list,local.global_secret_list,[
+    { name : "CHS_API_KEY", value : local.chs_api_key },
+  ])
 
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { name : "PORT", value : local.container_port },
-    { name : "LOGLEVEL", value : var.log_level }
+    { name : "LOGLEVEL", value : var.log_level },
+    { name : "CHS_KAFKA_API_URL", value : var.chs_kafka_api_url},
+    { name : "LOGGER_NAMESPACE", value : var.logger_namespace},
   ])
 }
