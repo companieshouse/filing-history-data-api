@@ -122,7 +122,3 @@ variable "chs_kafka_api_url" {
   type        = string
   description = "The url of chs-kafka-api which to send requests to Kafka."
 }
-variable "logger_namespace" {
-  type        = string
-  description = "The namespace of this application, useful for structured logging."
-}

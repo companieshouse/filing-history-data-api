@@ -7,6 +7,8 @@ locals {
   container_port              = "8080"
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
+  lb_listener_rule_priority   = 31
+  lb_listener_paths           = ["/company/*/filing-history/*/internal"]
   healthcheck_path            = "/filing-history-data-api/healthcheck" #healthcheck path for filing-history-data-api
   healthcheck_matcher         = "200-302"
   vpc_name                    = local.stack_secrets["vpc_name"]
@@ -66,7 +68,6 @@ locals {
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { name : "PORT", value : local.container_port },
     { name : "LOGLEVEL", value : var.log_level },
-    { name : "CHS_KAFKA_API_URL", value : var.chs_kafka_api_url},
-    { name : "LOGGER_NAMESPACE", value : var.logger_namespace},
+    { name : "CHS_KAFKA_API_URL", value : var.chs_kafka_api_url}
   ])
 }
