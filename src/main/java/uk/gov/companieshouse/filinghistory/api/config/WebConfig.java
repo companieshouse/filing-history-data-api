@@ -12,6 +12,8 @@ class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new RequestLoggingInterceptor());
-        registry.addInterceptor(new AuthenticationInterceptor());
+        registry.addInterceptor(new AuthenticationInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns("/healthcheck");
     }
 }
