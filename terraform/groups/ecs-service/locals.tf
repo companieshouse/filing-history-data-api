@@ -1,6 +1,6 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                  = "data-sync" # this must match the stack name the service deploys into
+  stack_name                  = "public-data" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "filing-history-data-api"
@@ -8,8 +8,8 @@ locals {
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority   = 31
-  lb_listener_paths           = ["/company/*/filing-history/*/internal"]
-  healthcheck_path            = "/filing-history-data-api/healthcheck" #healthcheck path for filing-history-data-api
+  lb_listener_paths           = ["/company/*/filing-history*"]
+  healthcheck_path            = "/healthcheck" #healthcheck path for filing-history-data-api
   healthcheck_matcher         = "200-302"
   vpc_name                    = local.stack_secrets["vpc_name"]
   s3_config_bucket            = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
@@ -22,6 +22,7 @@ locals {
 
   service_secrets            = jsondecode(data.vault_generic_secret.service_secrets.data_json)
   chs_api_key                = local.service_secrets["chs-api-key"]
+  chs_kafka_api_url          = local.service_secrets["chs-kafka-api-url"]
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
@@ -63,11 +64,11 @@ locals {
   # secrets to go in list
   task_secrets = concat(local.service_secret_list,local.global_secret_list,[
     { name : "CHS_API_KEY", value : local.chs_api_key },
+    { name : "CHS_KAFKA_API_URL", value : local.chs_kafka_api_url}
   ])
 
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { name : "PORT", value : local.container_port },
-    { name : "LOGLEVEL", value : var.log_level },
-    { name : "CHS_KAFKA_API_URL", value : var.chs_kafka_api_url}
+    { name : "LOGLEVEL", value : var.log_level }
   ])
 }

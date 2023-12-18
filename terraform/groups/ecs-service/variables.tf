@@ -118,7 +118,3 @@ variable "filing_history_data_api_version" {
   type        = string
   description = "The version of the filing-history-data-api container to run."
 }
-variable "chs_kafka_api_url" {
-  type        = string
-  description = "The url of chs-kafka-api which to send requests to Kafka."
-}
