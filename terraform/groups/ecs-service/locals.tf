@@ -1,6 +1,6 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                  = "data-sync" # this must match the stack name the service deploys into
+  stack_name                  = "public-data" # this must match the stack name the service deploys into
   name_prefix                 = "${local.stack_name}-${var.environment}"
   global_prefix               = "global-${var.environment}"
   service_name                = "filing-history-data-api"
@@ -8,8 +8,8 @@ locals {
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority   = 31
-  lb_listener_paths           = ["/company/*/filing-history/*/internal"]
-  healthcheck_path            = "/filing-history-data-api/healthcheck" #healthcheck path for filing-history-data-api
+  lb_listener_paths           = ["/company/*/filing-history*"]
+  healthcheck_path            = "/healthcheck" #healthcheck path for filing-history-data-api
   healthcheck_matcher         = "200-302"
   vpc_name                    = local.stack_secrets["vpc_name"]
   s3_config_bucket            = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
@@ -21,7 +21,7 @@ locals {
   application_subnet_pattern = local.stack_secrets["application_subnet_pattern"]
 
   service_secrets            = jsondecode(data.vault_generic_secret.service_secrets.data_json)
-  chs_api_key                = local.service_secrets["chs-api-key"]
+  chs_api_key                = local.service_secrets["chs_api_key"]
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
