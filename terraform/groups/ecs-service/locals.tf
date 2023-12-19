@@ -22,7 +22,6 @@ locals {
 
   service_secrets            = jsondecode(data.vault_generic_secret.service_secrets.data_json)
   chs_api_key                = local.service_secrets["chs_api_key"]
-  chs_kafka_api_url          = local.service_secrets["chs_kafka_api_url"]
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
@@ -64,11 +63,11 @@ locals {
   # secrets to go in list
   task_secrets = concat(local.service_secret_list,local.global_secret_list,[
     { name : "CHS_API_KEY", value : local.chs_api_key },
-    { name : "CHS_KAFKA_API_URL", value : local.chs_kafka_api_url}
   ])
 
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { name : "PORT", value : local.container_port },
-    { name : "LOGLEVEL", value : var.log_level }
+    { name : "LOGLEVEL", value : var.log_level },
+    { name : "CHS_KAFKA_API_URL", value : var.chs_kafka_api_url}
   ])
 }
