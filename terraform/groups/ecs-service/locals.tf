@@ -21,7 +21,6 @@ locals {
   application_subnet_pattern = local.stack_secrets["application_subnet_pattern"]
 
   service_secrets            = jsondecode(data.vault_generic_secret.service_secrets.data_json)
-  chs_api_key                = local.service_secrets["chs_api_key"]
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
@@ -61,9 +60,7 @@ locals {
   ]
 
   # secrets to go in list
-  task_secrets = concat(local.service_secret_list,local.global_secret_list,[
-    { name : "CHS_API_KEY", value : local.chs_api_key },
-  ])
+  task_secrets = concat(local.service_secret_list,local.global_secret_list)
 
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
     { name : "PORT", value : local.container_port },
