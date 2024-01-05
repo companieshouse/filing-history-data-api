@@ -27,7 +27,7 @@ data "aws_subnets" "application" {
 }
 
 data "aws_lb" "service_lb" {
-  name = "${var.environment}-chs-accountchgovuk"
+  name = "${var.environment}-chs-apichgovuk"
 }
 
 data "aws_lb_listener" "service_lb_listener" {
