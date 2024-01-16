@@ -1,0 +1,32 @@
+{
+  "_id" : "<id>",
+  "company_number" : "<company_number>",
+  "data" : {
+    "action_date" : ISODate("2014-08-29T00:00:00.000Z"),
+    "category" : "officers",
+    "type" : "TM01",
+    "description" : "termination-director-company-with-name-termination-date",
+    "subcategory" : "termination",
+    "date" : ISODate("2014-09-15T23:21:18.000Z"),
+    "description_values" : {
+      "termination_date" : ISODate("2014-08-29T00:00:00.000Z"),
+      "officer_name" : "John Tester"
+    },
+    "links" : {
+      "document_metadata" : "/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA",
+      "self" : "/company/<company_number>/filing-history/<id>"
+    },
+    "pages" : NumberInt(1)
+  },
+  "_barcode" : "X4BI89B6",
+  "delta_at" : "20140916230459600643",
+  "_entity_id" : "1234567890",
+  "updated_at" : ISODate("2014-09-17T18:52:08.001Z"),
+  "updated_by" : "5419d856b6a59f32b7684d0e",
+  "original_values" : {
+    "officer_name" : "John Tester",
+    "resignation_date" : "29/08/2014"
+  },
+  "original_description" : "Appointment Terminated, Director john tester",
+  "_document_id" : "000X4BI89B65846"
+}
