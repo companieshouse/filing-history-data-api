@@ -1,23 +1,28 @@
 package uk.gov.companieshouse.filinghistory.api.repository;
 
-import org.bson.Document;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.filinghistory.api.model.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Optional;
+import org.bson.Document;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @Testcontainers
 @SpringBootTest
@@ -30,23 +35,56 @@ class RepositoryIT {
     private static final String COMPANY_NUMBER = "12345678";
 
     @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
     private Repository repository;
+
 
     @BeforeAll
     static void start() throws IOException {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
-        MongoTemplate mongoTemplate = new MongoTemplate(new SimpleMongoClientDatabaseFactory(mongoDBContainer.getReplicaSetUrl()));
+    }
+
+    @BeforeEach
+    void setUp() {
+        mongoTemplate.dropCollection(FILING_HISTORY_COLLECTION);
         mongoTemplate.createCollection(FILING_HISTORY_COLLECTION);
-        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
-                        .replaceAll("<id>", TRANSACTION_ID)
-                        .replaceAll("<company_number>", COMPANY_NUMBER);
-        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
     }
 
     @Test
-    void testMappingsFromMongoToDocument() {
+    void testMappingsFromMongoToDocument() throws IOException {
         // given
-        final FilingHistoryDocument expectedDocument = new FilingHistoryDocument()
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument();
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = repository.findById(TRANSACTION_ID);
+
+        // then
+        assertTrue(actualDocument.isPresent());
+        assertEquals(expectedDocument, actualDocument.get());
+    }
+
+    @Test
+    void shouldSuccessfullyInsertDocumentById() {
+        // given
+        final FilingHistoryDocument document = getFilingHistoryDocument();
+
+        // when
+        repository.save(document);
+
+        // then
+        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(document, actual);
+    }
+
+    private static FilingHistoryDocument getFilingHistoryDocument() {
+        return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
@@ -73,11 +111,5 @@ class RepositoryIT {
                         .resignationDate("29/08/2014"))
                 .originalDescription("Appointment Terminated, Director john tester")
                 .documentId("000X4BI89B65846");
-
-        // when
-        final FilingHistoryDocument actualDocument = repository.findById(TRANSACTION_ID);
-
-        // then
-        assertEquals(expectedDocument, actualDocument);
     }
 }

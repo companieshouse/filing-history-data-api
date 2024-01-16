@@ -1,11 +1,10 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import java.time.Instant;
+import java.util.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
-import java.util.Objects;
 
 @Document(collection = "company_filing_history")
 public class FilingHistoryDocument {

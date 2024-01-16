@@ -1,0 +1,48 @@
+package uk.gov.companieshouse.filinghistory.api.service;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.mapper.Mapper;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
+import uk.gov.companieshouse.filinghistory.api.repository.Repository;
+
+public class FilingHistoryService implements Service {
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
+            .withZone(ZoneId.of("Z"));
+    private final Mapper mapper;
+    private final Repository repository;
+
+    public FilingHistoryService(Mapper mapper, Repository repository) {
+        this.mapper = mapper;
+        this.repository = repository;
+    }
+
+    @Override
+    public ServiceResult upsertFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
+        final Optional<FilingHistoryDocument> existingDocument = repository.findById(transactionId);
+
+        final FilingHistoryDocument documentToUpsert;
+        if (existingDocument.isPresent()) {
+            if (isDeltaStale(request, existingDocument.get())) {
+                return ServiceResult.STALE_DELTA;
+            } else {
+                documentToUpsert = mapper.mapFilingHistory(existingDocument.get(), request);
+            }
+        } else {
+            documentToUpsert = mapper.mapFilingHistory(transactionId, request);
+        }
+
+        repository.save(documentToUpsert);
+        return ServiceResult.UPSERT_SUCCESSFUL;
+    }
+
+    private static boolean isDeltaStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
+        return !request.getInternalData().getDeltaAt()
+                .isAfter(OffsetDateTime.parse(existingDocument.getDeltaAt(), FORMATTER));
+    }
+}

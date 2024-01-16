@@ -1,8 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
-import org.springframework.data.mongodb.core.mapping.Field;
-
 import java.util.Objects;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 public class FilingHistoryOriginalValues {
 
