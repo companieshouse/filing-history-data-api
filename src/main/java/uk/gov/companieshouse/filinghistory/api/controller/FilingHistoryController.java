@@ -25,14 +25,13 @@ public class FilingHistoryController {
             @PathVariable("transaction_id") final String transactionId,
             @RequestBody final InternalFilingHistoryApi requestBody) {
 
-        final HttpStatus status;
         final ServiceResult result = filingHistoryService.upsertFilingHistory(transactionId, requestBody);
 
         // This is a switch because we'll need to add more cases in the future when doing unhappy paths
-        switch (result) {
-            case STALE_DELTA -> status = HttpStatus.CONFLICT;
-            default -> status = HttpStatus.OK;
-        }
+        final HttpStatus status = switch (result) {
+            case STALE_DELTA -> HttpStatus.CONFLICT;
+            default -> HttpStatus.OK;
+        };
         return ResponseEntity.status(status).build();
     }
 }
