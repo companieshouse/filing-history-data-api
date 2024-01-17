@@ -24,24 +24,25 @@ public class FilingHistoryService implements Service {
 
     @Override
     public ServiceResult upsertFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
-        final Optional<FilingHistoryDocument> existingDocument = repository.findById(transactionId);
+        return repository.findById(transactionId)
+                .map(existingDocument -> updateFilingHistory(request, existingDocument))
+                .orElseGet(() -> insertFilingHistory(transactionId, request));
+    }
 
-        final FilingHistoryDocument documentToUpsert;
-        if (existingDocument.isPresent()) {
-            if (isDeltaStale(request, existingDocument.get())) {
-                return ServiceResult.STALE_DELTA;
-            } else {
-                documentToUpsert = mapper.mapFilingHistory(existingDocument.get(), request);
-            }
-        } else {
-            documentToUpsert = mapper.mapFilingHistory(transactionId, request);
+    private ServiceResult updateFilingHistory(final InternalFilingHistoryApi request, final FilingHistoryDocument existingDocument) {
+        if (isDeltaStale(request, existingDocument)) {
+            return ServiceResult.STALE_DELTA;
         }
-
-        repository.save(documentToUpsert);
+        repository.save(mapper.mapFilingHistory(existingDocument, request));
         return ServiceResult.UPSERT_SUCCESSFUL;
     }
 
-    private static boolean isDeltaStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
+    private ServiceResult insertFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
+        repository.save(mapper.mapFilingHistory(transactionId, request));
+        return ServiceResult.UPSERT_SUCCESSFUL;
+    }
+
+    private static boolean isDeltaStale(final InternalFilingHistoryApi request, final FilingHistoryDocument existingDocument) {
         return !request.getInternalData().getDeltaAt()
                 .isAfter(OffsetDateTime.parse(existingDocument.getDeltaAt(), FORMATTER));
     }
