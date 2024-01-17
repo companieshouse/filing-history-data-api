@@ -8,12 +8,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FilingHistoryControllerTest {
+class FilingHistoryControllerTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -32,10 +36,30 @@ public class FilingHistoryControllerTest {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.OK).build();
 
+        when(service.upsertFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+
         // when
-        final ResponseEntity<Void> actualResponse = controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
+        final ResponseEntity<Void> actualResponse =
+                controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
 
         // then
         assertEquals(expectedResponse, actualResponse);
+        verify(service).upsertFilingHistory(TRANSACTION_ID, requestBody);
+    }
+
+    @Test
+    void shouldReturn409ConflictWhenPutRequestWithStaleDelta() {
+        // given
+        final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.CONFLICT).build();
+
+        when(service.upsertFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
+
+        // when
+        final ResponseEntity<Void> actualResponse =
+                controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(service).upsertFilingHistory(TRANSACTION_ID, requestBody);
     }
 }
