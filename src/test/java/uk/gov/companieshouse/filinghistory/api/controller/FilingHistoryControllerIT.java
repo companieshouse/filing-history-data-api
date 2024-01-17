@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,12 +18,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
-import uk.gov.companieshouse.filinghistory.api.mapper.Mapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.service.Service;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -51,7 +49,7 @@ class FilingHistoryControllerIT {
     @MockBean
     private Service filingHistoryService;
     @MockBean
-    private Mapper mapper;
+    private TopLevelMapper topLevelMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

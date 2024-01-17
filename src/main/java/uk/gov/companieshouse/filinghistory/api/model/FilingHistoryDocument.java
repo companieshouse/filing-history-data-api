@@ -146,4 +146,21 @@ public class FilingHistoryDocument {
     public int hashCode() {
         return Objects.hash(transactionId, entityId, companyNumber, documentId, barcode, data, originalDescription, originalValues, deltaAt, updatedAt, updatedBy);
     }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryDocument{" +
+                "transactionId='" + transactionId + '\'' +
+                ", entityId='" + entityId + '\'' +
+                ", companyNumber='" + companyNumber + '\'' +
+                ", documentId='" + documentId + '\'' +
+                ", barcode='" + barcode + '\'' +
+                ", data=" + data +
+                ", originalDescription='" + originalDescription + '\'' +
+                ", originalValues=" + originalValues +
+                ", deltaAt='" + deltaAt + '\'' +
+                ", updatedAt=" + updatedAt +
+                ", updatedBy='" + updatedBy + '\'' +
+                '}';
+    }
 }

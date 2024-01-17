@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.Mapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
@@ -34,7 +34,7 @@ class FilingHistoryServiceTest {
     private FilingHistoryService filingHistoryService;
 
     @Mock
-    private Mapper mapper;
+    private TopLevelMapper topLevelMapper;
 
     @Mock
     private Repository repository;
@@ -55,7 +55,7 @@ class FilingHistoryServiceTest {
     void shouldSuccessfullyCallSaveWhenInsert() {
         // given
         when(repository.findById(any())).thenReturn(Optional.empty());
-        when(mapper.mapFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
+        when(topLevelMapper.mapFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
 
         // when
         ServiceResult actual = filingHistoryService.upsertFilingHistory(TRANSACTION_ID, request);
@@ -63,7 +63,7 @@ class FilingHistoryServiceTest {
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
         verify(repository).findById(TRANSACTION_ID);
-        verify(mapper).mapFilingHistory(TRANSACTION_ID, request);
+        verify(topLevelMapper).mapFilingHistory(TRANSACTION_ID, request);
         verify(repository).save(documentToUpsert);
     }
 
@@ -74,7 +74,7 @@ class FilingHistoryServiceTest {
         when(existingDocument.getDeltaAt()).thenReturn(EXISTING_DOCUMENT_DELTA_AT);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getDeltaAt()).thenReturn(NEWEST_REQUEST_DELTA_AT);
-        when(mapper.mapFilingHistory(any(FilingHistoryDocument.class), any())).thenReturn(documentToUpsert);
+        when(topLevelMapper.mapFilingHistory(any(FilingHistoryDocument.class), any())).thenReturn(documentToUpsert);
 
         // when
         ServiceResult actual = filingHistoryService.upsertFilingHistory(TRANSACTION_ID, request);
@@ -82,7 +82,7 @@ class FilingHistoryServiceTest {
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
         verify(repository).findById(TRANSACTION_ID);
-        verify(mapper).mapFilingHistory(existingDocument, request);
+        verify(topLevelMapper).mapFilingHistory(existingDocument, request);
         verify(repository).save(documentToUpsert);
     }
 
@@ -100,7 +100,7 @@ class FilingHistoryServiceTest {
         // then
         assertEquals(ServiceResult.STALE_DELTA, actual);
         verify(repository).findById(TRANSACTION_ID);
-        verifyNoInteractions(mapper);
+        verifyNoInteractions(topLevelMapper);
         verifyNoMoreInteractions(repository);
     }
 }
