@@ -38,7 +38,7 @@ class TopLevelMapperTest {
     public static final OffsetDateTime STALE_REQUEST_DELTA_AT = OffsetDateTime.parse("2013-06-15T18:52:08.001Z");
     private static final Instant UPDATED_AT = Instant.parse("2015-10-25T18:52:08.001Z");
     private static final String UPDATED_BY = "84746291";
-    private static final String SELF_LINK = "company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
+    private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
             .withZone(ZoneId.of("Z"));
 
@@ -67,7 +67,7 @@ class TopLevelMapperTest {
     @Test
     void mapNewFilingHistoryShouldReturnNewFilingHistoryDocumentWithMappedFields() {
         // given
-        when(dataMapper.map((any()))).thenReturn(expectedFilingHistoryData);
+        when(dataMapper.mapFilingHistoryExternalData((any()))).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
@@ -94,8 +94,9 @@ class TopLevelMapperTest {
 
     @Test
     void mapFilingHistoryUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
+        // TODO: Do not overwrite metadata link
         // given
-        when(dataMapper.map(any())).thenReturn(expectedFilingHistoryData);
+        when(dataMapper.mapFilingHistoryExternalData(any())).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
@@ -162,27 +163,6 @@ class TopLevelMapperTest {
         verifyNoInteractions(originalValuesMapper);
     }
 
-    private static ExternalData buildExternalData() {
-        return new ExternalData()
-                .transactionId(TRANSACTION_ID)
-                .barcode(BARCODE)
-                .type(TM01_TYPE)
-                .date(LocalDate.parse("20150225185208001000", FORMATTER))
-                .category(ExternalData.CategoryEnum.OFFICERS)
-                .annotations(buildAnnotationsList())
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
-                .description("description")
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
-                        .terminationDate("2015-01-25T18:52:08.001Z")
-                        .officerName("Officer Name"))
-                .pages(1)
-                .actionDate(LocalDate.parse("20150225185208001000", FORMATTER))
-                .paperFiled(true)
-                .links(new FilingHistoryItemDataLinks()
-                        .documentMetadata("metadata")
-                        .self(SELF_LINK));
-    }
-
     private InternalData buildInternalData() {
         return new InternalData()
                 .entityId(ENTITY_ID)
@@ -224,11 +204,5 @@ class TopLevelMapperTest {
         return new FilingHistoryOriginalValues()
                 .officerName("Officer Name")
                 .resignationDate("29/08/2014");
-    }
-
-    private static List<FilingHistoryItemDataAnnotations> buildAnnotationsList() {
-        List<FilingHistoryItemDataAnnotations> annotations = new ArrayList<>();
-        annotations.add(new FilingHistoryItemDataAnnotations());
-        return annotations;
     }
 }
