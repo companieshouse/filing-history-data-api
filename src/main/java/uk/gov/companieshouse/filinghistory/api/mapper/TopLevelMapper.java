@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -24,7 +26,7 @@ public class TopLevelMapper {
         this.originalValuesMapper = originalValuesMapper;
     }
 
-    public FilingHistoryDocument mapFilingHistory(final String id, final InternalFilingHistoryApi request) {
+    public FilingHistoryDocument mapNewFilingHistory(final String id, final InternalFilingHistoryApi request) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 
@@ -42,7 +44,15 @@ public class TopLevelMapper {
                 .updatedBy(internalData.getUpdatedBy());
     }
 
-    public FilingHistoryDocument mapFilingHistory(FilingHistoryDocument document, InternalFilingHistoryApi request) {
-        return null;
+    public Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
+        if (isDeltaStale(request, existingDocument)) {
+            return Optional.empty();
+        }
+        return Optional.empty();
+    }
+
+    private static boolean isDeltaStale(final InternalFilingHistoryApi request, final FilingHistoryDocument existingDocument) {
+        return !request.getInternalData().getDeltaAt()
+                .isAfter(OffsetDateTime.parse(existingDocument.getDeltaAt(), FORMATTER));
     }
 }

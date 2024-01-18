@@ -20,10 +20,9 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
-import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @ExtendWith(MockitoExtension.class)
-class FilingHistoryServiceTest {
+class FilingHistoryProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     public static final OffsetDateTime NEWEST_REQUEST_DELTA_AT = OffsetDateTime.parse("2015-10-25T18:52:08.001Z");
@@ -31,17 +30,15 @@ class FilingHistoryServiceTest {
     public static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
 
     @InjectMocks
-    private FilingHistoryService filingHistoryService;
+    private FilingHistoryProcessor filingHistoryProcessor;
 
+    @Mock
+    private FilingHistoryService filingHistoryService;
     @Mock
     private TopLevelMapper topLevelMapper;
 
     @Mock
-    private Repository repository;
-
-    @Mock
     private InternalFilingHistoryApi request;
-
     @Mock
     private FilingHistoryDocument documentToUpsert;
 
@@ -54,53 +51,54 @@ class FilingHistoryServiceTest {
     @Test
     void shouldSuccessfullyCallSaveWhenInsert() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.empty());
-        when(topLevelMapper.mapFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
+        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
+        when(topLevelMapper.mapNewFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
 
         // when
-        ServiceResult actual = filingHistoryService.upsertFilingHistory(TRANSACTION_ID, request);
+        ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
-        verify(repository).findById(TRANSACTION_ID);
-        verify(topLevelMapper).mapFilingHistory(TRANSACTION_ID, request);
-        verify(repository).save(documentToUpsert);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request);
+        verify(filingHistoryService).saveFilingHistory(documentToUpsert);
     }
 
     @Test
     void shouldSuccessfullyCallSaveWhenUpdate() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
         when(existingDocument.getDeltaAt()).thenReturn(EXISTING_DOCUMENT_DELTA_AT);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getDeltaAt()).thenReturn(NEWEST_REQUEST_DELTA_AT);
-        when(topLevelMapper.mapFilingHistory(any(FilingHistoryDocument.class), any())).thenReturn(documentToUpsert);
+        when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(
+                Optional.of(documentToUpsert));
 
         // when
-        ServiceResult actual = filingHistoryService.upsertFilingHistory(TRANSACTION_ID, request);
+        ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
-        verify(repository).findById(TRANSACTION_ID);
-        verify(topLevelMapper).mapFilingHistory(existingDocument, request);
-        verify(repository).save(documentToUpsert);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
+        verify(filingHistoryService).saveFilingHistory(documentToUpsert);
     }
 
     @Test
     void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
         when(existingDocument.getDeltaAt()).thenReturn(EXISTING_DOCUMENT_DELTA_AT);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getDeltaAt()).thenReturn(STALE_REQUEST_DELTA_AT);
 
         // when
-        ServiceResult actual = filingHistoryService.upsertFilingHistory(TRANSACTION_ID, request);
+        ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.STALE_DELTA, actual);
-        verify(repository).findById(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verifyNoInteractions(topLevelMapper);
-        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(filingHistoryService);
     }
 }

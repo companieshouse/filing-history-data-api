@@ -21,7 +21,7 @@ import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
-import uk.gov.companieshouse.filinghistory.api.service.Service;
+import uk.gov.companieshouse.filinghistory.api.service.Processor;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +47,7 @@ class FilingHistoryControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private Service filingHistoryService;
+    private Processor filingHistoryProcessor;
     @MockBean
     private TopLevelMapper topLevelMapper;
 
@@ -67,7 +67,7 @@ class FilingHistoryControllerIT {
     @Test
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
-        when(filingHistoryService.upsertFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+        when(filingHistoryProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
         FilingHistoryDocument document = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNull(document); // Ensure document does not already exist in DB

@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
-import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryService;
+import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryProcessor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +26,7 @@ class FilingHistoryControllerTest {
     private FilingHistoryController controller;
 
     @Mock
-    private FilingHistoryService service;
+    private FilingHistoryProcessor service;
 
     @Mock
     private InternalFilingHistoryApi requestBody;
@@ -36,7 +36,7 @@ class FilingHistoryControllerTest {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.OK).build();
 
-        when(service.upsertFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+        when(service.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -44,7 +44,7 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(service).upsertFilingHistory(TRANSACTION_ID, requestBody);
+        verify(service).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 
     @Test
@@ -52,7 +52,7 @@ class FilingHistoryControllerTest {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.CONFLICT).build();
 
-        when(service.upsertFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
+        when(service.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -60,6 +60,6 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(service).upsertFilingHistory(TRANSACTION_ID, requestBody);
+        verify(service).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 }

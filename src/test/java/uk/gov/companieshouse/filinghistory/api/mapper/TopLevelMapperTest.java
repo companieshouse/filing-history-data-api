@@ -77,7 +77,7 @@ class TopLevelMapperTest {
                 .updatedBy(UPDATED_BY);
 
         // when
-        final FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistory(TRANSACTION_ID, request);
+        final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(expectedDocument, actualDocument);

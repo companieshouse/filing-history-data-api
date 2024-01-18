@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import java.util.Optional;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 
 public interface Service {
 
-    ServiceResult upsertFilingHistory(final String transactionId, final InternalFilingHistoryApi request);
+    Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId);
+
+    ServiceResult saveFilingHistory(final FilingHistoryDocument document);
 
 }
