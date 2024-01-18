@@ -39,7 +39,7 @@ class FilingHistoryControllerIT {
     private static final String PUT_REQUEST_URI = "/company/{company_number/filing-history/{transaction_id}";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12");
 
     @Autowired
     private MongoTemplate mongoTemplate;
