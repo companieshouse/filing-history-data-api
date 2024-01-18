@@ -25,9 +25,6 @@ import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 class FilingHistoryProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
-    public static final OffsetDateTime NEWEST_REQUEST_DELTA_AT = OffsetDateTime.parse("2015-10-25T18:52:08.001Z");
-    public static final OffsetDateTime STALE_REQUEST_DELTA_AT = OffsetDateTime.parse("2013-06-15T18:52:08.001Z");
-    public static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
 
     @InjectMocks
     private FilingHistoryProcessor filingHistoryProcessor;
@@ -45,22 +42,22 @@ class FilingHistoryProcessorTest {
     @Mock
     private FilingHistoryDocument existingDocument;
 
-    @Mock
-    private InternalData internalData;
 
     @Test
     void shouldSuccessfullyCallSaveWhenInsert() {
         // given
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
+        when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
         when(topLevelMapper.mapNewFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
 
         // when
-        ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        final ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request);
+        verifyNoMoreInteractions(topLevelMapper);
         verify(filingHistoryService).saveFilingHistory(documentToUpsert);
     }
 
@@ -68,19 +65,18 @@ class FilingHistoryProcessorTest {
     void shouldSuccessfullyCallSaveWhenUpdate() {
         // given
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
-        when(existingDocument.getDeltaAt()).thenReturn(EXISTING_DOCUMENT_DELTA_AT);
-        when(request.getInternalData()).thenReturn(internalData);
-        when(internalData.getDeltaAt()).thenReturn(NEWEST_REQUEST_DELTA_AT);
+        when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
         when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(
                 Optional.of(documentToUpsert));
 
         // when
-        ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        final ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
+        verifyNoMoreInteractions(topLevelMapper);
         verify(filingHistoryService).saveFilingHistory(documentToUpsert);
     }
 
@@ -88,17 +84,15 @@ class FilingHistoryProcessorTest {
     void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
         // given
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
-        when(existingDocument.getDeltaAt()).thenReturn(EXISTING_DOCUMENT_DELTA_AT);
-        when(request.getInternalData()).thenReturn(internalData);
-        when(internalData.getDeltaAt()).thenReturn(STALE_REQUEST_DELTA_AT);
 
         // when
-        ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        final ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.STALE_DELTA, actual);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
-        verifyNoInteractions(topLevelMapper);
+        verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
+        verifyNoMoreInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
     }
 }

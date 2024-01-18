@@ -24,7 +24,8 @@ public class FilingHistoryProcessor implements Processor {
                 .map(existingDocument -> topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument))
                 .orElseGet(() -> Optional.of(topLevelMapper.mapNewFilingHistory(transactionId, request)));
 
-        return documentToSave.map(filingHistoryService::saveFilingHistory)
+        return documentToSave
+                .map(filingHistoryService::saveFilingHistory)
                 .orElse(ServiceResult.STALE_DELTA);
     }
 }
