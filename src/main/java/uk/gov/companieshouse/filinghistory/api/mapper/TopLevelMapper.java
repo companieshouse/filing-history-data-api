@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -12,10 +9,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @Component
-public class TopLevelMapper {
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
-            .withZone(ZoneOffset.UTC);
+public class TopLevelMapper extends AbstractMapper {
 
     private final DataMapper dataMapper;
     private final OriginalValuesMapper originalValuesMapper;
@@ -25,19 +19,17 @@ public class TopLevelMapper {
         this.originalValuesMapper = originalValuesMapper;
     }
 
-    public FilingHistoryDocument mapNewFilingHistory(final String id, final InternalFilingHistoryApi request) {
-        return mapFilingHistory(id, request, null);
-    }
-
+    @Override
     public Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument) {
-        if (isDeltaStale(request, existingDocument)) {
+        if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
             return Optional.empty();
         }
         return Optional.of(mapFilingHistory(null, request, existingDocument));
     }
 
-    private FilingHistoryDocument mapFilingHistory(String id, InternalFilingHistoryApi request,
+    @Override
+    protected FilingHistoryDocument mapFilingHistory(String id, InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
@@ -56,11 +48,5 @@ public class TopLevelMapper {
                 .deltaAt(FORMATTER.format(internalData.getDeltaAt()))
                 .updatedAt(Instant.parse(internalData.getUpdatedAt()))
                 .updatedBy(internalData.getUpdatedBy());
-    }
-
-    private static boolean isDeltaStale(final InternalFilingHistoryApi request,
-            final FilingHistoryDocument existingDocument) {
-        return !request.getInternalData().getDeltaAt()
-                .isAfter(OffsetDateTime.parse(existingDocument.getDeltaAt(), FORMATTER));
     }
 }
