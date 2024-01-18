@@ -48,7 +48,22 @@ public class TopLevelMapper {
         if (isDeltaStale(request, existingDocument)) {
             return Optional.empty();
         }
-        return Optional.empty();
+        final InternalData internalData = request.getInternalData();
+        final ExternalData externalData = request.getExternalData();
+
+        existingDocument
+            .entityId(internalData.getEntityId())
+            .companyNumber(internalData.getCompanyNumber())
+            .documentId(internalData.getDocumentId())
+            .barcode(externalData.getBarcode())
+            .data(dataMapper.map(externalData))
+            .originalDescription(internalData.getOriginalDescription())
+            .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
+            .deltaAt(FORMATTER.format(internalData.getDeltaAt()))
+            .updatedAt(Instant.parse(internalData.getUpdatedAt()))
+            .updatedBy(internalData.getUpdatedBy());
+
+        return Optional.of(existingDocument);
     }
 
     private static boolean isDeltaStale(final InternalFilingHistoryApi request, final FilingHistoryDocument existingDocument) {
