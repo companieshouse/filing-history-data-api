@@ -1,6 +1,9 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -8,15 +11,11 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 @Component
 public class TopLevelMapper {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
-            .withZone(ZoneId.of("Z"));
+            .withZone(ZoneOffset.UTC);
 
     private final DataMapper dataMapper;
     private final OriginalValuesMapper originalValuesMapper;
@@ -27,11 +26,26 @@ public class TopLevelMapper {
     }
 
     public FilingHistoryDocument mapNewFilingHistory(final String id, final InternalFilingHistoryApi request) {
+        return mapFilingHistory(id, request, null);
+    }
+
+    public Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
+            FilingHistoryDocument existingDocument) {
+        if (isDeltaStale(request, existingDocument)) {
+            return Optional.empty();
+        }
+        return Optional.of(mapFilingHistory(null, request, existingDocument));
+    }
+
+    private FilingHistoryDocument mapFilingHistory(String id, InternalFilingHistoryApi request,
+            FilingHistoryDocument existingDocument) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 
-        return new FilingHistoryDocument()
-                .transactionId(id)
+        return Optional.ofNullable(existingDocument)
+                .map(document -> existingDocument)
+                .orElse(new FilingHistoryDocument()
+                        .transactionId(id))
                 .entityId(internalData.getEntityId())
                 .companyNumber(internalData.getCompanyNumber())
                 .documentId(internalData.getDocumentId())
@@ -44,29 +58,8 @@ public class TopLevelMapper {
                 .updatedBy(internalData.getUpdatedBy());
     }
 
-    public Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
-        if (isDeltaStale(request, existingDocument)) {
-            return Optional.empty();
-        }
-        final InternalData internalData = request.getInternalData();
-        final ExternalData externalData = request.getExternalData();
-
-        existingDocument
-            .entityId(internalData.getEntityId())
-            .companyNumber(internalData.getCompanyNumber())
-            .documentId(internalData.getDocumentId())
-            .barcode(externalData.getBarcode())
-            .data(dataMapper.mapFilingHistoryExternalData(externalData))
-            .originalDescription(internalData.getOriginalDescription())
-            .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
-            .deltaAt(FORMATTER.format(internalData.getDeltaAt()))
-            .updatedAt(Instant.parse(internalData.getUpdatedAt()))
-            .updatedBy(internalData.getUpdatedBy());
-
-        return Optional.of(existingDocument);
-    }
-
-    private static boolean isDeltaStale(final InternalFilingHistoryApi request, final FilingHistoryDocument existingDocument) {
+    private static boolean isDeltaStale(final InternalFilingHistoryApi request,
+            final FilingHistoryDocument existingDocument) {
         return !request.getInternalData().getDeltaAt()
                 .isAfter(OffsetDateTime.parse(existingDocument.getDeltaAt(), FORMATTER));
     }

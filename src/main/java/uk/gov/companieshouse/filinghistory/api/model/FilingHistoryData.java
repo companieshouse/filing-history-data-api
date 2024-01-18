@@ -126,4 +126,20 @@ public class FilingHistoryData {
     public int hashCode() {
         return Objects.hash(type, date, category, subcategory, description, descriptionValues, actionDate, pages, paperFiled, links);
     }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryData{" +
+                "type='" + type + '\'' +
+                ", date=" + date +
+                ", category='" + category + '\'' +
+                ", subcategory='" + subcategory + '\'' +
+                ", description='" + description + '\'' +
+                ", descriptionValues=" + descriptionValues +
+                ", actionDate=" + actionDate +
+                ", pages=" + pages +
+                ", paperFiled=" + paperFiled +
+                ", links=" + links +
+                '}';
+    }
 }

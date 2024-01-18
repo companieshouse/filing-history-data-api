@@ -1,27 +1,29 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.*;
-import uk.gov.companieshouse.filinghistory.api.model.*;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.InternalData;
+import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
+import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
 class TopLevelMapperTest {
@@ -40,7 +42,8 @@ class TopLevelMapperTest {
     private static final String UPDATED_BY = "84746291";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
-            .withZone(ZoneId.of("Z"));
+            .withZone(ZoneOffset.UTC);
+    public static final String EXPECTED_DELTA_AT = FORMATTER.format(NEWEST_REQUEST_DELTA_AT);
 
     @InjectMocks
     private TopLevelMapper topLevelMapper;
@@ -52,11 +55,11 @@ class TopLevelMapperTest {
     @Mock
     private FilingHistoryData expectedFilingHistoryData;
     @Mock
-    private FilingHistoryData staleFilingHistoryData;
+    private FilingHistoryData existingFilingHistoryData;
     @Mock
     private FilingHistoryOriginalValues expectedFilingHistoryOriginalValues;
     @Mock
-    private FilingHistoryOriginalValues staleFilingHistoryOriginalValues;
+    private FilingHistoryOriginalValues existingFilingHistoryOriginalValues;
 
     @Mock
     private InternalDataOriginalValues requestOriginalValues;
@@ -72,67 +75,48 @@ class TopLevelMapperTest {
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
         final InternalFilingHistoryApi request = buildPutRequestBody();
-        final FilingHistoryDocument expectedDocument = new FilingHistoryDocument()
-                .transactionId(TRANSACTION_ID)
-                .entityId(ENTITY_ID)
-                .companyNumber(COMPANY_NUMBER)
-                .documentId(DOCUMENT_ID)
-                .barcode(BARCODE)
-                .data(expectedFilingHistoryData)
-                .originalDescription(ORIGINAL_DESCRIPTION)
-                .originalValues(expectedFilingHistoryOriginalValues)
-                .deltaAt(FORMATTER.format(NEWEST_REQUEST_DELTA_AT))
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY);
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
+                expectedFilingHistoryData,
+                expectedFilingHistoryOriginalValues,
+                EXPECTED_DELTA_AT);
 
         // when
         final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(expectedDocument, actualDocument);
+        verify(dataMapper).mapFilingHistoryExternalData(requestExternalData);
+        verify(originalValuesMapper).map(requestOriginalValues);
     }
 
     @Test
     void mapFilingHistoryUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
-        // TODO: Do not overwrite metadata link
+        // TODO: Do not overwrite metadata link or child arrays
         // given
         when(dataMapper.mapFilingHistoryExternalData(any())).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
         final InternalFilingHistoryApi request = buildPutRequestBody();
-        final FilingHistoryDocument expectedDocument = new FilingHistoryDocument()
-                .transactionId(TRANSACTION_ID)
-                .entityId(ENTITY_ID)
-                .companyNumber(COMPANY_NUMBER)
-                .documentId(DOCUMENT_ID)
-                .barcode(BARCODE)
-                .data(expectedFilingHistoryData)
-                .originalDescription(ORIGINAL_DESCRIPTION)
-                .originalValues(expectedFilingHistoryOriginalValues)
-                .deltaAt(FORMATTER.format(NEWEST_REQUEST_DELTA_AT))
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY);
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
+                expectedFilingHistoryData,
+                expectedFilingHistoryOriginalValues,
+                EXPECTED_DELTA_AT);
 
-        final FilingHistoryDocument staleDocument = new FilingHistoryDocument()
-                .transactionId(TRANSACTION_ID)
-                .entityId(ENTITY_ID)
-                .companyNumber(COMPANY_NUMBER)
-                .documentId(DOCUMENT_ID)
-                .barcode(BARCODE)
-                .data(staleFilingHistoryData)
-                .originalDescription(ORIGINAL_DESCRIPTION)
-                .originalValues(staleFilingHistoryOriginalValues)
-                .deltaAt(EXISTING_DOCUMENT_DELTA_AT)
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY);
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                existingFilingHistoryData,
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Optional<FilingHistoryDocument> actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request, staleDocument);
+        Optional<FilingHistoryDocument> actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request,
+                existingDocument);
 
         // then
         assertTrue(actualDocument.isPresent());
         assertEquals(expectedDocument, actualDocument.get());
+        verify(dataMapper).mapFilingHistoryExternalData(requestExternalData);
+        verify(originalValuesMapper).map(requestOriginalValues);
     }
 
     @Test
@@ -141,26 +125,25 @@ class TopLevelMapperTest {
         final InternalFilingHistoryApi request = buildPutRequestBody();
         request.getInternalData().deltaAt(STALE_REQUEST_DELTA_AT);
 
-        final FilingHistoryDocument existingDocument = new FilingHistoryDocument()
-                .transactionId(TRANSACTION_ID)
-                .entityId(ENTITY_ID)
-                .companyNumber(COMPANY_NUMBER)
-                .documentId(DOCUMENT_ID)
-                .barcode(BARCODE)
-                .data(staleFilingHistoryData)
-                .originalDescription(ORIGINAL_DESCRIPTION)
-                .originalValues(staleFilingHistoryOriginalValues)
-                .deltaAt(EXISTING_DOCUMENT_DELTA_AT)
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY);
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                existingFilingHistoryData,
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Optional<FilingHistoryDocument> actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument);
+        Optional<FilingHistoryDocument> actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request,
+                existingDocument);
 
         // then
         assertTrue(actualDocument.isEmpty());
         verifyNoInteractions(dataMapper);
         verifyNoInteractions(originalValuesMapper);
+    }
+
+    private InternalFilingHistoryApi buildPutRequestBody() {
+        return new InternalFilingHistoryApi()
+                .externalData(requestExternalData)
+                .internalData(buildInternalData());
     }
 
     private InternalData buildInternalData() {
@@ -176,33 +159,19 @@ class TopLevelMapperTest {
                 .updatedBy(UPDATED_BY);
     }
 
-    private InternalFilingHistoryApi buildPutRequestBody() {
-        return new InternalFilingHistoryApi()
-                .externalData(requestExternalData)
-                .internalData(buildInternalData());
-    }
-
-    private static FilingHistoryData buildFilingHistoryData() {
-        return new FilingHistoryData()
-                .type(TM01_TYPE)
-                .date(Instant.parse("2015-02-25T18:52:08.001Z"))
-                .category("officers")
-                .subcategory("termination")
-                .description("description")
-                .descriptionValues(new FilingHistoryDescriptionValues()
-                        .terminationDate(Instant.parse("2015-01-25T18:52:08.001Z"))
-                        .officerName("Officer Name"))
-                .actionDate(Instant.parse("2015-01-25T18:52:08.001Z"))
-                .pages(1)
-                .paperFiled(true)
-                .links(new FilingHistoryLinks()
-                        .self(SELF_LINK)
-                        .documentMetadata("metadata"));
-    }
-
-    private static FilingHistoryOriginalValues buildFilingHistoryOriginalValues() {
-        return new FilingHistoryOriginalValues()
-                .officerName("Officer Name")
-                .resignationDate("29/08/2014");
+    private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
+            FilingHistoryOriginalValues originalValues, String deltaAt) {
+        return new FilingHistoryDocument()
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .companyNumber(COMPANY_NUMBER)
+                .documentId(DOCUMENT_ID)
+                .barcode(BARCODE)
+                .data(data)
+                .originalDescription(ORIGINAL_DESCRIPTION)
+                .originalValues(originalValues)
+                .deltaAt(deltaAt)
+                .updatedAt(UPDATED_AT)
+                .updatedBy(UPDATED_BY);
     }
 }
