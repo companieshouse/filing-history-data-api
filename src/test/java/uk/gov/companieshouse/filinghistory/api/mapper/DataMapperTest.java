@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
+import static java.time.ZoneOffset.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
@@ -25,9 +26,8 @@ class DataMapperTest {
     private static final String COMPANY_NUMBER = "123456789";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final LocalDate DATE = LocalDate.of(2015, 1, 25);
-    private static final String ACTION_AND_TERMINATION_DATE_AS_STRING = "2015-02-26T00:00:00.000Z";
-    private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(
-            ACTION_AND_TERMINATION_DATE_AS_STRING);
+    private static final LocalDate ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE = LocalDate.of(2015, 2, 26);
+    private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.from(ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE.atStartOfDay(UTC));
 
     @InjectMocks
     private DataMapper dataMapper;
@@ -37,7 +37,7 @@ class DataMapperTest {
         // given
         final FilingHistoryData expectedData = new FilingHistoryData()
                 .type(TM01_TYPE)
-                .date(DATE.atStartOfDay(ZoneOffset.UTC).toInstant())
+                .date(DATE.atStartOfDay(UTC).toInstant())
                 .category("officers")
                 .subcategory("termination")
                 .description("description")
@@ -69,10 +69,10 @@ class DataMapperTest {
                 .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
                 .description("description")
                 .descriptionValues(new FilingHistoryItemDataDescriptionValues()
-                        .terminationDate(ACTION_AND_TERMINATION_DATE_AS_STRING)
+                        .terminationDate(ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE)
                         .officerName("Officer Name"))
                 .pages(1)
-                .actionDate(LocalDate.from(ACTION_AND_TERMINATION_DATE_AS_INSTANT.atZone(ZoneOffset.UTC)))
+                .actionDate(ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE)
                 .paperFiled(true)
                 .links(new FilingHistoryItemDataLinks()
                         .documentMetadata("metadata")

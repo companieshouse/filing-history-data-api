@@ -23,7 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
-import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.service.Processor;
@@ -49,7 +49,7 @@ class FilingHistoryControllerIT {
     @MockBean
     private Processor filingHistoryProcessor;
     @MockBean
-    private TopLevelMapper topLevelMapper;
+    private TopLevelTransactionMapper topLevelMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

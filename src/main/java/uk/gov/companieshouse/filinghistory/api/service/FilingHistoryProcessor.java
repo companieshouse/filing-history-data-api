@@ -3,7 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 
@@ -11,9 +11,9 @@ import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 public class FilingHistoryProcessor implements Processor {
 
     private final FilingHistoryService filingHistoryService;
-    private final TopLevelMapper topLevelMapper;
+    private final TopLevelTransactionMapper topLevelMapper;
 
-    public FilingHistoryProcessor(FilingHistoryService filingHistoryService, TopLevelMapper topLevelMapper) {
+    public FilingHistoryProcessor(FilingHistoryService filingHistoryService, TopLevelTransactionMapper topLevelMapper) {
         this.filingHistoryService = filingHistoryService;
         this.topLevelMapper = topLevelMapper;
     }

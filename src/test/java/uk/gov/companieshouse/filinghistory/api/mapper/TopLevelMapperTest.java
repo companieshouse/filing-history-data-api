@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -36,17 +37,17 @@ class TopLevelMapperTest {
     private static final String TM01_TYPE = "TM01";
     private static final String ORIGINAL_DESCRIPTION = "original description";
     public static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
-    public static final OffsetDateTime NEWEST_REQUEST_DELTA_AT = OffsetDateTime.parse("2015-10-25T18:52:08.001Z");
-    public static final OffsetDateTime STALE_REQUEST_DELTA_AT = OffsetDateTime.parse("2013-06-15T18:52:08.001Z");
+    public static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
+    public static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
     private static final Instant UPDATED_AT = Instant.parse("2015-10-25T18:52:08.001Z");
     private static final String UPDATED_BY = "84746291";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
             .withZone(ZoneOffset.UTC);
-    public static final String EXPECTED_DELTA_AT = FORMATTER.format(NEWEST_REQUEST_DELTA_AT);
+    public static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
 
     @InjectMocks
-    private TopLevelMapper topLevelMapper;
+    private TopLevelTransactionMapper topLevelMapper;
     @Mock
     private DataMapper dataMapper;
     @Mock
@@ -84,6 +85,12 @@ class TopLevelMapperTest {
         final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request);
 
         // then
+
+        // Updated at set as Instant.now() during mapping so
+        // Expected and actual will, therefore, be slightly different and not testable
+        assertNotNull(actualDocument.getUpdatedAt());
+        actualDocument.updatedAt(null);
+
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).mapFilingHistoryExternalData(requestExternalData);
         verify(originalValuesMapper).map(requestOriginalValues);
@@ -114,6 +121,12 @@ class TopLevelMapperTest {
 
         // then
         assertTrue(actualDocument.isPresent());
+
+        // Updated at set as Instant.now() during mapping so
+        // Expected and actual will, therefore, be slightly different and not testable
+        assertNotNull(actualDocument.get().getUpdatedAt());
+        actualDocument.get().updatedAt(null);
+
         assertEquals(expectedDocument, actualDocument.get());
         verify(dataMapper).mapFilingHistoryExternalData(requestExternalData);
         verify(originalValuesMapper).map(requestOriginalValues);
@@ -155,12 +168,11 @@ class TopLevelMapperTest {
                 .originalDescription("original description")
                 .originalValues(requestOriginalValues)
                 .parentEntityId("parent_entity_id")
-                .updatedAt("2015-10-25T18:52:08.001Z")
                 .updatedBy(UPDATED_BY);
     }
 
     private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
-            FilingHistoryOriginalValues originalValues, String deltaAt) {
+                                                           FilingHistoryOriginalValues originalValues, String deltaAt) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .entityId(ENTITY_ID)
@@ -171,7 +183,6 @@ class TopLevelMapperTest {
                 .originalDescription(ORIGINAL_DESCRIPTION)
                 .originalValues(originalValues)
                 .deltaAt(deltaAt)
-                .updatedAt(UPDATED_AT)
                 .updatedBy(UPDATED_BY);
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -9,12 +10,12 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @Component
-public class TopLevelMapper extends AbstractMapper {
+public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
     private final OriginalValuesMapper originalValuesMapper;
 
-    public TopLevelMapper(DataMapper dataMapper, OriginalValuesMapper originalValuesMapper) {
+    public TopLevelTransactionMapper(DataMapper dataMapper, OriginalValuesMapper originalValuesMapper) {
         this.dataMapper = dataMapper;
         this.originalValuesMapper = originalValuesMapper;
     }
@@ -45,8 +46,8 @@ public class TopLevelMapper extends AbstractMapper {
                 .data(dataMapper.mapFilingHistoryExternalData(externalData))
                 .originalDescription(internalData.getOriginalDescription())
                 .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
-                .deltaAt(FORMATTER.format(internalData.getDeltaAt()))
-                .updatedAt(Instant.parse(internalData.getUpdatedAt()))
+                .deltaAt(internalData.getDeltaAt())
+                .updatedAt(Instant.now())
                 .updatedBy(internalData.getUpdatedBy());
     }
 }

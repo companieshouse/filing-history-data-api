@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 
@@ -29,7 +29,7 @@ class FilingHistoryProcessorTest {
     @Mock
     private FilingHistoryService filingHistoryService;
     @Mock
-    private TopLevelMapper topLevelMapper;
+    private TopLevelTransactionMapper topLevelMapper;
 
     @Mock
     private InternalFilingHistoryApi request;
