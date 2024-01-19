@@ -17,10 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.filinghistory.api.model.Annotation;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 
 @ExtendWith(MockitoExtension.class)
 class DataMapperTest {
@@ -82,13 +81,13 @@ class DataMapperTest {
                 .subcategory("termination")
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
-                .annotations(List.of(new Annotation().annotation("annotation")))
+                .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")))
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                 .pages(1)
                 .paperFiled(true);
 
         final FilingHistoryData existingData = new FilingHistoryData()
-                .annotations(List.of(new Annotation().annotation("annotation")));
+                .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")));
 
         // when
         final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(), existingData);

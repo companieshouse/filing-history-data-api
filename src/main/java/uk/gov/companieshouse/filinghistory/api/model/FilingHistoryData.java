@@ -14,7 +14,7 @@ public class FilingHistoryData {
     private String description;
     @Field("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
-    private List<Annotation> annotations;
+    private List<FilingHistoryAnnotation> annotations;
     @Field("action_date")
     private Instant actionDate;
     private Integer pages;
@@ -76,11 +76,11 @@ public class FilingHistoryData {
         return this;
     }
 
-    public List<Annotation> getAnnotations() {
+    public List<FilingHistoryAnnotation> getAnnotations() {
         return annotations;
     }
 
-    public FilingHistoryData annotations(List<Annotation> annotations) {
+    public FilingHistoryData annotations(List<FilingHistoryAnnotation> annotations) {
         this.annotations = annotations;
         return this;
     }

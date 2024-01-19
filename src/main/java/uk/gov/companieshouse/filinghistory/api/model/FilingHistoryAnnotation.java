@@ -2,7 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.model;
 
 import java.util.Objects;
 
-public class Annotation {
+public class FilingHistoryAnnotation {
 
     private String annotation;
 
@@ -10,7 +10,7 @@ public class Annotation {
         return annotation;
     }
 
-    public Annotation annotation(String annotation) {
+    public FilingHistoryAnnotation annotation(String annotation) {
         this.annotation = annotation;
         return this;
     }
@@ -23,7 +23,7 @@ public class Annotation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Annotation that = (Annotation) o;
+        FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
         return Objects.equals(annotation, that.annotation);
     }
 
