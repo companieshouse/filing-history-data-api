@@ -1,8 +1,11 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
+import static java.time.ZoneOffset.*;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 public final class DateUtils {
 
@@ -10,6 +13,8 @@ public final class DateUtils {
     }
 
     static Instant localDateToInstant(final LocalDate localDate) {
-        return localDate != null ? Instant.from(localDate.atStartOfDay(ZoneOffset.UTC)) : null;
+        return Optional.ofNullable(localDate)
+                .map(date -> Instant.from(date.atStartOfDay(UTC)))
+                .orElse(null);
     }
 }

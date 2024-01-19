@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -13,6 +14,7 @@ public class FilingHistoryData {
     private String description;
     @Field("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
+    private List<Annotation> annotations;
     @Field("action_date")
     private Instant actionDate;
     private Integer pages;
@@ -74,6 +76,15 @@ public class FilingHistoryData {
         return this;
     }
 
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public FilingHistoryData annotations(List<Annotation> annotations) {
+        this.annotations = annotations;
+        return this;
+    }
+
     public Instant getActionDate() {
         return actionDate;
     }
@@ -119,12 +130,18 @@ public class FilingHistoryData {
             return false;
         }
         FilingHistoryData that = (FilingHistoryData) o;
-        return Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(category, that.category) && Objects.equals(subcategory, that.subcategory) && Objects.equals(description, that.description) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(actionDate, that.actionDate) && Objects.equals(pages, that.pages) && Objects.equals(paperFiled, that.paperFiled) && Objects.equals(links, that.links);
+        return Objects.equals(type, that.type) && Objects.equals(date, that.date)
+                && Objects.equals(category, that.category) && Objects.equals(subcategory,
+                that.subcategory) && Objects.equals(description, that.description) && Objects.equals(
+                descriptionValues, that.descriptionValues) && Objects.equals(annotations, that.annotations)
+                && Objects.equals(actionDate, that.actionDate) && Objects.equals(pages, that.pages)
+                && Objects.equals(paperFiled, that.paperFiled) && Objects.equals(links, that.links);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, date, category, subcategory, description, descriptionValues, actionDate, pages, paperFiled, links);
+        return Objects.hash(type, date, category, subcategory, description, descriptionValues, annotations, actionDate,
+                pages, paperFiled, links);
     }
 
     @Override
@@ -136,6 +153,7 @@ public class FilingHistoryData {
                 ", subcategory='" + subcategory + '\'' +
                 ", description='" + description + '\'' +
                 ", descriptionValues=" + descriptionValues +
+                ", annotations=" + annotations +
                 ", actionDate=" + actionDate +
                 ", pages=" + pages +
                 ", paperFiled=" + paperFiled +

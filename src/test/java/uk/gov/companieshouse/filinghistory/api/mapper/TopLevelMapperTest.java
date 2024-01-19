@@ -8,10 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,11 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,16 +32,11 @@ class TopLevelMapperTest {
     private static final String COMPANY_NUMBER = "123456789";
     private static final String DOCUMENT_ID = "documentId";
     private static final String BARCODE = "barcode";
-    private static final String TM01_TYPE = "TM01";
     private static final String ORIGINAL_DESCRIPTION = "original description";
     public static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     public static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     public static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
-    private static final Instant UPDATED_AT = Instant.parse("2015-10-25T18:52:08.001Z");
     private static final String UPDATED_BY = "84746291";
-    private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
-            .withZone(ZoneOffset.UTC);
     public static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
 
     @InjectMocks
@@ -52,6 +45,8 @@ class TopLevelMapperTest {
     private DataMapper dataMapper;
     @Mock
     private OriginalValuesMapper originalValuesMapper;
+    @Mock
+    private LinksMapper linksMapper;
 
     @Mock
     private FilingHistoryData expectedFilingHistoryData;
@@ -61,19 +56,26 @@ class TopLevelMapperTest {
     private FilingHistoryOriginalValues expectedFilingHistoryOriginalValues;
     @Mock
     private FilingHistoryOriginalValues existingFilingHistoryOriginalValues;
+    @Mock
+    private FilingHistoryLinks expectedFilingHistoryLinks;
 
     @Mock
     private InternalDataOriginalValues requestOriginalValues;
     @Mock
     private ExternalData requestExternalData;
+    @Mock
+    private FilingHistoryItemDataLinks requestLinks;
 
 
     @Test
     void mapNewFilingHistoryShouldReturnNewFilingHistoryDocumentWithMappedFields() {
         // given
-        when(dataMapper.mapFilingHistoryExternalData((any()))).thenReturn(expectedFilingHistoryData);
+        when(dataMapper.map((any()), any())).thenReturn(expectedFilingHistoryData);
+        when(requestExternalData.getLinks()).thenReturn(requestLinks);
+        when(linksMapper.map(any())).thenReturn(expectedFilingHistoryLinks);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
+        when(expectedFilingHistoryData.getLinks()).thenReturn(expectedFilingHistoryLinks);
 
         final InternalFilingHistoryApi request = buildPutRequestBody();
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
@@ -92,15 +94,15 @@ class TopLevelMapperTest {
         actualDocument.updatedAt(null);
 
         assertEquals(expectedDocument, actualDocument);
-        verify(dataMapper).mapFilingHistoryExternalData(requestExternalData);
+        verify(dataMapper).map(requestExternalData, new FilingHistoryData());
         verify(originalValuesMapper).map(requestOriginalValues);
+        verify(linksMapper).map(requestLinks);
     }
 
     @Test
     void mapFilingHistoryUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
-        // TODO: Do not overwrite metadata link or child arrays
         // given
-        when(dataMapper.mapFilingHistoryExternalData(any())).thenReturn(expectedFilingHistoryData);
+        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
@@ -128,7 +130,7 @@ class TopLevelMapperTest {
         actualDocument.get().updatedAt(null);
 
         assertEquals(expectedDocument, actualDocument.get());
-        verify(dataMapper).mapFilingHistoryExternalData(requestExternalData);
+        verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
         verify(originalValuesMapper).map(requestOriginalValues);
     }
 
@@ -172,7 +174,7 @@ class TopLevelMapperTest {
     }
 
     private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
-                                                           FilingHistoryOriginalValues originalValues, String deltaAt) {
+            FilingHistoryOriginalValues originalValues, String deltaAt) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .entityId(ENTITY_ID)
