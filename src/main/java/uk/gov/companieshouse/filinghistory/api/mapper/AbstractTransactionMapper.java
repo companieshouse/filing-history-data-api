@@ -37,7 +37,7 @@ public abstract class AbstractTransactionMapper {
             FilingHistoryDocument existingDocument);
 
     protected abstract FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument);
+            FilingHistoryDocument document);
 
     protected static boolean isDeltaStale(final String requestDeltaAt, final String existingDeltaAt) {
         return !OffsetDateTime.parse(requestDeltaAt, FORMATTER)

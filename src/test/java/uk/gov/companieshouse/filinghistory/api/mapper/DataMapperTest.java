@@ -28,8 +28,6 @@ class DataMapperTest {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String BARCODE = "barcode";
     private static final String TM01_TYPE = "TM01";
-    private static final String COMPANY_NUMBER = "123456789";
-    private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final LocalDate DATE = LocalDate.of(2015, 1, 25);
     private static final LocalDate ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE = LocalDate.of(2015, 2, 26);
     private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.from(
@@ -39,8 +37,6 @@ class DataMapperTest {
     private DataMapper dataMapper;
     @Mock
     private DescriptionValuesMapper descriptionValuesMapper;
-    @Mock
-    private LinksMapper linksMapper;
 
     @Mock
     private FilingHistoryItemDataDescriptionValues requestDescriptionValues;
@@ -49,14 +45,11 @@ class DataMapperTest {
 
     @Mock
     private FilingHistoryItemDataLinks requestLinks;
-    @Mock
-    private FilingHistoryLinks expectedLinks;
 
     @Test
     void mapShouldReturnFilingHistoryDataWhenNewData() {
         // given
         when(descriptionValuesMapper.map(any())).thenReturn(expectedDescriptionValues);
-        when(linksMapper.map(any())).thenReturn(expectedLinks);
 
         final FilingHistoryData expectedData = new FilingHistoryData()
                 .type(TM01_TYPE)
@@ -67,8 +60,7 @@ class DataMapperTest {
                 .descriptionValues(expectedDescriptionValues)
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                 .pages(1)
-                .paperFiled(true)
-                .links(expectedLinks);
+                .paperFiled(true);
 
         // when
         final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(), new FilingHistoryData());
@@ -76,14 +68,12 @@ class DataMapperTest {
         // then
         assertEquals(expectedData, actualData);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
-        verify(linksMapper).map(requestLinks);
     }
 
     @Test
     void mapShouldNotOverwriteDataWhenPassedExistingData() {
         // given
         when(descriptionValuesMapper.map(any())).thenReturn(expectedDescriptionValues);
-        when(linksMapper.map(any())).thenReturn(expectedLinks);
 
         final FilingHistoryData expectedData = new FilingHistoryData()
                 .type(TM01_TYPE)
@@ -95,8 +85,7 @@ class DataMapperTest {
                 .annotations(List.of(new Annotation().annotation("annotation")))
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                 .pages(1)
-                .paperFiled(true)
-                .links(expectedLinks);
+                .paperFiled(true);
 
         final FilingHistoryData existingData = new FilingHistoryData()
                 .annotations(List.of(new Annotation().annotation("annotation")));
@@ -107,7 +96,6 @@ class DataMapperTest {
         // then
         assertEquals(expectedData, actualData);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
-        verify(linksMapper).map(requestLinks);
     }
 
     private ExternalData buildRequestExternalData() {
