@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.interceptor;
+package uk.gov.companieshouse.filinghistory.api.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.util.LogContextProperties;
 
 @ExtendWith(MockitoExtension.class)

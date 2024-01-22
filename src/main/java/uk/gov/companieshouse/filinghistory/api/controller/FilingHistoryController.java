@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,12 +10,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.service.Processor;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @RestController
 public class FilingHistoryController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final Processor serviceProcessor;
 
     public FilingHistoryController(Processor serviceProcessor) {
@@ -26,6 +31,11 @@ public class FilingHistoryController {
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,
             @RequestBody final InternalFilingHistoryApi requestBody) {
+
+        DataMapHolder.get()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId);
+        LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
 
         final ServiceResult result = serviceProcessor.processFilingHistory(transactionId, requestBody);
 

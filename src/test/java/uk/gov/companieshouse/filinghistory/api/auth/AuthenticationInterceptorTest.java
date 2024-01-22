@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.interceptor;
+package uk.gov.companieshouse.filinghistory.api.auth;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,12 +1,12 @@
-package uk.gov.companieshouse.filinghistory.api.interceptor;
+package uk.gov.companieshouse.filinghistory.api.auth;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
-import static uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstants.API_KEY_IDENTITY_TYPE;
-import static uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstants.ERIC_AUTHORISED_KEY_PRIVILEGES_HEADER;
-import static uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstants.ERIC_IDENTITY;
-import static uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstants.ERIC_IDENTITY_TYPE;
-import static uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstants.INTERNAL_APP_PRIVILEGE;
-import static uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationConstants.OAUTH2_IDENTITY_TYPE;
+import static uk.gov.companieshouse.filinghistory.api.auth.AuthenticationConstants.API_KEY_IDENTITY_TYPE;
+import static uk.gov.companieshouse.filinghistory.api.auth.AuthenticationConstants.ERIC_AUTHORISED_KEY_PRIVILEGES_HEADER;
+import static uk.gov.companieshouse.filinghistory.api.auth.AuthenticationConstants.ERIC_IDENTITY;
+import static uk.gov.companieshouse.filinghistory.api.auth.AuthenticationConstants.ERIC_IDENTITY_TYPE;
+import static uk.gov.companieshouse.filinghistory.api.auth.AuthenticationConstants.INTERNAL_APP_PRIVILEGE;
+import static uk.gov.companieshouse.filinghistory.api.auth.AuthenticationConstants.OAUTH2_IDENTITY_TYPE;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
