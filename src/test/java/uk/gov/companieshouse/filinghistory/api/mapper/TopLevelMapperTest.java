@@ -33,11 +33,11 @@ class TopLevelMapperTest {
     private static final String DOCUMENT_ID = "documentId";
     private static final String BARCODE = "barcode";
     private static final String ORIGINAL_DESCRIPTION = "original description";
-    public static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
-    public static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
-    public static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
+    private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
+    private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
+    private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
     private static final String UPDATED_BY = "84746291";
-    public static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
+    private static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
 
     @InjectMocks
     private TopLevelTransactionMapper topLevelMapper;

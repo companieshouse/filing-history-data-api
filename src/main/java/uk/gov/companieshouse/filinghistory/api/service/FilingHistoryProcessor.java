@@ -3,7 +3,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 
@@ -11,18 +12,22 @@ import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 public class FilingHistoryProcessor implements Processor {
 
     private final FilingHistoryService filingHistoryService;
-    private final TopLevelTransactionMapper topLevelMapper;
+    private final AbstractTransactionMapperFactory mapperFactory;
 
-    public FilingHistoryProcessor(FilingHistoryService filingHistoryService, TopLevelTransactionMapper topLevelMapper) {
+    public FilingHistoryProcessor(FilingHistoryService filingHistoryService,
+            AbstractTransactionMapperFactory mapperFactory) {
         this.filingHistoryService = filingHistoryService;
-        this.topLevelMapper = topLevelMapper;
+        this.mapperFactory = mapperFactory;
     }
 
     @Override
     public ServiceResult processFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
+        AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
+                request.getInternalData().getTransactionKind());
+
         Optional<FilingHistoryDocument> documentToSave = filingHistoryService.findExistingFilingHistory(transactionId)
-                .map(existingDocument -> topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument))
-                .orElseGet(() -> Optional.of(topLevelMapper.mapNewFilingHistory(transactionId, request)));
+                .map(existingDocument -> mapper.mapFilingHistoryUnlessStale(request, existingDocument))
+                .orElseGet(() -> Optional.of(mapper.mapNewFilingHistory(transactionId, request)));
 
         return documentToSave
                 .map(filingHistoryService::saveFilingHistory)

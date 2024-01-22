@@ -3,15 +3,17 @@ package uk.gov.companieshouse.filinghistory.api.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ANNOTATION;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractTransactionMapperFactoryTest {
@@ -34,15 +36,16 @@ class AbstractTransactionMapperFactoryTest {
         assertEquals(topLevelTransactionMapper, actualMapper);
     }
 
-    @Test
-    void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper() {
+    @ParameterizedTest
+    @CsvSource({"annotation", "resolution", "associated-filing"})
+    void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper(String kind) {
         // given
 
         // when
-        Executable executable = () -> factory.getTransactionMapper(ANNOTATION);
+        Executable executable = () -> factory.getTransactionMapper(TransactionKindEnum.fromValue(kind));
 
         // then
         InvalidMapperException exception = assertThrows(InvalidMapperException.class, executable);
-        assertEquals("Invalid transaction kind: annotation", exception.getMessage());
+        assertEquals("Invalid transaction kind: %s".formatted(kind), exception.getMessage());
     }
 }

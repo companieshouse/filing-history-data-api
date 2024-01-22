@@ -9,20 +9,17 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 
 class LinksMapperTest {
 
-    public static final String SELF_LINK = "/company/12345678/filing-history/abc123def456ghi789";
-    public static final String METADATA = "metadata"; // this is unlikely to come across in a request
+    private static final String SELF_LINK = "/company/12345678/filing-history/abc123def456ghi789";
     private final LinksMapper mapper = new LinksMapper();
 
     @Test
     void shouldMapRequestLinksToPersistenceModelLinks() {
         // given
         FilingHistoryItemDataLinks requestLinks = new FilingHistoryItemDataLinks()
-                .self(SELF_LINK)
-                .documentMetadata(METADATA);
+                .self(SELF_LINK);
 
         FilingHistoryLinks expected = new FilingHistoryLinks()
-                .self(SELF_LINK)
-                .documentMetadata(METADATA);
+                .self(SELF_LINK);
         // when
         FilingHistoryLinks actual = mapper.map(requestLinks);
 

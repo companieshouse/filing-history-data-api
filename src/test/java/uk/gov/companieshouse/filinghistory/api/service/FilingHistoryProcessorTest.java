@@ -13,7 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.filinghistory.InternalData;
+import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
@@ -29,10 +32,14 @@ class FilingHistoryProcessorTest {
     @Mock
     private FilingHistoryService filingHistoryService;
     @Mock
+    private AbstractTransactionMapperFactory mapperFactory;
+    @Mock
     private TopLevelTransactionMapper topLevelMapper;
 
     @Mock
     private InternalFilingHistoryApi request;
+    @Mock
+    private InternalData internalData;
     @Mock
     private FilingHistoryDocument documentToUpsert;
 
@@ -43,15 +50,19 @@ class FilingHistoryProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenInsert() {
         // given
+        when(request.getInternalData()).thenReturn(internalData);
+        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
+        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
-        when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
         when(topLevelMapper.mapNewFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
+        when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
         // when
         final ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actual);
+        verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request);
         verifyNoMoreInteractions(topLevelMapper);
@@ -61,6 +72,9 @@ class FilingHistoryProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenUpdate() {
         // given
+        when(request.getInternalData()).thenReturn(internalData);
+        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
+        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
         when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
         when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(
@@ -80,6 +94,9 @@ class FilingHistoryProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
         // given
+        when(request.getInternalData()).thenReturn(internalData);
+        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
+        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
 
         // when

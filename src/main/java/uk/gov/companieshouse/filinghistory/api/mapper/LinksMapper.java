@@ -11,7 +11,6 @@ public class LinksMapper {
     FilingHistoryLinks map(final FilingHistoryItemDataLinks requestLinks) {
         return Optional.ofNullable(requestLinks)
                 .map(links -> new FilingHistoryLinks()
-                        .documentMetadata(links.getDocumentMetadata())
                         .self(links.getSelf()))
                 .orElse(null);
     }

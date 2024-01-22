@@ -18,7 +18,7 @@ public class DataMapper {
     FilingHistoryData map(final ExternalData data, final FilingHistoryData documentData) {
         return documentData
                 .type(data.getType())
-                .date(localDateToInstant(data.getDate()))
+                .date(data.getDate().toInstant())
                 .category(data.getCategory().toString())
                 .subcategory(data.getSubcategory().toString())
                 .description(data.getDescription())

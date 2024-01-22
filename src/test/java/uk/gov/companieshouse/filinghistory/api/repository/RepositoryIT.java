@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +19,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
@@ -97,12 +99,13 @@ class RepositoryIT {
                         .descriptionValues(new FilingHistoryDescriptionValues()
                                 .terminationDate(Instant.parse("2014-08-29T00:00:00.000Z"))
                                 .officerName("John Tester"))
+                        .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")))
                         .links(new FilingHistoryLinks()
                                 .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA")
                                 .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
                         .pages(1))
                 .barcode("X4BI89B6")
-                .deltaAt("20140916230459600643")
+                .deltaAt("20140815230459600643")
                 .entityId("1234567890")
                 .updatedAt(Instant.parse("2014-09-17T18:52:08.001Z"))
                 .updatedBy("5419d856b6a59f32b7684d0e")

@@ -27,7 +27,7 @@ class FilingHistoryControllerTest {
     private FilingHistoryController controller;
 
     @Mock
-    private FilingHistoryProcessor service;
+    private FilingHistoryProcessor processor;
 
     @Mock
     private InternalFilingHistoryApi requestBody;
@@ -40,7 +40,7 @@ class FilingHistoryControllerTest {
                 .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
                 .build();
 
-        when(service.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+        when(processor.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -48,7 +48,7 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(service).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 
     @Test
@@ -56,10 +56,9 @@ class FilingHistoryControllerTest {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
                 .build();
 
-        when(service.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
+        when(processor.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -67,6 +66,6 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(service).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 }

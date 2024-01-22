@@ -37,7 +37,7 @@ public abstract class AbstractTransactionMapper {
     protected abstract FilingHistoryData mapFilingHistoryData(ExternalData externalData,
             FilingHistoryData existingData);
 
-    protected abstract Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
+    public abstract Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument);
 
     protected abstract FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request,

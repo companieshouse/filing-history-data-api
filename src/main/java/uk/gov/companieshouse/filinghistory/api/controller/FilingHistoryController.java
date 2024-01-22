@@ -40,13 +40,14 @@ public class FilingHistoryController {
         final ServiceResult result = serviceProcessor.processFilingHistory(transactionId, requestBody);
 
         // This is a switch because we'll need to add more cases in the future when doing unhappy paths
-        final HttpStatus status = switch (result) {
-            case STALE_DELTA -> HttpStatus.CONFLICT;
-            default -> HttpStatus.OK;
+        return switch (result) {
+            case STALE_DELTA -> ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .build();
+            default -> ResponseEntity
+                    .status(HttpStatus.OK)
+                    .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
+                    .build();
         };
-        return ResponseEntity
-                .status(status)
-                .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
-                .build();
     }
 }

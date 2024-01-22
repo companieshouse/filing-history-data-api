@@ -43,4 +43,12 @@ public class FilingHistoryLinks {
     public int hashCode() {
         return Objects.hash(self, documentMetadata);
     }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryLinks{" +
+                "self='" + self + '\'' +
+                ", documentMetadata='" + documentMetadata + '\'' +
+                '}';
+    }
 }

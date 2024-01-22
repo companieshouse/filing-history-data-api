@@ -45,4 +45,12 @@ public class FilingHistoryDescriptionValues {
     public int hashCode() {
         return Objects.hash(terminationDate, officerName);
     }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryDescriptionValues{" +
+                "terminationDate=" + terminationDate +
+                ", officerName='" + officerName + '\'' +
+                '}';
+    }
 }

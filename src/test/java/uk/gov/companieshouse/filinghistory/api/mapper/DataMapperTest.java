@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,7 +104,7 @@ class DataMapperTest {
                 .transactionId(TRANSACTION_ID)
                 .barcode(BARCODE)
                 .type(TM01_TYPE)
-                .date(DATE)
+                .date(OffsetDateTime.of(DATE, LocalTime.ofSecondOfDay(0), UTC))
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
                 .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
