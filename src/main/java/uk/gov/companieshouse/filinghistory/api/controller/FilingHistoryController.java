@@ -30,7 +30,7 @@ public class FilingHistoryController {
     public ResponseEntity<Void> upsertFilingHistoryTransaction(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,
-            @RequestBody final InternalFilingHistoryApi requestBody) {
+            @RequestBody InternalFilingHistoryApi requestBody) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber)
