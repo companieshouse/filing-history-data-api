@@ -10,10 +10,10 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 @Component
 public class FilingHistoryProcessor implements Processor {
 
-    private final FilingHistoryService filingHistoryService;
+    private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
 
-    public FilingHistoryProcessor(FilingHistoryService filingHistoryService,
+    public FilingHistoryProcessor(Service filingHistoryService,
             AbstractTransactionMapperFactory mapperFactory) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
