@@ -43,6 +43,6 @@ class AbstractTransactionMapperFactoryTest {
 
         // then
         InvalidMapperException exception = assertThrows(InvalidMapperException.class, executable);
-        assertEquals("Unknown transaction kind: annotation", exception.getMessage());
+        assertEquals("Invalid transaction kind: annotation", exception.getMessage());
     }
 }

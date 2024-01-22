@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
@@ -26,6 +27,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     public Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
+            LOGGER.error("Stale delta received; request delta_at: [%s] is before existing delta_at: [%s]".formatted(
+                    request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
             return Optional.empty();
         }
         existingDocument.data(mapFilingHistoryData(request.getExternalData(), existingDocument.getData()));

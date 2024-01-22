@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
 import static java.time.ZoneOffset.UTC;
+import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,9 +10,12 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 public abstract class AbstractTransactionMapper {
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     protected static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
             .withZone(UTC);
 
