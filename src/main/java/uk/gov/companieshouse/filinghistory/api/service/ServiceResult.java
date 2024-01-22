@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.model;
+package uk.gov.companieshouse.filinghistory.api.service;
 
 public enum ServiceResult {
 

@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @Component

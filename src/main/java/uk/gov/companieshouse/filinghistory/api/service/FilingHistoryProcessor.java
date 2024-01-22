@@ -6,7 +6,6 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 
 @Component
 public class FilingHistoryProcessor implements Processor {

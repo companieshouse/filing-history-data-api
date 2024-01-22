@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
+import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryProcessor;
 
 @ExtendWith(MockitoExtension.class)

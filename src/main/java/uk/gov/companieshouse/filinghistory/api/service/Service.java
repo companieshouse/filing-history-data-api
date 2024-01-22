@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.util.Optional;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.ServiceResult;
 
 public interface Service {
 
