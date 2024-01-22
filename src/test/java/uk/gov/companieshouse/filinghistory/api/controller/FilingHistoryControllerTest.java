@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,10 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn200OKWhenPutRequest() {
         // given
-        final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.OK).build();
+        final ResponseEntity<Void> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                .build();
 
         when(service.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
@@ -50,7 +54,10 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn409ConflictWhenPutRequestWithStaleDelta() {
         // given
-        final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.CONFLICT).build();
+        final ResponseEntity<Void> expectedResponse = ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                .build();
 
         when(service.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
 

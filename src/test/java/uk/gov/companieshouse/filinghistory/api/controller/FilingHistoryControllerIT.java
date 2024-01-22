@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +37,7 @@ class FilingHistoryControllerIT {
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String PUT_REQUEST_URI = "/company/{company_number/filing-history/{transaction_id}";
+    private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}";
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12");
@@ -84,6 +85,7 @@ class FilingHistoryControllerIT {
 
         // then
         result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)));
     }
 
 }

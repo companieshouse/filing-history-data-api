@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
+import static org.springframework.http.HttpHeaders.LOCATION;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +34,9 @@ public class FilingHistoryController {
             case STALE_DELTA -> HttpStatus.CONFLICT;
             default -> HttpStatus.OK;
         };
-        return ResponseEntity.status(status).build();
+        return ResponseEntity
+                .status(status)
+                .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
+                .build();
     }
 }
