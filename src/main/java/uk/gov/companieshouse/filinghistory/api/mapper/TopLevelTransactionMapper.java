@@ -27,7 +27,7 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     public Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
-            LOGGER.error("Stale delta received; request delta_at: [%s] is before existing delta_at: [%s]".formatted(
+            LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
                     request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
             return Optional.empty();
         }

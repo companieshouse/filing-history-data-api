@@ -26,7 +26,7 @@ public class FilingHistoryController {
         this.serviceProcessor = serviceProcessor;
     }
 
-    @PutMapping("/company/{company_number}/filing-history/{transaction_id}")
+    @PutMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}")
     public ResponseEntity<Void> upsertFilingHistoryTransaction(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,

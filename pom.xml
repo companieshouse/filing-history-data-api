@@ -19,6 +19,7 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <spring.boot.version>3.2.0</spring.boot.version>
+    <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
     <structured-logging.version>3.0.1</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.1</api-sdk-manager-java-library.version>
     <private-api-sdk-java.version>unversioned</private-api-sdk-java.version>
@@ -211,6 +212,19 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>${jib-maven-plugin.version}</version>
+        <configuration>
+          <from>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-runtime-21:latest</image>
+          </from>
+          <to>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/filing-history-data-api:latest</image>
+          </to>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

@@ -52,7 +52,7 @@ class FilingHistoryControllerIT {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
-    private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}";
+    private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String ENTITY_ID = "1234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
