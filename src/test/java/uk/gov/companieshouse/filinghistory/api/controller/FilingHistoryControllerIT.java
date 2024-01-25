@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
-import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -9,8 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
@@ -95,7 +92,7 @@ class FilingHistoryControllerIT {
     @Test
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
-        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(null, null);
+        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(null, null, null);
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         // when
@@ -125,7 +122,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(DOCUMENT_METADATA,
+        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
                 List.of(new FilingHistoryAnnotation().annotation("annotation")));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -201,22 +198,22 @@ class FilingHistoryControllerIT {
                 .transactionId(TRANSACTION_ID)
                 .barcode(BARCODE)
                 .type(TM01_TYPE)
-                .date(OffsetDateTime.of(2014, 9, 15, 23, 21, 18, 0, UTC))
+                .date("20140915232118")
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
                 .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
                 .description(DESCRIPTION)
                 .descriptionValues(new FilingHistoryItemDataDescriptionValues()
                         .officerName(OFFICER_NAME)
-                        .terminationDate(LocalDate.parse("2014-08-29")))
-                .pages(1)
-                .actionDate(LocalDate.of(2014, 8, 29))
+                        .terminationDate("20140829000000"))
+                .pages(1) // should not be mapped, persisted by document store sub delta
+                .actionDate("20140829000000")
                 .paperFiled(true)
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK));
     }
 
-    private static FilingHistoryDocument getExpectedFilingHistoryDocument(String documentMetadata,
+    private static FilingHistoryDocument getExpectedFilingHistoryDocument(String documentMetadata, Integer pages,
             List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
@@ -236,7 +233,7 @@ class FilingHistoryControllerIT {
                         .links(new FilingHistoryLinks()
                                 .documentMetadata(documentMetadata)
                                 .self(SELF_LINK))
-                        .pages(1))
+                        .pages(pages))
                 .barcode(BARCODE)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)

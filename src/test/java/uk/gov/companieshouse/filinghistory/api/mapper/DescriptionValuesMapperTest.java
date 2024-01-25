@@ -1,11 +1,9 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
-import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
@@ -13,8 +11,8 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionVal
 class DescriptionValuesMapperTest {
 
     private static final String OFFICER_NAME = "John Tester";
-    private static final LocalDate TERMINATION_DATE = LocalDate.of(2020, 6, 10);
-
+    private static final String TERMINATION_DATE = "20200610000000";
+    private static final Instant TERMINATION_DATE_AS_INSTANT = Instant.parse("2020-06-10T00:00:00.00Z");
 
     private final DescriptionValuesMapper mapper = new DescriptionValuesMapper();
 
@@ -27,7 +25,7 @@ class DescriptionValuesMapperTest {
 
         FilingHistoryDescriptionValues expected = new FilingHistoryDescriptionValues()
                 .officerName(OFFICER_NAME)
-                .terminationDate(Instant.from(TERMINATION_DATE.atStartOfDay(UTC)));
+                .terminationDate(TERMINATION_DATE_AS_INSTANT);
 
         // when
         FilingHistoryDescriptionValues actual = mapper.map(descriptionValues);

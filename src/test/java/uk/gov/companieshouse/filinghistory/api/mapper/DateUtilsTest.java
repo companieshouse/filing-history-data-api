@@ -4,28 +4,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 class DateUtilsTest {
 
     @Test
-    void shouldConvertLocalDateToInstant() {
+    void shouldStringToInstant() {
         // given
-        LocalDate date = LocalDate.of(2020, 6, 10);
+        String date = "20200610000000";
 
         // when
-        Instant actual = DateUtils.localDateToInstant(date);
+        Instant actual = DateUtils.stringToInstant(date);
 
         // then
         assertEquals(Instant.ofEpochSecond(1591747200), actual);
     }
 
     @Test
-    void convertLocalDateToInstantShouldReturnNullWhenLocalDateNull() {
+    void convertStringToInstantShouldReturnNullWhenStringNull() {
         // given
         // when
-        Instant actual = DateUtils.localDateToInstant(null);
+        Instant actual = DateUtils.stringToInstant(null);
 
         // then
         assertNull(actual);

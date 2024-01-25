@@ -1,15 +1,11 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
-import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,10 +25,11 @@ class DataMapperTest {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String BARCODE = "barcode";
     private static final String TM01_TYPE = "TM01";
-    private static final LocalDate DATE = LocalDate.of(2015, 1, 25);
-    private static final LocalDate ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE = LocalDate.of(2015, 2, 26);
-    private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.from(
-            ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE.atStartOfDay(UTC));
+    private static final String DATE = "20150125000000";
+    private static final Instant DATE_AS_INSTANT = Instant.parse("2015-01-25T00:00:00.00Z");
+    private static final String ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE = "20150226000000";
+    private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(
+            "2015-02-26T00:00:00.00Z");
 
     @InjectMocks
     private DataMapper dataMapper;
@@ -54,13 +51,12 @@ class DataMapperTest {
 
         final FilingHistoryData expectedData = new FilingHistoryData()
                 .type(TM01_TYPE)
-                .date(DATE.atStartOfDay(UTC).toInstant())
+                .date(DATE_AS_INSTANT)
                 .category("officers")
                 .subcategory("termination")
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
-                .pages(1)
                 .paperFiled(true);
 
         // when
@@ -78,14 +74,13 @@ class DataMapperTest {
 
         final FilingHistoryData expectedData = new FilingHistoryData()
                 .type(TM01_TYPE)
-                .date(DATE.atStartOfDay(UTC).toInstant())
+                .date(DATE_AS_INSTANT)
                 .category("officers")
                 .subcategory("termination")
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
                 .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")))
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
-                .pages(1)
                 .paperFiled(true);
 
         final FilingHistoryData existingData = new FilingHistoryData()
@@ -104,13 +99,13 @@ class DataMapperTest {
                 .transactionId(TRANSACTION_ID)
                 .barcode(BARCODE)
                 .type(TM01_TYPE)
-                .date(OffsetDateTime.of(DATE, LocalTime.ofSecondOfDay(0), UTC))
+                .date(DATE)
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
                 .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
                 .description("description")
                 .descriptionValues(requestDescriptionValues)
-                .pages(1)
+                .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE)
                 .paperFiled(true)
                 .links(requestLinks);
