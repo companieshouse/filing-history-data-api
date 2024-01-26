@@ -31,7 +31,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 class RepositoryIT {
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
