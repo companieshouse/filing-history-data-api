@@ -71,7 +71,7 @@ class FilingHistoryControllerIT {
     private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(ACTION_AND_TERMINATION_DATE);
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
 
     @Autowired
     private MongoTemplate mongoTemplate;
