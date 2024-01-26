@@ -58,7 +58,8 @@ class FilingHistoryControllerIT {
     private static final String EXISTING_DELTA_AT = "20140815230459600643";
     private static final String UPDATED_BY = "5419d856b6a59f32b7684d0e";
     private static final String TM01_TYPE = "TM01";
-    private static final Instant DATE = Instant.parse("2014-09-15T23:21:18.000Z");
+    private static final String DATE = "2014-09-15T23:21:18.000Z";
+    private static final Instant DATE_AS_INSTANT = Instant.parse(DATE);
     private static final String ORIGINAL_DESCRIPTION = "Appointment Terminated, Director john tester";
     private static final String OFFICER_NAME = "John Tester";
     private static final String RESIGNATION_DATE = "29/08/2014";
@@ -66,7 +67,8 @@ class FilingHistoryControllerIT {
     private static final String DESCRIPTION = "termination-director-company-with-name-termination-date";
     private static final String SUBCATEGORY = "termination";
     private static final String CATEGORY = "officers";
-    private static final Instant ACTION_AND_TERMINATION_DATE = Instant.parse("2014-08-29T00:00:00.000Z");
+    private static final String ACTION_AND_TERMINATION_DATE = "2014-08-29T00:00:00.000Z";
+    private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(ACTION_AND_TERMINATION_DATE);
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12");
@@ -198,16 +200,16 @@ class FilingHistoryControllerIT {
                 .transactionId(TRANSACTION_ID)
                 .barcode(BARCODE)
                 .type(TM01_TYPE)
-                .date("20140915232118")
+                .date(DATE)
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
                 .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
                 .description(DESCRIPTION)
                 .descriptionValues(new FilingHistoryItemDataDescriptionValues()
                         .officerName(OFFICER_NAME)
-                        .terminationDate("20140829000000"))
+                        .terminationDate(ACTION_AND_TERMINATION_DATE))
                 .pages(1) // should not be mapped, persisted by document store sub delta
-                .actionDate("20140829000000")
+                .actionDate(ACTION_AND_TERMINATION_DATE)
                 .paperFiled(true)
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK));
@@ -219,15 +221,15 @@ class FilingHistoryControllerIT {
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
-                        .actionDate(ACTION_AND_TERMINATION_DATE)
+                        .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                         .category(CATEGORY)
                         .type(TM01_TYPE)
                         .description(DESCRIPTION)
                         .subcategory(SUBCATEGORY)
-                        .date(DATE)
+                        .date(DATE_AS_INSTANT)
                         .paperFiled(true)
                         .descriptionValues(new FilingHistoryDescriptionValues()
-                                .terminationDate(ACTION_AND_TERMINATION_DATE)
+                                .terminationDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                                 .officerName(OFFICER_NAME))
                         .annotations(annotations)
                         .links(new FilingHistoryLinks()

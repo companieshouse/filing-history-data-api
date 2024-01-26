@@ -11,8 +11,8 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionVal
 class DescriptionValuesMapperTest {
 
     private static final String OFFICER_NAME = "John Tester";
-    private static final String TERMINATION_DATE = "20200610000000";
-    private static final Instant TERMINATION_DATE_AS_INSTANT = Instant.parse("2020-06-10T00:00:00.00Z");
+    private static final String TERMINATION_DATE = "2020-06-10T00:00:00.00Z";
+    private static final Instant TERMINATION_DATE_AS_INSTANT = Instant.parse(TERMINATION_DATE);
 
     private final DescriptionValuesMapper mapper = new DescriptionValuesMapper();
 

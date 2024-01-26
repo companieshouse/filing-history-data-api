@@ -25,11 +25,11 @@ class DataMapperTest {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String BARCODE = "barcode";
     private static final String TM01_TYPE = "TM01";
-    private static final String DATE = "20150125000000";
-    private static final Instant DATE_AS_INSTANT = Instant.parse("2015-01-25T00:00:00.00Z");
-    private static final String ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE = "20150226000000";
+    private static final String DATE = "2015-01-25T00:00:00.00Z";
+    private static final Instant DATE_AS_INSTANT = Instant.parse(DATE);
+    private static final String ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE = "2015-02-26T00:00:00.00Z";
     private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(
-            "2015-02-26T00:00:00.00Z");
+            ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE);
 
     @InjectMocks
     private DataMapper dataMapper;
