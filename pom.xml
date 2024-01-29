@@ -27,7 +27,7 @@
     <maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
     <maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <test-containers.version>1.19.3</test-containers.version>
+    <test-containers.version>1.19.4</test-containers.version>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 

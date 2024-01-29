@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.bson.Document;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -71,7 +73,8 @@ class FilingHistoryControllerIT {
     private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(ACTION_AND_TERMINATION_DATE);
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12")
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)));
 
     @Autowired
     private MongoTemplate mongoTemplate;

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -30,21 +32,22 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 @SpringBootTest
 class RepositoryIT {
 
-    @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
 
+    @Container
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12")
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)));
+
     @Autowired
     private MongoTemplate mongoTemplate;
-
     @Autowired
     private Repository repository;
 
 
     @BeforeAll
-    static void start() throws IOException {
+    static void start() {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
     }
 
