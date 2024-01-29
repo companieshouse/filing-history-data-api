@@ -74,8 +74,7 @@ class FilingHistoryControllerIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12")
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)))
-            .withExposedPorts(27017);
+            .waitingFor(Wait.forListeningPorts(27017).withStartupTimeout(Duration.ofSeconds(30)));
 
     @Autowired
     private MongoTemplate mongoTemplate;
