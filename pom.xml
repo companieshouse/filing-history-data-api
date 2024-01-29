@@ -18,14 +18,16 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.2.0</spring.boot.version>
+    <spring.boot.version>3.2.2</spring.boot.version>
+    <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
     <structured-logging.version>3.0.1</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.1</api-sdk-manager-java-library.version>
-    <private-api-sdk-java.version>4.0.4</private-api-sdk-java.version>
+    <private-api-sdk-java.version>2.0.346</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
     <maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
     <maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <test-containers.version>1.19.4</test-containers.version>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 
@@ -33,12 +35,14 @@
     <logback.version>1.4.14</logback.version>
     <jackson-databind.version>2.16.1</jackson-databind.version>
     <grpc.version>1.60.1</grpc.version>
+    <json-path.version>2.9.0</json-path.version>
 
     <!--sonar configuration-->
     <sonar.coverage.jacoco.xmlReportPaths>
       ${project.build.directory}/site/jacoco/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
     <sonar.jacoco.reports>${project.build.directory}/site</sonar.jacoco.reports>
+    <sonar.coverage.exclusions>**/model/*</sonar.coverage.exclusions>
   </properties>
 
   <dependencyManagement>
@@ -47,6 +51,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${test-containers.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -79,6 +90,11 @@
       <groupId>io.grpc</groupId>
       <artifactId>grpc-context</artifactId>
       <version>${grpc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>${json-path.version}</version>
     </dependency>
     <!--end transitive dependencies-->
 
@@ -113,6 +129,10 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+    <dependency>
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>structured-logging</artifactId>
       <version>${structured-logging.version}</version>
@@ -136,6 +156,21 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mongodb</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -183,6 +218,19 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>${jib-maven-plugin.version}</version>
+        <configuration>
+          <from>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-runtime-21:latest</image>
+          </from>
+          <to>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/filing-history-data-api:latest</image>
+          </to>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

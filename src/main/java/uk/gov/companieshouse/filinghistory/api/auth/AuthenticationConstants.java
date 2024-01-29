@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.interceptor;
+package uk.gov.companieshouse.filinghistory.api.auth;
 
 public final class AuthenticationConstants {
 

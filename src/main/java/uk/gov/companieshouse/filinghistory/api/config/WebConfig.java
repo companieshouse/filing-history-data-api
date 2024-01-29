@@ -3,8 +3,8 @@ package uk.gov.companieshouse.filinghistory.api.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import uk.gov.companieshouse.filinghistory.api.interceptor.AuthenticationInterceptor;
-import uk.gov.companieshouse.filinghistory.api.interceptor.RequestLoggingInterceptor;
+import uk.gov.companieshouse.filinghistory.api.auth.AuthenticationInterceptor;
+import uk.gov.companieshouse.filinghistory.api.logging.RequestLoggingInterceptor;
 
 @Configuration
 class WebConfig implements WebMvcConfigurer {

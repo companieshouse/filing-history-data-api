@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.interceptor;
+package uk.gov.companieshouse.filinghistory.api.logging;
 
 import static uk.gov.companieshouse.logging.util.LogContextProperties.REQUEST_ID;
 
@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
-import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.RequestLogger;
