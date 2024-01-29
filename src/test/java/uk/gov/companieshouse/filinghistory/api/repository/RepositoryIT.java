@@ -37,8 +37,7 @@ class RepositoryIT {
     private static final String COMPANY_NUMBER = "12345678";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.12")
-            .waitingFor(Wait.forListeningPorts(27017).withStartupTimeout(Duration.ofSeconds(30)));
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
 
     @Autowired
     private MongoTemplate mongoTemplate;
