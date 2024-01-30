@@ -42,6 +42,16 @@ variable "required_memory" {
   description = "The required memory for this service"
   default = 512 # defaulted low for node service in dev environments, override for production
 }
+variable "eric_cpus" {
+  type = number
+  description = "The required cpu resource for eric. 1024 here is 1 vCPU"
+  default = 256
+}
+variable "eric_memory" {
+  type = number
+  description = "The required memory for eric"
+  default = 512
+}
 
 variable "max_task_count" {
   type        = number
@@ -117,4 +127,9 @@ variable "log_level" {
 variable "filing_history_data_api_version" {
   type        = string
   description = "The version of the filing-history-data-api container to run."
+}
+
+variable "eric_version" {
+  type        = string
+  description = "The version of the eric container to run."
 }

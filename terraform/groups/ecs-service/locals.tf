@@ -5,6 +5,7 @@ locals {
   global_prefix               = "global-${var.environment}"
   service_name                = "filing-history-data-api"
   container_port              = "8080"
+  eric_port                   = "10000"
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority   = 41
@@ -66,4 +67,11 @@ locals {
     { name : "PORT", value : local.container_port },
     { name : "LOGLEVEL", value : var.log_level }
   ])
+
+  # get eric secrets from global secrets map
+  eric_secrets = [
+    { "name": "API_KEY", "valueFrom": local.global_secrets_arn_map.eric_api_key },
+    { "name": "AES256_KEY", "valueFrom": local.global_secrets_arn_map.eric_aes256_key }
+  ]
+  eric_environment_filename = "eric.env"
 }
