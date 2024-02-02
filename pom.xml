@@ -34,7 +34,6 @@
     <!--explicit versions of transitive dependencies with vulnerabilities in previous versions-->
     <logback.version>1.4.14</logback.version>
     <jackson-databind.version>2.16.1</jackson-databind.version>
-    <grpc.version>1.60.1</grpc.version>
     <json-path.version>2.9.0</json-path.version>
 
     <!--sonar configuration-->
@@ -66,31 +65,6 @@
 
   <dependencies>
     <!--the following transitive dependencies are added specifically to avoid vulnerabilities-->
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <version>${logback.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson-databind.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.grpc</groupId>
-      <artifactId>grpc-api</artifactId>
-      <version>${grpc.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.grpc</groupId>
-      <artifactId>grpc-context</artifactId>
-      <version>${grpc.version}</version>
-    </dependency>
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
@@ -145,6 +119,14 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.grpc</groupId>
+          <artifactId>grpc-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.grpc</groupId>
+          <artifactId>grpc-context</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -322,7 +304,7 @@
         <configuration>
           <argLine>-Dfile.encoding=UTF-8</argLine>
           <argLine>${surefireArgLine}</argLine>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile><!--          <excludes>-->
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <skipTests>${skip.unit.tests}</skipTests>
         </configuration>
       </plugin>
