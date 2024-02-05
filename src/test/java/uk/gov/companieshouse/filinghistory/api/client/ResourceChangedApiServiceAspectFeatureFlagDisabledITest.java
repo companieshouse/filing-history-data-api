@@ -17,7 +17,6 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
@@ -54,7 +53,7 @@ class ResourceChangedApiServiceAspectFeatureFlagDisabledITest {
 
     @Test
     void testThatKafkaApiShouldBeCalledWhenFeatureFlagDisabled()
-            throws ApiErrorResponseException, ServiceUnavailableException {
+            throws ApiErrorResponseException {
 
         when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(

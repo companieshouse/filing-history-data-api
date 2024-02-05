@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiService;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
@@ -22,6 +24,9 @@ class FilingHistoryServiceTest {
 
     @InjectMocks
     private FilingHistoryService service;
+
+    @Mock
+    private ResourceChangedApiService resourceChangedApiService;
 
     @Mock
     private Repository repository;
@@ -55,14 +60,15 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void saveFilingHistoryShouldSaveDocumentAndReturnUpsertSuccessful() {
+    void saveFilingHistoryShouldSaveDocumentAndReturnUpsertSuccessful() throws ApiErrorResponseException {
         // given
 
         // when
-        final ServiceResult actualResult = service.saveFilingHistory(document);
+        final ServiceResult actualResult = service.insertFilingHistory(document);
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
         verify(repository).save(document);
+        verify(resourceChangedApiService).invokeChsKafkaApi(any());
     }
 }

@@ -28,7 +28,6 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.logging.Logger;
@@ -77,7 +76,7 @@ class ResourceChangedApiServiceTest {
 
     @Test
     @DisplayName("Test should successfully invoke chs-kafka-api")
-    void invokeChsKafkaApi() throws ApiErrorResponseException, ServiceUnavailableException {
+    void invokeChsKafkaApi() throws ApiErrorResponseException {
         // given
         when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
@@ -112,27 +111,28 @@ class ResourceChangedApiServiceTest {
         Executable executable = () -> resourceChangedApiService.invokeChsKafkaApi(resourceChangedRequest);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(ApiErrorResponseException.class, executable);
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
         verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed", changedResource);
         verify(changedResourcePost, times(1)).execute();
     }
 
+    // TODO: throw service unavailable exception as part of DSND-2280.
     private static Stream<Arguments> invokeChsKafkaApiExceptionFixtures() {
         return Stream.of(
                 Arguments.of(
-                        Named.of("Throws service unavailable exception when response code is HTTP 500",
+                        Named.of("Throws API error response exception when response code is HTTP 500",
                                 new ResourceChangedApiServiceTestArgument(500, "Internal Service Error")
                         )
                 ),
                 Arguments.of(
-                        Named.of("Throws service unavailable exception when response code is HTTP 503",
+                        Named.of("Throws API error response exception when response code is HTTP 503",
                                 new ResourceChangedApiServiceTestArgument(503, "Service Unavailable")
                         )
                 ),
                 Arguments.of(
-                        Named.of("Throws service unavailable exception when response code is HTTP 200 with errors",
+                        Named.of("Throws API error response exception when response code is HTTP 200 with errors",
                                 new ResourceChangedApiServiceTestArgument(200, "")
                         )
                 )

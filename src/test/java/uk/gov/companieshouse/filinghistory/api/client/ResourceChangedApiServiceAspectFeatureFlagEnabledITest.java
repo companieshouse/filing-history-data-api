@@ -9,9 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest
@@ -33,7 +33,7 @@ class ResourceChangedApiServiceAspectFeatureFlagEnabledITest {
     private PrivateChangedResourcePost changedResourcePost;
 
     @Test
-    void testThatAspectShouldNotProceedWhenFeatureFlagEnabled() throws ServiceUnavailableException {
+    void testThatAspectShouldNotProceedWhenFeatureFlagEnabled() throws ApiErrorResponseException {
 
         resourceChangedApiService.invokeChsKafkaApi(resourceChangedRequest);
 
