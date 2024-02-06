@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,16 +22,14 @@ import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapp
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest
-class ResourceChangedApiServiceAspectFeatureFlagDisabledITest {
+class ResourceChangedApiClientAspectFeatureFlagDisabledITest {
 
     @Autowired
-    private ResourceChangedApiService resourceChangedApiService;
-
+    private ResourceChangedApiClient resourceChangedApiClient;
     @MockBean
-    private ApiClientService apiClientService;
+    private Supplier<InternalApiClient> internalApiClientSupplier;
     @MockBean
     private ResourceChangedRequestMapper mapper;
-
     @Mock
     private InternalApiClient internalApiClient;
     @Mock
@@ -55,7 +54,7 @@ class ResourceChangedApiServiceAspectFeatureFlagDisabledITest {
     void testThatKafkaApiShouldBeCalledWhenFeatureFlagDisabled()
             throws ApiErrorResponseException {
 
-        when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
+        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(
                 privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(
@@ -63,9 +62,9 @@ class ResourceChangedApiServiceAspectFeatureFlagDisabledITest {
         when(changedResourcePost.execute()).thenReturn(response);
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
 
-        resourceChangedApiService.invokeChsKafkaApi(resourceChangedRequest);
+        resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
 
-        verify(apiClientService).getInternalApiClient();
+        verify(internalApiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource("/resource-changed",
                 changedResource);

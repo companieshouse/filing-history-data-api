@@ -1,23 +1,17 @@
 package uk.gov.companieshouse.filinghistory.api.client;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,10 +27,10 @@ import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceChangedApiServiceTest {
+class ResourceChangedApiClientTest {
 
     @Mock
-    private ApiClientService apiClientService;
+    private Supplier<InternalApiClient> internalApiClientSupplier;
 
     @Mock
     private InternalApiClient internalApiClient;
@@ -65,9 +59,8 @@ class ResourceChangedApiServiceTest {
     @Mock
     private HttpClient httpClient;
 
-
     @InjectMocks
-    private ResourceChangedApiService resourceChangedApiService;
+    private ResourceChangedApiClient resourceChangedApiClient;
 
     @BeforeEach
     void setup() {
@@ -78,83 +71,42 @@ class ResourceChangedApiServiceTest {
     @DisplayName("Test should successfully invoke chs-kafka-api")
     void invokeChsKafkaApi() throws ApiErrorResponseException {
         // given
-        when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
+        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(changedResourcePost);
         when(changedResourcePost.execute()).thenReturn(response);
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
 
         // when
-        resourceChangedApiService.invokeChsKafkaApi(resourceChangedRequest);
+        resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
 
         // then
-        verify(apiClientService).getInternalApiClient();
+        verify(internalApiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
         verify(changedResourcePost).execute();
     }
 
-    @ParameterizedTest
-    @MethodSource("invokeChsKafkaApiExceptionFixtures")
-    void invokeChsKafkaApiExceptionTests(ResourceChangedApiServiceTestArgument argument) throws ApiErrorResponseException {
+    @Test
+    void invokeChsKafkaApiReturns503ErrorInResponse() throws ApiErrorResponseException {
         // given
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(argument.getStatusCode(), argument.getErrorMessage(), new HttpHeaders());
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(503, "Service Unavailable", new HttpHeaders());
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 
-        when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
+        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(changedResourcePost);
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
         when(changedResourcePost.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Executable executable = () -> resourceChangedApiService.invokeChsKafkaApi(resourceChangedRequest);
+        ApiResponse<Void> result = resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
 
         // then
-        assertThrows(ApiErrorResponseException.class, executable);
-        verify(apiClientService, times(1)).getInternalApiClient();
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed", changedResource);
-        verify(changedResourcePost, times(1)).execute();
+        assertEquals(result.getStatusCode(), 503);
+        verify(internalApiClientSupplier).get();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
+        verify(changedResourcePost).execute();
     }
-
-    // TODO: throw service unavailable exception as part of DSND-2280.
-    private static Stream<Arguments> invokeChsKafkaApiExceptionFixtures() {
-        return Stream.of(
-                Arguments.of(
-                        Named.of("Throws API error response exception when response code is HTTP 500",
-                                new ResourceChangedApiServiceTestArgument(500, "Internal Service Error")
-                        )
-                ),
-                Arguments.of(
-                        Named.of("Throws API error response exception when response code is HTTP 503",
-                                new ResourceChangedApiServiceTestArgument(503, "Service Unavailable")
-                        )
-                ),
-                Arguments.of(
-                        Named.of("Throws API error response exception when response code is HTTP 200 with errors",
-                                new ResourceChangedApiServiceTestArgument(200, "")
-                        )
-                )
-        );
-    }
-
-    private static class ResourceChangedApiServiceTestArgument {
-        private final int statusCode;
-        private final String errorMessage;
-
-        public ResourceChangedApiServiceTestArgument(int statusCode, String errorMessage) {
-            this.statusCode = statusCode;
-            this.errorMessage = errorMessage;
-        }
-
-        public int getStatusCode() {
-            return statusCode;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-    }
-
 }

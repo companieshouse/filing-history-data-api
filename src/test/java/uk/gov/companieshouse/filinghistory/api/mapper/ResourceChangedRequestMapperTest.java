@@ -3,6 +3,8 @@ package uk.gov.companieshouse.filinghistory.api.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
@@ -21,20 +23,22 @@ import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 class ResourceChangedRequestMapperTest {
 
     private static final String EXPECTED_CONTEXT_ID = "35234234";
-    private static final String DATE = "date";
     private static final Object deletedData = new Object();
 
     @Mock
-    private Supplier<String> timestampGenerator;
+    private Supplier<Instant> instantSupplier;
 
     @InjectMocks
     private ResourceChangedRequestMapper mapper;
+
+    private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
 
     @ParameterizedTest
     @MethodSource("resourceChangedScenarios")
     void testMapper(ResourceChangedTestArgument argument) {
         // given
-        when(timestampGenerator.get()).thenReturn(DATE);
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
         // when
         ChangedResource actual = mapper.mapChangedResource(argument.getRequest());
@@ -53,7 +57,7 @@ class ResourceChangedRequestMapperTest {
                                 .withResourceUri("/company/12345678/filing-history/ABCDE54321")
                                 .withResourceKind("filing-history")
                                 .withEventType("changed")
-                                .withEventPublishedAt(DATE)
+                                .withEventPublishedAt(UPDATED_AT.toString())
                                 .build()
                         )
                 ),
@@ -67,7 +71,7 @@ class ResourceChangedRequestMapperTest {
                             .withResourceKind("filing-history")
                             .withEventType("deleted")
                             .withDeletedData(deletedData)
-                            .withEventPublishedAt(DATE)
+                            .withEventPublishedAt(UPDATED_AT.toString())
                             .build()
                     )
                 )

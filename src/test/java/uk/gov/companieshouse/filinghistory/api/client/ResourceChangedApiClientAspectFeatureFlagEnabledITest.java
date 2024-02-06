@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.client;
 
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,11 @@ import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest
 @ActiveProfiles("feature_flag_enabled")
-class ResourceChangedApiServiceAspectFeatureFlagEnabledITest {
+class ResourceChangedApiClientAspectFeatureFlagEnabledITest {
     @Autowired
-    private ResourceChangedApiService resourceChangedApiService;
-
+    private ResourceChangedApiClient resourceChangedApiClient;
     @MockBean
-    private ApiClientService apiClientService;
-
+    private Supplier<InternalApiClient> internalApiClientSupplier;
     @Mock
     private InternalApiClient internalApiClient;
     @Mock
@@ -35,9 +34,9 @@ class ResourceChangedApiServiceAspectFeatureFlagEnabledITest {
     @Test
     void testThatAspectShouldNotProceedWhenFeatureFlagEnabled() throws ApiErrorResponseException {
 
-        resourceChangedApiService.invokeChsKafkaApi(resourceChangedRequest);
+        resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
 
-        verifyNoInteractions(apiClientService);
+        verifyNoInteractions(internalApiClientSupplier);
         verifyNoInteractions(internalApiClient);
         verifyNoInteractions(privateChangedResourceHandler);
         verifyNoInteractions(changedResourcePost);

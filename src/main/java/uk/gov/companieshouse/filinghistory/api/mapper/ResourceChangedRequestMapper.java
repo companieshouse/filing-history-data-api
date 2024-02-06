@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
+import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
@@ -9,15 +10,15 @@ import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 @Component
 public class ResourceChangedRequestMapper {
 
-    private final Supplier<String> timestampGenerator;
+    private final Supplier<Instant> instantSupplier;
 
-    public ResourceChangedRequestMapper(Supplier<String> timestampGenerator) {
-        this.timestampGenerator = timestampGenerator;
+    public ResourceChangedRequestMapper(Supplier<Instant> instantSupplier) {
+        this.instantSupplier = instantSupplier;
     }
 
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
-        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(this.timestampGenerator.get());
-        ChangedResource changedResource = new ChangedResource() //NOSONAR
+        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(instantSupplier.get().toString());
+        ChangedResource changedResource = new ChangedResource()
                 .resourceUri(String.format("/company/%s/filing-history/%s", request.getCompanyNumber(),
                         request.getTransactionId()))
                 .resourceKind("filing-history")

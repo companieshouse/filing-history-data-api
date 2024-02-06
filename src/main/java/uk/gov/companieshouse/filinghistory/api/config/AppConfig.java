@@ -7,8 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.text.SimpleDateFormat;
-import java.time.Clock;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,21 +19,9 @@ import uk.gov.companieshouse.filinghistory.api.serdes.EmptyFieldDeserializer;
 
 @Configuration
 public class AppConfig {
-
-    /**
-     * Obtains a clock that returns the current instant using the best available system clock,
-     * converting to date and time using the UTC time-zone.
-     *
-     * @return a clock that uses the best available system clock in the UTC zone, not null
-     */
     @Bean
-    public Clock clock() {
-        return Clock.systemUTC();
-    }
-
-    @Bean
-    public Supplier<String> offsetDateTimeGenerator() {
-        return () -> String.valueOf(OffsetDateTime.now());
+    public Supplier<Instant> instantSupplier() {
+        return Instant::now;
     }
 
     @Bean

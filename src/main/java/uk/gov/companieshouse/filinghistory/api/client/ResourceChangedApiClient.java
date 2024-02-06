@@ -1,7 +1,9 @@
 package uk.gov.companieshouse.filinghistory.api.client;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
+
+import java.util.function.Supplier;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
@@ -9,24 +11,23 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service
-public class ResourceChangedApiService {
+@Component
+public class ResourceChangedApiClient {
 
     private static final String CHANGED_RESOURCE_URI = "/resource-changed";
-    private final String chsKafkaUrl;
-    private final ApiClientService apiClientService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResourceChangedRequestMapper mapper;
 
     /**
      * Invoke API.
      */
-    public ResourceChangedApiService(@Value("${chs.kafka.api.endpoint}") String chsKafkaUrl,
-                                ApiClientService apiClientService,
-                                ResourceChangedRequestMapper mapper) {
-        this.chsKafkaUrl = chsKafkaUrl;
-        this.apiClientService = apiClientService;
+    public ResourceChangedApiClient(ResourceChangedRequestMapper mapper, Supplier<InternalApiClient> internalApiClientFactory) {
         this.mapper = mapper;
+        this.internalApiClientFactory = internalApiClientFactory;
     }
 
 
@@ -36,17 +37,18 @@ public class ResourceChangedApiService {
      * @return The service status of the response from chs kafka api
      */
     @StreamEvents
-    public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest)
-            throws ApiErrorResponseException {
-        InternalApiClient internalApiClient = apiClientService.getInternalApiClient(); //NOSONAR
+    public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
+        InternalApiClient internalApiClient = internalApiClientFactory.get();
         internalApiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
-
-        internalApiClient.setBasePath(chsKafkaUrl);
 
         PrivateChangedResourcePost changedResourcePost =
                 internalApiClient.privateChangedResourceHandler().postChangedResource(
                         CHANGED_RESOURCE_URI, mapper.mapChangedResource(resourceChangedRequest));
-        // TODO: exception catching as part of DSND-2280.
-        return changedResourcePost.execute();
+        try {
+            return changedResourcePost.execute();
+        } catch (ApiErrorResponseException e) {
+            LOGGER.error("Unsuccessful call to /resource-changed endpoint", e, DataMapHolder.getLogMap());
+            return new ApiResponse<>(e.getStatusCode(), e.getHeaders());
+        }
     }
 }

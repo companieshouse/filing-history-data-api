@@ -11,9 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiService;
+import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
@@ -24,14 +25,14 @@ class FilingHistoryServiceTest {
 
     @InjectMocks
     private FilingHistoryService service;
-
     @Mock
-    private ResourceChangedApiService resourceChangedApiService;
-
+    private ResourceChangedApiClient resourceChangedApiClient;
     @Mock
     private Repository repository;
     @Mock
     private FilingHistoryDocument document;
+    @Mock
+    private ApiResponse<Void> response;
 
     @Test
     void findExistingFilingHistoryDocumentShouldReturnDocument() {
@@ -60,8 +61,10 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void saveFilingHistoryShouldSaveDocumentAndReturnUpsertSuccessful() throws ApiErrorResponseException {
+    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
+        when(resourceChangedApiClient.invokeChsKafkaApi(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(200);
 
         // when
         final ServiceResult actualResult = service.insertFilingHistory(document);
@@ -69,6 +72,23 @@ class FilingHistoryServiceTest {
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
         verify(repository).save(document);
-        verify(resourceChangedApiService).invokeChsKafkaApi(any());
+        verify(resourceChangedApiClient).invokeChsKafkaApi(any());
+    }
+
+    @Test
+    void updateFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+        FilingHistoryDocument existingDocument = Mockito.mock(FilingHistoryDocument.class);
+
+        // given
+        when(resourceChangedApiClient.invokeChsKafkaApi(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(200);
+
+        // when
+        final ServiceResult actualResult = service.updateFilingHistory(document, existingDocument);
+
+        // then
+        assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
+        verify(repository).save(document);
+        verify(resourceChangedApiClient).invokeChsKafkaApi(any());
     }
 }

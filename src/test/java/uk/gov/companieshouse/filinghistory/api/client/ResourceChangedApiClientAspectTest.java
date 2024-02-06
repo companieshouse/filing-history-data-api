@@ -8,10 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceChangedApiServiceAspectTest {
+class ResourceChangedApiClientAspectTest {
 
     @InjectMocks
-    private ResourceChangedApiServiceAspect apiServiceAspect;
+    private ResourceChangedApiClientAspect apiServiceAspect;
 
     @Test
     void testAspectDoesNotProceedWhenFlagDisabled() {

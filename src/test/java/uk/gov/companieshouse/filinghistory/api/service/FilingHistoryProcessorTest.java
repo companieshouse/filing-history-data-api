@@ -87,7 +87,7 @@ class FilingHistoryProcessorTest {
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).insertFilingHistory(documentToUpsert);
+        verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocument);
     }
 
     @Test

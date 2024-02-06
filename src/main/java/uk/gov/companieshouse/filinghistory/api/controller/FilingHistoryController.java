@@ -44,6 +44,9 @@ public class FilingHistoryController {
             case STALE_DELTA -> ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .build();
+            case SERVICE_UNAVAILABLE -> ResponseEntity
+                    .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .build();
             default -> ResponseEntity
                     .status(HttpStatus.OK)
                     .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))

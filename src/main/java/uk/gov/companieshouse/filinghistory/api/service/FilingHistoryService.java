@@ -1,22 +1,27 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
+import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
+
 import java.util.Optional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiService;
+import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class FilingHistoryService implements Service {
-    private final ResourceChangedApiService resourceChangedApiService;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private final ResourceChangedApiClient resourceChangedApiClient;
     private final Repository repository;
 
-    public FilingHistoryService(ResourceChangedApiService resourceChangedApiService, Repository repository) {
-        this.resourceChangedApiService = resourceChangedApiService;
+    public FilingHistoryService(ResourceChangedApiClient resourceChangedApiClient, Repository repository) {
+        this.resourceChangedApiClient = resourceChangedApiClient;
         this.repository = repository;
     }
 
@@ -25,31 +30,26 @@ public class FilingHistoryService implements Service {
     }
 
     public ServiceResult insertFilingHistory(final FilingHistoryDocument documentToSave) {
-        repository.save(documentToSave);
-        try {
-            // TODO: compensatory transaction as part of DSND-2280.
-            resourceChangedApiService.invokeChsKafkaApi(
-                    new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
-                            documentToSave.getTransactionId(), null, false));
-        } catch (ApiErrorResponseException e) {
-            // TODO: exception catching as part of DSND-2280.
-            throw new RuntimeException(e);
-        }
-        return ServiceResult.UPSERT_SUCCESSFUL;
+        return handleTransaction(documentToSave, null);
     }
 
     @Override
     public ServiceResult updateFilingHistory(FilingHistoryDocument documentToSave,
             FilingHistoryDocument existingDocument) {
+        return handleTransaction(documentToSave, existingDocument);
+    }
+
+    private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
+            FilingHistoryDocument existingDocument) {
         repository.save(documentToSave);
-        try {
-            // TODO: compensatory transaction as part of DSND-2280.
-            resourceChangedApiService.invokeChsKafkaApi(
-                    new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
-                            documentToSave.getTransactionId(), null, false));
-        } catch (ApiErrorResponseException e) {
-            // TODO: exception catching as part of DSND-2280.
-            throw new RuntimeException(e);
+
+        ApiResponse<Void> result = resourceChangedApiClient.invokeChsKafkaApi(
+                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
+                        documentToSave.getTransactionId(), null, false));
+
+        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
+            LOGGER.error("Call to resource-changed endpoint was not 200 OK", DataMapHolder.getLogMap());
+            return ServiceResult.SERVICE_UNAVAILABLE;
         }
         return ServiceResult.UPSERT_SUCCESSFUL;
     }
