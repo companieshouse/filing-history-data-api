@@ -1,5 +1,6 @@
-package uk.gov.companieshouse.filinghistory.api.service;
+package uk.gov.companieshouse.filinghistory.api.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,17 +19,16 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest
-class HandleResourceChangedAspectFeatureEnabledIT {
+class ResourceChangedApiClientAspectFeatureEnabledIT {
 
     @Autowired
-    private ResourceChangedApiClient resourceChangedApiClient;
+    private ResourceChangedApiClient client;
     @MockBean
-    private Supplier<InternalApiClient> internalApiClientSupplier;
+    private Supplier<InternalApiClient> apiClientSupplier;
     @MockBean
     private ResourceChangedRequestMapper mapper;
     @Mock
@@ -52,23 +52,21 @@ class HandleResourceChangedAspectFeatureEnabledIT {
     }
 
     @Test
-    void testThatKafkaApiShouldBeCalledWhenFeatureFlagDisabled()
-            throws ApiErrorResponseException {
+    void shouldCallResourceChangedWhenFeatureEnabled() throws ApiErrorResponseException {
 
-        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
-        when(internalApiClient.privateChangedResourceHandler()).thenReturn(
-                privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(
-                changedResourcePost);
-        when(changedResourcePost.execute()).thenReturn(response);
+        when(apiClientSupplier.get()).thenReturn(internalApiClient);
+        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
+        when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(changedResourcePost);
+        when(changedResourcePost.execute()).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(200);
 
-        resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
+        ApiResponse<Void> actual = client.callResourceChanged(resourceChangedRequest);
 
-        verify(internalApiClientSupplier).get();
+        assertEquals(200, actual.getStatusCode());
+        verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler).postChangedResource("/resource-changed",
-                changedResource);
+        verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
         verify(changedResourcePost).execute();
     }
 }

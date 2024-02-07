@@ -54,6 +54,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionVal
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
+
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest(classes = FilingHistoryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -97,7 +98,7 @@ class FilingHistoryControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
-    private Supplier<InternalApiClient> internalApiClientFactory;
+    private Supplier<InternalApiClient> apiClientSupplier;
     @MockBean
     private Supplier<Instant> instantSupplier;
     @Mock
@@ -129,7 +130,7 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        when(internalApiClientFactory.get()).thenReturn(internalApiClient);
+        when(apiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.getHttpClient()).thenReturn(apiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(privateChangedResourcePost);
@@ -153,7 +154,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        verify(internalApiClientFactory).get();
+        verify(apiClientSupplier).get();
         verify(internalApiClient).getHttpClient();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource(RESOURCE_CHANGED_URI, getExpectedChangedResource());
@@ -174,7 +175,7 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        when(internalApiClientFactory.get()).thenReturn(internalApiClient);
+        when(apiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.getHttpClient()).thenReturn(apiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(privateChangedResourcePost);
@@ -200,7 +201,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        verify(internalApiClientFactory).get();
+        verify(apiClientSupplier).get();
         verify(internalApiClient).getHttpClient();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource(RESOURCE_CHANGED_URI, getExpectedChangedResource());

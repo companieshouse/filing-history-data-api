@@ -19,6 +19,7 @@ import uk.gov.companieshouse.filinghistory.api.serdes.EmptyFieldDeserializer;
 
 @Configuration
 public class AppConfig {
+
     @Bean
     public Supplier<Instant> instantSupplier() {
         return Instant::now;

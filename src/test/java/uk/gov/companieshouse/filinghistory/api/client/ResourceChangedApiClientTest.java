@@ -9,7 +9,6 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,13 +23,12 @@ import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
-import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceChangedApiClientTest {
 
     @Mock
-    private Supplier<InternalApiClient> internalApiClientSupplier;
+    private Supplier<InternalApiClient> apiClientSupplier;
 
     @Mock
     private InternalApiClient internalApiClient;
@@ -43,9 +41,6 @@ class ResourceChangedApiClientTest {
 
     @Mock
     private ApiResponse<Void> response;
-
-    @Mock
-    private Logger logger;
 
     @Mock
     private ResourceChangedRequestMapper mapper;
@@ -68,10 +63,9 @@ class ResourceChangedApiClientTest {
     }
 
     @Test
-    @DisplayName("Test should successfully invoke chs-kafka-api")
-    void invokeChsKafkaApi() throws ApiErrorResponseException {
+    void shouldCallPostChangedResourceAndReturnOk() throws ApiErrorResponseException {
         // given
-        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
+        when(apiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(changedResourcePost);
         when(changedResourcePost.execute()).thenReturn(response);
@@ -81,19 +75,21 @@ class ResourceChangedApiClientTest {
         resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         // then
-        verify(internalApiClientSupplier).get();
+        verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
         verify(changedResourcePost).execute();
     }
 
     @Test
-    void invokeChsKafkaApiReturns503ErrorInResponse() throws ApiErrorResponseException {
+    void shouldCallPostChangedResourceAndReturnServiceUnavailableWhenApiErrorResponse503()
+            throws ApiErrorResponseException {
         // given
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(503, "Service Unavailable", new HttpHeaders());
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(503, "Service Unavailable",
+                new HttpHeaders());
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 
-        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
+        when(apiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(changedResourcePost);
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
@@ -103,8 +99,8 @@ class ResourceChangedApiClientTest {
         ApiResponse<Void> result = resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         // then
-        assertEquals(result.getStatusCode(), 503);
-        verify(internalApiClientSupplier).get();
+        assertEquals(503, result.getStatusCode());
+        verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
         verify(changedResourcePost).execute();

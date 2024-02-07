@@ -16,12 +16,13 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class FilingHistoryService implements Service {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private final ResourceChangedApiClient resourceChangedApiClient;
+    private final ResourceChangedApiClient apiClient;
     private final Repository repository;
 
-    public FilingHistoryService(ResourceChangedApiClient resourceChangedApiClient, Repository repository) {
-        this.resourceChangedApiClient = resourceChangedApiClient;
+    public FilingHistoryService(ResourceChangedApiClient apiClient, Repository repository) {
+        this.apiClient = apiClient;
         this.repository = repository;
     }
 
@@ -42,12 +43,7 @@ public class FilingHistoryService implements Service {
     private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
             FilingHistoryDocument existingDocument) {
         repository.save(documentToSave);
-        return handleResourceChanged(documentToSave);
-    }
-
-    @HandleResourceChanged
-    private ServiceResult handleResourceChanged(FilingHistoryDocument documentToSave) {
-        ApiResponse<Void> result = resourceChangedApiClient.callResourceChanged(
+        ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
                         documentToSave.getTransactionId(), null, false));
 

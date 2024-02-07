@@ -37,7 +37,6 @@ class TopLevelMapperTest {
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
-
     private static final Instant UPDATED_AT = Instant.now();
     private static final String UPDATED_BY = "84746291";
     private static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;

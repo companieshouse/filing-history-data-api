@@ -31,6 +31,7 @@ class FilingHistoryControllerTest {
 
     @Mock
     private InternalFilingHistoryApi requestBody;
+
     @Test
     void shouldReturn200OKWhenPutRequest() {
         // given

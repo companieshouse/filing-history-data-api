@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
@@ -17,31 +16,30 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Component
 public class ResourceChangedApiClient {
 
-    private static final String CHANGED_RESOURCE_URI = "/resource-changed";
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private final Supplier<InternalApiClient> internalApiClientFactory;
+    private static final String CHANGED_RESOURCE_URI = "/resource-changed";
+    private final Supplier<InternalApiClient> apiClientSupplier;
     private final ResourceChangedRequestMapper mapper;
 
-    /**
-     * Invoke API.
-     */
-    public ResourceChangedApiClient(ResourceChangedRequestMapper mapper, Supplier<InternalApiClient> internalApiClientFactory) {
+    public ResourceChangedApiClient(ResourceChangedRequestMapper mapper,
+            Supplier<InternalApiClient> apiClientSupplier) {
         this.mapper = mapper;
-        this.internalApiClientFactory = internalApiClientFactory;
+        this.apiClientSupplier = apiClientSupplier;
     }
 
+    @CallResourceChanged
     public ApiResponse<Void> callResourceChanged(ResourceChangedRequest resourceChangedRequest) {
-        InternalApiClient internalApiClient = internalApiClientFactory.get();
+        InternalApiClient internalApiClient = apiClientSupplier.get();
         internalApiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
 
-        PrivateChangedResourcePost changedResourcePost =
-                internalApiClient.privateChangedResourceHandler().postChangedResource(
-                        CHANGED_RESOURCE_URI, mapper.mapChangedResource(resourceChangedRequest));
         try {
-            return changedResourcePost.execute();
-        } catch (ApiErrorResponseException e) {
-            LOGGER.error("Unsuccessful call to /resource-changed endpoint", e, DataMapHolder.getLogMap());
-            return new ApiResponse<>(e.getStatusCode(), e.getHeaders());
+            return internalApiClient
+                    .privateChangedResourceHandler()
+                    .postChangedResource(CHANGED_RESOURCE_URI, mapper.mapChangedResource(resourceChangedRequest))
+                    .execute();
+        } catch (ApiErrorResponseException ex) {
+            LOGGER.error("Unsuccessful call to /resource-changed endpoint", ex, DataMapHolder.getLogMap());
+            return new ApiResponse<>(ex.getStatusCode(), ex.getHeaders());
         }
     }
 }
