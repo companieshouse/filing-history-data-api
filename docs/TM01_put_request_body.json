@@ -1,29 +1,29 @@
 {
   "external_data": {
     "links": {
-      "self": "/company/12345678/filing-history/MzA1MzY0NzkxNWFkaXF6a2N4"
+      "self": "/company/01777777/filing-history/MzA1MzY0NzkxNWFkaXF6a2N4"
     },
     "category": "officers",
     "subcategory": "termination",
-    "action_date": "2011-08-06",
+    "action_date": "2011-08-06T00:00:00.00Z",
     "date": "2011-09-05T05:39:19.000Z",
     "type": "TM01",
     "description_values": {
-      "officer_name": "John Tester",
-      "termination_date": "2011-08-06"
+      "officer_name": "Paul Tester",
+      "termination_date": "2011-08-06T00:00:00.00Z"
     },
     "description": "termination-director-company-with-name-termination-date"
   },
   "internal_data": {
     "original_values": {
       "resignation_date": "06/08/2011",
-      "officer_name": "John Tester"
+      "officer_name": "Paul Tester"
     },
-    "original_description": "Appointment terminated, director john tester",
-    "company_number": "12345678",
+    "original_description": "Appointment terminated, director paul tester",
+    "company_number": "01777777",
     "entity_id": "3053647915",
     "document_id": "000X4BI89B65846",
-    "delta_at": "20150816230459600643",
+    "delta_at": "20240131090859600644",
     "updated_by": "contextId",
     "transaction_kind": "top-level"
   }
