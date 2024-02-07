@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.client;
+package uk.gov.companieshouse.filinghistory.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -18,11 +18,12 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest
-class ResourceChangedApiClientAspectFeatureFlagDisabledITest {
+class HandleResourceChangedAspectFeatureEnabledIT {
 
     @Autowired
     private ResourceChangedApiClient resourceChangedApiClient;
@@ -62,7 +63,7 @@ class ResourceChangedApiClientAspectFeatureFlagDisabledITest {
         when(changedResourcePost.execute()).thenReturn(response);
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
 
-        resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
+        resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         verify(internalApiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();

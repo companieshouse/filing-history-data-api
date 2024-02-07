@@ -30,14 +30,7 @@ public class ResourceChangedApiClient {
         this.internalApiClientFactory = internalApiClientFactory;
     }
 
-
-    /**
-     * Calls the CHS Kafka api.
-     * @param resourceChangedRequest encapsulates details relating to the updated or deleted company exemption
-     * @return The service status of the response from chs kafka api
-     */
-    @StreamEvents
-    public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
+    public ApiResponse<Void> callResourceChanged(ResourceChangedRequest resourceChangedRequest) {
         InternalApiClient internalApiClient = internalApiClientFactory.get();
         internalApiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
 

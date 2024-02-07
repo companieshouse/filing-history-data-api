@@ -42,8 +42,12 @@ public class FilingHistoryService implements Service {
     private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
             FilingHistoryDocument existingDocument) {
         repository.save(documentToSave);
+        return handleResourceChanged(documentToSave);
+    }
 
-        ApiResponse<Void> result = resourceChangedApiClient.invokeChsKafkaApi(
+    @HandleResourceChanged
+    private ServiceResult handleResourceChanged(FilingHistoryDocument documentToSave) {
+        ApiResponse<Void> result = resourceChangedApiClient.callResourceChanged(
                 new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
                         documentToSave.getTransactionId(), null, false));
 

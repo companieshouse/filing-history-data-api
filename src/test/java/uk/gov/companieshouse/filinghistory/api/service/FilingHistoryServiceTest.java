@@ -63,7 +63,7 @@ class FilingHistoryServiceTest {
     @Test
     void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
-        when(resourceChangedApiClient.invokeChsKafkaApi(any())).thenReturn(response);
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
 
         // when
@@ -72,7 +72,7 @@ class FilingHistoryServiceTest {
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
         verify(repository).save(document);
-        verify(resourceChangedApiClient).invokeChsKafkaApi(any());
+        verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
     @Test
@@ -80,7 +80,7 @@ class FilingHistoryServiceTest {
         FilingHistoryDocument existingDocument = Mockito.mock(FilingHistoryDocument.class);
 
         // given
-        when(resourceChangedApiClient.invokeChsKafkaApi(any())).thenReturn(response);
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
 
         // when
@@ -89,6 +89,6 @@ class FilingHistoryServiceTest {
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
         verify(repository).save(document);
-        verify(resourceChangedApiClient).invokeChsKafkaApi(any());
+        verify(resourceChangedApiClient).callResourceChanged(any());
     }
 }

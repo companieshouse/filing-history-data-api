@@ -78,7 +78,7 @@ class ResourceChangedApiClientTest {
         when(mapper.mapChangedResource(resourceChangedRequest)).thenReturn(changedResource);
 
         // when
-        resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
+        resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         // then
         verify(internalApiClientSupplier).get();
@@ -100,7 +100,7 @@ class ResourceChangedApiClientTest {
         when(changedResourcePost.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        ApiResponse<Void> result = resourceChangedApiClient.invokeChsKafkaApi(resourceChangedRequest);
+        ApiResponse<Void> result = resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         // then
         assertEquals(result.getStatusCode(), 503);

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.client;
+package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface StreamEvents {
+public @interface HandleResourceChanged {
 }
