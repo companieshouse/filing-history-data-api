@@ -42,6 +42,7 @@ public class FilingHistoryService implements Service {
 
     private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
             FilingHistoryDocument existingDocument) {
+        // Add compensatory transaction as part of DSND-2280.
         repository.save(documentToSave);
         ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
