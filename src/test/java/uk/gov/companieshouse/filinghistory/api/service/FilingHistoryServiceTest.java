@@ -32,6 +32,8 @@ class FilingHistoryServiceTest {
     @Mock
     private FilingHistoryDocument document;
     @Mock
+    private FilingHistoryDocument existingDocument;
+    @Mock
     private ApiResponse<Void> response;
 
     @Test
@@ -77,8 +79,6 @@ class FilingHistoryServiceTest {
 
     @Test
     void updateFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
-        FilingHistoryDocument existingDocument = Mockito.mock(FilingHistoryDocument.class);
-
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -88,6 +88,21 @@ class FilingHistoryServiceTest {
 
         // then
         assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
+        verify(repository).save(document);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() {
+        // given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(503);
+
+        // when
+        final ServiceResult actualResult = service.updateFilingHistory(document, existingDocument);
+
+        // then
+        assertEquals(ServiceResult.SERVICE_UNAVAILABLE, actualResult);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
