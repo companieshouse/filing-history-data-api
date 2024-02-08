@@ -28,13 +28,14 @@ The service is implemented in Java 21 using Spring Boot 3.2
 3. Boot up the services' containers on docker using tilt `tilt up`.
 
 ## Environment variables
-| Variable          | Description                                              | Example (from docker-chs-development) |
-|-------------------|----------------------------------------------------------|---------------------------------------|
-| CHS_API_KEY       | The client ID of an API key with internal app privileges | abc123def456ghi789                    |
-| CHS_KAFKA_API_URL | The URL which the chs-kafka-api is hosted on             | http://api.chs.local:4001             |
-| SERVER_PORT       | The server port of this service                          | 8080                                  |
-| LOGLEVEL          | The level of log messages output to the logs             | debug                                 |
-| HUMAN_LOG         | A boolean value to enable more readable log messages     | 1                                     |
+| Variable                       | Description                                              | Example (from docker-chs-development) |
+|--------------------------------|----------------------------------------------------------|---------------------------------------|
+| CHS_API_KEY                    | The client ID of an API key with internal app privileges | abc123def456ghi789                    |
+| CHS_KAFKA_API_URL              | The URL which the chs-kafka-api is hosted on             | http://api.chs.local:4001             |
+| SERVER_PORT                    | The server port of this service                          | 8080                                  |
+| LOGLEVEL                       | The level of log messages output to the logs             | debug                                 |
+| HUMAN_LOG                      | A boolean value to enable more readable log messages     | 1                                     |
+| RESOURCE_CHANGED_CALL_DISABLED | Toggles whether resource-changed calls are posted.       | false                                 | 
 
 ## Building the docker image
 
