@@ -24,12 +24,16 @@ public class FilingHistoryProcessor implements Processor {
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
                 request.getInternalData().getTransactionKind());
 
-        Optional<FilingHistoryDocument> documentToSave = filingHistoryService.findExistingFilingHistory(transactionId)
-                .map(existingDocument -> mapper.mapFilingHistoryUnlessStale(request, existingDocument))
+        Optional<FilingHistoryDocument> existingDocument = filingHistoryService.findExistingFilingHistory(transactionId);
+
+        Optional<FilingHistoryDocument> documentToSave = existingDocument
+                .map(document -> mapper.mapFilingHistoryUnlessStale(request, document))
                 .orElseGet(() -> Optional.of(mapper.mapNewFilingHistory(transactionId, request)));
 
         return documentToSave
-                .map(filingHistoryService::saveFilingHistory)
+                .map(document -> existingDocument
+                        .map(existingDoc -> filingHistoryService.updateFilingHistory(document, existingDoc))
+                        .orElseGet(() -> filingHistoryService.insertFilingHistory(document)))
                 .orElse(ServiceResult.STALE_DELTA);
     }
 }

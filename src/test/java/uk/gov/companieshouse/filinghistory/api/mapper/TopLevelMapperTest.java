@@ -1,14 +1,15 @@
 package uk.gov.companieshouse.filinghistory.api.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +37,7 @@ class TopLevelMapperTest {
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
+    private static final Instant UPDATED_AT = Instant.now();
     private static final String UPDATED_BY = "84746291";
     private static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
 
@@ -43,6 +45,8 @@ class TopLevelMapperTest {
     private TopLevelTransactionMapper topLevelMapper;
     @Mock
     private DataMapper dataMapper;
+    @Mock
+    private Supplier<Instant> instantSupplier;
     @Mock
     private OriginalValuesMapper originalValuesMapper;
     @Mock
@@ -71,6 +75,7 @@ class TopLevelMapperTest {
     void mapNewFilingHistoryShouldReturnNewFilingHistoryDocumentWithMappedFields() {
         // given
         when(dataMapper.map((any()), any())).thenReturn(expectedFilingHistoryData);
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(requestExternalData.getLinks()).thenReturn(requestLinks);
         when(linksMapper.map(any())).thenReturn(expectedFilingHistoryLinks);
         when(expectedFilingHistoryData.links(any())).thenReturn(expectedFilingHistoryData);
@@ -87,14 +92,9 @@ class TopLevelMapperTest {
         final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request);
 
         // then
-
-        // Updated at set as Instant.now() during mapping so
-        // Expected and actual will, therefore, be slightly different and not testable
-        assertNotNull(actualDocument.getUpdatedAt());
-        actualDocument.updatedAt(null);
-
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, new FilingHistoryData());
+        verify(instantSupplier).get();
         verify(originalValuesMapper).map(requestOriginalValues);
         verify(linksMapper).map(requestLinks);
     }
@@ -103,6 +103,7 @@ class TopLevelMapperTest {
     void mapFilingHistoryUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
         // given
         when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
@@ -123,14 +124,9 @@ class TopLevelMapperTest {
 
         // then
         assertTrue(actualDocument.isPresent());
-
-        // Updated at set as Instant.now() during mapping so
-        // Expected and actual will, therefore, be slightly different and not testable
-        assertNotNull(actualDocument.get().getUpdatedAt());
-        actualDocument.get().updatedAt(null);
-
         assertEquals(expectedDocument, actualDocument.get());
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
+        verify(instantSupplier).get();
         verify(originalValuesMapper).map(requestOriginalValues);
     }
 
@@ -153,6 +149,7 @@ class TopLevelMapperTest {
         assertTrue(actualDocument.isEmpty());
         verifyNoInteractions(dataMapper);
         verifyNoInteractions(originalValuesMapper);
+        verifyNoInteractions(instantSupplier);
     }
 
     private InternalFilingHistoryApi buildPutRequestBody() {
@@ -185,6 +182,7 @@ class TopLevelMapperTest {
                 .originalDescription(ORIGINAL_DESCRIPTION)
                 .originalValues(originalValues)
                 .deltaAt(deltaAt)
+                .updatedAt(UPDATED_AT)
                 .updatedBy(UPDATED_BY);
     }
 }

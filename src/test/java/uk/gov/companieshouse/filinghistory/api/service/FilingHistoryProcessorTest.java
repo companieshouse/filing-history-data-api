@@ -54,7 +54,7 @@ class FilingHistoryProcessorTest {
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
         when(topLevelMapper.mapNewFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
-        when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+        when(filingHistoryService.insertFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
         // when
         final ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
@@ -65,7 +65,7 @@ class FilingHistoryProcessorTest {
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).saveFilingHistory(documentToUpsert);
+        verify(filingHistoryService).insertFilingHistory(documentToUpsert);
     }
 
     @Test
@@ -75,7 +75,7 @@ class FilingHistoryProcessorTest {
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
-        when(filingHistoryService.saveFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+        when(filingHistoryService.insertFilingHistory(any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
         when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(
                 Optional.of(documentToUpsert));
 
@@ -87,7 +87,7 @@ class FilingHistoryProcessorTest {
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).saveFilingHistory(documentToUpsert);
+        verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocument);
     }
 
     @Test

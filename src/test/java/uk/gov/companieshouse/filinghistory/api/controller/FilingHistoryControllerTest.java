@@ -68,4 +68,22 @@ class FilingHistoryControllerTest {
         assertEquals(expectedResponse, actualResponse);
         verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
+
+    @Test
+    void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() {
+        // given
+        final ResponseEntity<Void> expectedResponse = ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .build();
+
+        when(processor.processFilingHistory(any(), any())).thenReturn(ServiceResult.SERVICE_UNAVAILABLE);
+
+        // when
+        final ResponseEntity<Void> actualResponse =
+                controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
+    }
 }
