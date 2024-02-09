@@ -19,7 +19,7 @@ terraform {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.243"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.245"
 
 
   # Environmental configuration
@@ -34,6 +34,12 @@ module "ecs-service" {
   lb_listener_arn                 = data.aws_lb_listener.service_lb_listener.arn
   lb_listener_rule_priority       = local.lb_listener_rule_priority
   lb_listener_paths               = local.lb_listener_paths
+  multilb_listeners               = {
+    "priv-api-lb": {
+      listener_arn                = data.aws_lb_listener.secondary_lb_listener.arn,
+      load_balancer_arn           = data.aws_lb.secondary_lb.arn
+    }
+  }
 
   # ECS Task container health check
   use_task_container_healthcheck = true
@@ -83,7 +89,7 @@ module "ecs-service" {
 }
 
 module "secrets" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.243"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.245"
 
   name_prefix = "${local.service_name}-${var.environment}"
   environment = var.environment
