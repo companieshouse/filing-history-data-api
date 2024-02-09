@@ -86,7 +86,7 @@ class FilingHistoryControllerIT {
     private static final String ACTION_AND_TERMINATION_DATE = "2014-08-29T00:00:00.000Z";
     private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(ACTION_AND_TERMINATION_DATE);
     private static final String CONTEXT_ID = "ABCD1234";
-    private static final String RESOURCE_CHANGED_URI = "/resource-changed";
+    private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");

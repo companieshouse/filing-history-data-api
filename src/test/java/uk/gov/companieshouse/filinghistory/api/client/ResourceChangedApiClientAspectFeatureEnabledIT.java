@@ -66,7 +66,7 @@ class ResourceChangedApiClientAspectFeatureEnabledIT {
         assertEquals(200, actual.getStatusCode());
         verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
+        verify(privateChangedResourceHandler).postChangedResource("/private/resource-changed", changedResource);
         verify(changedResourcePost).execute();
     }
 }
