@@ -35,6 +35,15 @@ data "aws_lb_listener" "service_lb_listener" {
   port = 443
 }
 
+data "aws_lb" "secondary_lb" {
+  name = "${var.environment}-chs-apichgovuk-private"
+}
+
+data "aws_lb_listener" "secondary_lb_listener" {
+  load_balancer_arn = data.aws_lb.secondary_lb.arn
+  port = 443
+}
+
 data "aws_ecs_cluster" "ecs_cluster" {
   cluster_name = "${local.name_prefix}-cluster"
 }
