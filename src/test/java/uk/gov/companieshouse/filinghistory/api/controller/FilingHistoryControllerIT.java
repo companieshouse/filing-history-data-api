@@ -1,8 +1,11 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +13,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -19,7 +23,6 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +36,6 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -43,11 +45,6 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
-import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
-import uk.gov.companieshouse.api.http.HttpClient;
-import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
@@ -57,7 +54,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 
 @Testcontainers
 @AutoConfigureMockMvc
-@SpringBootTest(classes = FilingHistoryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest
 class FilingHistoryControllerIT {
 
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
@@ -90,6 +87,7 @@ class FilingHistoryControllerIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final WireMockServer server = new WireMockServer(8888);
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -98,29 +96,19 @@ class FilingHistoryControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
-    private Supplier<InternalApiClient> apiClientSupplier;
-    @MockBean
     private Supplier<Instant> instantSupplier;
-    @Mock
-    private InternalApiClient internalApiClient;
-    @Mock
-    private HttpClient apiClient;
-    @Mock
-    private PrivateChangedResourceHandler privateChangedResourceHandler;
-    @Mock
-    private PrivateChangedResourcePost privateChangedResourcePost;
-    @Mock
-    private ApiResponse<Void> voidApiResponse;
 
     @BeforeAll
     static void start() {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
+        server.start();
     }
 
     @BeforeEach
     void setUp() {
         mongoTemplate.dropCollection(FILING_HISTORY_COLLECTION);
         mongoTemplate.createCollection(FILING_HISTORY_COLLECTION);
+        server.resetAll();
     }
 
     @Test
@@ -130,12 +118,10 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        when(apiClientSupplier.get()).thenReturn(internalApiClient);
-        when(internalApiClient.getHttpClient()).thenReturn(apiClient);
-        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(privateChangedResourcePost);
-        when(privateChangedResourcePost.execute()).thenReturn(voidApiResponse);
-        when(voidApiResponse.getStatusCode()).thenReturn(200);
+        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
@@ -154,12 +140,8 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        verify(apiClientSupplier).get();
-        verify(internalApiClient).getHttpClient();
-        verify(internalApiClient).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler).postChangedResource(RESOURCE_CHANGED_URI, getExpectedChangedResource());
-        verify(privateChangedResourcePost).execute();
-        verify(voidApiResponse).getStatusCode();
+        server.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -175,12 +157,9 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        when(apiClientSupplier.get()).thenReturn(internalApiClient);
-        when(internalApiClient.getHttpClient()).thenReturn(apiClient);
-        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(any(), any())).thenReturn(privateChangedResourcePost);
-        when(privateChangedResourcePost.execute()).thenReturn(voidApiResponse);
-        when(voidApiResponse.getStatusCode()).thenReturn(200);
+        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
 
         // when
         final ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -194,19 +173,14 @@ class FilingHistoryControllerIT {
         // then
         result.andExpect(MockMvcResultMatchers.status().isOk());
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
-        verify(privateChangedResourceHandler).postChangedResource(RESOURCE_CHANGED_URI, getExpectedChangedResource());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        verify(apiClientSupplier).get();
-        verify(internalApiClient).getHttpClient();
-        verify(internalApiClient).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler).postChangedResource(RESOURCE_CHANGED_URI, getExpectedChangedResource());
-        verify(privateChangedResourcePost).execute();
-        verify(voidApiResponse).getStatusCode();
+        server.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
