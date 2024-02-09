@@ -5,10 +5,12 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.service.Processor;
@@ -52,5 +54,17 @@ public class FilingHistoryController {
                     .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
                     .build();
         };
+    }
+
+    @GetMapping("/company/{company_number}/filing-history/{transaction_id}")
+    public ResponseEntity<ExternalData> getSingleFilingHistory(
+            @PathVariable("company_number") final String companyNumber,
+            @PathVariable("transaction_id") final String transactionId) {
+
+        ExternalData responseBody = serviceProcessor.processGetSingleFilingHistory(companyNumber, transactionId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
     }
 }

@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
@@ -31,6 +32,9 @@ class FilingHistoryControllerTest {
 
     @Mock
     private InternalFilingHistoryApi requestBody;
+
+    @Mock
+    private ExternalData responseBody;
 
     @Test
     void shouldReturn200OKWhenPutRequest() {
@@ -85,5 +89,23 @@ class FilingHistoryControllerTest {
         // then
         assertEquals(expectedResponse, actualResponse);
         verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
+    }
+
+    @Test
+    void shouldReturn200OKWhenGetSingleTransaction() {
+        // given
+        final ResponseEntity<ExternalData> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
+
+        when(processor.processGetSingleFilingHistory(any(), any())).thenReturn(responseBody);
+
+        // when
+        final ResponseEntity<ExternalData> actualResponse =
+                controller.getSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(processor).processGetSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
     }
 }

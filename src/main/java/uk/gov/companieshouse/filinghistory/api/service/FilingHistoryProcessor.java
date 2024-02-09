@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
@@ -35,5 +36,10 @@ public class FilingHistoryProcessor implements Processor {
                         .map(existingDoc -> filingHistoryService.updateFilingHistory(document, existingDoc))
                         .orElseGet(() -> filingHistoryService.insertFilingHistory(document)))
                 .orElse(ServiceResult.STALE_DELTA);
+    }
+
+    @Override
+    public ExternalData processGetSingleFilingHistory(String companyNumber, String transactionId) {
+        return new ExternalData();
     }
 }
