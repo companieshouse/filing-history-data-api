@@ -38,6 +38,7 @@ import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -241,7 +242,29 @@ class FilingHistoryControllerIT {
     @Test
     void shouldGetSingleDocumentAndReturn200OKWhen() throws Exception {
         // given
-        final ExternalData expectedResponseBody = new ExternalData();
+        final ExternalData expectedResponseBody = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .barcode(BARCODE)
+                .actionDate("2014-08-29")
+                .category(ExternalData.CategoryEnum.OFFICERS)
+                .type(TM01_TYPE)
+                .description(DESCRIPTION)
+                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .date("2014-09-15")
+                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                        .officerName("John Tester")
+                        .terminationDate("2014-08-29"))
+                .annotations(List.of(
+                        new FilingHistoryItemDataAnnotations().annotation("annotation")))
+                .links(new FilingHistoryItemDataLinks()
+                        .self(SELF_LINK)
+                        .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                .pages(1);;
+
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
         ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
