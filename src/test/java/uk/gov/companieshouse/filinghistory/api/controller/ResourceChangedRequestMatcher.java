@@ -12,6 +12,9 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 
 public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
 
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .setSerializationInclusion(Include.NON_EMPTY)
+            .registerModule(new JavaTimeModule());
     private final String expectedUrl;
     private final ChangedResource expectedBody;
 
@@ -37,13 +40,8 @@ public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
     }
 
     private MatchResult matchBody(String actualBody) {
-        ObjectMapper mapper = new ObjectMapper()
-                .setSerializationInclusion(Include.NON_EMPTY)
-                .registerModule(new JavaTimeModule());
-
-        ChangedResource actual;
         try {
-            actual = mapper.readValue(actualBody, ChangedResource.class);
+            ChangedResource actual = mapper.readValue(actualBody, ChangedResource.class);
             return MatchResult.of(expectedBody.equals(actual));
         } catch (JsonProcessingException e) {
             return MatchResult.of(false);
