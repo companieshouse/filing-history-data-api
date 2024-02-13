@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -7,7 +7,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionV
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
 @Component
-public class DescriptionValuesResponseMapper {
+public class DescriptionGetValuesResponseMapper {
 
     public FilingHistoryItemDataDescriptionValues map(FilingHistoryDescriptionValues descriptionValues) {
         return new FilingHistoryItemDataDescriptionValues()

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
 import java.util.function.Supplier;

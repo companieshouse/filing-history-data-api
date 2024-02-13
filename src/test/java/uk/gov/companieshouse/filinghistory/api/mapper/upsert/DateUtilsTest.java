@@ -1,10 +1,11 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.DateUtils;
 
 class DateUtilsTest {
 

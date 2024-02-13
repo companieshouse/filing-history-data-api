@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 
 @Component
-public class AnnotationsResponseMapper {
+public class AnnotationsGetResponseMapper {
 
     public List<FilingHistoryItemDataAnnotations> map(List<FilingHistoryAnnotation> documentAnnotations) {
 

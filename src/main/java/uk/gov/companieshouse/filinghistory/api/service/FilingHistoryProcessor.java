@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
-import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapper;
-import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.mapper.response.ItemResponseMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
+import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @Component
@@ -15,13 +15,13 @@ public class FilingHistoryProcessor implements Processor {
 
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
-    private final ItemResponseMapper itemResponseMapper;
+    private final ItemGetResponseMapper itemGetResponseMapper;
 
     public FilingHistoryProcessor(Service filingHistoryService,
-                                  AbstractTransactionMapperFactory mapperFactory, ItemResponseMapper itemResponseMapper) {
+                                  AbstractTransactionMapperFactory mapperFactory, ItemGetResponseMapper itemGetResponseMapper) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
-        this.itemResponseMapper = itemResponseMapper;
+        this.itemGetResponseMapper = itemGetResponseMapper;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class FilingHistoryProcessor implements Processor {
 
     @Override
     public ExternalData processGetSingleFilingHistory(String companyNumber, String transactionId) {
-        return itemResponseMapper.mapFilingHistoryItem(
+        return itemGetResponseMapper.mapFilingHistoryItem(
                 filingHistoryService.findExistingFilingHistory(transactionId)
                         .orElseThrow(() ->
                                 new NotFoundException("Record with transaction id: %s could not be found in MongoDB"

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +24,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
-class ItemResponseMapperTest {
+class ItemGetResponseMapperTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String BARCODE = "X4BI89B6";
@@ -33,14 +33,14 @@ class ItemResponseMapperTest {
     private static final String TM01_TYPE = "TM01";
 
     @InjectMocks
-    private ItemResponseMapper itemResponseMapper;
+    private ItemGetResponseMapper itemGetResponseMapper;
 
     @Mock
-    private AnnotationsResponseMapper annotationsResponseMapper;
+    private AnnotationsGetResponseMapper annotationsGetResponseMapper;
     @Mock
-    private DescriptionValuesResponseMapper descriptionValuesResponseMapper;
+    private DescriptionGetValuesResponseMapper descriptionGetValuesResponseMapper;
     @Mock
-    private LinksResponseMapper linksResponseMapper;
+    private LinksGetResponseMapper linksGetResponseMapper;
 
     @Mock
     private List<FilingHistoryItemDataAnnotations> itemAnnotations;
@@ -73,18 +73,18 @@ class ItemResponseMapperTest {
                 .links(itemLinks)
                 .pages(1);
 
-        when(annotationsResponseMapper.map(any())).thenReturn(itemAnnotations);
-        when(descriptionValuesResponseMapper.map(any())).thenReturn(itemDescriptionValues);
-        when(linksResponseMapper.map(any())).thenReturn(itemLinks);
+        when(annotationsGetResponseMapper.map(any())).thenReturn(itemAnnotations);
+        when(descriptionGetValuesResponseMapper.map(any())).thenReturn(itemDescriptionValues);
+        when(linksGetResponseMapper.map(any())).thenReturn(itemLinks);
 
         // when
-        final ExternalData actual = itemResponseMapper.mapFilingHistoryItem(buildFilingHistoryDocument());
+        final ExternalData actual = itemGetResponseMapper.mapFilingHistoryItem(buildFilingHistoryDocument());
 
         // then
         assertEquals(expected, actual);
-        verify(annotationsResponseMapper).map(any());
-        verify(descriptionValuesResponseMapper).map(any());
-        verify(linksResponseMapper).map(any());
+        verify(annotationsGetResponseMapper).map(any());
+        verify(descriptionGetValuesResponseMapper).map(any());
+        verify(linksGetResponseMapper).map(any());
     }
 
     private FilingHistoryDocument buildFilingHistoryDocument() {

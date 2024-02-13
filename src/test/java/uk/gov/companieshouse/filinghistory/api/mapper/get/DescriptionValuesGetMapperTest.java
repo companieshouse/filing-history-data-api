@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
-class DescriptionValuesResponseMapperTest {
+class DescriptionValuesGetMapperTest {
 
-    private final DescriptionValuesResponseMapper mapper = new DescriptionValuesResponseMapper();
+    private final DescriptionGetValuesResponseMapper mapper = new DescriptionGetValuesResponseMapper();
 
     @Test
     void shouldSuccessfullyMapDescriptionValues() {

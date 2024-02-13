@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 
-class LinksResponseMapperTest {
+class LinksGetResponseMapperTest {
 
     private static final String SELF_LINK = "/company/12345678/filing-history/Mkv123";
     private static final String DOCUMENT_METADATA = "/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA";
 
-    private final LinksResponseMapper mapper = new LinksResponseMapper();
+    private final LinksGetResponseMapper mapper = new LinksGetResponseMapper();
 
     @Test
     void shouldSuccessfullyMapLinks() {

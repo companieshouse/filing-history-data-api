@@ -13,7 +13,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.filinghistory.api.mapper.ResourceChangedRequestMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest

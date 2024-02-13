@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 
-class AnnotationsResponseMapperTest {
+class AnnotationsGetMapperTest {
 
-    private final AnnotationsResponseMapper annotationsResponseMapper = new AnnotationsResponseMapper();
+    private final AnnotationsGetResponseMapper annotationsGetResponseMapper = new AnnotationsGetResponseMapper();
 
     @Test
     void shouldSuccessfullyMapAnnotations() {
@@ -20,7 +20,7 @@ class AnnotationsResponseMapperTest {
                 new FilingHistoryItemDataAnnotations().annotation("annotations_2"));
 
         // when
-        final List<FilingHistoryItemDataAnnotations> actual = annotationsResponseMapper.map(buildDocumentAnnotationsList());
+        final List<FilingHistoryItemDataAnnotations> actual = annotationsGetResponseMapper.map(buildDocumentAnnotationsList());
 
         // then
         assertEquals(expected, actual);
@@ -31,7 +31,7 @@ class AnnotationsResponseMapperTest {
         // given
 
         // when
-        final List<FilingHistoryItemDataAnnotations> actual = annotationsResponseMapper.map(null);
+        final List<FilingHistoryItemDataAnnotations> actual = annotationsGetResponseMapper.map(null);
 
         // then
         assertNull(actual);

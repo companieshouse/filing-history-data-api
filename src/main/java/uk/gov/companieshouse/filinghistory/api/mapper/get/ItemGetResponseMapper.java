@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper.response;
+package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.SubcategoryEnum;
@@ -11,16 +11,16 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @Component
-public class ItemResponseMapper {
+public class ItemGetResponseMapper {
 
-    private final AnnotationsResponseMapper annotationsResponseMapper;
-    private final DescriptionValuesResponseMapper descriptionValuesResponseMapper;
-    private final LinksResponseMapper linksResponseMapper;
+    private final AnnotationsGetResponseMapper annotationsGetResponseMapper;
+    private final DescriptionGetValuesResponseMapper descriptionGetValuesResponseMapper;
+    private final LinksGetResponseMapper linksGetResponseMapper;
 
-    public ItemResponseMapper(AnnotationsResponseMapper annotationsResponseMapper, DescriptionValuesResponseMapper descriptionValuesResponseMapper, LinksResponseMapper linksResponseMapper) {
-        this.annotationsResponseMapper = annotationsResponseMapper;
-        this.descriptionValuesResponseMapper = descriptionValuesResponseMapper;
-        this.linksResponseMapper = linksResponseMapper;
+    public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper, DescriptionGetValuesResponseMapper descriptionGetValuesResponseMapper, LinksGetResponseMapper linksGetResponseMapper) {
+        this.annotationsGetResponseMapper = annotationsGetResponseMapper;
+        this.descriptionGetValuesResponseMapper = descriptionGetValuesResponseMapper;
+        this.linksGetResponseMapper = linksGetResponseMapper;
     }
 
     public ExternalData mapFilingHistoryItem(FilingHistoryDocument document) {
@@ -32,12 +32,12 @@ public class ItemResponseMapper {
                 .date(LocalDate.ofInstant(data.getDate(), ZoneOffset.UTC).toString())
                 .category(CategoryEnum.fromValue(data.getCategory()))
                 .subcategory(SubcategoryEnum.fromValue(data.getSubcategory()))
-                .annotations(annotationsResponseMapper.map(data.getAnnotations()))
+                .annotations(annotationsGetResponseMapper.map(data.getAnnotations()))
                 .description(data.getDescription())
-                .descriptionValues(descriptionValuesResponseMapper.map(data.getDescriptionValues()))
+                .descriptionValues(descriptionGetValuesResponseMapper.map(data.getDescriptionValues()))
                 .pages(data.getPages())
                 .actionDate(LocalDate.ofInstant(data.getActionDate(), ZoneOffset.UTC).toString())
                 .paperFiled(data.getPaperFiled())
-                .links(linksResponseMapper.map(data.getLinks()));
+                .links(linksGetResponseMapper.map(data.getLinks()));
     }
 }

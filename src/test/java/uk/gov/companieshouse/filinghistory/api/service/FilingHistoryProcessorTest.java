@@ -21,9 +21,9 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
-import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.mapper.response.ItemResponseMapper;
-import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
+import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ class FilingHistoryProcessorTest {
     @Mock
     private TopLevelTransactionMapper topLevelMapper;
     @Mock
-    private ItemResponseMapper itemResponseMapper;
+    private ItemGetResponseMapper itemGetResponseMapper;
 
     @Mock
     private InternalFilingHistoryApi request;
@@ -123,7 +123,7 @@ class FilingHistoryProcessorTest {
     void shouldSuccessfullyGetSingleFilingHistoryDocumentAndReturnExternalData() {
         // given
         final ExternalData expected = externalData;
-        when(itemResponseMapper.mapFilingHistoryItem(any())).thenReturn(externalData);
+        when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(externalData);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
 
         // when
@@ -131,7 +131,7 @@ class FilingHistoryProcessorTest {
 
         // then
         assertEquals(expected, actual);
-        verify(itemResponseMapper).mapFilingHistoryItem(existingDocument);
+        verify(itemGetResponseMapper).mapFilingHistoryItem(existingDocument);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
     }
 
@@ -145,7 +145,7 @@ class FilingHistoryProcessorTest {
 
         // then
         assertThrows(NotFoundException.class, executable);
-        verifyNoInteractions(itemResponseMapper);
+        verifyNoInteractions(itemGetResponseMapper);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
     }
 }
