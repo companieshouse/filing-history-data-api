@@ -240,7 +240,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldGetSingleDocumentAndReturn200OKWhen() throws Exception {
+    void shouldGetSingleDocumentAndReturn200OK() throws Exception {
         // given
         final ExternalData expectedResponseBody = new ExternalData()
                 .transactionId(TRANSACTION_ID)
@@ -259,7 +259,7 @@ class FilingHistoryControllerIT {
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK)
                         .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
-                .pages(1);;
+                .pages(1);
 
         final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
@@ -281,6 +281,22 @@ class FilingHistoryControllerIT {
         ExternalData actualResponseBody = objectMapper.readValue(responseBodyAsString, ExternalData.class);
 
         assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    void shouldReturn404NotFoundWhenNoDocumentInDB() throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app") // TODO: Check privileges
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
