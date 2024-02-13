@@ -123,7 +123,7 @@ class FilingHistoryProcessorTest {
     void shouldSuccessfullyGetSingleFilingHistoryDocumentAndReturnExternalData() {
         // given
         final ExternalData expected = externalData;
-        when(itemResponseMapper.mapFilingHistory(any())).thenReturn(externalData);
+        when(itemResponseMapper.mapFilingHistoryItem(any())).thenReturn(externalData);
         when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
 
         // when
@@ -131,7 +131,7 @@ class FilingHistoryProcessorTest {
 
         // then
         assertEquals(expected, actual);
-        verify(itemResponseMapper).mapFilingHistory(existingDocument);
+        verify(itemResponseMapper).mapFilingHistoryItem(existingDocument);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
     }
 

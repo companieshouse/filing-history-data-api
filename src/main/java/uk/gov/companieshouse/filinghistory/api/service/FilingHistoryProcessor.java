@@ -44,7 +44,7 @@ public class FilingHistoryProcessor implements Processor {
 
     @Override
     public ExternalData processGetSingleFilingHistory(String companyNumber, String transactionId) {
-        return itemResponseMapper.mapFilingHistory(
+        return itemResponseMapper.mapFilingHistoryItem(
                 filingHistoryService.findExistingFilingHistory(transactionId)
                         .orElseThrow(() ->
                                 new NotFoundException("Record with transaction id: %s could not be found in MongoDB"

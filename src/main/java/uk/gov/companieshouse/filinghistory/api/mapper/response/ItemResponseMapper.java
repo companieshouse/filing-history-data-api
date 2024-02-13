@@ -23,7 +23,7 @@ public class ItemResponseMapper {
         this.linksResponseMapper = linksResponseMapper;
     }
 
-    public ExternalData mapFilingHistory(FilingHistoryDocument document) {
+    public ExternalData mapFilingHistoryItem(FilingHistoryDocument document) {
         FilingHistoryData data = document.getData();
         return new ExternalData()
                 .transactionId(document.getTransactionId())

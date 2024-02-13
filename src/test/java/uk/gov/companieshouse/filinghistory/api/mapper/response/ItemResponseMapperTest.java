@@ -78,7 +78,7 @@ class ItemResponseMapperTest {
         when(linksResponseMapper.map(any())).thenReturn(itemLinks);
 
         // when
-        final ExternalData actual = itemResponseMapper.mapFilingHistory(buildFilingHistoryDocument());
+        final ExternalData actual = itemResponseMapper.mapFilingHistoryItem(buildFilingHistoryDocument());
 
         // then
         assertEquals(expected, actual);
