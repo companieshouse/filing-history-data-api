@@ -22,7 +22,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.mapper.ItemResponseMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.response.ItemResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 

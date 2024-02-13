@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

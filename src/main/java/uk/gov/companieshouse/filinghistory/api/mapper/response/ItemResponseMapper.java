@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.response;
 
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.SubcategoryEnum;

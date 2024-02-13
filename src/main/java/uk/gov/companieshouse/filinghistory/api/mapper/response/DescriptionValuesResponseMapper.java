@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.response;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;

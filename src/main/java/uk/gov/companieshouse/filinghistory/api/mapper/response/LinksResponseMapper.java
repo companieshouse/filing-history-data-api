@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.response;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
