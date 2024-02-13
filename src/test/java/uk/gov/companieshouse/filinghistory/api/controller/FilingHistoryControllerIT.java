@@ -270,7 +270,6 @@ class FilingHistoryControllerIT {
         ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app") // TODO: Check privileges
                 .header("X-Request-Id", CONTEXT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
@@ -291,7 +290,6 @@ class FilingHistoryControllerIT {
         ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app") // TODO: Check privileges
                 .header("X-Request-Id", CONTEXT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
