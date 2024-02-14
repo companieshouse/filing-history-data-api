@@ -1,60 +1,55 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import static uk.gov.companieshouse.filinghistory.api.mapper.get.DateUtils.convertInstantToLocalDateString;
+
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
 @Component
-public class DescriptionGetValuesResponseMapper {
+public class DescriptionValuesGetResponseMapper {
 
     public FilingHistoryItemDataDescriptionValues map(FilingHistoryDescriptionValues descriptionValues) {
         return new FilingHistoryItemDataDescriptionValues()
-                .appointmentDate(convertInstantToString(descriptionValues.getAppointmentDate()))
+                .appointmentDate(convertInstantToLocalDateString(descriptionValues.getAppointmentDate()))
                 .branchNumber(descriptionValues.getBranchNumber())
-                .broughtDownDate(convertInstantToString(descriptionValues.getBroughtDownDate()))
-                .caseEndDate(convertInstantToString(descriptionValues.getCaseEndDate()))
+                .broughtDownDate(convertInstantToLocalDateString(descriptionValues.getBroughtDownDate()))
+                .caseEndDate(convertInstantToLocalDateString(descriptionValues.getCaseEndDate()))
                 .caseNumber(descriptionValues.getCaseNumber())
-                .cessationDate(convertInstantToString(descriptionValues.getCessationDate()))
+                .cessationDate(convertInstantToLocalDateString(descriptionValues.getCessationDate()))
                 .changeAddress(descriptionValues.getChangeAddress())
-                .changeDate(convertInstantToString(descriptionValues.getChangeDate()))
+                .changeDate(convertInstantToLocalDateString(descriptionValues.getChangeDate()))
                 .changeDetails(descriptionValues.getChangeDetails())
                 .changeName(descriptionValues.getChangeName())
                 .changeType(descriptionValues.getChangeType())
-                .chargeCreationDate(convertInstantToString(descriptionValues.getChargeCreationDate()))
+                .chargeCreationDate(convertInstantToLocalDateString(descriptionValues.getChargeCreationDate()))
                 .chargeNumber(descriptionValues.getChargeNumber())
-                .closeDate(convertInstantToString(descriptionValues.getCloseDate()))
+                .closeDate(convertInstantToLocalDateString(descriptionValues.getCloseDate()))
                 .companyNumber(descriptionValues.getCompanyNumber())
                 .companyType(descriptionValues.getCompanyType())
-                .date(convertInstantToString(descriptionValues.getDate()))
+                .date(convertInstantToLocalDateString(descriptionValues.getDate()))
                 .defaultAddress(descriptionValues.getDefaultAddress())
                 .description(descriptionValues.getDescription())
                 .formAttached(descriptionValues.getFormAttached())
                 .formType(descriptionValues.getFormType())
-                .incorporationDate(convertInstantToString(descriptionValues.getIncorporationDate()))
-                .madeUpDate(convertInstantToString(descriptionValues.getMadeUpDate()))
+                .incorporationDate(convertInstantToLocalDateString(descriptionValues.getIncorporationDate()))
+                .madeUpDate(convertInstantToLocalDateString(descriptionValues.getMadeUpDate()))
                 .newAddress(descriptionValues.getNewAddress())
-                .newDate(convertInstantToString(descriptionValues.getNewDate()))
+                .newDate(convertInstantToLocalDateString(descriptionValues.getNewDate()))
                 .newJurisdiction(descriptionValues.getNewJurisdiction())
-                .notificationDate(convertInstantToString(descriptionValues.getNotificationDate()))
+                .notificationDate(convertInstantToLocalDateString(descriptionValues.getNotificationDate()))
                 .officerAddress(descriptionValues.getOfficerAddress())
                 .officerName(descriptionValues.getOfficerName())
-                .terminationDate(convertInstantToString(descriptionValues.getTerminationDate()))
+                .terminationDate(convertInstantToLocalDateString(descriptionValues.getTerminationDate()))
                 .oldAddress(descriptionValues.getOldAddress())
                 .oldJurisdiction(descriptionValues.getOldJurisdiction())
                 .originalDescription(descriptionValues.getOriginalDescription())
-                .propertyAcquiredDate(convertInstantToString(descriptionValues.getPropertyAcquiredDate()))
+                .propertyAcquiredDate(convertInstantToLocalDateString(descriptionValues.getPropertyAcquiredDate()))
                 .pscName(descriptionValues.getPscName())
                 .representativeDetails(descriptionValues.getRepresentativeDetails())
-                .withdrawalDate(convertInstantToString(descriptionValues.getWithdrawalDate()))
-                .caseStartDate(convertInstantToString(descriptionValues.getCaseStartDate()))
+                .withdrawalDate(convertInstantToLocalDateString(descriptionValues.getWithdrawalDate()))
+                .caseStartDate(convertInstantToLocalDateString(descriptionValues.getCaseStartDate()))
                 .resType(descriptionValues.getResType())
-                .resolutionDate(convertInstantToString(descriptionValues.getResolutionDate()));
-    }
-
-    private static String convertInstantToString(final Instant inputDate) {
-        return inputDate == null ? null : LocalDate.ofInstant(inputDate, ZoneOffset.UTC).toString();
+                .resolutionDate(convertInstantToLocalDateString(descriptionValues.getResolutionDate()));
     }
 }

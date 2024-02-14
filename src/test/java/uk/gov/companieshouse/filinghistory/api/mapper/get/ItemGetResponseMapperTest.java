@@ -38,7 +38,7 @@ class ItemGetResponseMapperTest {
     @Mock
     private AnnotationsGetResponseMapper annotationsGetResponseMapper;
     @Mock
-    private DescriptionGetValuesResponseMapper descriptionGetValuesResponseMapper;
+    private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
     private LinksGetResponseMapper linksGetResponseMapper;
 
@@ -74,7 +74,7 @@ class ItemGetResponseMapperTest {
                 .pages(1);
 
         when(annotationsGetResponseMapper.map(any())).thenReturn(itemAnnotations);
-        when(descriptionGetValuesResponseMapper.map(any())).thenReturn(itemDescriptionValues);
+        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(itemDescriptionValues);
         when(linksGetResponseMapper.map(any())).thenReturn(itemLinks);
 
         // when
@@ -83,7 +83,7 @@ class ItemGetResponseMapperTest {
         // then
         assertEquals(expected, actual);
         verify(annotationsGetResponseMapper).map(any());
-        verify(descriptionGetValuesResponseMapper).map(any());
+        verify(descriptionValuesGetResponseMapper).map(any());
         verify(linksGetResponseMapper).map(any());
     }
 

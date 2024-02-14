@@ -2,7 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.model;
 
 import java.util.Objects;
 
-public class FilingHistoryAnnotation {
+public class FilingHistoryAnnotation extends AbstractFilingHistoryChild {
 
     private String annotation;
 
@@ -20,7 +20,8 @@ public class FilingHistoryAnnotation {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) {
             return false;
         }
         FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
@@ -29,6 +30,6 @@ public class FilingHistoryAnnotation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(annotation);
+        return Objects.hash(super.hashCode(), annotation);
     }
 }

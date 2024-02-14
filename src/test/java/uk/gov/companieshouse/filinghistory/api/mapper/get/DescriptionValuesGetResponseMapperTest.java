@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
-class DescriptionValuesGetMapperTest {
+class DescriptionValuesGetResponseMapperTest {
 
-    private final DescriptionGetValuesResponseMapper mapper = new DescriptionGetValuesResponseMapper();
+    private final DescriptionValuesGetResponseMapper mapper = new DescriptionValuesGetResponseMapper();
 
     @Test
     void shouldSuccessfullyMapDescriptionValues() {

@@ -15,6 +15,8 @@ public class FilingHistoryData {
     @Field("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
     private List<FilingHistoryAnnotation> annotations;
+    private List<FilingHistoryResolution> resolutions;
+    private List<FilingHistoryAssociatedFiling> associatedFilings;
     @Field("action_date")
     private Instant actionDate;
     private Integer pages;
@@ -82,6 +84,24 @@ public class FilingHistoryData {
 
     public FilingHistoryData annotations(List<FilingHistoryAnnotation> annotations) {
         this.annotations = annotations;
+        return this;
+    }
+
+    public List<FilingHistoryResolution> getResolutions() {
+        return resolutions;
+    }
+
+    public FilingHistoryData resolutions(List<FilingHistoryResolution> resolutions) {
+        this.resolutions = resolutions;
+        return this;
+    }
+
+    public List<FilingHistoryAssociatedFiling> getAssociatedFilings() {
+        return associatedFilings;
+    }
+
+    public FilingHistoryData associatedFilings(List<FilingHistoryAssociatedFiling> associatedFilings) {
+        this.associatedFilings = associatedFilings;
         return this;
     }
 
