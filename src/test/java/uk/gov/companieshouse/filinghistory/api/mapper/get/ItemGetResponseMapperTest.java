@@ -14,8 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataResolutions;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
@@ -38,12 +40,20 @@ class ItemGetResponseMapperTest {
     @Mock
     private AnnotationsGetResponseMapper annotationsGetResponseMapper;
     @Mock
+    private AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper;
+    @Mock
+    private ResolutionsGetResponseMapper resolutionsGetResponseMapper;
+    @Mock
     private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
     private LinksGetResponseMapper linksGetResponseMapper;
 
     @Mock
     private List<FilingHistoryItemDataAnnotations> itemAnnotations;
+    @Mock
+    private List<FilingHistoryItemDataAssociatedFilings> itemAssociatedFilings;
+    @Mock
+    private List<FilingHistoryItemDataResolutions> itemResolutions;
     @Mock
     private FilingHistoryItemDataDescriptionValues itemDescriptionValues;
     @Mock
@@ -74,6 +84,8 @@ class ItemGetResponseMapperTest {
                 .pages(1);
 
         when(annotationsGetResponseMapper.map(any())).thenReturn(itemAnnotations);
+        when(associatedFilingsGetResponseMapper.map(any())).thenReturn(null);
+        when(resolutionsGetResponseMapper.map(any())).thenReturn(null);
         when(descriptionValuesGetResponseMapper.map(any())).thenReturn(itemDescriptionValues);
         when(linksGetResponseMapper.map(any())).thenReturn(itemLinks);
 

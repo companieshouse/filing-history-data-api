@@ -14,7 +14,10 @@
     },
     "annotations":[
       {
-        "annotation": "annotation"
+        "annotation": "annotation",
+        "description_values": {
+          "description": "description"
+        }
       }
     ],
     "links" : {

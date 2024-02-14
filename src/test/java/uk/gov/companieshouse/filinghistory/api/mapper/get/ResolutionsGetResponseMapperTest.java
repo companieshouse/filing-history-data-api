@@ -19,7 +19,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionVal
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryResolution;
 
 @ExtendWith(MockitoExtension.class)
-public class ResolutionsGetResponseMapperTest {
+class ResolutionsGetResponseMapperTest {
 
     private static final String CATEGORY = "category";
     private static final String TYPE = "type";

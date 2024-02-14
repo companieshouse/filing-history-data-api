@@ -174,7 +174,10 @@ class FilingHistoryControllerIT {
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
-                List.of(new FilingHistoryAnnotation().annotation("annotation")));
+                List.of(new FilingHistoryAnnotation()
+                        .annotation("annotation")
+                        .descriptionValues(new FilingHistoryDescriptionValues()
+                                .description("description"))));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -255,7 +258,10 @@ class FilingHistoryControllerIT {
                         .officerName("John Tester")
                         .terminationDate("2014-08-29"))
                 .annotations(List.of(
-                        new FilingHistoryItemDataAnnotations().annotation("annotation")))
+                        new FilingHistoryItemDataAnnotations()
+                                .annotation("annotation")
+                                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                                        .description("description"))))
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK)
                         .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
