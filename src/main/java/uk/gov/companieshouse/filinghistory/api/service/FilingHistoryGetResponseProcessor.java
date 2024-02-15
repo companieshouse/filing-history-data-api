@@ -28,10 +28,6 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
         return itemGetResponseMapper.mapFilingHistoryItem(
                 filingHistoryService.findExistingFilingHistory(transactionId)
                         .orElseGet(() -> {
-                            DataMapHolder.get()
-                                    .companyNumber(companyNumber)
-                                    .transactionId(transactionId);
-
                             LOGGER.error("Record with transaction ID: [%s] could not be found in MongoDB"
                                     .formatted(transactionId), DataMapHolder.getLogMap());
 
