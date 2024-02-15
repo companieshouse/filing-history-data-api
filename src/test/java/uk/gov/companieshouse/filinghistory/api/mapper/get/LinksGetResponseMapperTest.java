@@ -29,9 +29,27 @@ class LinksGetResponseMapperTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    void shouldSuccessfullyMapLinksWithNullDocumentMetadata() {
+        // given
+        final FilingHistoryItemDataLinks expected = new FilingHistoryItemDataLinks()
+                .self(SELF_LINK);
+
+        // when
+        final FilingHistoryItemDataLinks actual = mapper.map(buildDocumentFilingHistoryLinksWithNullMetadata());
+
+        // then
+        assertEquals(expected, actual);
+    }
+
     private static FilingHistoryLinks buildDocumentFilingHistoryLinks() {
         return new FilingHistoryLinks()
                 .self(SELF_LINK)
                 .documentMetadata(DOCUMENT_METADATA);
+    }
+
+    private static FilingHistoryLinks buildDocumentFilingHistoryLinksWithNullMetadata() {
+        return new FilingHistoryLinks()
+                .self(SELF_LINK);
     }
 }

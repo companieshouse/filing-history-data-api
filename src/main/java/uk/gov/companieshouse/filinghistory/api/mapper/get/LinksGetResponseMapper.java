@@ -15,7 +15,8 @@ public class LinksGetResponseMapper {
     }
 
     public FilingHistoryItemDataLinks map(FilingHistoryLinks links) {
-        final String metadataLink = "%s%s".formatted(documentApiUrl, links.getDocumentMetadata());
+        final String metadataLink = links.getDocumentMetadata() == null ?
+                null : "%s%s".formatted(documentApiUrl, links.getDocumentMetadata());
 
         return new FilingHistoryItemDataLinks()
                 .self(links.getSelf())

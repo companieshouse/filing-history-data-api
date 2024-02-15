@@ -10,7 +10,7 @@ import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 class DateUtilsTest {
 
     @Test
-    void shouldStringToInstant() {
+    void shouldConvertStringToInstant() {
         // given
         String date = "2020-06-10T00:00:00.00Z";
 
@@ -26,6 +26,30 @@ class DateUtilsTest {
         // given
         // when
         Instant actual = DateUtils.stringToInstant(null);
+
+        // then
+        assertNull(actual);
+    }
+
+    @Test
+    void shouldConvertInstantToString() {
+        // given
+        final String expected = "2020-06-10";
+        final Instant input = Instant.parse("2020-06-10T00:00:00.00Z");
+
+        // when
+        final String actual = DateUtils.convertInstantToLocalDateString(input);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void convertInstantToStringShouldReturnNullWhenInstantNull() {
+        // given
+
+        // when
+        final String actual = DateUtils.convertInstantToLocalDateString(null);
 
         // then
         assertNull(actual);

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.DescriptionValuesMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
 class DescriptionValuesMapperTest {

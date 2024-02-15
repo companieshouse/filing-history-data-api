@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -49,6 +51,18 @@ class AssociatedFilingsGetResponseMapperTest {
         // then
         assertEquals(expected, actual);
         verify(descriptionValuesGetResponseMapper).map(new FilingHistoryDescriptionValues());
+    }
+
+    @Test
+    void shouldReturnNull() {
+        // given
+
+        // when
+        final List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingsGetResponseMapper.map(null);
+
+        // then
+        assertNull(actual);
+        verifyNoInteractions(descriptionValuesGetResponseMapper);
     }
 
     private static List<FilingHistoryAssociatedFiling> buildDocumentAssociatedFilingsList() {

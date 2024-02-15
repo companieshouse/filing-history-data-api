@@ -14,10 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.InvalidMapperException;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractTransactionMapperFactoryTest {

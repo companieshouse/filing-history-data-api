@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.OriginalValuesMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 class OriginalValuesMapperTest {
