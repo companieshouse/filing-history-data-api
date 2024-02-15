@@ -77,7 +77,7 @@ class ResourceChangedApiClientTest {
         // then
         verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
+        verify(privateChangedResourceHandler).postChangedResource("/private/resource-changed", changedResource);
         verify(changedResourcePost).execute();
     }
 
@@ -102,7 +102,7 @@ class ResourceChangedApiClientTest {
         assertEquals(503, result.getStatusCode());
         verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler).postChangedResource("/resource-changed", changedResource);
+        verify(privateChangedResourceHandler).postChangedResource("/private/resource-changed", changedResource);
         verify(changedResourcePost).execute();
     }
 }

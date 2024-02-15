@@ -28,6 +28,8 @@
     <maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <test-containers.version>1.19.4</test-containers.version>
+    <wiremock.version>3.3.1</wiremock.version>
+
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 
@@ -125,9 +127,16 @@
       <artifactId>private-api-sdk-java</artifactId>
       <version>${private-api-sdk-java.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

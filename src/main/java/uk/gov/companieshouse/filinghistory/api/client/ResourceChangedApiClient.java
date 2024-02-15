@@ -17,7 +17,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class ResourceChangedApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private static final String CHANGED_RESOURCE_URI = "/resource-changed";
+    private static final String CHANGED_RESOURCE_URI = "/private/resource-changed";
     private final Supplier<InternalApiClient> apiClientSupplier;
     private final ResourceChangedRequestMapper mapper;
 
