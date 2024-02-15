@@ -119,10 +119,6 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn404NotFoundWhenGetSingleTransaction() {
         // given
-        final ResponseEntity<ExternalData> expectedResponse = ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .build();
-
         when(getResponseProcessor.processGetSingleFilingHistory(any(), any())).thenThrow(NotFoundException.class);
 
         // then
