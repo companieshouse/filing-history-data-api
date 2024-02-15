@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;

@@ -3,18 +3,18 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapper;
-import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @Component
-public class FilingHistoryProcessor implements Processor {
+public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
 
-    public FilingHistoryProcessor(Service filingHistoryService,
-            AbstractTransactionMapperFactory mapperFactory) {
+    public FilingHistoryUpsertProcessor(Service filingHistoryService,
+                                        AbstractTransactionMapperFactory mapperFactory) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
     }

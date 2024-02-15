@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.mapper;
+package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -171,7 +171,7 @@ class TopLevelMapperTest {
     }
 
     private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
-            FilingHistoryOriginalValues originalValues, String deltaAt) {
+                                                           FilingHistoryOriginalValues originalValues, String deltaAt) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .entityId(ENTITY_ID)

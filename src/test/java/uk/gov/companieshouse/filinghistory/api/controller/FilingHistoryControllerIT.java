@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +40,7 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -57,11 +59,12 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 @SpringBootTest
 class FilingHistoryControllerIT {
 
+    private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
+    private static final String SINGLE_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
-    private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String ENTITY_ID = "1234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
@@ -153,7 +156,10 @@ class FilingHistoryControllerIT {
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
-                List.of(new FilingHistoryAnnotation().annotation("annotation")));
+                List.of(new FilingHistoryAnnotation()
+                        .annotation("annotation")
+                        .descriptionValues(new FilingHistoryDescriptionValues()
+                                .description("description"))));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -208,6 +214,67 @@ class FilingHistoryControllerIT {
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
         assertEquals(EXISTING_DELTA_AT, actualDocument.getDeltaAt());
+    }
+
+    @Test
+    void shouldGetSingleDocumentAndReturn200OK() throws Exception {
+        // given
+        final ExternalData expectedResponseBody = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .barcode(BARCODE)
+                .actionDate("2014-08-29")
+                .category(ExternalData.CategoryEnum.OFFICERS)
+                .type(TM01_TYPE)
+                .description(DESCRIPTION)
+                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .date("2014-09-15")
+                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                        .officerName("John Tester")
+                        .terminationDate("2014-08-29"))
+                .annotations(List.of(
+                        new FilingHistoryItemDataAnnotations()
+                                .annotation("annotation")
+                                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                                        .description("description"))))
+                .links(new FilingHistoryItemDataLinks()
+                        .self(SELF_LINK)
+                        .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                .pages(1);
+
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        ExternalData actualResponseBody = objectMapper.readValue(responseBodyAsString, ExternalData.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    void shouldReturn404NotFoundWhenNoDocumentInDB() throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {

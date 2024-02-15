@@ -16,17 +16,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.mapper.TopLevelTransactionMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
-class FilingHistoryProcessorTest {
+class FilingHistoryUpsertProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
 
     @InjectMocks
-    private FilingHistoryProcessor filingHistoryProcessor;
+    private FilingHistoryUpsertProcessor filingHistoryProcessor;
 
     @Mock
     private FilingHistoryService filingHistoryService;

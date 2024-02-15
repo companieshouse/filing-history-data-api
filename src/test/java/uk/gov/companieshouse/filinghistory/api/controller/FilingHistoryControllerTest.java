@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,13 +9,17 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryProcessor;
+import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
+import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
+import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,10 +32,16 @@ class FilingHistoryControllerTest {
     private FilingHistoryController controller;
 
     @Mock
-    private FilingHistoryProcessor processor;
+    private FilingHistoryUpsertProcessor upsertProcessor;
+
+    @Mock
+    private FilingHistoryGetResponseProcessor getResponseProcessor;
 
     @Mock
     private InternalFilingHistoryApi requestBody;
+
+    @Mock
+    private ExternalData responseBody;
 
     @Test
     void shouldReturn200OKWhenPutRequest() {
@@ -40,7 +51,7 @@ class FilingHistoryControllerTest {
                 .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
                 .build();
 
-        when(processor.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
+        when(upsertProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -48,7 +59,7 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 
     @Test
@@ -58,7 +69,7 @@ class FilingHistoryControllerTest {
                 .status(HttpStatus.CONFLICT)
                 .build();
 
-        when(processor.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
+        when(upsertProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -66,7 +77,7 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 
     @Test
@@ -76,7 +87,7 @@ class FilingHistoryControllerTest {
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .build();
 
-        when(processor.processFilingHistory(any(), any())).thenReturn(ServiceResult.SERVICE_UNAVAILABLE);
+        when(upsertProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.SERVICE_UNAVAILABLE);
 
         // when
         final ResponseEntity<Void> actualResponse =
@@ -84,6 +95,36 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(processor).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
+    }
+
+    @Test
+    void shouldReturn200OKWhenGetSingleTransaction() {
+        // given
+        final ResponseEntity<ExternalData> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
+
+        when(getResponseProcessor.processGetSingleFilingHistory(any(), any())).thenReturn(responseBody);
+
+        // when
+        final ResponseEntity<ExternalData> actualResponse =
+                controller.getSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(getResponseProcessor).processGetSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
+    }
+
+    @Test
+    void shouldReturn404NotFoundWhenGetSingleTransaction() {
+        // given
+        when(getResponseProcessor.processGetSingleFilingHistory(any(), any())).thenThrow(NotFoundException.class);
+
+        // then
+        Executable executable = () -> controller.getSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
+
+        // when
+        assertThrows(NotFoundException.class, executable);
     }
 }

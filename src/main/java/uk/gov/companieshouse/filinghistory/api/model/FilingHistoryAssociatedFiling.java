@@ -4,9 +4,8 @@ import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-public class FilingHistoryAnnotation {
+public class FilingHistoryAssociatedFiling {
 
-    private String annotation;
     private String category;
     private String description;
     private String type;
@@ -14,20 +13,11 @@ public class FilingHistoryAnnotation {
     @Field("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
 
-    public String getAnnotation() {
-        return annotation;
-    }
-
-    public FilingHistoryAnnotation annotation(String annotation) {
-        this.annotation = annotation;
-        return this;
-    }
-
     public String getCategory() {
         return category;
     }
 
-    public FilingHistoryAnnotation category(String category) {
+    public FilingHistoryAssociatedFiling category(String category) {
         this.category = category;
         return this;
     }
@@ -36,7 +26,7 @@ public class FilingHistoryAnnotation {
         return description;
     }
 
-    public FilingHistoryAnnotation description(String description) {
+    public FilingHistoryAssociatedFiling description(String description) {
         this.description = description;
         return this;
     }
@@ -45,7 +35,7 @@ public class FilingHistoryAnnotation {
         return type;
     }
 
-    public FilingHistoryAnnotation type(String type) {
+    public FilingHistoryAssociatedFiling type(String type) {
         this.type = type;
         return this;
     }
@@ -54,7 +44,7 @@ public class FilingHistoryAnnotation {
         return date;
     }
 
-    public FilingHistoryAnnotation date(Instant date) {
+    public FilingHistoryAssociatedFiling date(Instant date) {
         this.date = date;
         return this;
     }
@@ -63,7 +53,7 @@ public class FilingHistoryAnnotation {
         return descriptionValues;
     }
 
-    public FilingHistoryAnnotation descriptionValues(FilingHistoryDescriptionValues descriptionValues) {
+    public FilingHistoryAssociatedFiling descriptionValues(FilingHistoryDescriptionValues descriptionValues) {
         this.descriptionValues = descriptionValues;
         return this;
     }
@@ -76,9 +66,8 @@ public class FilingHistoryAnnotation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
-        return Objects.equals(annotation, that.annotation)
-                && Objects.equals(category, that.category)
+        FilingHistoryAssociatedFiling that = (FilingHistoryAssociatedFiling) o;
+        return Objects.equals(category, that.category)
                 && Objects.equals(description, that.description)
                 && Objects.equals(type, that.type)
                 && Objects.equals(date, that.date)
@@ -87,6 +76,6 @@ public class FilingHistoryAnnotation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(annotation, category, description, type, date, descriptionValues);
+        return Objects.hash(category, description, type, date, descriptionValues);
     }
 }
