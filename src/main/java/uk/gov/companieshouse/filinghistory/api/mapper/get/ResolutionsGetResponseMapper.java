@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.get.DateUtils.convertInstantToLocalDateString;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.convertInstantToLocalDateString;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,10 +11,10 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryResolution;
 @Component
 public class ResolutionsGetResponseMapper {
 
-    private final DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
+    private final DescriptionValuesGetResponseMapper mapper;
 
-    public ResolutionsGetResponseMapper(DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper) {
-        this.descriptionValuesGetResponseMapper = descriptionValuesGetResponseMapper;
+    public ResolutionsGetResponseMapper(DescriptionValuesGetResponseMapper mapper) {
+        this.mapper = mapper;
     }
 
     public List<FilingHistoryItemDataResolutions> map(List<FilingHistoryResolution> documentResolutions) {
@@ -27,7 +27,7 @@ public class ResolutionsGetResponseMapper {
                                         .description(resolution.getDescription())
                                         .type(resolution.getType())
                                         .date(convertInstantToLocalDateString(resolution.getDate()))
-                                        .descriptionValues(descriptionValuesGetResponseMapper.map(resolution.getDescriptionValues())))
+                                        .descriptionValues(mapper.map(resolution.getDescriptionValues())))
                         .toList())
                 .orElse(null);
     }

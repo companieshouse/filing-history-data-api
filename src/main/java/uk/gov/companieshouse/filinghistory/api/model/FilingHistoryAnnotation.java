@@ -77,7 +77,12 @@ public class FilingHistoryAnnotation {
             return false;
         }
         FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
-        return Objects.equals(annotation, that.annotation) && Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues);
+        return Objects.equals(annotation, that.annotation)
+                && Objects.equals(category, that.category)
+                && Objects.equals(description, that.description)
+                && Objects.equals(type, that.type)
+                && Objects.equals(date, that.date)
+                && Objects.equals(descriptionValues, that.descriptionValues);
     }
 
     @Override

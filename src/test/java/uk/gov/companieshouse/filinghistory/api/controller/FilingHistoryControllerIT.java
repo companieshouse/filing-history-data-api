@@ -60,7 +60,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
-    private static final String SINGLE_GET_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}";
+    private static final String SINGLE_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -238,7 +238,7 @@ class FilingHistoryControllerIT {
                                         .description("description"))))
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK)
-                        .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                        .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
                 .pages(1);
 
         final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)

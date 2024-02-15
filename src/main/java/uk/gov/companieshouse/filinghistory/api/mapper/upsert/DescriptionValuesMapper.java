@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.upsert.DateUtils.stringToInstant;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import org.springframework.stereotype.Component;

@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.service.Processor;
+import uk.gov.companieshouse.filinghistory.api.service.GetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
+import uk.gov.companieshouse.filinghistory.api.service.UpsertProcessor;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -22,10 +23,13 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class FilingHistoryController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private final Processor serviceProcessor;
+    private final UpsertProcessor serviceUpsertProcessor;
+    private final GetResponseProcessor filingHistoryGetResponseProcessor;
 
-    public FilingHistoryController(Processor serviceProcessor) {
-        this.serviceProcessor = serviceProcessor;
+    public FilingHistoryController(UpsertProcessor serviceUpsertProcessor,
+                                   GetResponseProcessor filingHistoryGetResponseProcessor) {
+        this.serviceUpsertProcessor = serviceUpsertProcessor;
+        this.filingHistoryGetResponseProcessor = filingHistoryGetResponseProcessor;
     }
 
     @PutMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal")
@@ -39,7 +43,7 @@ public class FilingHistoryController {
                 .transactionId(transactionId);
         LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
 
-        final ServiceResult result = serviceProcessor.processFilingHistory(transactionId, requestBody);
+        final ServiceResult result = serviceUpsertProcessor.processFilingHistory(transactionId, requestBody);
 
         // This is a switch because we'll need to add more cases in the future when doing unhappy paths
         return switch (result) {
@@ -56,13 +60,18 @@ public class FilingHistoryController {
         };
     }
 
-    @GetMapping("/company/{company_number}/filing-history/{transaction_id}")
+    @GetMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}")
     public ResponseEntity<ExternalData> getSingleFilingHistory(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId) {
 
+        DataMapHolder.get()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId);
+        LOGGER.info("Processing GET single transaction", DataMapHolder.getLogMap());
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(serviceProcessor.processGetSingleFilingHistory(companyNumber, transactionId));
+                .body(filingHistoryGetResponseProcessor.processGetSingleFilingHistory(companyNumber, transactionId));
     }
 }

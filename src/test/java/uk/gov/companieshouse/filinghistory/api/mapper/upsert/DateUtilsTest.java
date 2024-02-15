@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.DateUtils;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 
 class DateUtilsTest {
 

@@ -9,16 +9,18 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 class LinksGetResponseMapperTest {
 
     private static final String SELF_LINK = "/company/12345678/filing-history/Mkv123";
+    private static final String GET_RESPONSE_METADATA = "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA";
     private static final String DOCUMENT_METADATA = "/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA";
+    private static final String DOCUMENT_API_URL = "http://localhost:8080";
 
-    private final LinksGetResponseMapper mapper = new LinksGetResponseMapper();
+    private final LinksGetResponseMapper mapper = new LinksGetResponseMapper(DOCUMENT_API_URL);
 
     @Test
     void shouldSuccessfullyMapLinks() {
         // given
         final FilingHistoryItemDataLinks expected = new FilingHistoryItemDataLinks()
                 .self(SELF_LINK)
-                .documentMetadata(DOCUMENT_METADATA);
+                .documentMetadata(GET_RESPONSE_METADATA);
 
         // when
         final FilingHistoryItemDataLinks actual = mapper.map(buildDocumentFilingHistoryLinks());

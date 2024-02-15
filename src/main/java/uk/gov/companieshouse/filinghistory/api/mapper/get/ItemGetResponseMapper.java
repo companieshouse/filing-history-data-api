@@ -2,7 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.SubcategoryEnum;
-import static uk.gov.companieshouse.filinghistory.api.mapper.get.DateUtils.convertInstantToLocalDateString;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.convertInstantToLocalDateString;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -18,7 +18,11 @@ public class ItemGetResponseMapper {
     private final DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     private final LinksGetResponseMapper linksGetResponseMapper;
 
-    public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper, ResolutionsGetResponseMapper resolutionsGetResponseMapper, AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper, DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper, LinksGetResponseMapper linksGetResponseMapper) {
+    public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper,
+                                 ResolutionsGetResponseMapper resolutionsGetResponseMapper,
+                                 AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
+                                 DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
+                                 LinksGetResponseMapper linksGetResponseMapper) {
         this.annotationsGetResponseMapper = annotationsGetResponseMapper;
         this.resolutionsGetResponseMapper = resolutionsGetResponseMapper;
         this.associatedFilingsGetResponseMapper = associatedFilingsGetResponseMapper;

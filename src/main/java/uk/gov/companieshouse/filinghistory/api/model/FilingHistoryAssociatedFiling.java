@@ -67,7 +67,11 @@ public class FilingHistoryAssociatedFiling {
             return false;
         }
         FilingHistoryAssociatedFiling that = (FilingHistoryAssociatedFiling) o;
-        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues);
+        return Objects.equals(category, that.category)
+                && Objects.equals(description, that.description)
+                && Objects.equals(type, that.type)
+                && Objects.equals(date, that.date)
+                && Objects.equals(descriptionValues, that.descriptionValues);
     }
 
     @Override

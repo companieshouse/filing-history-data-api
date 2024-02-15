@@ -1,38 +1,32 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
-class FilingHistoryProcessorTest {
+class FilingHistoryUpsertProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
 
     @InjectMocks
-    private FilingHistoryProcessor filingHistoryProcessor;
+    private FilingHistoryUpsertProcessor filingHistoryProcessor;
 
     @Mock
     private FilingHistoryService filingHistoryService;
@@ -40,13 +34,9 @@ class FilingHistoryProcessorTest {
     private AbstractTransactionMapperFactory mapperFactory;
     @Mock
     private TopLevelTransactionMapper topLevelMapper;
-    @Mock
-    private ItemGetResponseMapper itemGetResponseMapper;
 
     @Mock
     private InternalFilingHistoryApi request;
-    @Mock
-    private ExternalData externalData;
     @Mock
     private InternalData internalData;
     @Mock
@@ -117,35 +107,5 @@ class FilingHistoryProcessorTest {
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
-    }
-
-    @Test
-    void shouldSuccessfullyGetSingleFilingHistoryDocumentAndReturnExternalData() {
-        // given
-        final ExternalData expected = externalData;
-        when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(externalData);
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
-
-        // when
-        final ExternalData actual = filingHistoryProcessor.processGetSingleFilingHistory("12345678", TRANSACTION_ID);
-
-        // then
-        assertEquals(expected, actual);
-        verify(itemGetResponseMapper).mapFilingHistoryItem(existingDocument);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
-    }
-
-    @Test
-    void shouldThrowNotFoundExceptionWhenNoDocumentInDB() {
-        // given
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
-
-        // when
-        Executable executable = () -> filingHistoryProcessor.processGetSingleFilingHistory("12345678", TRANSACTION_ID);
-
-        // then
-        assertThrows(NotFoundException.class, executable);
-        verifyNoInteractions(itemGetResponseMapper);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
     }
 }

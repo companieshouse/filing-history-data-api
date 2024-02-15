@@ -16,6 +16,7 @@ public class FilingHistoryData {
     private FilingHistoryDescriptionValues descriptionValues;
     private List<FilingHistoryAnnotation> annotations;
     private List<FilingHistoryResolution> resolutions;
+    @Field("associated_filings")
     private List<FilingHistoryAssociatedFiling> associatedFilings;
     @Field("action_date")
     private Instant actionDate;
