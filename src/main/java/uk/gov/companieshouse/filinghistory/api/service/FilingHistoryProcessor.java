@@ -43,7 +43,7 @@ public class FilingHistoryProcessor implements Processor {
     }
 
     @Override
-    public ExternalData processGetSingleFilingHistory(String companyNumber, String transactionId) {
+    public ExternalData processGetSingleFilingHistory(final String companyNumber, final String transactionId) {
         return itemGetResponseMapper.mapFilingHistoryItem(
                 filingHistoryService.findExistingFilingHistory(transactionId)
                         .orElseThrow(() ->

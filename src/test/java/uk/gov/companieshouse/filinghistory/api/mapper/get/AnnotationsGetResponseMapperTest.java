@@ -68,7 +68,7 @@ class AnnotationsGetResponseMapperTest {
 
     private static List<FilingHistoryAnnotation> buildDocumentAnnotationsList() {
         return List.of(
-                (FilingHistoryAnnotation) new FilingHistoryAnnotation()
+                new FilingHistoryAnnotation()
                         .annotation("annotations_1")
                         .category(CATEGORY)
                         .type(TYPE)

@@ -53,7 +53,7 @@ class AssociatedFilingsGetResponseMapperTest {
 
     private static List<FilingHistoryAssociatedFiling> buildDocumentAssociatedFilingsList() {
         return List.of(
-                (FilingHistoryAssociatedFiling) new FilingHistoryAssociatedFiling()
+                new FilingHistoryAssociatedFiling()
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION)

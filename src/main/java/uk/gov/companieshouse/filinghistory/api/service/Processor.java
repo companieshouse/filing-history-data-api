@@ -7,5 +7,5 @@ public interface Processor {
 
     ServiceResult processFilingHistory(final String transactionId, final InternalFilingHistoryApi request);
 
-    ExternalData processGetSingleFilingHistory(String companyNumber, String transactionId);
+    ExternalData processGetSingleFilingHistory(final String companyNumber, final String transactionId);
 }

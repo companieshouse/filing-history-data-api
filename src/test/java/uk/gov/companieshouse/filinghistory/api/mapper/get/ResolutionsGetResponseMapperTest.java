@@ -67,7 +67,7 @@ class ResolutionsGetResponseMapperTest {
 
     private static List<FilingHistoryResolution> buildDocumentResolutionsList() {
         return List.of(
-                (FilingHistoryResolution) new FilingHistoryResolution()
+                new FilingHistoryResolution()
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION)

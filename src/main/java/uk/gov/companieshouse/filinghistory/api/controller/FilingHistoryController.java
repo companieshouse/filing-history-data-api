@@ -61,10 +61,8 @@ public class FilingHistoryController {
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId) {
 
-        ExternalData responseBody = serviceProcessor.processGetSingleFilingHistory(companyNumber, transactionId);
-
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(responseBody);
+                .body(serviceProcessor.processGetSingleFilingHistory(companyNumber, transactionId));
     }
 }
