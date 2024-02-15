@@ -51,10 +51,6 @@ class ItemGetResponseMapperTest {
     @Mock
     private List<FilingHistoryItemDataAnnotations> itemAnnotations;
     @Mock
-    private List<FilingHistoryItemDataAssociatedFilings> itemAssociatedFilings;
-    @Mock
-    private List<FilingHistoryItemDataResolutions> itemResolutions;
-    @Mock
     private FilingHistoryItemDataDescriptionValues itemDescriptionValues;
     @Mock
     private FilingHistoryItemDataLinks itemLinks;
