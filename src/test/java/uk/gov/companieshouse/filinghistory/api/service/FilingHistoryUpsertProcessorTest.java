@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
@@ -108,4 +110,24 @@ class FilingHistoryUpsertProcessorTest {
         verifyNoMoreInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
     }
+
+    @Test
+    void shouldThrowServiceUnavailableWhenFindingDocumentInDB() {
+        // given
+        when(request.getInternalData()).thenReturn(internalData);
+        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
+        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
+        when(filingHistoryService.findExistingFilingHistory(any())).thenThrow(ServiceUnavailableException.class);
+
+        // when
+        final ServiceResult actual = filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+
+        // then
+        assertEquals(ServiceResult.SERVICE_UNAVAILABLE, actual);
+        verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verifyNoInteractions(topLevelMapper);
+        verifyNoMoreInteractions(filingHistoryService);
+    }
+
 }

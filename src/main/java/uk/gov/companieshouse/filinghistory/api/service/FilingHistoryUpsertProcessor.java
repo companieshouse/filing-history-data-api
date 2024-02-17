@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
@@ -24,7 +25,12 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
                 request.getInternalData().getTransactionKind());
 
-        Optional<FilingHistoryDocument> existingDocument = filingHistoryService.findExistingFilingHistory(transactionId);
+        Optional<FilingHistoryDocument> existingDocument;
+        try {
+            existingDocument = filingHistoryService.findExistingFilingHistory(transactionId);
+        } catch (ServiceUnavailableException ex) { // TODO: Could I catch a DataAccessException here or should I throw the service unavailable in the repository class?
+            return ServiceResult.SERVICE_UNAVAILABLE;
+        }
 
         Optional<FilingHistoryDocument> documentToSave = existingDocument
                 .map(document -> mapper.mapFilingHistoryUnlessStale(request, document))

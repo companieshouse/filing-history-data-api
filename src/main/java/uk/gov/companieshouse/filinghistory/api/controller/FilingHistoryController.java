@@ -45,7 +45,6 @@ public class FilingHistoryController {
 
         final ServiceResult result = serviceUpsertProcessor.processFilingHistory(transactionId, requestBody);
 
-        // This is a switch because we'll need to add more cases in the future when doing unhappy paths
         return switch (result) {
             case STALE_DELTA -> ResponseEntity
                     .status(HttpStatus.CONFLICT)

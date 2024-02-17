@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
@@ -36,14 +37,19 @@ public class FilingHistoryService implements Service {
 
     @Override
     public ServiceResult updateFilingHistory(FilingHistoryDocument documentToSave,
-            FilingHistoryDocument existingDocument) {
+                                             FilingHistoryDocument existingDocument) {
         return handleTransaction(documentToSave, existingDocument);
     }
 
     private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
-            FilingHistoryDocument existingDocument) {
+                                            FilingHistoryDocument existingDocument) {
         // Add compensatory transaction as part of DSND-2280.
-        repository.save(documentToSave);
+        try {
+            repository.save(documentToSave);
+        } catch (ServiceUnavailableException ex) {
+            return ServiceResult.SERVICE_UNAVAILABLE;
+        }
+
         ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
                         documentToSave.getTransactionId(), null, false));

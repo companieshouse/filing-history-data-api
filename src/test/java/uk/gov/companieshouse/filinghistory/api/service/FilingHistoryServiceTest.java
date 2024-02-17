@@ -1,19 +1,24 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
@@ -24,6 +29,7 @@ class FilingHistoryServiceTest {
 
     @InjectMocks
     private FilingHistoryService service;
+
     @Mock
     private ResourceChangedApiClient resourceChangedApiClient;
     @Mock
@@ -104,5 +110,33 @@ class FilingHistoryServiceTest {
         assertEquals(ServiceResult.SERVICE_UNAVAILABLE, actualResult);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void findExistingFilingHistoryDocumentShouldThrowServiceUnavailableExceptionWhenCatchingServiceUnavailableException() {
+        // given
+        when(repository.findById(any())).thenThrow(ServiceUnavailableException.class);
+
+        // when
+        Executable executable = () -> service.findExistingFilingHistory(TRANSACTION_ID);
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(repository).findById(TRANSACTION_ID);
+    }
+
+    @Test
+    void upsertExistingFilingHistoryDocumentShouldReturnServiceUnavailableResultWhenCatchingServiceUnavailableException() {
+        // given
+        doThrow(ServiceUnavailableException.class)
+                .when(repository).save(any());
+
+        // when
+        final ServiceResult actual = service.insertFilingHistory(document);
+
+        // then
+        assertEquals(ServiceResult.SERVICE_UNAVAILABLE, actual);
+        verify(repository).save(document);
+        verifyNoInteractions(resourceChangedApiClient);
     }
 }
