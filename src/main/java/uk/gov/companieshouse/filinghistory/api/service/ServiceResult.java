@@ -4,5 +4,6 @@ public enum ServiceResult {
     UPSERT_SUCCESSFUL,
     STALE_DELTA,
     SERVICE_UNAVAILABLE,
-    BAD_REQUEST
+    BAD_REQUEST,
+    VALID_REQUEST
 }

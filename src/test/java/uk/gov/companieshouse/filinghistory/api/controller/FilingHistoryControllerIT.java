@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,10 +21,15 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -189,6 +195,57 @@ class FilingHistoryControllerIT {
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
+    @ParameterizedTest
+    @MethodSource("badRequestScenarios")
+    void shouldReturn400BadRequestWhenInvalidFieldsSentInRequestBody(InternalFilingHistoryApi requestBody) throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldReturn401UnauthorisedWhenNoIdentity() throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(buildPutRequestBody(NEWEST_REQUEST_DELTA_AT))));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldReturn403ForbiddenWhenNoInternalAppPrivileges() throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(buildPutRequestBody(NEWEST_REQUEST_DELTA_AT))));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isForbidden());
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+    }
+
     @Test
     void shouldNotUpdateDocumentAndShouldReturn409ConflictWhenDeltaStale() throws Exception {
         // given
@@ -319,7 +376,7 @@ class FilingHistoryControllerIT {
     }
 
     private static FilingHistoryDocument getExpectedFilingHistoryDocument(String documentMetadata, Integer pages,
-            List<FilingHistoryAnnotation> annotations) {
+                                                                          List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
@@ -361,5 +418,129 @@ class FilingHistoryControllerIT {
                         .fieldsChanged(null)
                         .publishedAt(UPDATED_AT.toString())
                         .type("changed"));
+    }
+
+    private static Stream<Arguments> badRequestScenarios() {
+        return Stream.of(
+                Arguments.of(
+                        Named.of("Null external and internal data objects",
+                                new InternalFilingHistoryApi())),
+                Arguments.of(
+                        Named.of("Null external data object",
+                                new InternalFilingHistoryApi()
+                                        .internalData(new InternalData()))),
+                Arguments.of(
+                        Named.of("Null internal data object",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()))),
+                Arguments.of(
+                        Named.of("Null transaction ID",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty transaction ID",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId("")
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Null self link",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty type",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type("")
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty date",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date("")
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Null category",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty description",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description("")
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty entity ID",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId("")
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT))))
+        );
     }
 }

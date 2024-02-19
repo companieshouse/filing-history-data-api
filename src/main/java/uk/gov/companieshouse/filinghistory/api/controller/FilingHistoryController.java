@@ -52,6 +52,9 @@ public class FilingHistoryController {
             case SERVICE_UNAVAILABLE -> ResponseEntity
                     .status(HttpStatus.SERVICE_UNAVAILABLE)
                     .build();
+            case BAD_REQUEST -> ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
             default -> ResponseEntity
                     .status(HttpStatus.OK)
                     .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
