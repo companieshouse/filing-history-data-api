@@ -19,9 +19,6 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryDocumentCopierTest {
 
-    private static final String TRANSACTION_ID = "transactionId";
-    private static final String OBJECT_AS_STRING = "object_as_string";
-
     @InjectMocks
     private FilingHistoryDocumentCopier copier;
 
@@ -36,7 +33,7 @@ class FilingHistoryDocumentCopierTest {
     @Test
     void shouldReturnCopyOfInputDocument() throws Exception {
         // given
-        when(objectMapper.writeValueAsString(any())).thenReturn(OBJECT_AS_STRING);
+        when(objectMapper.writeValueAsString(any())).thenReturn("object_as_string");
         when(objectMapper.readValue(anyString(), eq(FilingHistoryDocument.class))).thenReturn(copyInputDocument);
 
         // when
