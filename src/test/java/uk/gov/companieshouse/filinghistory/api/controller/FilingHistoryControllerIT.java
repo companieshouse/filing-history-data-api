@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -123,7 +124,8 @@ class FilingHistoryControllerIT {
     @Test
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
-        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(null, null, null);
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(NEWEST_REQUEST_DELTA_AT, null, null, null, null);
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -161,7 +163,8 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(NEWEST_REQUEST_DELTA_AT, DOCUMENT_METADATA, null, 1,
                 List.of(new FilingHistoryAnnotation()
                         .annotation("annotation")
                         .descriptionValues(new FilingHistoryDescriptionValues()
@@ -334,6 +337,71 @@ class FilingHistoryControllerIT {
         result.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB() throws Exception {
+        // given
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(503)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+
+        verify(instantSupplier, times(2)).get();
+        server.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndDocumentShouldBeRolledBackToPreviousState() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(503)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+
+        assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+
+        verify(instantSupplier, times(2)).get();
+        server.verify(exactly(0),
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .internalData(buildInternalData(deltaAt))
@@ -375,7 +443,10 @@ class FilingHistoryControllerIT {
                         .self(SELF_LINK));
     }
 
-    private static FilingHistoryDocument getExpectedFilingHistoryDocument(String documentMetadata, Integer pages,
+    private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String deltaAt,
+                                                                          final String documentMetadata,
+                                                                          Boolean isPaperFiled,
+                                                                          Integer pages,
                                                                           List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
@@ -387,7 +458,6 @@ class FilingHistoryControllerIT {
                         .description(DESCRIPTION)
                         .subcategory(SUBCATEGORY)
                         .date(DATE_AS_INSTANT)
-                        .paperFiled(true)
                         .descriptionValues(new FilingHistoryDescriptionValues()
                                 .terminationDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                                 .officerName(OFFICER_NAME))
@@ -395,9 +465,10 @@ class FilingHistoryControllerIT {
                         .links(new FilingHistoryLinks()
                                 .documentMetadata(documentMetadata)
                                 .self(SELF_LINK))
-                        .pages(pages))
+                        .pages(pages)
+                        .paperFiled(isPaperFiled))
                 .barcode(BARCODE)
-                .deltaAt(NEWEST_REQUEST_DELTA_AT)
+                .deltaAt(deltaAt)
                 .entityId(ENTITY_ID)
                 .updatedAt(UPDATED_AT)
                 .updatedBy(UPDATED_BY)

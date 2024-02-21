@@ -1,53 +1,61 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
+import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
+import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
+
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
-    private final Validator<InternalFilingHistoryApi> filingHistoryRequestValidator;
+    private final Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
                                         AbstractTransactionMapperFactory mapperFactory,
-                                        Validator<InternalFilingHistoryApi> filingHistoryRequestValidator) {
+                                        Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
-        this.filingHistoryRequestValidator = filingHistoryRequestValidator;
+        this.filingHistoryPutRequestValidator = filingHistoryPutRequestValidator;
     }
 
     @Override
-    public ServiceResult processFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
-        if (filingHistoryRequestValidator.validate(request) == ServiceResult.BAD_REQUEST) {
-            return ServiceResult.BAD_REQUEST;
+    public void processFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
+        if (!filingHistoryPutRequestValidator.isValid(request)) {
+            LOGGER.error("Request body missing required field", DataMapHolder.getLogMap());
+            throw new BadRequestException("Required field missing");
         }
 
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
                 request.getInternalData().getTransactionKind());
 
-        Optional<FilingHistoryDocument> existingDocument;
-        try {
-            existingDocument = filingHistoryService.findExistingFilingHistory(transactionId);
-        } catch (
-                ServiceUnavailableException ex) { // TODO: Could I catch a DataAccessException here or should I throw the service unavailable in the repository class?
-            return ServiceResult.SERVICE_UNAVAILABLE;
-        }
+        Optional<FilingHistoryDocument> existingDocument =
+                filingHistoryService.findExistingFilingHistory(transactionId);
 
         Optional<FilingHistoryDocument> documentToSave = existingDocument
                 .map(document -> mapper.mapFilingHistoryUnlessStale(request, document))
                 .orElseGet(() -> Optional.of(mapper.mapNewFilingHistory(transactionId, request)));
 
-        return documentToSave
-                .map(document -> existingDocument
-                        .map(existingDoc -> filingHistoryService.updateFilingHistory(document, existingDoc))
-                        .orElseGet(() -> filingHistoryService.insertFilingHistory(document)))
-                .orElse(ServiceResult.STALE_DELTA);
+        if (documentToSave.isPresent()) {
+            if (existingDocument.isPresent()) {
+                filingHistoryService.updateFilingHistory(documentToSave.get(), existingDocument.get());
+            } else {
+                filingHistoryService.insertFilingHistory(documentToSave.get());
+            }
+        } else {
+            throw new ConflictException("Stale delta for upsert");
+        }
     }
 }

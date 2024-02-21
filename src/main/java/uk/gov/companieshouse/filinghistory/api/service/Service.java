@@ -7,6 +7,6 @@ public interface Service {
 
     Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId);
 
-    ServiceResult insertFilingHistory(final FilingHistoryDocument documentToSave);
-    ServiceResult updateFilingHistory(final FilingHistoryDocument documentToSave, final FilingHistoryDocument existingDocument);
+    void insertFilingHistory(final FilingHistoryDocument documentToSave);
+    void updateFilingHistory(final FilingHistoryDocument documentToSave, final FilingHistoryDocument existingDocument);
 }

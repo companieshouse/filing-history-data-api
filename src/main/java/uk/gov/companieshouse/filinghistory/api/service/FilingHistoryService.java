@@ -31,33 +31,28 @@ public class FilingHistoryService implements Service {
         return repository.findById(transactionId);
     }
 
-    public ServiceResult insertFilingHistory(final FilingHistoryDocument documentToSave) {
-        return handleTransaction(documentToSave, null);
+    @Override
+    public void insertFilingHistory(final FilingHistoryDocument documentToSave) {
+        handleTransaction(documentToSave, null);
     }
 
     @Override
-    public ServiceResult updateFilingHistory(FilingHistoryDocument documentToSave,
+    public void updateFilingHistory(FilingHistoryDocument documentToSave,
                                              FilingHistoryDocument existingDocument) {
-        return handleTransaction(documentToSave, existingDocument);
+        handleTransaction(documentToSave, existingDocument);
     }
 
-    private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
-                                            FilingHistoryDocument existingDocument) {
-        // Add compensatory transaction as part of DSND-2280.
-        try {
-            repository.save(documentToSave);
-        } catch (ServiceUnavailableException ex) {
-            return ServiceResult.SERVICE_UNAVAILABLE;
-        }
+    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument existingDocument) {
+        repository.save(documentToSave);
 
         ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
                         documentToSave.getTransactionId(), null, false));
 
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            LOGGER.error("Call to resource-changed endpoint was not 200 OK", DataMapHolder.getLogMap());
-            return ServiceResult.SERVICE_UNAVAILABLE;
+            repository.rollBackToOriginalState(existingDocument, documentToSave.getTransactionId());
+            LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("Resource changed endpoint unavailable");
         }
-        return ServiceResult.UPSERT_SUCCESSFUL;
     }
 }

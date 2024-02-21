@@ -14,7 +14,6 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.service.GetResponseProcessor;
-import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
 import uk.gov.companieshouse.filinghistory.api.service.UpsertProcessor;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -43,23 +42,12 @@ public class FilingHistoryController {
                 .transactionId(transactionId);
         LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
 
-        final ServiceResult result = serviceUpsertProcessor.processFilingHistory(transactionId, requestBody);
+        serviceUpsertProcessor.processFilingHistory(transactionId, requestBody);
 
-        return switch (result) {
-            case STALE_DELTA -> ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .build();
-            case SERVICE_UNAVAILABLE -> ResponseEntity
-                    .status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .build();
-            case BAD_REQUEST -> ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
-            default -> ResponseEntity
-                    .status(HttpStatus.OK)
-                    .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
-                    .build();
-        };
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(LOCATION, "/company/%s/filing-history/%s".formatted(companyNumber, transactionId))
+                .build();
     }
 
     @GetMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}")

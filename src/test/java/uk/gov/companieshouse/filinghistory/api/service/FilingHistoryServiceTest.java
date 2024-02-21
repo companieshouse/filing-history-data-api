@@ -74,10 +74,9 @@ class FilingHistoryServiceTest {
         when(response.getStatusCode()).thenReturn(200);
 
         // when
-        final ServiceResult actualResult = service.insertFilingHistory(document);
+        service.insertFilingHistory(document);
 
         // then
-        assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
@@ -89,10 +88,9 @@ class FilingHistoryServiceTest {
         when(response.getStatusCode()).thenReturn(200);
 
         // when
-        final ServiceResult actualResult = service.updateFilingHistory(document, existingDocument);
+        service.updateFilingHistory(document, existingDocument);
 
         // then
-        assertEquals(ServiceResult.UPSERT_SUCCESSFUL, actualResult);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
@@ -104,10 +102,10 @@ class FilingHistoryServiceTest {
         when(response.getStatusCode()).thenReturn(503);
 
         // when
-        final ServiceResult actualResult = service.updateFilingHistory(document, existingDocument);
+        Executable executable = () -> service.updateFilingHistory(document, existingDocument);
 
         // then
-        assertEquals(ServiceResult.SERVICE_UNAVAILABLE, actualResult);
+        assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
@@ -132,10 +130,10 @@ class FilingHistoryServiceTest {
                 .when(repository).save(any());
 
         // when
-        final ServiceResult actual = service.insertFilingHistory(document);
+        Executable executable = () -> service.insertFilingHistory(document);
 
         // then
-        assertEquals(ServiceResult.SERVICE_UNAVAILABLE, actual);
+        assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
         verifyNoInteractions(resourceChangedApiClient);
     }

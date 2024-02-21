@@ -3,10 +3,10 @@ package uk.gov.companieshouse.filinghistory.api.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class NotFoundException extends RuntimeException {
+@ResponseStatus(HttpStatus.CONFLICT)
+public class ConflictException extends RuntimeException {
 
-    public NotFoundException(String message) {
+    public ConflictException(String message) {
         super(message);
     }
 }

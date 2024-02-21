@@ -13,7 +13,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
-class FilingHistoryRequestValidatorTest {
+class FilingHistoryPutRequestValidatorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String VALID_SELF_LINK = "/company/12345678/filing-history/transactionId";
@@ -22,8 +22,9 @@ class FilingHistoryRequestValidatorTest {
     private static final String DATE = "2011-08-06T00:00:00.00Z";
     private static final String DESCRIPTION = "description";
     private static final String ENTITY_ID = "entityId";
+    private static final String COMPANY_NUMBER = "12345678";
 
-    Validator<InternalFilingHistoryApi> filingHistoryRequestValidator = new FilingHistoryRequestValidator<>();
+    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new FilingHistoryPutRequestValidator<>();
 
     @ParameterizedTest
     @MethodSource("badRequestScenarios")
@@ -31,10 +32,10 @@ class FilingHistoryRequestValidatorTest {
         // given
 
         // when
-        final ServiceResult actual = filingHistoryRequestValidator.validate(requestBody);
+        final boolean actual = filingHistoryPutRequestValidator.isValid(requestBody);
 
         // then
-        assertEquals(ServiceResult.BAD_REQUEST, actual);
+        assertEquals(false, actual);
     }
 
     @Test
@@ -51,13 +52,14 @@ class FilingHistoryRequestValidatorTest {
                                 .self(VALID_SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
+                        .companyNumber(COMPANY_NUMBER)
                         .deltaAt(VALID_DELTA_AT));
 
         // when
-        final ServiceResult actual = filingHistoryRequestValidator.validate(validRequestBody);
+        final boolean actual = filingHistoryPutRequestValidator.isValid(validRequestBody);
 
         // then
-        assertEquals(ServiceResult.VALID_REQUEST, actual);
+        assertEquals(true, actual);
     }
 
     private static Stream<Arguments> badRequestScenarios() {

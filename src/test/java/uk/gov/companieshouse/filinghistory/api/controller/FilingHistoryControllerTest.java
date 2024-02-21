@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -17,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
@@ -51,8 +54,6 @@ class FilingHistoryControllerTest {
                 .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
                 .build();
 
-        when(upsertProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.UPSERT_SUCCESSFUL);
-
         // when
         final ResponseEntity<Void> actualResponse =
                 controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
@@ -65,36 +66,30 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn409ConflictWhenPutRequestWithStaleDelta() {
         // given
-        final ResponseEntity<Void> expectedResponse = ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .build();
-
-        when(upsertProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.STALE_DELTA);
+        doThrow(ConflictException.class)
+                .when(upsertProcessor).processFilingHistory(any(), any());
 
         // when
-        final ResponseEntity<Void> actualResponse =
+        Executable executable = () ->
                 controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
 
         // then
-        assertEquals(expectedResponse, actualResponse);
+        assertThrows(ConflictException.class, executable);
         verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 
     @Test
     void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() {
         // given
-        final ResponseEntity<Void> expectedResponse = ResponseEntity
-                .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .build();
-
-        when(upsertProcessor.processFilingHistory(any(), any())).thenReturn(ServiceResult.SERVICE_UNAVAILABLE);
+        doThrow(ServiceUnavailableException.class)
+                .when(upsertProcessor).processFilingHistory(any(), any());
 
         // when
-        final ResponseEntity<Void> actualResponse =
+        Executable executable = () ->
                 controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
 
         // then
-        assertEquals(expectedResponse, actualResponse);
+        assertThrows(ServiceUnavailableException.class, executable);
         verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
     }
 
