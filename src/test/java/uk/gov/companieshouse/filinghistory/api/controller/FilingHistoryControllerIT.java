@@ -125,7 +125,7 @@ class FilingHistoryControllerIT {
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
         final FilingHistoryDocument expectedDocument =
-                getExpectedFilingHistoryDocument(NEWEST_REQUEST_DELTA_AT, null, null, null, null);
+                getExpectedFilingHistoryDocument(null, null, null, null);
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -164,7 +164,7 @@ class FilingHistoryControllerIT {
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument =
-                getExpectedFilingHistoryDocument(NEWEST_REQUEST_DELTA_AT, DOCUMENT_METADATA, null, 1,
+                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, null, 1,
                 List.of(new FilingHistoryAnnotation()
                         .annotation("annotation")
                         .descriptionValues(new FilingHistoryDescriptionValues()
@@ -438,13 +438,11 @@ class FilingHistoryControllerIT {
                         .terminationDate(ACTION_AND_TERMINATION_DATE))
                 .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE)
-                .paperFiled(true)
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK));
     }
 
-    private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String deltaAt,
-                                                                          final String documentMetadata,
+    private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
                                                                           Boolean isPaperFiled,
                                                                           Integer pages,
                                                                           List<FilingHistoryAnnotation> annotations) {
@@ -468,7 +466,7 @@ class FilingHistoryControllerIT {
                         .pages(pages)
                         .paperFiled(isPaperFiled))
                 .barcode(BARCODE)
-                .deltaAt(deltaAt)
+                .deltaAt(FilingHistoryControllerIT.NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)
                 .updatedAt(UPDATED_AT)
                 .updatedBy(UPDATED_BY)
