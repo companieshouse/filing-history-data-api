@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,7 +67,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() throws Exception {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -96,10 +95,11 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() {
+    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() throws Exception {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(503);
+        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.updateFilingHistory(document, existingDocument);
@@ -108,6 +108,7 @@ class FilingHistoryServiceTest {
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
+        verify(repository).save(existingDocument);
     }
 
     @Test

@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -14,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
@@ -60,29 +59,14 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCallSaveWhenExistingDocumentIsNotNull() {
+    void shouldCallSaveWithFilingHistoryDocument() {
         // given
 
         // when
-        repository.rollBackToOriginalState(new FilingHistoryDocument(), TRANSACTION_ID);
+        repository.save(new FilingHistoryDocument());
 
         // then
         verify(mongoTemplate).save(new FilingHistoryDocument());
-        verifyNoMoreInteractions(mongoTemplate);
-    }
-
-    @Test
-    void shouldCallRemoveWhenExistingDocumentIsNull() {
-        // given
-        Query query = new Query().addCriteria(
-                Criteria.where("_id").is(TRANSACTION_ID));
-
-        // when
-        repository.rollBackToOriginalState(null, TRANSACTION_ID);
-
-        // then
-        verify(mongoTemplate).remove(query, FilingHistoryDocument.class);
-        verifyNoMoreInteractions(mongoTemplate);
     }
 
     @Test
@@ -92,7 +76,7 @@ class RepositoryTest {
         });
 
         // when
-        Executable executable = () -> repository.rollBackToOriginalState(new FilingHistoryDocument(), TRANSACTION_ID);
+        Executable executable = () -> repository.save(new FilingHistoryDocument());
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
@@ -101,14 +85,13 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenDocumentIsNull() {
+    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenDeleteById() {
         // given
-        Query query = new Query().addCriteria(Criteria.where("_id").is(TRANSACTION_ID));
-        when(mongoTemplate.remove(query, FilingHistoryDocument.class)).thenThrow(new DataAccessException("...") {
+        when(mongoTemplate.remove(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
 
         // when
-        Executable executable = () -> repository.rollBackToOriginalState(null, TRANSACTION_ID);
+        Executable executable = () -> repository.deleteById(TRANSACTION_ID);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);

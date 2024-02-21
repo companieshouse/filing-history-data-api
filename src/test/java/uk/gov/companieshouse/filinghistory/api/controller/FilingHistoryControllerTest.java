@@ -23,7 +23,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProcessor;
-import uk.gov.companieshouse.filinghistory.api.service.ServiceResult;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryControllerTest {
@@ -47,7 +46,7 @@ class FilingHistoryControllerTest {
     private ExternalData responseBody;
 
     @Test
-    void shouldReturn200OKWhenPutRequest() {
+    void shouldReturn200OKWhenPutRequest() throws Exception {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity
                 .status(HttpStatus.OK)
@@ -64,7 +63,7 @@ class FilingHistoryControllerTest {
     }
 
     @Test
-    void shouldReturn409ConflictWhenPutRequestWithStaleDelta() {
+    void shouldReturn409ConflictWhenPutRequestWithStaleDelta() throws Exception {
         // given
         doThrow(ConflictException.class)
                 .when(upsertProcessor).processFilingHistory(any(), any());
@@ -79,7 +78,7 @@ class FilingHistoryControllerTest {
     }
 
     @Test
-    void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() {
+    void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() throws Exception {
         // given
         doThrow(ServiceUnavailableException.class)
                 .when(upsertProcessor).processFilingHistory(any(), any());

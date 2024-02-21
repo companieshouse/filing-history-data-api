@@ -1,16 +1,14 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import java.util.Optional;
-import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
-import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -22,13 +20,16 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
     private final Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator;
+    private final FilingHistoryDocumentCopier filingHistoryDocumentCopier;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
                                         AbstractTransactionMapperFactory mapperFactory,
-                                        Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator) {
+                                        Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator,
+                                        FilingHistoryDocumentCopier filingHistoryDocumentCopier) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
         this.filingHistoryPutRequestValidator = filingHistoryPutRequestValidator;
+        this.filingHistoryDocumentCopier = filingHistoryDocumentCopier;
     }
 
     @Override
@@ -41,21 +42,17 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
                 request.getInternalData().getTransactionKind());
 
-        Optional<FilingHistoryDocument> existingDocument =
-                filingHistoryService.findExistingFilingHistory(transactionId);
+        filingHistoryService.findExistingFilingHistory(transactionId)
+                .ifPresentOrElse(
+                        existingDoc -> {
+                            FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
+                            FilingHistoryDocument docToSave = mapper.mapFilingHistoryUnlessStale(request, existingDoc);
 
-        Optional<FilingHistoryDocument> documentToSave = existingDocument
-                .map(document -> mapper.mapFilingHistoryUnlessStale(request, document))
-                .orElseGet(() -> Optional.of(mapper.mapNewFilingHistory(transactionId, request)));
-
-        if (documentToSave.isPresent()) {
-            if (existingDocument.isPresent()) {
-                filingHistoryService.updateFilingHistory(documentToSave.get(), existingDocument.get());
-            } else {
-                filingHistoryService.insertFilingHistory(documentToSave.get());
-            }
-        } else {
-            throw new ConflictException("Stale delta for upsert");
-        }
+                            filingHistoryService.updateFilingHistory(docToSave, existingDocCopy);
+                        },
+                        () -> {
+                            FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request);
+                            filingHistoryService.insertFilingHistory(newDocument);
+                        });
     }
 }

@@ -5,7 +5,6 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
@@ -37,7 +36,7 @@ public abstract class AbstractTransactionMapper {
     protected abstract FilingHistoryData mapFilingHistoryData(ExternalData externalData,
             FilingHistoryData existingData);
 
-    public abstract Optional<FilingHistoryDocument> mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
+    public abstract FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument);
 
     protected abstract FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request,

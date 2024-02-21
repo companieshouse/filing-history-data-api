@@ -37,12 +37,11 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument documentToSave,
-                                             FilingHistoryDocument existingDocument) {
-        handleTransaction(documentToSave, existingDocument);
+    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
+        handleTransaction(documentToSave, originalDocumentCopy);
     }
 
-    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument existingDocument) {
+    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
 
         ApiResponse<Void> result = apiClient.callResourceChanged(
@@ -50,7 +49,13 @@ public class FilingHistoryService implements Service {
                         documentToSave.getTransactionId(), null, false));
 
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            repository.rollBackToOriginalState(existingDocument, documentToSave.getTransactionId());
+            if (originalDocumentCopy == null) {
+                repository.deleteById(documentToSave.getTransactionId());
+                LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
+            } else {
+                repository.save(originalDocumentCopy);
+                LOGGER.info("Reverting previously inserted document", DataMapHolder.getLogMap());
+            }
             LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("Resource changed endpoint unavailable");
         }

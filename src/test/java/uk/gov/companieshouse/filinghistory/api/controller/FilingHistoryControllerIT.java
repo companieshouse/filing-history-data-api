@@ -398,7 +398,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
         verify(instantSupplier, times(2)).get();
-        server.verify(exactly(0),
+        server.verify(exactly(1),
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 

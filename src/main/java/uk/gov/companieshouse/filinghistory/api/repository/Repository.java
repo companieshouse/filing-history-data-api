@@ -45,17 +45,15 @@ public class Repository {
         }
     }
 
-    public void rollBackToOriginalState(FilingHistoryDocument existingDocument, final String transactionId) {
+    public void deleteById(final String id) {
         try {
-            if (existingDocument != null) {
-                mongoTemplate.save(existingDocument);
-            } else {
-                mongoTemplate.remove(
-                        Query.query(Criteria.where("_id").is(transactionId)),
-                        FilingHistoryDocument.class);
-            }
+            mongoTemplate.remove(
+                    Query.query(Criteria.where("_id").is(id)),
+                    FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
-            throw new ServiceUnavailableException("MongoDB unavailable when rolling back document");
+            LOGGER.error("MongoDB unavailable when deleting document: %s".formatted(ex.getMessage()),
+                    DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("MongoDB unavailable when deleting document");
         }
     }
 }
