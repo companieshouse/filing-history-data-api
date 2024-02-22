@@ -192,6 +192,52 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void shouldGetSingleDocumentAndReturn200OK() throws Exception {
+        // given
+        final ExternalData expectedResponseBody = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .barcode(BARCODE)
+                .actionDate("2014-08-29")
+                .category(ExternalData.CategoryEnum.OFFICERS)
+                .type(TM01_TYPE)
+                .description(DESCRIPTION)
+                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .date("2014-09-15")
+                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                        .officerName("John Tester")
+                        .terminationDate("2014-08-29"))
+                .annotations(List.of(
+                        new FilingHistoryItemDataAnnotations()
+                                .annotation("annotation")
+                                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                                        .description("description"))))
+                .links(new FilingHistoryItemDataLinks()
+                        .self(SELF_LINK)
+                        .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                .pages(1);
+
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        ExternalData actualResponseBody = objectMapper.readValue(responseBodyAsString, ExternalData.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
     void shouldReturn400BadRequestWhenInvalidFieldsSentInRequestBody() throws Exception {
         // given
         InternalFilingHistoryApi requestBody = new InternalFilingHistoryApi()
@@ -277,52 +323,6 @@ class FilingHistoryControllerIT {
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
         assertEquals(EXISTING_DELTA_AT, actualDocument.getDeltaAt());
-    }
-
-    @Test
-    void shouldGetSingleDocumentAndReturn200OK() throws Exception {
-        // given
-        final ExternalData expectedResponseBody = new ExternalData()
-                .transactionId(TRANSACTION_ID)
-                .barcode(BARCODE)
-                .actionDate("2014-08-29")
-                .category(ExternalData.CategoryEnum.OFFICERS)
-                .type(TM01_TYPE)
-                .description(DESCRIPTION)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
-                .date("2014-09-15")
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
-                        .officerName("John Tester")
-                        .terminationDate("2014-08-29"))
-                .annotations(List.of(
-                        new FilingHistoryItemDataAnnotations()
-                                .annotation("annotation")
-                                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
-                                        .description("description"))))
-                .links(new FilingHistoryItemDataLinks()
-                        .self(SELF_LINK)
-                        .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
-                .pages(1);
-
-        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
-        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
-
-        // when
-        ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("X-Request-Id", CONTEXT_ID)
-                .contentType(MediaType.APPLICATION_JSON));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isOk());
-
-        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
-        ExternalData actualResponseBody = objectMapper.readValue(responseBodyAsString, ExternalData.class);
-
-        assertEquals(expectedResponseBody, actualResponseBody);
     }
 
     @Test

@@ -31,8 +31,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
@@ -57,7 +55,6 @@ class FilingHistoryControllerMongoUnavailableIT {
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
     private static final String NEWEST_REQUEST_DELTA_AT = "20140916230459600643";
-    private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     private static final String UPDATED_BY = "5419d856b6a59f32b7684d0e";
     private static final String TM01_TYPE = "TM01";
     private static final String DATE = "2014-09-15T23:21:18.000Z";
@@ -98,7 +95,7 @@ class FilingHistoryControllerMongoUnavailableIT {
     @Test
     void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringSave() throws Exception {
         // given
-        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+        final InternalFilingHistoryApi request = buildPutRequestBody();
 
         doThrow(ServiceUnavailableException.class)
                 .when(repository).save(any());
@@ -122,7 +119,7 @@ class FilingHistoryControllerMongoUnavailableIT {
     @Test
     void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringFind() throws Exception {
         // given
-        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+        final InternalFilingHistoryApi request = buildPutRequestBody();
 
         when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
 
@@ -142,30 +139,18 @@ class FilingHistoryControllerMongoUnavailableIT {
         WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 
-    private static ChangedResource getExpectedChangedResource() {
-        return new ChangedResource()
-                .resourceUri("/company/12345678/filing-history/transactionId")
-                .resourceKind("filing-history")
-                .contextId(CONTEXT_ID)
-                .deletedData(null)
-                .event(new ChangedResourceEvent()
-                        .fieldsChanged(null)
-                        .publishedAt(UPDATED_AT.toString())
-                        .type("changed"));
-    }
-
-    private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
+    private static InternalFilingHistoryApi buildPutRequestBody() {
         return new InternalFilingHistoryApi()
-                .internalData(buildInternalData(deltaAt))
+                .internalData(buildInternalData())
                 .externalData(buildExternalData());
     }
 
-    private static InternalData buildInternalData(String deltaAt) {
+    private static InternalData buildInternalData() {
         return new InternalData()
                 .entityId(ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .documentId(DOCUMENT_ID)
-                .deltaAt(deltaAt)
+                .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .originalDescription(ORIGINAL_DESCRIPTION)
                 .originalValues(new InternalDataOriginalValues()
                         .officerName(OFFICER_NAME)
