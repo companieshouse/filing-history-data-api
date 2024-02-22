@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -29,11 +30,11 @@ class FilingHistoryPutRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("badRequestScenarios")
-    void testValidateThrowsBadRequestExceptionWhenExternalAndInternalDataAreBothNull(InternalFilingHistoryApi requestBody) {
+    void testValidateThrowsBadRequestExceptionWhenExternalAndInternalDataAreBothNull(RequestBodyTestArgument argument) {
         // given
 
         // when
-        final boolean actual = filingHistoryPutRequestValidator.isValid(requestBody);
+        final boolean actual = filingHistoryPutRequestValidator.isValid(argument.requestBody());
 
         // then
         assertFalse(actual);
@@ -42,19 +43,7 @@ class FilingHistoryPutRequestValidatorTest {
     @Test
     void testValidRequestBodyDoesNotThrowException() {
         // given
-        InternalFilingHistoryApi validRequestBody = new InternalFilingHistoryApi()
-                .externalData(new ExternalData()
-                        .transactionId(TRANSACTION_ID)
-                        .type(TM01_TYPE)
-                        .date(DATE)
-                        .category(ExternalData.CategoryEnum.OFFICERS)
-                        .description(DESCRIPTION)
-                        .links(new FilingHistoryItemDataLinks()
-                                .self(VALID_SELF_LINK)))
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID)
-                        .companyNumber(COMPANY_NUMBER)
-                        .deltaAt(VALID_DELTA_AT));
+        InternalFilingHistoryApi validRequestBody = getRequestBody();
 
         // when
         final boolean actual = filingHistoryPutRequestValidator.isValid(validRequestBody);
@@ -66,156 +55,213 @@ class FilingHistoryPutRequestValidatorTest {
     private static Stream<Arguments> badRequestScenarios() {
         return Stream.of(
                 Arguments.of(
-                        Named.of("Null external and internal data objects",
-                                new InternalFilingHistoryApi())),
-                Arguments.of(
                         Named.of("Null external data object",
-                                new InternalFilingHistoryApi()
-                                        .internalData(new InternalData()))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyExternalData(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Null internal data object",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyInternalData(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Null transaction ID",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyTransactionId(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty transaction ID",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId("")
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyTransactionId("")
+                                        .build())),
                 Arguments.of(
                         Named.of("Null link object",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyLinks(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null self link",
+                                RequestBodyTestArgument.builder()
+                                        .modifySelfLink(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty self link",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self("")))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .companyNumber(COMPANY_NUMBER)
-                                                .deltaAt(VALID_DELTA_AT)))
-                ),
+                                RequestBodyTestArgument.builder()
+                                        .modifySelfLink("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null type",
+                                RequestBodyTestArgument.builder()
+                                        .modifyType(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty type",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type("")
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyType("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null date",
+                                RequestBodyTestArgument.builder()
+                                        .modifyDate(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty date",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date("")
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyDate("")
+                                        .build())),
                 Arguments.of(
                         Named.of("Null category",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyCategory(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null description",
+                                RequestBodyTestArgument.builder()
+                                        .modifyDescription(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty description",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description("")
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyDescription("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null entity ID",
+                                RequestBodyTestArgument.builder()
+                                        .modifyEntityId(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty entity ID",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId("")
-                                                .deltaAt(VALID_DELTA_AT)))),
+                                RequestBodyTestArgument.builder()
+                                        .modifyEntityId("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null delta at",
+                                RequestBodyTestArgument.builder()
+                                        .modifyDeltaAt(null)
+                                        .build())),
                 Arguments.of(
                         Named.of("Empty delta at",
-                                new InternalFilingHistoryApi()
-                                        .externalData(new ExternalData()
-                                                .transactionId(TRANSACTION_ID)
-                                                .type(TM01_TYPE)
-                                                .date(DATE)
-                                                .category(ExternalData.CategoryEnum.OFFICERS)
-                                                .description(DESCRIPTION)
-                                                .links(new FilingHistoryItemDataLinks()
-                                                        .self(VALID_SELF_LINK)))
-                                        .internalData(new InternalData()
-                                                .entityId(ENTITY_ID)
-                                                .companyNumber(COMPANY_NUMBER)
-                                                .deltaAt("")))
-                )
+                                RequestBodyTestArgument.builder()
+                                        .modifyDeltaAt("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null company number",
+                                RequestBodyTestArgument.builder()
+                                        .modifyCompanyNumber(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty company number",
+                                RequestBodyTestArgument.builder()
+                                        .modifyCompanyNumber("")
+                                        .build()))
         );
+    }
+
+    private record RequestBodyTestArgument(InternalFilingHistoryApi requestBody) {
+
+        private static RequestBodyTestArgumentBuilder builder() {
+            return new RequestBodyTestArgumentBuilder();
+        }
+
+        private static class RequestBodyTestArgumentBuilder {
+
+            private final InternalFilingHistoryApi requestBody;
+
+            public RequestBodyTestArgumentBuilder() {
+                requestBody = new InternalFilingHistoryApi()
+                        .externalData(new ExternalData()
+                                .transactionId(TRANSACTION_ID)
+                                .type(TM01_TYPE)
+                                .date(DATE)
+                                .category(CategoryEnum.OFFICERS)
+                                .description(DESCRIPTION)
+                                .links(new FilingHistoryItemDataLinks()
+                                        .self(VALID_SELF_LINK)))
+                        .internalData(new InternalData()
+                                .entityId(ENTITY_ID)
+                                .companyNumber(COMPANY_NUMBER)
+                                .deltaAt(VALID_DELTA_AT));
+            }
+
+            public RequestBodyTestArgumentBuilder modifyExternalData(final ExternalData value) {
+                requestBody.externalData(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyInternalData(final InternalData value) {
+                requestBody.internalData(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyTransactionId(final String value) {
+                requestBody.getExternalData().transactionId(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
+                requestBody.getExternalData().links(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifySelfLink(final String value) {
+                requestBody.getExternalData().getLinks().self(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyType(final String value) {
+                requestBody.getExternalData().type(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyDate(final String value) {
+                requestBody.getExternalData().date(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyCategory(CategoryEnum value) {
+                requestBody.getExternalData().category(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyDescription(final String value) {
+                requestBody.getExternalData().description(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyEntityId(final String value) {
+                requestBody.getInternalData().entityId(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyDeltaAt(final String value) {
+                requestBody.getInternalData().deltaAt(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyCompanyNumber(final String value) {
+                requestBody.getInternalData().companyNumber(value);
+                return this;
+            }
+
+            public RequestBodyTestArgument build() {
+                return new RequestBodyTestArgument(this.requestBody);
+            }
+        }
+    }
+
+    private static InternalFilingHistoryApi getRequestBody() {
+        return new InternalFilingHistoryApi()
+                .externalData(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .type(TM01_TYPE)
+                        .date(DATE)
+                        .category(CategoryEnum.OFFICERS)
+                        .description(DESCRIPTION)
+                        .links(new FilingHistoryItemDataLinks()
+                                .self(VALID_SELF_LINK)))
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID)
+                        .companyNumber(COMPANY_NUMBER)
+                        .deltaAt(VALID_DELTA_AT));
     }
 }

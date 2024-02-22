@@ -18,15 +18,15 @@ public class FilingHistoryPutRequestValidator<T> implements Validator<T> {
 
         return externalData != null
                 && internalData != null
-                && !StringUtils.isBlank(internalData.getEntityId())
-                && !StringUtils.isBlank(internalData.getDeltaAt())
-                && !StringUtils.isBlank(internalData.getCompanyNumber())
-                && !StringUtils.isBlank(externalData.getTransactionId())
+                && StringUtils.isNotBlank(internalData.getEntityId())
+                && StringUtils.isNotBlank(internalData.getDeltaAt())
+                && StringUtils.isNotBlank(internalData.getCompanyNumber())
+                && StringUtils.isNotBlank(externalData.getTransactionId())
                 && externalData.getCategory() != null // NOSONAR
-                && !StringUtils.isBlank(externalData.getType())
-                && !StringUtils.isBlank(externalData.getDate())
-                && !StringUtils.isBlank(externalData.getDescription())
+                && StringUtils.isNotBlank(externalData.getType())
+                && StringUtils.isNotBlank(externalData.getDate())
+                && StringUtils.isNotBlank(externalData.getDescription())
                 && externalData.getLinks() != null
-                && !StringUtils.isBlank(externalData.getLinks().getSelf());
+                && StringUtils.isNotBlank(externalData.getLinks().getSelf());
     }
 }
