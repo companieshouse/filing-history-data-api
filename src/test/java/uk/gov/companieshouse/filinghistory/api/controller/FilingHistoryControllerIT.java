@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,7 +16,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -63,6 +65,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@WireMockTest(httpPort = 8888)
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
@@ -96,7 +99,6 @@ class FilingHistoryControllerIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
-    private static final WireMockServer server = new WireMockServer(8888);
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -111,14 +113,12 @@ class FilingHistoryControllerIT {
     @BeforeAll
     static void start() {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
-        server.start();
     }
 
     @BeforeEach
     void setUp() {
         mongoTemplate.dropCollection(FILING_HISTORY_COLLECTION);
         mongoTemplate.createCollection(FILING_HISTORY_COLLECTION);
-        server.resetAll();
     }
 
     @Test
@@ -129,7 +129,7 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(200)));
 
@@ -151,8 +151,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        server.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -172,7 +171,7 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(200)));
 
@@ -194,8 +193,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        server.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @ParameterizedTest
@@ -343,7 +341,7 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(503)));
 
@@ -362,8 +360,7 @@ class FilingHistoryControllerIT {
         assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
         verify(instantSupplier, times(2)).get();
-        server.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -379,7 +376,7 @@ class FilingHistoryControllerIT {
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(503)));
 
@@ -398,8 +395,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
         verify(instantSupplier, times(2)).get();
-        server.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {

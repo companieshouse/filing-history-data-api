@@ -11,7 +11,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
@@ -44,6 +45,7 @@ import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@WireMockTest(httpPort = 8888)
 class FilingHistoryControllerMongoUnavailableIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
@@ -69,7 +71,6 @@ class FilingHistoryControllerMongoUnavailableIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
-    private static final WireMockServer server = new WireMockServer(8889);
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -86,14 +87,12 @@ class FilingHistoryControllerMongoUnavailableIT {
     @BeforeAll
     static void start() {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
-        server.start();
     }
 
     @BeforeEach
     void setUp() {
         mongoTemplate.dropCollection(FILING_HISTORY_COLLECTION);
         mongoTemplate.createCollection(FILING_HISTORY_COLLECTION);
-        server.resetAll();
     }
 
     @Test
@@ -117,7 +116,7 @@ class FilingHistoryControllerMongoUnavailableIT {
         result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
 
         verify(instantSupplier, times(1)).get();
-        server.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 
     @Test
@@ -140,7 +139,7 @@ class FilingHistoryControllerMongoUnavailableIT {
         result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
 
         verify(instantSupplier, times(0)).get();
-        server.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 
     private static ChangedResource getExpectedChangedResource() {
