@@ -25,9 +25,13 @@ public class Repository {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public Optional<FilingHistoryDocument> findById(final String id) {
+    public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {
         try {
-            return Optional.ofNullable(mongoTemplate.findById(id, FilingHistoryDocument.class));
+            Query query = new Query(
+                    Criteria.where("_id").is(id)
+                            .and("company_number").is(companyNumber));
+
+            return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());

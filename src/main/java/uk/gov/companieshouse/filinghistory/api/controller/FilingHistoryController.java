@@ -43,7 +43,7 @@ public class FilingHistoryController {
                 .transactionId(transactionId);
         LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
 
-        serviceUpsertProcessor.processFilingHistory(transactionId, requestBody);
+        serviceUpsertProcessor.processFilingHistory(transactionId, companyNumber, requestBody);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -63,6 +63,6 @@ public class FilingHistoryController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(filingHistoryGetResponseProcessor.processGetSingleFilingHistory(companyNumber, transactionId));
+                .body(filingHistoryGetResponseProcessor.processGetSingleFilingHistory(transactionId, companyNumber));
     }
 }

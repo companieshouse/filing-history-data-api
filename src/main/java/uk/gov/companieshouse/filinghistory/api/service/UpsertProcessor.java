@@ -5,5 +5,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
 public interface UpsertProcessor {
 
-    void processFilingHistory(final String transactionId, final InternalFilingHistoryApi request) throws JsonProcessingException;
+    void processFilingHistory(final String transactionId,
+                              final String companyNumber,
+                              final InternalFilingHistoryApi request) throws JsonProcessingException;
 }

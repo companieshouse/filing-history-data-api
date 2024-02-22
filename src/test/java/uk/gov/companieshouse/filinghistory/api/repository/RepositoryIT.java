@@ -65,11 +65,26 @@ class RepositoryIT {
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument();
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = repository.findById(TRANSACTION_ID);
+        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isPresent());
         assertEquals(expectedDocument, actualDocument.get());
+    }
+
+    @Test
+    void testInvalidCompanyNumber() throws IOException {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, "87654321");
+
+        // then
+        assertTrue(actualDocument.isEmpty());
     }
 
     @Test

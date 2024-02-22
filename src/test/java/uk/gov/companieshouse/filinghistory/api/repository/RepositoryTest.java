@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
@@ -22,6 +24,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 class RepositoryTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String COMPANY_NUMBER = "12345678";
 
     @InjectMocks
     private Repository repository;
@@ -35,11 +38,11 @@ class RepositoryTest {
     @Test
     void shouldCatchDataAccessExceptionWhenFindingDocumentByIdAndThrowServiceUnavailableException() {
         // given
-        when(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class)).thenThrow(new DataAccessException("...") {
+        when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
 
         // when
-        Executable executable = () -> repository.findById(TRANSACTION_ID);
+        Executable executable = () -> repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,14 +60,14 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, requestBody);
     }
 
     @Test
-    void shouldReturn409ConflictWhenPutRequestWithStaleDelta() throws Exception {
+    void shouldReturn409ConflictWhenPutRequestWithStaleDelta() {
         // given
         doThrow(ConflictException.class)
-                .when(upsertProcessor).processFilingHistory(any(), any());
+                .when(upsertProcessor).processFilingHistory(anyString(), anyString(), any());
 
         // when
         Executable executable = () ->
@@ -74,14 +75,14 @@ class FilingHistoryControllerTest {
 
         // then
         assertThrows(ConflictException.class, executable);
-        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, requestBody);
     }
 
     @Test
     void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() throws Exception {
         // given
         doThrow(ServiceUnavailableException.class)
-                .when(upsertProcessor).processFilingHistory(any(), any());
+                .when(upsertProcessor).processFilingHistory(anyString(), anyString(), any());
 
         // when
         Executable executable = () ->
@@ -89,7 +90,7 @@ class FilingHistoryControllerTest {
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
-        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, requestBody);
+        verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, requestBody);
     }
 
     @Test
@@ -107,7 +108,7 @@ class FilingHistoryControllerTest {
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(getResponseProcessor).processGetSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
+        verify(getResponseProcessor).processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test

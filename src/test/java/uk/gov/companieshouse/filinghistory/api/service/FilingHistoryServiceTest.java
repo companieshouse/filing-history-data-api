@@ -25,6 +25,7 @@ import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 class FilingHistoryServiceTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String COMPANY_NUMBER = "12345678";
 
     @InjectMocks
     private FilingHistoryService service;
@@ -43,27 +44,27 @@ class FilingHistoryServiceTest {
     @Test
     void findExistingFilingHistoryDocumentShouldReturnDocument() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.of(document));
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenReturn(Optional.of(document));
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID);
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isPresent());
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test
     void findExistingFilingHistoryDocumentShouldReturnEmptyWhenNoDocumentExists() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.empty());
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenReturn(Optional.empty());
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID);
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isEmpty());
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test
@@ -114,14 +115,14 @@ class FilingHistoryServiceTest {
     @Test
     void findExistingFilingHistoryDocumentShouldThrowServiceUnavailableExceptionWhenCatchingServiceUnavailableException() {
         // given
-        when(repository.findById(any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
 
         // when
-        Executable executable = () -> service.findExistingFilingHistory(TRANSACTION_ID);
+        Executable executable = () -> service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test

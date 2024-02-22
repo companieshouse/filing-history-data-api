@@ -30,6 +30,7 @@ import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopie
 class FilingHistoryUpsertProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String COMPANY_NUMBER = "12345678";
 
     @InjectMocks
     private FilingHistoryUpsertProcessor filingHistoryProcessor;
@@ -65,15 +66,15 @@ class FilingHistoryUpsertProcessorTest {
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
         when(topLevelMapper.mapNewFilingHistory(anyString(), any())).thenReturn(documentToUpsert);
 
         // when
-        filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
 
         // then
         verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verifyNoInteractions(filingHistoryDocumentCopier);
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request);
         verifyNoMoreInteractions(topLevelMapper);
@@ -87,15 +88,15 @@ class FilingHistoryUpsertProcessorTest {
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(filingHistoryDocumentCopier.deepCopy(any())).thenReturn(existingDocumentCopy);
         when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(documentToUpsert);
 
         // when
-        filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
 
         // then
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
@@ -109,15 +110,15 @@ class FilingHistoryUpsertProcessorTest {
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any())).thenThrow(ConflictException.class);
 
         // when
-        Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
 
         // then
         assertThrows(ConflictException.class, executable);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
@@ -131,15 +132,15 @@ class FilingHistoryUpsertProcessorTest {
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-        when(filingHistoryService.findExistingFilingHistory(any())).thenThrow(ServiceUnavailableException.class);
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(ServiceUnavailableException.class);
 
         // when
-        Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
         verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verifyNoInteractions(filingHistoryDocumentCopier);
         verifyNoInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
@@ -151,7 +152,7 @@ class FilingHistoryUpsertProcessorTest {
         when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(false);
 
         // when
-        Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, request);
+        Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
 
         // then
         assertThrows(BadRequestException.class, executable);

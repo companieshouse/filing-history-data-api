@@ -33,7 +33,9 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
     }
 
     @Override
-    public void processFilingHistory(final String transactionId, final InternalFilingHistoryApi request) {
+    public void processFilingHistory(final String transactionId,
+                                     final String companyNumber,
+                                     final InternalFilingHistoryApi request) {
         if (!filingHistoryPutRequestValidator.isValid(request)) {
             LOGGER.error("Request body missing required field", DataMapHolder.getLogMap());
             throw new BadRequestException("Required field missing");
@@ -42,7 +44,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
                 request.getInternalData().getTransactionKind());
 
-        filingHistoryService.findExistingFilingHistory(transactionId)
+        filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                 .ifPresentOrElse(
                         existingDoc -> {
                             FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
