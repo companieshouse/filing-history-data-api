@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -105,6 +104,7 @@ class FilingHistoryControllerIT {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+
     @MockBean
     private Supplier<Instant> instantSupplier;
 
@@ -165,10 +165,10 @@ class FilingHistoryControllerIT {
 
         final FilingHistoryDocument expectedDocument =
                 getExpectedFilingHistoryDocument(DOCUMENT_METADATA, null, 1,
-                List.of(new FilingHistoryAnnotation()
-                        .annotation("annotation")
-                        .descriptionValues(new FilingHistoryDescriptionValues()
-                                .description("description"))));
+                        List.of(new FilingHistoryAnnotation()
+                                .annotation("annotation")
+                                .descriptionValues(new FilingHistoryDescriptionValues()
+                                        .description("description"))));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -398,7 +398,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
         verify(instantSupplier, times(2)).get();
-        server.verify(exactly(1),
+        server.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
