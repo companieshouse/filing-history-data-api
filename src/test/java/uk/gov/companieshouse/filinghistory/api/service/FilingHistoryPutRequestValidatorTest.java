@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
@@ -35,7 +37,7 @@ class FilingHistoryPutRequestValidatorTest {
         final boolean actual = filingHistoryPutRequestValidator.isValid(requestBody);
 
         // then
-        assertEquals(false, actual);
+        assertFalse(actual);
     }
 
     @Test
@@ -59,7 +61,7 @@ class FilingHistoryPutRequestValidatorTest {
         final boolean actual = filingHistoryPutRequestValidator.isValid(validRequestBody);
 
         // then
-        assertEquals(true, actual);
+        assertTrue(actual);
     }
 
     private static Stream<Arguments> badRequestScenarios() {
@@ -103,7 +105,7 @@ class FilingHistoryPutRequestValidatorTest {
                                                 .entityId(ENTITY_ID)
                                                 .deltaAt(VALID_DELTA_AT)))),
                 Arguments.of(
-                        Named.of("Null self link",
+                        Named.of("Null link object",
                                 new InternalFilingHistoryApi()
                                         .externalData(new ExternalData()
                                                 .transactionId(TRANSACTION_ID)
@@ -114,6 +116,22 @@ class FilingHistoryPutRequestValidatorTest {
                                         .internalData(new InternalData()
                                                 .entityId(ENTITY_ID)
                                                 .deltaAt(VALID_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty self link",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self("")))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .companyNumber(COMPANY_NUMBER)
+                                                .deltaAt(VALID_DELTA_AT)))
+                ),
                 Arguments.of(
                         Named.of("Empty type",
                                 new InternalFilingHistoryApi()
@@ -182,7 +200,23 @@ class FilingHistoryPutRequestValidatorTest {
                                                         .self(VALID_SELF_LINK)))
                                         .internalData(new InternalData()
                                                 .entityId("")
-                                                .deltaAt(VALID_DELTA_AT))))
+                                                .deltaAt(VALID_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty delta at",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(VALID_SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .companyNumber(COMPANY_NUMBER)
+                                                .deltaAt("")))
+                )
         );
     }
 }

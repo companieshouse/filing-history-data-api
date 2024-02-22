@@ -530,7 +530,7 @@ class FilingHistoryControllerIT {
                                                 .entityId(ENTITY_ID)
                                                 .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
                 Arguments.of(
-                        Named.of("Null self link",
+                        Named.of("Null link object",
                                 new InternalFilingHistoryApi()
                                         .externalData(new ExternalData()
                                                 .transactionId(TRANSACTION_ID)
@@ -541,6 +541,22 @@ class FilingHistoryControllerIT {
                                         .internalData(new InternalData()
                                                 .entityId(ENTITY_ID)
                                                 .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty self link",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self("")))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .companyNumber(COMPANY_NUMBER)
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))
+                ),
                 Arguments.of(
                         Named.of("Empty type",
                                 new InternalFilingHistoryApi()
@@ -609,7 +625,23 @@ class FilingHistoryControllerIT {
                                                         .self(SELF_LINK)))
                                         .internalData(new InternalData()
                                                 .entityId("")
-                                                .deltaAt(NEWEST_REQUEST_DELTA_AT))))
+                                                .deltaAt(NEWEST_REQUEST_DELTA_AT)))),
+                Arguments.of(
+                        Named.of("Empty delta at",
+                                new InternalFilingHistoryApi()
+                                        .externalData(new ExternalData()
+                                                .transactionId(TRANSACTION_ID)
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                                .category(ExternalData.CategoryEnum.OFFICERS)
+                                                .description(DESCRIPTION)
+                                                .links(new FilingHistoryItemDataLinks()
+                                                        .self(SELF_LINK)))
+                                        .internalData(new InternalData()
+                                                .entityId(ENTITY_ID)
+                                                .companyNumber(COMPANY_NUMBER)
+                                                .deltaAt("")))
+                )
         );
     }
 }
