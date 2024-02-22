@@ -19,7 +19,7 @@ public class DataMapper {
         return documentData
                 .type(data.getType())
                 .date(stringToInstant(data.getDate()))
-                .category(data.getCategory() == null ? null : data.getCategory().toString()) // NOSONAR
+                .category(data.getCategory().toString())
                 .subcategory(data.getSubcategory() == null ? null : data.getSubcategory().toString())
                 .description(data.getDescription())
                 .descriptionValues(descriptionValuesMapper.map(data.getDescriptionValues()))

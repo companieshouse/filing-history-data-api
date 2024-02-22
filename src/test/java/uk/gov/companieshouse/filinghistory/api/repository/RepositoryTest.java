@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
