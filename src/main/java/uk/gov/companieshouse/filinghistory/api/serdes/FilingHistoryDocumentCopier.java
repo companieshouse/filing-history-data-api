@@ -11,7 +11,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
-public class FilingHistoryDocumentCopier {
+public class FilingHistoryDocumentCopier implements ObjectCopier<FilingHistoryDocument> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
 

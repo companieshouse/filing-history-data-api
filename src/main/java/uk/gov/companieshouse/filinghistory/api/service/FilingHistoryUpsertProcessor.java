@@ -8,7 +8,7 @@ import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
+import uk.gov.companieshouse.filinghistory.api.serdes.ObjectCopier;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -20,12 +20,12 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
     private final Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator;
-    private final FilingHistoryDocumentCopier filingHistoryDocumentCopier;
+    private final ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
                                         AbstractTransactionMapperFactory mapperFactory,
                                         Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator,
-                                        FilingHistoryDocumentCopier filingHistoryDocumentCopier) {
+                                        ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
         this.filingHistoryPutRequestValidator = filingHistoryPutRequestValidator;
