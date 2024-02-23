@@ -54,6 +54,29 @@ class ResolutionsGetResponseMapperTest {
     }
 
     @Test
+    void shouldSuccessfullyMapResolutionsWithNullDescriptionValues() {
+        // given
+        final List<FilingHistoryItemDataResolutions> expected = List.of(
+                new FilingHistoryItemDataResolutions()
+                        .category(CATEGORY)
+                        .type(TYPE)
+                        .description(DESCRIPTION));
+
+        // when
+        final List<FilingHistoryItemDataResolutions> actual = resolutionsGetResponseMapper.map(
+                List.of(
+                        new FilingHistoryResolution()
+                                .category(CATEGORY)
+                                .type(TYPE)
+                                .description(DESCRIPTION))
+        );
+
+        // then
+        assertEquals(expected, actual);
+        verify(descriptionValuesGetResponseMapper).map(null);
+    }
+
+    @Test
     void shouldReturnNull() {
         // given
 

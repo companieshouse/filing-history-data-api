@@ -55,6 +55,29 @@ class AnnotationsGetResponseMapperTest {
     }
 
     @Test
+    void shouldSuccessfullyMapAnnotationsWithNulLDescriptionValues() {
+        // given
+        final List<FilingHistoryItemDataAnnotations> expected = List.of(
+                new FilingHistoryItemDataAnnotations()
+                        .annotation("annotations_1")
+                        .category(CATEGORY)
+                        .type(TYPE)
+                        .description(DESCRIPTION));
+
+        // when
+        final List<FilingHistoryItemDataAnnotations> actual = annotationsGetResponseMapper.map(List.of(
+                new FilingHistoryAnnotation()
+                        .annotation("annotations_1")
+                        .category(CATEGORY)
+                        .type(TYPE)
+                        .description(DESCRIPTION)));
+
+        // then
+        assertEquals(expected, actual);
+        verify(descriptionValuesGetResponseMapper).map(null);
+    }
+
+    @Test
     void shouldReturnNull() {
         // given
 
