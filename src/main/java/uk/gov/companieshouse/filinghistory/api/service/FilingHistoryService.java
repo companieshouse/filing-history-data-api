@@ -27,7 +27,9 @@ public class FilingHistoryService implements Service {
         this.repository = repository;
     }
 
-    public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId, final String companyNumber) {
+    @Override
+    public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId,
+                                                                     final String companyNumber) {
         return repository.findByIdAndCompanyNumber(transactionId, companyNumber);
     }
 

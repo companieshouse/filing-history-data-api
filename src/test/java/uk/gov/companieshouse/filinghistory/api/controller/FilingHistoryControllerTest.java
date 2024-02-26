@@ -79,7 +79,7 @@ class FilingHistoryControllerTest {
     }
 
     @Test
-    void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() throws Exception {
+    void shouldReturn503ErrorCodeWhenResultIsServiceUnavailable() {
         // given
         doThrow(ServiceUnavailableException.class)
                 .when(upsertProcessor).processFilingHistory(anyString(), anyString(), any());

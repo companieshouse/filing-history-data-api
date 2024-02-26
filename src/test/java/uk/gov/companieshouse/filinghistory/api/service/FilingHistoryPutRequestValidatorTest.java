@@ -26,7 +26,7 @@ class FilingHistoryPutRequestValidatorTest {
     private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
 
-    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new FilingHistoryPutRequestValidator<>();
+    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new FilingHistoryPutRequestValidator();
 
     @ParameterizedTest
     @MethodSource("badRequestScenarios")

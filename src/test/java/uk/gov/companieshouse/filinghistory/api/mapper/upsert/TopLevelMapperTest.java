@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -124,7 +123,6 @@ class TopLevelMapperTest {
         FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument);
 
         // then
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
         verify(instantSupplier).get();

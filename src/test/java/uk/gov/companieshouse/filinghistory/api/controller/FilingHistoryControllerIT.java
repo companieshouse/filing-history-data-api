@@ -120,7 +120,7 @@ class FilingHistoryControllerIT {
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
         final FilingHistoryDocument expectedDocument =
-                getExpectedFilingHistoryDocument(null, null, null, null);
+                getExpectedFilingHistoryDocument(null, null, null);
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -158,7 +158,7 @@ class FilingHistoryControllerIT {
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument =
-                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, null, 1,
+                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
                         List.of(new FilingHistoryAnnotation()
                                 .annotation("annotation")
                                 .descriptionValues(new FilingHistoryDescriptionValues()
@@ -444,7 +444,6 @@ class FilingHistoryControllerIT {
     }
 
     private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
-                                                                          Boolean isPaperFiled,
                                                                           Integer pages,
                                                                           List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
@@ -465,7 +464,7 @@ class FilingHistoryControllerIT {
                                 .documentMetadata(documentMetadata)
                                 .self(SELF_LINK))
                         .pages(pages)
-                        .paperFiled(isPaperFiled))
+                        .paperFiled(null))
                 .barcode(BARCODE)
                 .deltaAt(FilingHistoryControllerIT.NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)

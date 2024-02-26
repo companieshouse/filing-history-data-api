@@ -68,7 +68,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() throws Exception {
+    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -96,7 +96,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() throws Exception {
+    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(503);

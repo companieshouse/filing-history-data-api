@@ -51,29 +51,29 @@ class ResourceChangedRequestMapperTest {
         return Stream.of(
                 Arguments.of(
                         Named.of("Test resource-changed scenario with event type of changed",
-                        ResourceChangedTestArgument.ResourceChangedTestArgumentBuilder()
-                                .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "12345678", "ABCDE54321", null, false))
-                                .withContextId(EXPECTED_CONTEXT_ID)
-                                .withResourceUri("/company/12345678/filing-history/ABCDE54321")
-                                .withResourceKind("filing-history")
-                                .withEventType("changed")
-                                .withEventPublishedAt(UPDATED_AT.toString())
-                                .build()
+                                ResourceChangedTestArgument.ResourceChangedTestArgumentBuilder()
+                                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "12345678", "ABCDE54321", null, false))
+                                        .withContextId(EXPECTED_CONTEXT_ID)
+                                        .withResourceUri("/company/12345678/filing-history/ABCDE54321")
+                                        .withResourceKind("filing-history")
+                                        .withEventType("changed")
+                                        .withEventPublishedAt(UPDATED_AT.toString())
+                                        .build()
                         )
                 ),
                 Arguments.of(
-                    Named.of("Test resource-changed scenario with event type of deleted",
-                    ResourceChangedTestArgument.ResourceChangedTestArgumentBuilder()
-                            .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "12345678", "ABCDE54321",
-                                    deletedData, true))
-                            .withContextId(EXPECTED_CONTEXT_ID)
-                            .withResourceUri("/company/12345678/filing-history/ABCDE54321")
-                            .withResourceKind("filing-history")
-                            .withEventType("deleted")
-                            .withDeletedData(deletedData)
-                            .withEventPublishedAt(UPDATED_AT.toString())
-                            .build()
-                    )
+                        Named.of("Test resource-changed scenario with event type of deleted",
+                                ResourceChangedTestArgument.ResourceChangedTestArgumentBuilder()
+                                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "12345678", "ABCDE54321",
+                                                deletedData, true))
+                                        .withContextId(EXPECTED_CONTEXT_ID)
+                                        .withResourceUri("/company/12345678/filing-history/ABCDE54321")
+                                        .withResourceKind("filing-history")
+                                        .withEventType("deleted")
+                                        .withDeletedData(deletedData)
+                                        .withEventPublishedAt(UPDATED_AT.toString())
+                                        .build()
+                        )
                 )
         );
     }
@@ -81,71 +81,71 @@ class ResourceChangedRequestMapperTest {
     private record ResourceChangedTestArgument(ResourceChangedRequest request, ChangedResource changedResource) {
 
         public static ResourceChangedTestArgumentBuilder ResourceChangedTestArgumentBuilder() {
-                return new ResourceChangedTestArgumentBuilder();
+            return new ResourceChangedTestArgumentBuilder();
+        }
+
+        private static class ResourceChangedTestArgumentBuilder {
+
+            private ResourceChangedRequest request;
+            private String resourceUri;
+            private String resourceKind;
+            private String contextId;
+            private String eventType;
+            private String eventPublishedAt;
+            private Object deletedData;
+
+            public ResourceChangedTestArgumentBuilder withRequest(ResourceChangedRequest request) {
+                this.request = request;
+                return this;
             }
 
-            private static class ResourceChangedTestArgumentBuilder {
-
-                private ResourceChangedRequest request;
-                private String resourceUri;
-                private String resourceKind;
-                private String contextId;
-                private String eventType;
-                private String eventPublishedAt;
-                private Object deletedData;
-
-                public ResourceChangedTestArgumentBuilder withRequest(ResourceChangedRequest request) {
-                    this.request = request;
-                    return this;
-                }
-
-                public ResourceChangedTestArgumentBuilder withResourceUri(String resourceUri) {
-                    this.resourceUri = resourceUri;
-                    return this;
-                }
-
-                public ResourceChangedTestArgumentBuilder withResourceKind(String resourceKind) {
-                    this.resourceKind = resourceKind;
-                    return this;
-                }
-
-                public ResourceChangedTestArgumentBuilder withContextId(String contextId) {
-                    this.contextId = contextId;
-                    return this;
-                }
-
-                public ResourceChangedTestArgumentBuilder withEventType(String eventType) {
-                    this.eventType = eventType;
-                    return this;
-                }
-
-                public ResourceChangedTestArgumentBuilder withEventPublishedAt(String eventPublishedAt) {
-                    this.eventPublishedAt = eventPublishedAt;
-                    return this;
-                }
-
-                public ResourceChangedTestArgumentBuilder withDeletedData(Object deletedData) {
-                    this.deletedData = deletedData;
-                    return this;
-                }
-
-                public ResourceChangedTestArgument build() {
-                    ChangedResource changedResource = new ChangedResource();
-                    changedResource.setResourceUri(this.resourceUri);
-                    changedResource.setResourceKind(this.resourceKind);
-                    changedResource.setContextId(this.contextId);
-                    ChangedResourceEvent event = new ChangedResourceEvent();
-                    event.setType(this.eventType);
-                    event.setPublishedAt(this.eventPublishedAt);
-                    changedResource.setEvent(event);
-                    changedResource.setDeletedData(deletedData);
-                    return new ResourceChangedTestArgument(this.request, changedResource);
-                }
+            public ResourceChangedTestArgumentBuilder withResourceUri(String resourceUri) {
+                this.resourceUri = resourceUri;
+                return this;
             }
 
-            @Override
-            public String toString() {
-                return this.request.toString();
+            public ResourceChangedTestArgumentBuilder withResourceKind(String resourceKind) {
+                this.resourceKind = resourceKind;
+                return this;
+            }
+
+            public ResourceChangedTestArgumentBuilder withContextId(String contextId) {
+                this.contextId = contextId;
+                return this;
+            }
+
+            public ResourceChangedTestArgumentBuilder withEventType(String eventType) {
+                this.eventType = eventType;
+                return this;
+            }
+
+            public ResourceChangedTestArgumentBuilder withEventPublishedAt(String eventPublishedAt) {
+                this.eventPublishedAt = eventPublishedAt;
+                return this;
+            }
+
+            public ResourceChangedTestArgumentBuilder withDeletedData(Object deletedData) {
+                this.deletedData = deletedData;
+                return this;
+            }
+
+            public ResourceChangedTestArgument build() {
+                ChangedResource changedResource = new ChangedResource();
+                changedResource.setResourceUri(this.resourceUri);
+                changedResource.setResourceKind(this.resourceKind);
+                changedResource.setContextId(this.contextId);
+                ChangedResourceEvent event = new ChangedResourceEvent();
+                event.setType(this.eventType);
+                event.setPublishedAt(this.eventPublishedAt);
+                changedResource.setEvent(event);
+                changedResource.setDeletedData(deletedData);
+                return new ResourceChangedTestArgument(this.request, changedResource);
             }
         }
+
+        @Override
+        public String toString() {
+            return this.request.toString();
+        }
+    }
 }
