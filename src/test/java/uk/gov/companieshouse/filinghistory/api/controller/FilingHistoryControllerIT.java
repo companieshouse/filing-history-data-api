@@ -466,7 +466,7 @@ class FilingHistoryControllerIT {
                         .pages(pages)
                         .paperFiled(null))
                 .barcode(BARCODE)
-                .deltaAt(FilingHistoryControllerIT.NEWEST_REQUEST_DELTA_AT)
+                .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)
                 .updatedAt(UPDATED_AT)
                 .updatedBy(UPDATED_BY)

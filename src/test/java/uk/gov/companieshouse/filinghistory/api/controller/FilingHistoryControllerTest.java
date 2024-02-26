@@ -47,7 +47,7 @@ class FilingHistoryControllerTest {
     private ExternalData responseBody;
 
     @Test
-    void shouldReturn200OKWhenPutRequest() throws Exception {
+    void shouldReturn200OKWhenPutRequest() {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity
                 .status(HttpStatus.OK)
