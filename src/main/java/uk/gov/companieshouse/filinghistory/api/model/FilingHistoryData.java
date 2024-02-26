@@ -151,12 +151,19 @@ public class FilingHistoryData {
             return false;
         }
         FilingHistoryData that = (FilingHistoryData) o;
-        return Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(category, that.category) && Objects.equals(subcategory, that.subcategory) && Objects.equals(description, that.description) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(annotations, that.annotations) && Objects.equals(resolutions, that.resolutions) && Objects.equals(associatedFilings, that.associatedFilings) && Objects.equals(actionDate, that.actionDate) && Objects.equals(pages, that.pages) && Objects.equals(paperFiled, that.paperFiled) && Objects.equals(links, that.links);
+        return Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(category,
+                that.category) && Objects.equals(subcategory, that.subcategory) && Objects.equals(description,
+                that.description) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(
+                annotations, that.annotations) && Objects.equals(resolutions, that.resolutions) && Objects.equals(
+                associatedFilings, that.associatedFilings) && Objects.equals(actionDate, that.actionDate)
+                && Objects.equals(pages, that.pages) && Objects.equals(paperFiled, that.paperFiled) && Objects.equals(
+                links, that.links);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, date, category, subcategory, description, descriptionValues, annotations, resolutions, associatedFilings, actionDate, pages, paperFiled, links);
+        return Objects.hash(type, date, category, subcategory, description, descriptionValues, annotations, resolutions,
+                associatedFilings, actionDate, pages, paperFiled, links);
     }
 
     @Override

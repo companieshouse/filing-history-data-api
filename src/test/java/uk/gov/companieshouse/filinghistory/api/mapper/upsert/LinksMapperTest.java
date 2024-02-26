@@ -36,6 +36,5 @@ class LinksMapperTest {
 
         // then
         assertNull(actual);
-
     }
 }
