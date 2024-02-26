@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.ExternalData.SubcategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
@@ -60,7 +61,30 @@ class DataMapperTest {
                 .paperFiled(true);
 
         // when
-        final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(), new FilingHistoryData());
+        final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(SubcategoryEnum.TERMINATION), new FilingHistoryData());
+
+        // then
+        assertEquals(expectedData, actualData);
+        verify(descriptionValuesMapper).map(requestDescriptionValues);
+    }
+
+    @Test
+    void mapShouldReturnFilingHistoryDataWithNullSubcategoryWhenNewData() {
+        // given
+        when(descriptionValuesMapper.map(any())).thenReturn(expectedDescriptionValues);
+
+        final FilingHistoryData expectedData = new FilingHistoryData()
+                .type(TM01_TYPE)
+                .date(DATE_AS_INSTANT)
+                .category("officers")
+                .subcategory(null)
+                .description("description")
+                .descriptionValues(expectedDescriptionValues)
+                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
+                .paperFiled(true);
+
+        // when
+        final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(null), new FilingHistoryData());
 
         // then
         assertEquals(expectedData, actualData);
@@ -87,14 +111,14 @@ class DataMapperTest {
                 .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")));
 
         // when
-        final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(), existingData);
+        final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(SubcategoryEnum.TERMINATION), existingData);
 
         // then
         assertEquals(expectedData, actualData);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
 
-    private ExternalData buildRequestExternalData() {
+    private ExternalData buildRequestExternalData(SubcategoryEnum subcategory) {
         return new ExternalData()
                 .transactionId(TRANSACTION_ID)
                 .barcode(BARCODE)
@@ -102,7 +126,7 @@ class DataMapperTest {
                 .date(DATE)
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .subcategory(subcategory)
                 .description("description")
                 .descriptionValues(requestDescriptionValues)
                 .pages(1) // should not be mapped, persisted by document store sub delta

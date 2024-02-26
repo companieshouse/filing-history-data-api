@@ -1,17 +1,17 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
@@ -119,12 +120,10 @@ class TopLevelMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Optional<FilingHistoryDocument> actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request,
-                existingDocument);
+        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument);
 
         // then
-        assertTrue(actualDocument.isPresent());
-        assertEquals(expectedDocument, actualDocument.get());
+        assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
         verify(instantSupplier).get();
         verify(originalValuesMapper).map(requestOriginalValues);
@@ -142,11 +141,10 @@ class TopLevelMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Optional<FilingHistoryDocument> actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request,
-                existingDocument);
+        Executable executable = () -> topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument);
 
         // then
-        assertTrue(actualDocument.isEmpty());
+        assertThrows(ConflictException.class, executable);
         verifyNoInteractions(dataMapper);
         verifyNoInteractions(originalValuesMapper);
         verifyNoInteractions(instantSupplier);

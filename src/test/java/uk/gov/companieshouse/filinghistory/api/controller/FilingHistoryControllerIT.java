@@ -3,9 +3,11 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,7 +16,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -57,6 +60,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@WireMockTest(httpPort = 8888)
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
@@ -90,7 +94,6 @@ class FilingHistoryControllerIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
-    private static final WireMockServer server = new WireMockServer(8888);
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -98,30 +101,30 @@ class FilingHistoryControllerIT {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+
     @MockBean
     private Supplier<Instant> instantSupplier;
 
     @BeforeAll
     static void start() {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
-        server.start();
     }
 
     @BeforeEach
     void setUp() {
         mongoTemplate.dropCollection(FILING_HISTORY_COLLECTION);
         mongoTemplate.createCollection(FILING_HISTORY_COLLECTION);
-        server.resetAll();
     }
 
     @Test
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
-        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(null, null, null);
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(null, null, null);
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(200)));
 
@@ -143,8 +146,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        server.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -155,15 +157,16 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
-                List.of(new FilingHistoryAnnotation()
-                        .annotation("annotation")
-                        .descriptionValues(new FilingHistoryDescriptionValues()
-                                .description("description"))));
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
+                        List.of(new FilingHistoryAnnotation()
+                                .annotation("annotation")
+                                .descriptionValues(new FilingHistoryDescriptionValues()
+                                        .description("description"))));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        server.stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(200)));
 
@@ -185,35 +188,7 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        server.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
-    }
-
-    @Test
-    void shouldNotUpdateDocumentAndShouldReturn409ConflictWhenDeltaStale() throws Exception {
-        // given
-        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
-        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
-
-        final InternalFilingHistoryApi request = buildPutRequestBody(STALE_REQUEST_DELTA_AT);
-
-        // when
-        final ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isConflict());
-        result.andExpect(MockMvcResultMatchers.header().doesNotExist(LOCATION));
-
-        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
-        assertEquals(EXISTING_DELTA_AT, actualDocument.getDeltaAt());
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -263,6 +238,94 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void shouldReturn400BadRequestWhenInvalidFieldsSentInRequestBody() throws Exception {
+        // given
+        InternalFilingHistoryApi requestBody = new InternalFilingHistoryApi()
+                .externalData(new ExternalData()
+                        .type(TM01_TYPE)
+                        .date(DATE)
+                        .category(ExternalData.CategoryEnum.OFFICERS)
+                        .description(DESCRIPTION)
+                        .links(new FilingHistoryItemDataLinks()
+                                .self(SELF_LINK)))
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID)
+                        .deltaAt(NEWEST_REQUEST_DELTA_AT));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldReturn401UnauthorisedWhenNoIdentity() throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(buildPutRequestBody(NEWEST_REQUEST_DELTA_AT))));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldReturn403ForbiddenWhenNoInternalAppPrivileges() throws Exception {
+        // given
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(buildPutRequestBody(NEWEST_REQUEST_DELTA_AT))));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isForbidden());
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldNotUpdateDocumentAndShouldReturn409ConflictWhenDeltaStale() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        final InternalFilingHistoryApi request = buildPutRequestBody(STALE_REQUEST_DELTA_AT);
+
+        // when
+        final ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isConflict());
+        result.andExpect(MockMvcResultMatchers.header().doesNotExist(LOCATION));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(EXISTING_DELTA_AT, actualDocument.getDeltaAt());
+    }
+
+    @Test
     void shouldReturn404NotFoundWhenNoDocumentInDB() throws Exception {
         // given
 
@@ -275,6 +338,69 @@ class FilingHistoryControllerIT {
 
         // then
         result.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB() throws Exception {
+        // given
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(503)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndDocumentShouldBeRolledBackToPreviousState() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(503)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+
+        assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
@@ -313,13 +439,13 @@ class FilingHistoryControllerIT {
                         .terminationDate(ACTION_AND_TERMINATION_DATE))
                 .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE)
-                .paperFiled(true)
                 .links(new FilingHistoryItemDataLinks()
                         .self(SELF_LINK));
     }
 
-    private static FilingHistoryDocument getExpectedFilingHistoryDocument(String documentMetadata, Integer pages,
-            List<FilingHistoryAnnotation> annotations) {
+    private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
+                                                                          Integer pages,
+                                                                          List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
@@ -330,7 +456,6 @@ class FilingHistoryControllerIT {
                         .description(DESCRIPTION)
                         .subcategory(SUBCATEGORY)
                         .date(DATE_AS_INSTANT)
-                        .paperFiled(true)
                         .descriptionValues(new FilingHistoryDescriptionValues()
                                 .terminationDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
                                 .officerName(OFFICER_NAME))
@@ -338,7 +463,8 @@ class FilingHistoryControllerIT {
                         .links(new FilingHistoryLinks()
                                 .documentMetadata(documentMetadata)
                                 .self(SELF_LINK))
-                        .pages(pages))
+                        .pages(pages)
+                        .paperFiled(null))
                 .barcode(BARCODE)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)

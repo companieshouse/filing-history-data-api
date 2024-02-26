@@ -20,7 +20,7 @@ public class DataMapper {
                 .type(data.getType())
                 .date(stringToInstant(data.getDate()))
                 .category(data.getCategory().toString())
-                .subcategory(data.getSubcategory().toString())
+                .subcategory(data.getSubcategory() == null ? null : data.getSubcategory().toString())
                 .description(data.getDescription())
                 .descriptionValues(descriptionValuesMapper.map(data.getDescriptionValues()))
                 .actionDate(stringToInstant(data.getActionDate()))

@@ -37,7 +37,7 @@ public class ItemGetResponseMapper {
                 .barcode(document.getBarcode())
                 .type(data.getType())
                 .date(convertInstantToLocalDateString(data.getDate()))
-                .category(data.getCategory() == null ? null : CategoryEnum.fromValue(data.getCategory()))
+                .category(CategoryEnum.fromValue(data.getCategory()))
                 .subcategory(data.getSubcategory() == null ? null : SubcategoryEnum.fromValue(data.getSubcategory()))
                 .annotations(annotationsGetResponseMapper.map(data.getAnnotations()))
                 .resolutions(resolutionsGetResponseMapper.map(data.getResolutions()))

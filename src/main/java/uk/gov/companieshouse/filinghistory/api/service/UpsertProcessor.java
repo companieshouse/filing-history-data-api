@@ -4,5 +4,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
 public interface UpsertProcessor {
 
-    ServiceResult processFilingHistory(final String transactionId, final InternalFilingHistoryApi request);
+    void processFilingHistory(final String transactionId,
+                              final String companyNumber,
+                              final InternalFilingHistoryApi request);
 }

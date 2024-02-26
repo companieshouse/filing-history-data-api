@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,17 @@ class DescriptionValuesGetResponseMapperTest {
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldReturnNullWhenPassedNullDescriptionValues() {
+        // given
+
+        // when
+        final FilingHistoryItemDataDescriptionValues actual = mapper.map(null);
+
+        // then
+        assertNull(actual);
     }
 
     private static FilingHistoryDescriptionValues buildDocumentDescriptionValues() {

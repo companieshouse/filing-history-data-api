@@ -54,6 +54,27 @@ class AssociatedFilingsGetResponseMapperTest {
     }
 
     @Test
+    void shouldSuccessfullyMapAssociatedFilingsWithNullDescriptionValues() {
+        // given
+        final List<FilingHistoryItemDataAssociatedFilings> expected = List.of(
+                new FilingHistoryItemDataAssociatedFilings()
+                        .category(CATEGORY)
+                        .type(TYPE)
+                        .description(DESCRIPTION));
+
+        // when
+        final List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingsGetResponseMapper.map(List.of(
+                new FilingHistoryAssociatedFiling()
+                        .category(CATEGORY)
+                        .type(TYPE)
+                        .description(DESCRIPTION)));
+
+        // then
+        assertEquals(expected, actual);
+        verify(descriptionValuesGetResponseMapper).map(null);
+    }
+
+    @Test
     void shouldReturnNull() {
         // given
 

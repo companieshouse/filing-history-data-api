@@ -24,15 +24,14 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
     }
 
     @Override
-    public ExternalData processGetSingleFilingHistory(String companyNumber, String transactionId) {
+    public ExternalData processGetSingleFilingHistory(final String transactionId, final String companyNumber) {
         return itemGetResponseMapper.mapFilingHistoryItem(
-                filingHistoryService.findExistingFilingHistory(transactionId)
+                filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                         .orElseGet(() -> {
-                            LOGGER.error("Record with transaction ID: [%s] could not be found in MongoDB"
-                                    .formatted(transactionId), DataMapHolder.getLogMap());
+                            LOGGER.error("Record could not be found in MongoDB",
+                                    DataMapHolder.getLogMap());
 
-                            throw new NotFoundException("Record with transaction ID: [%s] could not be found in MongoDB"
-                                    .formatted(transactionId));
+                            throw new NotFoundException("Record could not be found in MongoDB");
                         }));
     }
 }

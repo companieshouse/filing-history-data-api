@@ -23,6 +23,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 class FilingHistoryGetResponseProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String COMPANY_NUMBER = "12345678";
 
     @InjectMocks
     private FilingHistoryGetResponseProcessor processor;
@@ -42,28 +43,28 @@ class FilingHistoryGetResponseProcessorTest {
         // given
         final ExternalData expected = externalData;
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(externalData);
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
 
         // when
-        final ExternalData actual = processor.processGetSingleFilingHistory("12345678", TRANSACTION_ID);
+        final ExternalData actual = processor.processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertEquals(expected, actual);
         verify(itemGetResponseMapper).mapFilingHistoryItem(existingDocument);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test
     void shouldThrowNotFoundExceptionWhenNoDocumentInDB() {
         // given
-        when(filingHistoryService.findExistingFilingHistory(any())).thenReturn(Optional.empty());
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
 
         // when
-        Executable executable = () -> processor.processGetSingleFilingHistory("12345678", TRANSACTION_ID);
+        Executable executable = () -> processor.processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertThrows(NotFoundException.class, executable);
         verifyNoInteractions(itemGetResponseMapper);
-        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
 }

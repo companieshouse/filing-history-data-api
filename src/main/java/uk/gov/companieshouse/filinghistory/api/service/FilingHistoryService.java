@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
@@ -26,32 +27,39 @@ public class FilingHistoryService implements Service {
         this.repository = repository;
     }
 
-    public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId) {
-        return repository.findById(transactionId);
-    }
-
-    public ServiceResult insertFilingHistory(final FilingHistoryDocument documentToSave) {
-        return handleTransaction(documentToSave, null);
+    @Override
+    public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId,
+                                                                     final String companyNumber) {
+        return repository.findByIdAndCompanyNumber(transactionId, companyNumber);
     }
 
     @Override
-    public ServiceResult updateFilingHistory(FilingHistoryDocument documentToSave,
-            FilingHistoryDocument existingDocument) {
-        return handleTransaction(documentToSave, existingDocument);
+    public void insertFilingHistory(final FilingHistoryDocument documentToSave) {
+        handleTransaction(documentToSave, null);
     }
 
-    private ServiceResult handleTransaction(FilingHistoryDocument documentToSave,
-            FilingHistoryDocument existingDocument) {
-        // Add compensatory transaction as part of DSND-2280.
+    @Override
+    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
+        handleTransaction(documentToSave, originalDocumentCopy);
+    }
+
+    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
+
         ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
                         documentToSave.getTransactionId(), null, false));
 
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            LOGGER.error("Call to resource-changed endpoint was not 200 OK", DataMapHolder.getLogMap());
-            return ServiceResult.SERVICE_UNAVAILABLE;
+            if (originalDocumentCopy == null) {
+                repository.deleteById(documentToSave.getTransactionId());
+                LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
+            } else {
+                repository.save(originalDocumentCopy);
+                LOGGER.info("Reverting previously inserted document", DataMapHolder.getLogMap());
+            }
+            LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("Resource changed endpoint unavailable");
         }
-        return ServiceResult.UPSERT_SUCCESSFUL;
     }
 }
