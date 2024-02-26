@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +35,7 @@ public class FilingHistoryController {
     public ResponseEntity<Void> upsertFilingHistoryTransaction(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,
-            @RequestBody InternalFilingHistoryApi requestBody) throws JsonProcessingException {
+            @RequestBody InternalFilingHistoryApi requestBody) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber)
