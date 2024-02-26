@@ -2,10 +2,16 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.AltCapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.CapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
@@ -13,6 +19,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAltCapital;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryCapital;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
+@ExtendWith(MockitoExtension.class)
 class DescriptionValuesMapperTest {
 
     private static final String TERMINATION_DATE = "2022-01-31T00:00:00.00Z";
@@ -51,13 +58,23 @@ class DescriptionValuesMapperTest {
     private static final Instant CASE_START_DATE_INSTANT = Instant.parse(CASE_START_DATE);
     private static final Instant RESOLUTION_DATE_INSTANT = Instant.parse(RESOLUTION_DATE);
 
-    private final DescriptionValuesMapper mapper = new DescriptionValuesMapper(new CapitalDescriptionMapper());
+    @Mock
+    private CapitalDescriptionMapper capitalDescriptionMapper;
+    @Mock
+    private FilingHistoryCapital filingHistoryCapital;
+    @Mock
+    private FilingHistoryAltCapital filingHistoryAltCapital;
+
+    @InjectMocks
+    private DescriptionValuesMapper mapper;
 
     @Test
     void shouldMapDescriptionValues() {
         // given
-        FilingHistoryCapital filingHistoryCapital = new FilingHistoryCapital();
-        FilingHistoryAltCapital filingHistoryAltCapital = new FilingHistoryAltCapital();
+        when(capitalDescriptionMapper.mapCapitalDescriptionValueList(anyList())).thenReturn(
+                List.of(filingHistoryCapital));
+        when(capitalDescriptionMapper.mapAltCapitalDescriptionValueList(anyList())).thenReturn(
+                List.of(filingHistoryAltCapital));
 
         FilingHistoryItemDataDescriptionValues descriptionValues = new FilingHistoryItemDataDescriptionValues()
                 .altCapital(List.of(new AltCapitalDescriptionValue()))

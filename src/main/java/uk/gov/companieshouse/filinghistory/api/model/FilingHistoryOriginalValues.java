@@ -42,9 +42,6 @@ public class FilingHistoryOriginalValues {
     @Field("period_type")
     private String periodType;
 
-    @Field("extended")
-    private String extended;
-
     @Field("new_date")
     private String newDate;
 
@@ -180,15 +177,6 @@ public class FilingHistoryOriginalValues {
         return this;
     }
 
-    public String getExtended() {
-        return extended;
-    }
-
-    public FilingHistoryOriginalValues extended(String extended) {
-        this.extended = extended;
-        return this;
-    }
-
     public String getNewDate() {
         return newDate;
     }
@@ -291,7 +279,6 @@ public class FilingHistoryOriginalValues {
                 && Objects.equals(changeDate, that.changeDate)
                 && Objects.equals(accountingPeriod, that.accountingPeriod)
                 && Objects.equals(periodType, that.periodType)
-                && Objects.equals(extended, that.extended)
                 && Objects.equals(newDate, that.newDate)
                 && Objects.equals(notificationDate, that.notificationDate)
                 && Objects.equals(pscName, that.pscName)
@@ -304,7 +291,7 @@ public class FilingHistoryOriginalValues {
     public int hashCode() {
         return Objects.hash(officerName, resignationDate, chargeCreationDate, propertyAcquiredDate,
                 appointmentDate, caseStartDate, caseEndDate, madeUpDate, accType, changeDate,
-                accountingPeriod, periodType, extended, newDate, notificationDate, pscName,
+                accountingPeriod, periodType, newDate, notificationDate, pscName,
                 newRoAddress, resType, cessationDate);
     }
 
@@ -323,7 +310,6 @@ public class FilingHistoryOriginalValues {
                 ", changeDate='" + changeDate + '\'' +
                 ", accountingPeriod='" + accountingPeriod + '\'' +
                 ", periodType='" + periodType + '\'' +
-                ", extended='" + extended + '\'' +
                 ", newDate='" + newDate + '\'' +
                 ", notificationDate='" + notificationDate + '\'' +
                 ", pscName='" + pscName + '\'' +

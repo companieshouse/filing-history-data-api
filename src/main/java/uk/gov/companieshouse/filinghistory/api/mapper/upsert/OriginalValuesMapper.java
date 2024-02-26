@@ -25,7 +25,6 @@ public class OriginalValuesMapper {
                         .changeDate(values.getChangeDate())
                         .accountingPeriod(values.getAccountingPeriod())
                         .periodType(values.getPeriodType())
-                        .extended(values.getExtended())
                         .newDate(values.getNewDate())
                         .notificationDate(values.getNotificationDate())
                         .pscName(values.getPscName())

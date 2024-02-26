@@ -28,7 +28,6 @@ class OriginalValuesMapperTest {
     private static final String ACC_TYPE = "FULL";
     private static final String ACCOUNTING_PERIOD = "accounting period";
     private static final String PERIOD_TYPE = "period type";
-    private static final String EXTENDED = "extended";
     private static final String PSC_NAME = "psc name";
     private static final String NEW_RO_ADDRESS = "new ro address";
     private static final String RES_TYPE = "ADOPT ARTICLES";
@@ -52,7 +51,6 @@ class OriginalValuesMapperTest {
                 .officerName(OFFICER_NAME)
                 .accountingPeriod(ACCOUNTING_PERIOD)
                 .periodType(PERIOD_TYPE)
-                .extended(EXTENDED)
                 .newDate(NEW_DATE)
                 .notificationDate(NOTIFICATION_DATE)
                 .pscName(PSC_NAME)
@@ -76,7 +74,6 @@ class OriginalValuesMapperTest {
                 .officerName(OFFICER_NAME)
                 .accountingPeriod(ACCOUNTING_PERIOD)
                 .periodType(PERIOD_TYPE)
-                .extended(EXTENDED)
                 .newDate(NEW_DATE)
                 .notificationDate(NOTIFICATION_DATE)
                 .pscName(PSC_NAME)
