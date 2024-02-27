@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -84,6 +85,10 @@ public class FilingHistoryDescriptionValues {
     private String resType;
     @Field("resolution_date")
     private Instant resolutionDate;
+    @Field("capital")
+    private List<FilingHistoryCapital> capital;
+    @Field("alt_capital")
+    private List<FilingHistoryAltCapital> altCapital;
 
     public Instant getTerminationDate() {
         return terminationDate;
@@ -445,17 +450,82 @@ public class FilingHistoryDescriptionValues {
         return this;
     }
 
+    public List<FilingHistoryCapital> getCapital() {
+        return capital;
+    }
+
+    public FilingHistoryDescriptionValues capital(List<FilingHistoryCapital> capital) {
+        this.capital = capital;
+        return this;
+    }
+
+    public List<FilingHistoryAltCapital> getAltCapital() {
+        return altCapital;
+    }
+
+    public FilingHistoryDescriptionValues altCapital(List<FilingHistoryAltCapital> altCapital) {
+        this.altCapital = altCapital;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         FilingHistoryDescriptionValues that = (FilingHistoryDescriptionValues) o;
-        return Objects.equals(appointmentDate, that.appointmentDate) && Objects.equals(branchNumber, that.branchNumber) && Objects.equals(broughtDownDate, that.broughtDownDate) && Objects.equals(caseEndDate, that.caseEndDate) && Objects.equals(caseNumber, that.caseNumber) && Objects.equals(cessationDate, that.cessationDate) && Objects.equals(changeAddress, that.changeAddress) && Objects.equals(changeDate, that.changeDate) && Objects.equals(changeDetails, that.changeDetails) && Objects.equals(changeName, that.changeName) && Objects.equals(changeType, that.changeType) && Objects.equals(chargeCreationDate, that.chargeCreationDate) && Objects.equals(chargeNumber, that.chargeNumber) && Objects.equals(closeDate, that.closeDate) && Objects.equals(companyNumber, that.companyNumber) && Objects.equals(companyType, that.companyType) && Objects.equals(date, that.date) && Objects.equals(defaultAddress, that.defaultAddress) && Objects.equals(description, that.description) && Objects.equals(formAttached, that.formAttached) && Objects.equals(formType, that.formType) && Objects.equals(incorporationDate, that.incorporationDate) && Objects.equals(madeUpDate, that.madeUpDate) && Objects.equals(newAddress, that.newAddress) && Objects.equals(newDate, that.newDate) && Objects.equals(newJurisdiction, that.newJurisdiction) && Objects.equals(notificationDate, that.notificationDate) && Objects.equals(officerAddress, that.officerAddress) && Objects.equals(terminationDate, that.terminationDate) && Objects.equals(officerName, that.officerName) && Objects.equals(oldAddress, that.oldAddress) && Objects.equals(oldJurisdiction, that.oldJurisdiction) && Objects.equals(originalDescription, that.originalDescription) && Objects.equals(propertyAcquiredDate, that.propertyAcquiredDate) && Objects.equals(pscName, that.pscName) && Objects.equals(representativeDetails, that.representativeDetails) && Objects.equals(withdrawalDate, that.withdrawalDate) && Objects.equals(caseStartDate, that.caseStartDate) && Objects.equals(resType, that.resType) && Objects.equals(resolutionDate, that.resolutionDate);
+        return Objects.equals(appointmentDate, that.appointmentDate)
+                && Objects.equals(branchNumber, that.branchNumber)
+                && Objects.equals(broughtDownDate, that.broughtDownDate)
+                && Objects.equals(caseEndDate, that.caseEndDate) && Objects.equals(
+                caseNumber, that.caseNumber) && Objects.equals(cessationDate,
+                that.cessationDate) && Objects.equals(changeAddress, that.changeAddress)
+                && Objects.equals(changeDate, that.changeDate) && Objects.equals(
+                changeDetails, that.changeDetails) && Objects.equals(changeName,
+                that.changeName) && Objects.equals(changeType, that.changeType)
+                && Objects.equals(chargeCreationDate, that.chargeCreationDate)
+                && Objects.equals(chargeNumber, that.chargeNumber)
+                && Objects.equals(closeDate, that.closeDate) && Objects.equals(
+                companyNumber, that.companyNumber) && Objects.equals(companyType,
+                that.companyType) && Objects.equals(date, that.date)
+                && Objects.equals(defaultAddress, that.defaultAddress)
+                && Objects.equals(description, that.description) && Objects.equals(
+                formAttached, that.formAttached) && Objects.equals(formType, that.formType)
+                && Objects.equals(incorporationDate, that.incorporationDate)
+                && Objects.equals(madeUpDate, that.madeUpDate) && Objects.equals(
+                newAddress, that.newAddress) && Objects.equals(newDate, that.newDate)
+                && Objects.equals(newJurisdiction, that.newJurisdiction)
+                && Objects.equals(notificationDate, that.notificationDate)
+                && Objects.equals(officerAddress, that.officerAddress)
+                && Objects.equals(terminationDate, that.terminationDate)
+                && Objects.equals(officerName, that.officerName) && Objects.equals(
+                oldAddress, that.oldAddress) && Objects.equals(oldJurisdiction,
+                that.oldJurisdiction) && Objects.equals(originalDescription,
+                that.originalDescription) && Objects.equals(propertyAcquiredDate,
+                that.propertyAcquiredDate) && Objects.equals(pscName, that.pscName)
+                && Objects.equals(representativeDetails, that.representativeDetails)
+                && Objects.equals(withdrawalDate, that.withdrawalDate)
+                && Objects.equals(caseStartDate, that.caseStartDate)
+                && Objects.equals(resType, that.resType) && Objects.equals(
+                resolutionDate, that.resolutionDate) && Objects.equals(capital, that.capital)
+                && Objects.equals(altCapital, that.altCapital);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(appointmentDate, branchNumber, broughtDownDate, caseEndDate, caseNumber, cessationDate, changeAddress, changeDate, changeDetails, changeName, changeType, chargeCreationDate, chargeNumber, closeDate, companyNumber, companyType, date, defaultAddress, description, formAttached, formType, incorporationDate, madeUpDate, newAddress, newDate, newJurisdiction, notificationDate, officerAddress, terminationDate, officerName, oldAddress, oldJurisdiction, originalDescription, propertyAcquiredDate, pscName, representativeDetails, withdrawalDate, caseStartDate, resType, resolutionDate);
+        return Objects.hash(appointmentDate, branchNumber, broughtDownDate, caseEndDate, caseNumber,
+                cessationDate, changeAddress, changeDate, changeDetails, changeName, changeType,
+                chargeCreationDate, chargeNumber, closeDate, companyNumber, companyType, date,
+                defaultAddress, description, formAttached, formType, incorporationDate, madeUpDate,
+                newAddress, newDate, newJurisdiction, notificationDate, officerAddress,
+                terminationDate,
+                officerName, oldAddress, oldJurisdiction, originalDescription, propertyAcquiredDate,
+                pscName, representativeDetails, withdrawalDate, caseStartDate, resType,
+                resolutionDate,
+                capital, altCapital);
     }
 
     @Override
@@ -501,6 +571,8 @@ public class FilingHistoryDescriptionValues {
                 ", caseStartDate=" + caseStartDate +
                 ", resType='" + resType + '\'' +
                 ", resolutionDate=" + resolutionDate +
+                ", capital=" + capital +
+                ", altCapital=" + altCapital +
                 '}';
     }
 }
