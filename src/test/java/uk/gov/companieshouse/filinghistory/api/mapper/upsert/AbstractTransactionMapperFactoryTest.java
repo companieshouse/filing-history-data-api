@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ANNOTATION;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,8 @@ class AbstractTransactionMapperFactoryTest {
 
     @Mock
     private TopLevelTransactionMapper topLevelTransactionMapper;
+    @Mock
+    private AnnotationTransactionMapper annotationTransactionMapper;
 
     @Test
     void shouldReturnTopLevelTransactionMapperWhenTopLevelKindPassed() {
@@ -36,8 +39,20 @@ class AbstractTransactionMapperFactoryTest {
         assertEquals(topLevelTransactionMapper, actualMapper);
     }
 
+    @Test
+    void shouldReturnAnnotationTransactionMapperWhenAnnotationKindPassed() {
+        // given
+
+        // when
+        AbstractTransactionMapper actualMapper = factory.getTransactionMapper(ANNOTATION);
+
+        // then
+        assertInstanceOf(AnnotationTransactionMapper.class, actualMapper);
+        assertEquals(annotationTransactionMapper, actualMapper);
+    }
+
     @ParameterizedTest
-    @CsvSource({"annotation", "resolution", "associated-filing"})
+    @CsvSource({"resolution", "associated-filing"})
     void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper(String kind) {
         // given
 

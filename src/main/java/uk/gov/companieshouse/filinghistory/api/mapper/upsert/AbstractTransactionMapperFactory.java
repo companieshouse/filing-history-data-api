@@ -14,16 +14,19 @@ public class AbstractTransactionMapperFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final TopLevelTransactionMapper topLevelTransactionMapper;
+    private final AnnotationTransactionMapper annotationTransactionMapper;
 
-    public AbstractTransactionMapperFactory(TopLevelTransactionMapper topLevelTransactionMapper) {
+    public AbstractTransactionMapperFactory(TopLevelTransactionMapper topLevelTransactionMapper, AnnotationTransactionMapper annotationTransactionMapper) {
         this.topLevelTransactionMapper = topLevelTransactionMapper;
+        this.annotationTransactionMapper = annotationTransactionMapper;
     }
 
     public AbstractTransactionMapper getTransactionMapper(TransactionKindEnum kind) {
         LOGGER.debug("Getting mapper for [%s] transaction kind".formatted(kind.getValue()), DataMapHolder.getLogMap());
         return switch (kind) {
             case TOP_LEVEL -> topLevelTransactionMapper;
-            case ANNOTATION, RESOLUTION, ASSOCIATED_FILING -> {
+            case ANNOTATION -> annotationTransactionMapper;
+            case RESOLUTION, ASSOCIATED_FILING -> {
                 LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()));
                 throw new InvalidMapperException("Invalid transaction kind: %s".formatted(kind.getValue()));
             }
