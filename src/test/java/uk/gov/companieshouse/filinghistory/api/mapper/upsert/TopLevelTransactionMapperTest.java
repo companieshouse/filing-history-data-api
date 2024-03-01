@@ -27,7 +27,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
-class TopLevelMapperTest {
+class TopLevelTransactionMapperTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String ENTITY_ID = "1234567890";

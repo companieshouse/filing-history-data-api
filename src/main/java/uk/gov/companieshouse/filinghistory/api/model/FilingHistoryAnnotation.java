@@ -11,8 +11,19 @@ public class FilingHistoryAnnotation {
     private String description;
     private String type;
     private Instant date;
+    @Field("entity_id")
+    private String entityId;
     @Field("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public FilingHistoryAnnotation entityId(String entityId) {
+        this.entityId = entityId;
+        return this;
+    }
 
     public String getAnnotation() {
         return annotation;
