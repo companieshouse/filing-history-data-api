@@ -10,7 +10,7 @@ public class FilingHistoryData {
     private String type;
     private Instant date;
     private String category;
-    private String subcategory;
+    private Object subcategory;
     private String description;
     @Field("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
@@ -52,12 +52,17 @@ public class FilingHistoryData {
         return this;
     }
 
-    public String getSubcategory() {
+    public Object getSubcategory() {
         return subcategory;
     }
 
     public FilingHistoryData subcategory(String subcategory) {
         this.subcategory = subcategory;
+        return this;
+    }
+
+    public FilingHistoryData subcategory(List<String> subcategories) {
+        this.subcategory = subcategories;
         return this;
     }
 
@@ -151,13 +156,14 @@ public class FilingHistoryData {
             return false;
         }
         FilingHistoryData that = (FilingHistoryData) o;
-        return Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(category,
-                that.category) && Objects.equals(subcategory, that.subcategory) && Objects.equals(description,
-                that.description) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(
-                annotations, that.annotations) && Objects.equals(resolutions, that.resolutions) && Objects.equals(
-                associatedFilings, that.associatedFilings) && Objects.equals(actionDate, that.actionDate)
-                && Objects.equals(pages, that.pages) && Objects.equals(paperFiled, that.paperFiled) && Objects.equals(
-                links, that.links);
+        return Objects.equals(type, that.type) && Objects.equals(date, that.date)
+                && Objects.equals(category, that.category) && Objects.equals(subcategory,
+                that.subcategory) && Objects.equals(description, that.description) && Objects.equals(
+                descriptionValues, that.descriptionValues) && Objects.equals(annotations, that.annotations)
+                && Objects.equals(resolutions, that.resolutions) && Objects.equals(associatedFilings,
+                that.associatedFilings) && Objects.equals(actionDate, that.actionDate)
+                && Objects.equals(pages, that.pages) && Objects.equals(paperFiled, that.paperFiled)
+                && Objects.equals(links, that.links);
     }
 
     @Override
@@ -172,7 +178,7 @@ public class FilingHistoryData {
                 "type='" + type + '\'' +
                 ", date=" + date +
                 ", category='" + category + '\'' +
-                ", subcategory='" + subcategory + '\'' +
+                ", subcategory=" + subcategory +
                 ", description='" + description + '\'' +
                 ", descriptionValues=" + descriptionValues +
                 ", annotations=" + annotations +

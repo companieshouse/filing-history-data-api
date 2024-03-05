@@ -43,6 +43,7 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
@@ -86,6 +87,7 @@ class FilingHistoryControllerIT {
     private static final String DOCUMENT_METADATA = "/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA";
     private static final String DESCRIPTION = "termination-director-company-with-name-termination-date";
     private static final String SUBCATEGORY = "termination";
+    private static final List<String> SUBCATEGORY_LIST = List.of("voluntary", "certificate");
     private static final String CATEGORY = "officers";
     private static final String ACTION_AND_TERMINATION_DATE = "2014-08-29T00:00:00.000Z";
     private static final Instant ACTION_AND_TERMINATION_DATE_AS_INSTANT = Instant.parse(ACTION_AND_TERMINATION_DATE);
@@ -146,7 +148,45 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldInsertDocumentWithListSubcategoryAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
+        // given
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(null, null, null);
+        expectedDocument.getData().subcategory(SUBCATEGORY_LIST);
+
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+        request.getExternalData().subcategory(SUBCATEGORY_LIST);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -188,7 +228,8 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -201,7 +242,7 @@ class FilingHistoryControllerIT {
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .type(TM01_TYPE)
                 .description(DESCRIPTION)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .subcategory(SUBCATEGORY)
                 .date("2014-09-15")
                 .descriptionValues(new FilingHistoryItemDataDescriptionValues()
                         .officerName("John Tester")
@@ -217,6 +258,45 @@ class FilingHistoryControllerIT {
                 .pages(1);
 
         final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(get(SINGLE_GET_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        ExternalData actualResponseBody = objectMapper.readValue(responseBodyAsString, ExternalData.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    void shouldGetSingleDocumentWithListSubcategoryAndReturn200OK() throws Exception {
+        // given
+        final ExternalData expectedResponseBody = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .actionDate("2014-08-29")
+                .category(CategoryEnum.INSOLVENCY)
+                .type("4.38")
+                .description("liquidation-voluntary-removal-liquidator")
+                .subcategory(SUBCATEGORY_LIST)
+                .date("2014-09-15")
+                .links(new FilingHistoryItemDataLinks()
+                        .self(SELF_LINK)
+                        .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                .pages(1)
+                .paperFiled(true);
+
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document-list-subcategory.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -341,7 +421,8 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB() throws Exception {
+    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB()
+            throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -365,18 +446,21 @@ class FilingHistoryControllerIT {
         assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndDocumentShouldBeRolledBackToPreviousState() throws Exception {
+    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndDocumentShouldBeRolledBackToPreviousState()
+            throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
+                FilingHistoryDocument.class);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -400,7 +484,8 @@ class FilingHistoryControllerIT {
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
@@ -432,7 +517,7 @@ class FilingHistoryControllerIT {
                 .date(DATE)
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .subcategory(SUBCATEGORY)
                 .description(DESCRIPTION)
                 .descriptionValues(new FilingHistoryItemDataDescriptionValues()
                         .officerName(OFFICER_NAME)
@@ -444,8 +529,8 @@ class FilingHistoryControllerIT {
     }
 
     private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
-                                                                          Integer pages,
-                                                                          List<FilingHistoryAnnotation> annotations) {
+            Integer pages,
+            List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)

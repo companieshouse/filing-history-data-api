@@ -32,6 +32,7 @@ class ItemGetResponseMapperTest {
     private static final String TRANSACTION_ID = "Mkv9213";
     private static final String DESCRIPTION = "termination-director-company-with-name-termination-date";
     private static final String TM01_TYPE = "TM01";
+    private static final String SUBCATEGORY = "termination";
 
     @InjectMocks
     private ItemGetResponseMapper itemGetResponseMapper;
@@ -71,7 +72,7 @@ class ItemGetResponseMapperTest {
                 .category(OFFICERS)
                 .type(TM01_TYPE)
                 .description(DESCRIPTION)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .subcategory(SUBCATEGORY)
                 .date("2014-09-15")
                 .descriptionValues(itemDescriptionValues)
                 .annotations(itemAnnotations)
@@ -104,7 +105,7 @@ class ItemGetResponseMapperTest {
                 .category(OFFICERS)
                 .type(TM01_TYPE)
                 .description(DESCRIPTION)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .subcategory(SUBCATEGORY)
                 .date("2014-09-15")
                 .annotations(itemAnnotations)
                 .links(itemLinks)
@@ -172,7 +173,8 @@ class ItemGetResponseMapperTest {
         when(linksGetResponseMapper.map(any())).thenReturn(itemLinks);
 
         // when
-        final ExternalData actual = itemGetResponseMapper.mapFilingHistoryItem(buildFilingHistoryDocumentWithNullSubcategories());
+        final ExternalData actual = itemGetResponseMapper.mapFilingHistoryItem(
+                buildFilingHistoryDocumentWithNullSubcategories());
 
         // then
         assertEquals(expected, actual);

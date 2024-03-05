@@ -1,0 +1,23 @@
+{
+  "_id" : "<id>",
+  "company_number" : "<company_number>",
+  "data" : {
+    "action_date" : ISODate("2014-08-29T00:00:00.000Z"),
+    "category" : "insolvency",
+    "type" : "4.38",
+    "description" : "liquidation-voluntary-removal-liquidator",
+    "subcategory" : ["voluntary", "certificate"],
+    "date" : ISODate("2014-09-15T23:21:18.000Z"),
+    "links" : {
+      "document_metadata" : "/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA",
+      "self" : "/company/<company_number>/filing-history/<id>"
+    },
+    "pages" : NumberInt(1),
+    "paper_filed" : true
+  },
+  "delta_at" : "20140815230459600643",
+  "_entity_id" : "1234567890",
+  "updated_at" : ISODate("2014-09-17T18:52:08.001Z"),
+  "updated_by" : "5419d856b6a59f32b7684d0e",
+  "original_description" : "Removal of voluntary liquidator from office"
+}
