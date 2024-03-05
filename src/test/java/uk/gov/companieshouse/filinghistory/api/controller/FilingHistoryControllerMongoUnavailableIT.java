@@ -62,6 +62,7 @@ class FilingHistoryControllerMongoUnavailableIT {
     private static final String RESIGNATION_DATE = "29/08/2014";
     private static final String DESCRIPTION = "termination-director-company-with-name-termination-date";
     private static final String ACTION_AND_TERMINATION_DATE = "2014-08-29T00:00:00.000Z";
+    private static final String SUBCATEGORY = "termination";
     private static final String CONTEXT_ID = "ABCD1234";
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
 
@@ -167,7 +168,7 @@ class FilingHistoryControllerMongoUnavailableIT {
                 .date(DATE)
                 .category(ExternalData.CategoryEnum.OFFICERS)
                 .annotations(null)
-                .subcategory(ExternalData.SubcategoryEnum.TERMINATION)
+                .subcategory(SUBCATEGORY)
                 .description(DESCRIPTION)
                 .descriptionValues(new FilingHistoryItemDataDescriptionValues()
                         .officerName(OFFICER_NAME)

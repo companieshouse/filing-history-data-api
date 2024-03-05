@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
-import static uk.gov.companieshouse.api.filinghistory.ExternalData.SubcategoryEnum;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.convertInstantToLocalDateString;
 
 import org.springframework.stereotype.Component;
@@ -19,10 +18,10 @@ public class ItemGetResponseMapper {
     private final LinksGetResponseMapper linksGetResponseMapper;
 
     public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper,
-                                 ResolutionsGetResponseMapper resolutionsGetResponseMapper,
-                                 AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
-                                 DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
-                                 LinksGetResponseMapper linksGetResponseMapper) {
+            ResolutionsGetResponseMapper resolutionsGetResponseMapper,
+            AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
+            DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
+            LinksGetResponseMapper linksGetResponseMapper) {
         this.annotationsGetResponseMapper = annotationsGetResponseMapper;
         this.resolutionsGetResponseMapper = resolutionsGetResponseMapper;
         this.associatedFilingsGetResponseMapper = associatedFilingsGetResponseMapper;
@@ -38,7 +37,7 @@ public class ItemGetResponseMapper {
                 .type(data.getType())
                 .date(convertInstantToLocalDateString(data.getDate()))
                 .category(CategoryEnum.fromValue(data.getCategory()))
-                .subcategory(data.getSubcategory() == null ? null : SubcategoryEnum.fromValue(data.getSubcategory()))
+                .subcategory(data.getSubcategory())
                 .annotations(annotationsGetResponseMapper.map(data.getAnnotations()))
                 .resolutions(resolutionsGetResponseMapper.map(data.getResolutions()))
                 .associatedFilings(associatedFilingsGetResponseMapper.map(data.getAssociatedFilings()))
