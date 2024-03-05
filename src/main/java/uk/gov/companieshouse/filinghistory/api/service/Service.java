@@ -9,4 +9,8 @@ public interface Service {
 
     void insertFilingHistory(final FilingHistoryDocument documentToSave);
     void updateFilingHistory(final FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy);
+
+    void deleteExistingFilingHistory(FilingHistoryDocument existingDoc);
+
+    Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId);
 }

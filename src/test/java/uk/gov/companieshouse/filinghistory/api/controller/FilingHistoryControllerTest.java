@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryDeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProcessor;
 
@@ -39,6 +40,9 @@ class FilingHistoryControllerTest {
 
     @Mock
     private FilingHistoryGetResponseProcessor getResponseProcessor;
+
+    @Mock
+    private FilingHistoryDeleteProcessor deleteProcessor;
 
     @Mock
     private InternalFilingHistoryApi requestBody;
@@ -121,5 +125,22 @@ class FilingHistoryControllerTest {
 
         // when
         assertThrows(NotFoundException.class, executable);
+    }
+
+    @Test
+    void shouldReturn200WhenDeleteSingleTransaction() {
+        // given
+        final ResponseEntity<Void> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .header(LOCATION, "/filing-history/%s".formatted(TRANSACTION_ID))
+                .build();
+
+        // when
+        final ResponseEntity<Void> actualResponse =
+                controller.deleteFilingHistoryTransaction(TRANSACTION_ID);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(deleteProcessor).processFilingHistoryDelete(TRANSACTION_ID);
     }
 }

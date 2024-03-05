@@ -139,4 +139,17 @@ class FilingHistoryServiceTest {
         verify(repository).save(document);
         verifyNoInteractions(resourceChangedApiClient);
     }
+
+    @Test
+    void deleteExistingFilingHistoryDocumentDeletesDocumentAndCallsChsKafkaApiReturningSuccessful(){
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(200);
+
+        // when
+        service.deleteExistingFilingHistory(existingDoc);
+
+        // then
+        verify(repository).deleteById(TRANSACTION_ID);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
 }

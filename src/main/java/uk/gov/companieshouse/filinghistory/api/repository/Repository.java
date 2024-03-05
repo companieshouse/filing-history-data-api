@@ -39,6 +39,16 @@ public class Repository {
         }
     }
 
+    public Optional<FilingHistoryDocument> findById(final String id){
+        try {
+            return Optional.ofNullable(mongoTemplate.findById(
+                    Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class));
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
+                DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("MongoDB unavailable when finding the document");}
+    }
+
     public void save(final FilingHistoryDocument document) {
         try {
             mongoTemplate.save(document);

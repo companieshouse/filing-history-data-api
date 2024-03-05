@@ -43,6 +43,27 @@ public class FilingHistoryService implements Service {
         handleTransaction(documentToSave, originalDocumentCopy);
     }
 
+    @Override
+    public void deleteExistingFilingHistory(FilingHistoryDocument existingDoc) {
+        repository.deleteById(existingDoc.getTransactionId());
+
+        ApiResponse<Void> result = apiClient.callResourceChanged(
+                new ResourceChangedRequest(DataMapHolder.getRequestId(), existingDoc.getCompanyNumber(),
+                        existingDoc.getTransactionId(), null, true));
+
+        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
+                repository.save(existingDoc);
+                LOGGER.info("Reverting delete to inserted document", DataMapHolder.getLogMap());
+            }
+            LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("Resource changed endpoint unavailable");
+        }
+
+    @Override
+    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
+        return repository.findById(transactionId);
+    }
+
     private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
 
