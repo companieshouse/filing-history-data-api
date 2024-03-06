@@ -3,7 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import java.time.Instant;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -34,29 +34,21 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
-        List<FilingHistoryAnnotation> annotationList = existingDocument.getData().getAnnotations();
-        if (annotationList == null || annotationList.isEmpty()) {
-            existingDocument.data(dataMapper.mapNewAnnotation(request.getExternalData(), existingDocument.getData()));
-            return mapFilingHistory(request, existingDocument);
-        }
-
-        for (final FilingHistoryAnnotation annotation : annotationList) {
-            if (annotation.getEntityId().equals(request.getInternalData().getEntityId())) {
-                existingDocument.data(dataMapper.mapExistingAnnotation(request.getExternalData(), existingDocument.getData()));
-                break;
-            } else {
-                existingDocument.data(dataMapper.mapNewAnnotation(request.getExternalData(), existingDocument.getData()));
-            }
-        }
         return mapFilingHistory(request, existingDocument);
-
-        // TODO: This is a work in progress and needs cleaning up
     }
 
     @Override
     protected FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request, FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
+
+        // TODO: May need to find a more elegant solution to mapping child entity ids
+        List<FilingHistoryAnnotation> annotationsList = document.getData().getAnnotations();
+        if (!annotationsList.isEmpty() && StringUtils.isBlank(annotationsList.getFirst().getEntityId())) {
+            annotationsList
+                    .getFirst()
+                    .entityId(request.getInternalData().getEntityId());
+        }
 
         return document
                 .entityId(request.getInternalData().getEntityId())

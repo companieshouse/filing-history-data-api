@@ -12,8 +12,8 @@ public class FilingHistoryAnnotation {
     private String description;
     private String type;
     private Instant date;
-    @Field("entity_id")
-	@JsonProperty("entity_id")
+    @Field("_entity_id")
+	@JsonProperty("_entity_id")
     private String entityId;
     @Field("description_values")
 	@JsonProperty("description_values")
@@ -91,16 +91,11 @@ public class FilingHistoryAnnotation {
             return false;
         }
         FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
-        return Objects.equals(annotation, that.annotation)
-                && Objects.equals(category, that.category)
-                && Objects.equals(description, that.description)
-                && Objects.equals(type, that.type)
-                && Objects.equals(date, that.date)
-                && Objects.equals(descriptionValues, that.descriptionValues);
+        return Objects.equals(annotation, that.annotation) && Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(entityId, that.entityId) && Objects.equals(descriptionValues, that.descriptionValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(annotation, category, description, type, date, descriptionValues);
+        return Objects.hash(annotation, category, description, type, date, entityId, descriptionValues);
     }
 }
