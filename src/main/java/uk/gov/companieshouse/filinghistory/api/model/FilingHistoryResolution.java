@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -11,6 +12,7 @@ public class FilingHistoryResolution {
     private String type;
     private Instant date;
     @Field("description_values")
+	@JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
 
     public String getCategory() {

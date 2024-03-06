@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
@@ -10,25 +11,35 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class FilingHistoryDocument {
 
     @Id
+    @JsonProperty("_id")
     private String transactionId;
     @Field("_entity_id")
+	@JsonProperty("_entity_id")
     private String entityId;
     @Field("company_number")
+	@JsonProperty("company_number")
     private String companyNumber;
     @Field("_document_id")
+	@JsonProperty("_document_id")
     private String documentId;
     @Field("_barcode")
+	@JsonProperty("_barcode")
     private String barcode;
     private FilingHistoryData data;
     @Field("original_description")
+	@JsonProperty("original_description")
     private String originalDescription;
     @Field("original_values")
+	@JsonProperty("original_values")
     private FilingHistoryOriginalValues originalValues;
     @Field("delta_at")
+	@JsonProperty("delta_at")
     private String deltaAt;
     @Field("updated_at")
+	@JsonProperty("updated_at")
     private Instant updatedAt;
     @Field("updated_by")
+	@JsonProperty("updated_by")
     private String updatedBy;
 
     public String getTransactionId() {

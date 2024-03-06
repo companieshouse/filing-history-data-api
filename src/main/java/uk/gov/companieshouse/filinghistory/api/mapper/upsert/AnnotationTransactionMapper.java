@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -11,6 +12,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
+@Component
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
@@ -57,12 +59,13 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
         final ExternalData externalData = request.getExternalData();
 
         return document
+                .entityId(request.getInternalData().getEntityId())
                 .companyNumber(internalData.getCompanyNumber())
                 .documentId(internalData.getDocumentId())
                 .barcode(externalData.getBarcode())
                 .originalDescription(internalData.getOriginalDescription())
                 .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
-//                .deltaAt(internalData.getDeltaAt())
+                .deltaAt(internalData.getDeltaAt())
                 .updatedAt(instantSupplier.get())
                 .updatedBy(internalData.getUpdatedBy());
     }

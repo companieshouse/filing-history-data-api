@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.util.BsonUtils;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -570,6 +572,51 @@ class FilingHistoryControllerIT {
 
         // then
         result.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    void shouldInsertAnnotationDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
+        // given
+        String documentJson = IOUtils.resourceToString("/filing-history-annotation-document.json", StandardCharsets.UTF_8);
+        documentJson = documentJson
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID);
+
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(documentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString("/put_requests/annotation-put-request.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        expectedDocument.updatedAt(actualDocument.getUpdatedAt());
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {

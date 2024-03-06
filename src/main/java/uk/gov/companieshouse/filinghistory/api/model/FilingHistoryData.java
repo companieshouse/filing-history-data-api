@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -13,15 +14,19 @@ public class FilingHistoryData {
     private Object subcategory;
     private String description;
     @Field("description_values")
+	@JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
     private List<FilingHistoryAnnotation> annotations;
     private List<FilingHistoryResolution> resolutions;
     @Field("associated_filings")
+	@JsonProperty("associated_filings")
     private List<FilingHistoryAssociatedFiling> associatedFilings;
     @Field("action_date")
+	@JsonProperty("action_date")
     private Instant actionDate;
     private Integer pages;
     @Field("paper_filed")
+	@JsonProperty("paper_filed")
     private Boolean paperFiled;
     private FilingHistoryLinks links;
 

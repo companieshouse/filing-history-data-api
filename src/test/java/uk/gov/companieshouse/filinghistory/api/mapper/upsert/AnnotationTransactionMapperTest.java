@@ -73,7 +73,7 @@ class AnnotationTransactionMapperTest {
         // given
         // TODO: Find out what a new annotation document should look like and write test appropriate for that
 
-        when(dataMapper.mapAnnotation((any()), any())).thenReturn(expectedFilingHistoryData);
+//        when(dataMapper.mapAnnotation((any()), any())).thenReturn(expectedFilingHistoryData);
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(requestExternalData.getLinks()).thenReturn(requestLinks);
         when(linksMapper.map(any())).thenReturn(expectedFilingHistoryLinks);
@@ -98,7 +98,7 @@ class AnnotationTransactionMapperTest {
     @Test
     void mapAnnotationUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
         // given
-        when(dataMapper.mapAnnotation(any(), any())).thenReturn(expectedFilingHistoryData);
+//        when(dataMapper.mapAnnotation(any(), any())).thenReturn(expectedFilingHistoryData);
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
