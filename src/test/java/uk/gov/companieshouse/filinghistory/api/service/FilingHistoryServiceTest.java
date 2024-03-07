@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,8 @@ class FilingHistoryServiceTest {
     private FilingHistoryDocument existingDocument;
     @Mock
     private ApiResponse<Void> response;
+
+    private WireMock wireMock;
 
     @Test
     void findExistingFilingHistoryDocumentShouldReturnDocument() {
@@ -74,7 +77,7 @@ class FilingHistoryServiceTest {
         when(response.getStatusCode()).thenReturn(200);
 
         // when
-        service.insertFilingHistory(document);
+        service.insertFilingHistory(document, false);
 
         // then
         verify(repository).save(document);
@@ -88,7 +91,7 @@ class FilingHistoryServiceTest {
         when(response.getStatusCode()).thenReturn(200);
 
         // when
-        service.updateFilingHistory(document, existingDocument);
+        service.updateFilingHistory(document, existingDocument, false);
 
         // then
         verify(repository).save(document);
@@ -103,7 +106,7 @@ class FilingHistoryServiceTest {
         when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
-        Executable executable = () -> service.updateFilingHistory(document, existingDocument);
+        Executable executable = () -> service.updateFilingHistory(document, existingDocument, false);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
@@ -132,7 +135,7 @@ class FilingHistoryServiceTest {
                 .when(repository).save(any());
 
         // when
-        Executable executable = () -> service.insertFilingHistory(document);
+        Executable executable = () -> service.insertFilingHistory(document, false);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
@@ -142,14 +145,31 @@ class FilingHistoryServiceTest {
 
     @Test
     void deleteExistingFilingHistoryDocumentDeletesDocumentAndCallsChsKafkaApiReturningSuccessful(){
-        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
+//        response.getStatusCode();
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+
 
         // when
-        service.deleteExistingFilingHistory(existingDoc);
+        service.deleteExistingFilingHistory(existingDocument);
 
         // then
         verify(repository).deleteById(TRANSACTION_ID);
         verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void deleteFilingHistoryDeletesDocumentButResourceChangedCallReturnsNon200() {
+        // given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(503);
+
+        // when
+        Executable executable = () -> service.deleteExistingFilingHistory(existingDocument);
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+        verify(repository).save(existingDocument);
     }
 }

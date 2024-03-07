@@ -3,20 +3,25 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
+import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
+import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryDeleteProcessorTest {
 
 
     private static final String TRANSACTION_ID = "transactionId";
-    private static final String COMPANY_NUMBER = "12345678";
 
     @InjectMocks
     private FilingHistoryDeleteProcessor filingHistoryDeleteProcessor;
@@ -24,64 +29,47 @@ class FilingHistoryDeleteProcessorTest {
     @Mock
     private FilingHistoryService filingHistoryService;
     @Mock
-    private FilingHistoryDocumentCopier filingHistoryDocumentCopier;
+    private FilingHistoryDocument existingDocument;
 
     @Test
     void shouldSuccessfullyCallDeleteWhenRequestReceived() {
         // given
-//        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
+        when(filingHistoryService.findExistingFilingHistoryById(any())).thenReturn(Optional.of(existingDocument));
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(TRANSACTION_ID);
 
         // then
-        verify(filingHistoryService).deleteExistingFilingHistory(existingDoc);
-//        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verify(filingHistoryService).deleteExistingFilingHistory(existingDocument);
+        verify(filingHistoryService).findExistingFilingHistoryById(TRANSACTION_ID);
     }
 
-//    @Test
-//    void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
-//        // given
-//        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(true);
-//        when(request.getInternalData()).thenReturn(internalData);
-//        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
-//        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-//        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
-//        when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any())).thenThrow(ConflictException.class);
-//
-//        // when
-//        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
-//
-//        // then
-//        assertThrows(ConflictException.class, executable);
-//        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
-//        verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
-//        verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
-//        verifyNoMoreInteractions(topLevelMapper);
-//        verifyNoMoreInteractions(filingHistoryService);
-//    }
-//
-//    @Test
-//    void shouldThrowServiceUnavailableWhenFindingDocumentInDB() {
-//        // given
-//        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(true);
-//        when(request.getInternalData()).thenReturn(internalData);
-//        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
-//        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-//        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(
-//                ServiceUnavailableException.class);
-//
-//        // when
-//        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
-//
-//        // then
-//        assertThrows(ServiceUnavailableException.class, executable);
-//        verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
-//        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
-//        verifyNoInteractions(filingHistoryDocumentCopier);
-//        verifyNoInteractions(topLevelMapper);
-//        verifyNoMoreInteractions(filingHistoryService);
-//    }
-//
+    @Test
+    void shouldThrowNotFoundExceptionWhenCannotFindDocumentInDB(){
+        // given
+        when(filingHistoryService.findExistingFilingHistoryById(any())).thenReturn(Optional.empty());
+
+        // when
+        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(TRANSACTION_ID);
+
+        // then
+        assertThrows(NotFoundException.class, executable);
+        verify(filingHistoryService).findExistingFilingHistoryById(TRANSACTION_ID);
+    }
+
+    @Test
+    void shouldThrowServiceUnavailableWhenMongoDBUnavailable() {
+        // given
+        when(filingHistoryService.findExistingFilingHistoryById(any())).thenThrow(
+                ServiceUnavailableException.class);
+
+        // when
+        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(TRANSACTION_ID);
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(filingHistoryService).findExistingFilingHistoryById(TRANSACTION_ID);
+        verifyNoMoreInteractions(filingHistoryService);
+    }
 
 }

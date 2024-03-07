@@ -78,7 +78,7 @@ class FilingHistoryUpsertProcessorTest {
         verifyNoInteractions(filingHistoryDocumentCopier);
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).insertFilingHistory(documentToUpsert);
+        verify(filingHistoryService).insertFilingHistory(documentToUpsert, false);
     }
 
     @Test
@@ -100,7 +100,7 @@ class FilingHistoryUpsertProcessorTest {
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
         verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocumentCopy);
+        verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocumentCopy, false);
     }
 
     @Test

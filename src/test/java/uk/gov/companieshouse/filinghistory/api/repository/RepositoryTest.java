@@ -98,4 +98,17 @@ class RepositoryTest {
         assertThrows(ServiceUnavailableException.class, executable);
         verifyNoMoreInteractions(mongoTemplate);
     }
+
+    @Test
+    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindById() {
+        // given
+        when(mongoTemplate.findById(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
+        });
+
+        // when
+        Executable executable = () -> repository.findById(TRANSACTION_ID);
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+    }
 }

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -98,6 +99,22 @@ class RepositoryIT {
         // then
         FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(document, actual);
+    }
+
+    @Test
+    void shouldSuccessfullyDeleteDocumentById() throws IOException {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        repository.deleteById(TRANSACTION_ID);
+
+        // then
+        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNull(actual);
     }
 
     private static FilingHistoryDocument getFilingHistoryDocument() {

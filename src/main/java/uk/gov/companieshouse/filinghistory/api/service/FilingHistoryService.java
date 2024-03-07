@@ -5,6 +5,7 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
@@ -16,7 +17,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
-public class FilingHistoryService implements Service {
+public class FilingHistoryService extends AbstractService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final ResourceChangedApiClient apiClient;
@@ -34,29 +35,29 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void insertFilingHistory(final FilingHistoryDocument documentToSave) {
-        handleTransaction(documentToSave, null);
+    public void insertFilingHistory(final FilingHistoryDocument documentToSave, Boolean isDelete) {
+        saveOrDeleteDocument(documentToSave, false);
+
+        ApiResponse<Void> result = callResourceChangedApi(documentToSave, false);
+
+        handleResponseAndApplyCompensatoryTransaction(result, documentToSave, null);
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
-        handleTransaction(documentToSave, originalDocumentCopy);
+    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy, Boolean isDelete) {
+        saveOrDeleteDocument(documentToSave, false);
+
+        ApiResponse<Void> result = callResourceChangedApi(documentToSave, false);
+
+        handleResponseAndApplyCompensatoryTransaction(result, documentToSave, originalDocumentCopy);
     }
 
     @Override
-    public void deleteExistingFilingHistory(FilingHistoryDocument existingDoc) {
-        repository.deleteById(existingDoc.getTransactionId());
+    @Transactional
+    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
+        saveOrDeleteDocument(existingDocument, true);
 
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), existingDoc.getCompanyNumber(),
-                        existingDoc.getTransactionId(), null, true));
-
-        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-                repository.save(existingDoc);
-                LOGGER.info("Reverting delete to inserted document", DataMapHolder.getLogMap());
-            }
-            LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("Resource changed endpoint unavailable");
+        callResourceChangedApi(existingDocument, true);
         }
 
     @Override
@@ -64,12 +65,25 @@ public class FilingHistoryService implements Service {
         return repository.findById(transactionId);
     }
 
-    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
-        repository.save(documentToSave);
+    @Override
+    public void saveOrDeleteDocument(FilingHistoryDocument document, Boolean isDelete) {
+        if(Boolean.FALSE.equals(isDelete)) {
+            repository.save(document);
+        } else {
+            repository.deleteById(document.getTransactionId());
+        }
+    }
 
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
-                        documentToSave.getTransactionId(), null, false));
+    @Override
+    public ApiResponse<Void> callResourceChangedApi(FilingHistoryDocument documentToSaveDelete, Boolean isDelete) {
+        return apiClient.callResourceChanged(
+                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSaveDelete.getCompanyNumber(),
+                        documentToSaveDelete.getTransactionId(), null, isDelete));
+    }
+
+    @Override
+    public void handleResponseAndApplyCompensatoryTransaction(ApiResponse<Void> result,
+            FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
 
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
