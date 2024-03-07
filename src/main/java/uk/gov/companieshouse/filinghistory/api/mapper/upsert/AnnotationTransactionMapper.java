@@ -16,13 +16,15 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
+    private final AnnotationListMapper annotationListMapper;
     private final Supplier<Instant> instantSupplier;
     private final OriginalValuesMapper originalValuesMapper;
 
-    public AnnotationTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
+    public AnnotationTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper, AnnotationListMapper annotationListMapper,
                                        Supplier<Instant> instantSupplier, OriginalValuesMapper originalValuesMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
+        this.annotationListMapper = annotationListMapper;
         this.instantSupplier = instantSupplier;
         this.originalValuesMapper = originalValuesMapper;
     }
