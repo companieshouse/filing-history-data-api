@@ -34,7 +34,7 @@
   },
   "_barcode" : "X3GI11A7",
   "delta_at" : "20140916230459600643",
-  "_entity_id" : "3107532517",
+  "_entity_id" : "<parent_entity_id>",
   "updated_at" : "2014-09-17T18:52:08.001Z",
   "updated_by" : "5419d856b6a59f32b7684d0e",
   "original_values" : {

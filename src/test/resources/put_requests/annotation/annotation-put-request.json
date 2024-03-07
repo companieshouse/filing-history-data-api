@@ -1,30 +1,19 @@
 {
   "external_data" : {
-    "action_date": "2014-08-29T00:00:00.000Z",
     "transaction_id": "<transaction_id>",
-    "barcode": "X4BI89B6",
     "category" : "annotation",
     "type": "ANNOTATION",
     "date" : "2011-11-26T11:27:55.000Z",
     "description" : "annotation",
     "description_values" : {
-      "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011",
-      "officer_name": "John Tester",
-      "termination_date": "2014-08-29T00:00:00.000Z"
+      "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
     },
     "links" : {
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
     },
-    "paper_filed" : true,
-    "pages": 1,
-    "subcategory": "termination"
+    "paper_filed" : true
   },
   "internal_data": {
-    "document_id": "000X4BI89B65846",
-    "original_values": {
-      "officer_name": "John Tester",
-      "resignation_date": "29/08/2014"
-    },
     "company_number" : "<company_number>",
     "entity_id" : "<entity_id>",
     "original_description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011",
