@@ -1,0 +1,23 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<entity_id>",
+  "data" : {
+    "annotations" : [
+      {
+        "annotation" : "Clarification This document was second filed with the CH04 registered on 26/11/2011",
+        "category" : "annotation",
+        "date" : "2011-11-26T11:27:55.000Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
+        },
+        "type" : "ANNOTATION"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  }
+}
