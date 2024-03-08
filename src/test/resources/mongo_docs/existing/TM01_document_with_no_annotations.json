@@ -13,12 +13,12 @@
       "officer_name" : "John Test Tester"
     },
     "links" : {
-      "document_metadata" : "/document/C1_z-PlM567zJgwJz8uN-UZ4_xnGfCljj3k7L62LxwA",
+      "document_metadata" : "/document/ABcdEFg_1234",
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
     },
     "pages" : 1
   },
-  "_barcode" : "X3GI11A7",
+  "_barcode" : "X3GI11F3",
   "delta_at" : "20140916230459600643",
   "_entity_id" : "<entity_id>",
   "updated_at" : "2014-09-17T18:52:08.001Z",
@@ -28,5 +28,5 @@
     "resignation_date" : "15/09/2014"
   },
   "original_description" : "Appointment Terminated, Director john tester",
-  "_document_id" : "000X3GI11A75672"
+  "_document_id" : "000X3GI11F35672"
 }

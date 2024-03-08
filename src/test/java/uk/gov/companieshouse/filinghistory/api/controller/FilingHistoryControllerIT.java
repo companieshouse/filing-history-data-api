@@ -596,7 +596,8 @@ class FilingHistoryControllerIT {
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
-        String requestBody = IOUtils.resourceToString("/put_requests/annotation/annotation-put-request.json", StandardCharsets.UTF_8);
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/annotation-put-request.json", StandardCharsets.UTF_8);
         requestBody = requestBody
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)

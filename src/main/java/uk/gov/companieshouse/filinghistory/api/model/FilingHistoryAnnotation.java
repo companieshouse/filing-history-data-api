@@ -19,6 +19,10 @@ public class FilingHistoryAnnotation {
 	@JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
 
+    @Field("delta_at")
+    @JsonProperty("delta_at")
+    private String deltaAt;
+
     public String getEntityId() {
         return entityId;
     }
@@ -82,6 +86,15 @@ public class FilingHistoryAnnotation {
         return this;
     }
 
+    public String getDeltaAt() {
+        return deltaAt;
+    }
+
+    public FilingHistoryAnnotation deltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -91,11 +104,11 @@ public class FilingHistoryAnnotation {
             return false;
         }
         FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
-        return Objects.equals(annotation, that.annotation) && Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(entityId, that.entityId) && Objects.equals(descriptionValues, that.descriptionValues);
+        return Objects.equals(annotation, that.annotation) && Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(entityId, that.entityId) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(deltaAt, that.deltaAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(annotation, category, description, type, date, entityId, descriptionValues);
+        return Objects.hash(annotation, category, description, type, date, entityId, descriptionValues, deltaAt);
     }
 }
