@@ -5,12 +5,14 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
+import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequestBuilder;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -43,23 +45,30 @@ public class FilingHistoryService implements Service {
         handleTransaction(documentToSave, originalDocumentCopy);
     }
 
+    @Transactional
     @Override
-    public void deleteFilingHistory(FilingHistoryDocument documentToDelete) {
-        repository.deleteById(documentToDelete.getTransactionId());
+    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
+        repository.deleteById(existingDocument.getTransactionId());
         ApiResponse<Void> response = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToDelete.getCompanyNumber(),
-                        documentToDelete.getTransactionId(), documentToDelete.getData(), true));
+                buildBaseResourceChangedRequest(existingDocument)
+                .filingHistoryData(existingDocument)
+                .isDelete(true)
+                .build());
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwServiceUnavailable();
         }
+    }
+
+    @Override
+    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
+        return repository.findById(transactionId);
     }
 
     private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
 
         ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
-                        documentToSave.getTransactionId(), null, false));
+                buildBaseResourceChangedRequest(documentToSave).build());
 
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
@@ -71,6 +80,13 @@ public class FilingHistoryService implements Service {
             }
             throwServiceUnavailable();
         }
+    }
+
+    private ResourceChangedRequestBuilder buildBaseResourceChangedRequest(FilingHistoryDocument document) {
+        return ResourceChangedRequestBuilder.builder()
+                .contextId(DataMapHolder.getRequestId())
+                .companyNumber(document.getCompanyNumber())
+                .transactionId(document.getTransactionId());
     }
 
     private void throwServiceUnavailable() {

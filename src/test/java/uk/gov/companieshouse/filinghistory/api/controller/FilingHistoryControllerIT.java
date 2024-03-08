@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.bson.Document;
@@ -345,11 +346,14 @@ class FilingHistoryControllerIT {
         result.andExpect(MockMvcResultMatchers.status().isOk());
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, DELETE_URI));
 
-//        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-//        assertNull(actualDocument);
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNull(actualDocument);
 
-        verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        verify(instantSupplier, times(1)).get();
+
+//        WireMock.verify(requestMadeFor(new PutRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete().toString())));/
+
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
 
     @Test
@@ -520,7 +524,8 @@ class FilingHistoryControllerIT {
 
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
@@ -611,7 +616,7 @@ class FilingHistoryControllerIT {
 
     private static ChangedResource getExpectedChangedResourceDelete() {
         return new ChangedResource()
-                .resourceUri("filing-history/transactionId")
+                .resourceUri("/company/12345678/filing-history/transactionId")
                 .resourceKind("filing-history")
                 .contextId(CONTEXT_ID)
                 .deletedData(getExpectedFilingHistoryDocument(null, null, null))

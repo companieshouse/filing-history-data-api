@@ -102,7 +102,7 @@ class RepositoryTest {
     @Test
     void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindById() {
         // given
-        when(mongoTemplate.findById(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
+        when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
 
         // when
