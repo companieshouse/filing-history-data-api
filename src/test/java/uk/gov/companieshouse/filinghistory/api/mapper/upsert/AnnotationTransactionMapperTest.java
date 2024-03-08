@@ -1,10 +1,8 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,77 +14,42 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
-import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationTransactionMapperTest {
 
-    private static final String TRANSACTION_ID = "transactionId";
     private static final String ENTITY_ID = "1234567890";
     private static final String PARENT_ENTITY_ID = "0987654321";
     private static final String COMPANY_NUMBER = "123456789";
-    private static final String DOCUMENT_ID = "documentId";
-    private static final String BARCODE = "barcode";
-    private static final String ORIGINAL_DESCRIPTION = "original description";
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
-    private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
-    private static final Instant UPDATED_AT = Instant.now();
     private static final String UPDATED_BY = "84746291";
-    private static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
 
     @InjectMocks
     private AnnotationTransactionMapper annotationTransactionMapper;
 
     @Mock
-    private DataMapper dataMapper;
+    private AnnotationListMapper annotationListMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
-    @Mock
-    private OriginalValuesMapper originalValuesMapper;
-    @Mock
-    private LinksMapper linksMapper;
-    @Mock
-    private AnnotationListMapper annotationListMapper;
 
-    @Mock
-    private FilingHistoryDocument mockDocument;
-    @Mock
-    private FilingHistoryData expectedFilingHistoryData;
-    @Mock
-    private FilingHistoryData existingFilingHistoryData;
-    @Mock
-    private FilingHistoryOriginalValues expectedFilingHistoryOriginalValues;
-    @Mock
-    private FilingHistoryOriginalValues existingFilingHistoryOriginalValues;
-    @Mock
-    private FilingHistoryLinks expectedFilingHistoryLinks;
     @Mock
     private List<FilingHistoryAnnotation> annotationList;
-    @Mock
-    private FilingHistoryAnnotation mockAnnotation;
 
-    @Mock
-    private InternalDataOriginalValues requestOriginalValues;
-    @Mock
-    private ExternalData requestExternalData;
-    @Mock
-    private FilingHistoryItemDataLinks requestLinks;
 
     @Test
     void shouldAddNewAnnotationToNewAnnotationList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
-                        .entityId(ENTITY_ID));
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
 
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData());
@@ -95,7 +58,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).addNewAnnotationToList(new ArrayList<>());
+        verify(annotationListMapper).addNewAnnotationToList(new ArrayList<>(), request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -104,7 +67,9 @@ class AnnotationTransactionMapperTest {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
-                        .entityId(ENTITY_ID));
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
 
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
@@ -114,7 +79,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).addNewAnnotationToList(annotationList);
+        verify(annotationListMapper).addNewAnnotationToList(annotationList, request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -124,7 +89,9 @@ class AnnotationTransactionMapperTest {
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
-                        .deltaAt(NEWEST_REQUEST_DELTA_AT));
+                        .deltaAt(NEWEST_REQUEST_DELTA_AT))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
 
         FilingHistoryAnnotation annotationWithEntityIdMatch = new FilingHistoryAnnotation()
                 .entityId(ENTITY_ID)
@@ -160,7 +127,9 @@ class AnnotationTransactionMapperTest {
                         .parentEntityId(PARENT_ENTITY_ID)
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT)
-                        .updatedBy(UPDATED_BY));
+                        .updatedBy(UPDATED_BY))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
 
         FilingHistoryAnnotation annotation = new FilingHistoryAnnotation()
                 .entityId(ENTITY_ID)
@@ -176,7 +145,8 @@ class AnnotationTransactionMapperTest {
 
         final FilingHistoryDocument expected = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(list))
+                        .annotations(list)
+                        .paperFiled(true))
                 .entityId(PARENT_ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .updatedBy(UPDATED_BY);
@@ -187,38 +157,4 @@ class AnnotationTransactionMapperTest {
         // then
         assertEquals(expected, actual);
     }
-
-//    private InternalFilingHistoryApi buildPutRequestBody() {
-//        return new InternalFilingHistoryApi()
-//                .externalData(requestExternalData)
-//                .internalData(buildInternalData());
-//    }
-//
-//    private InternalData buildInternalData() {
-//        return new InternalData()
-//                .entityId(ENTITY_ID)
-//                .companyNumber(COMPANY_NUMBER)
-//                .documentId(DOCUMENT_ID)
-//                .deltaAt(NEWEST_REQUEST_DELTA_AT)
-//                .originalDescription("original description")
-//                .originalValues(requestOriginalValues)
-//                .parentEntityId("parent_entity_id")
-//                .updatedBy(UPDATED_BY);
-//    }
-//
-//    private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
-//                                                           FilingHistoryOriginalValues originalValues, String deltaAt) {
-//        return new FilingHistoryDocument()
-//                .transactionId(TRANSACTION_ID)
-//                .entityId(ENTITY_ID)
-//                .companyNumber(COMPANY_NUMBER)
-//                .documentId(DOCUMENT_ID)
-//                .barcode(BARCODE)
-//                .data(data)
-//                .originalDescription(ORIGINAL_DESCRIPTION)
-//                .originalValues(originalValues)
-//                .deltaAt(deltaAt)
-//                .updatedAt(UPDATED_AT)
-//                .updatedBy(UPDATED_BY);
-//    }
 }

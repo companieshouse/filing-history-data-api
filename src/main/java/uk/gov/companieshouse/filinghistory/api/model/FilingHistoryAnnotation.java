@@ -111,4 +111,18 @@ public class FilingHistoryAnnotation {
     public int hashCode() {
         return Objects.hash(annotation, category, description, type, date, entityId, descriptionValues, deltaAt);
     }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryAnnotation{" +
+                "annotation='" + annotation + '\'' +
+                ", category='" + category + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", date=" + date +
+                ", entityId='" + entityId + '\'' +
+                ", descriptionValues=" + descriptionValues +
+                ", deltaAt='" + deltaAt + '\'' +
+                '}';
+    }
 }

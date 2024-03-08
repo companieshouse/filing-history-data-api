@@ -18,15 +18,13 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     private final DataMapper dataMapper;
     private final AnnotationListMapper annotationListMapper;
     private final Supplier<Instant> instantSupplier;
-    private final OriginalValuesMapper originalValuesMapper;
 
-    public AnnotationTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper, AnnotationListMapper annotationListMapper,
-                                       Supplier<Instant> instantSupplier, OriginalValuesMapper originalValuesMapper) {
+    public AnnotationTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
+                                       AnnotationListMapper annotationListMapper, Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.annotationListMapper = annotationListMapper;
         this.instantSupplier = instantSupplier;
-        this.originalValuesMapper = originalValuesMapper;
     }
 
     @Override
@@ -53,9 +51,10 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                                     }
                                                     annotationListMapper.updateExistingAnnotation(annotation);
                                                 },
-                                                () -> annotationListMapper.addNewAnnotationToList(annotationList)),
+                                                () -> annotationListMapper
+                                                        .addNewAnnotationToList(annotationList, request)),
                         () -> existingDocument.getData().annotations(
-                                annotationListMapper.addNewAnnotationToList(new ArrayList<>()))
+                                annotationListMapper.addNewAnnotationToList(new ArrayList<>(), request))
                 );
         return mapFilingHistory(request, existingDocument);
     }
@@ -64,8 +63,9 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     protected FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request, FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
+        document.getData().paperFiled(request.getExternalData().getPaperFiled()); // TODO: Check where to set this field for annotation
         return document
-                .entityId(request.getInternalData().getParentEntityId())
+                .entityId(internalData.getParentEntityId())
                 .companyNumber(internalData.getCompanyNumber())
                 .updatedAt(instantSupplier.get())
                 .updatedBy(internalData.getUpdatedBy());

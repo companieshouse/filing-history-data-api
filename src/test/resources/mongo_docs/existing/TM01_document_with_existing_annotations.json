@@ -2,6 +2,20 @@
   "_id" : "<transaction_id>",
   "company_number" : "<company_number>",
   "data" : {
+    "annotations" : [
+      {
+        "annotation" : "annotation",
+        "category" : "annotation",
+        "date" : "2011-11-26T11:27:55.000Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
+        },
+        "type" : "ANNOTATION",
+        "_entity_id": "3333333333",
+        "delta_at": "delta_at"
+      }
+    ],
     "action_date" : "2014-09-15T00:00:00.000Z",
     "category" : "officers",
     "type" : "TM01",
@@ -16,26 +30,11 @@
       "document_metadata" : "/document/ABcdEFg_1234",
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
     },
-    "pages" : 1,
-    "annotations" : [
-      {
-        "annotation" : "annotation",
-        "category" : "annotation",
-        "date" : "2011-11-26T11:27:55.000Z",
-        "description" : "annotation",
-        "description_values" : {
-          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
-        },
-        "type" : "ANNOTATION",
-        "_entity_id": "<child_entity_id>",
-        "delta_at": "<delta_at>"
-      }
-    ],
-    "paper_filed" : true
+    "pages" : 1
   },
   "_barcode" : "X3GI11F3",
   "delta_at" : "20140916230459600643",
-  "_entity_id" : "<parent_entity_id>",
+  "_entity_id" : "<entity_id>",
   "updated_at" : "2014-09-17T18:52:08.001Z",
   "updated_by" : "context_id",
   "original_values" : {
