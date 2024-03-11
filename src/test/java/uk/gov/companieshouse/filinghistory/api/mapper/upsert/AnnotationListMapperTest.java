@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -47,15 +48,19 @@ class AnnotationListMapperTest {
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
-                        .category(CategoryEnum.ANNOTATION)
-                        .date("2011-11-26T11:27:55.000Z")
-                        .description("annotation")
-                        .descriptionValues(requestDescriptionValues)
-                        .type("ANNOTATION"));
+                        .annotations(List.of(
+                                new FilingHistoryItemDataAnnotations()
+                                        .category("annotation")
+                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .description("annotation")
+                                        .descriptionValues(requestDescriptionValues)
+                                        .type("ANNOTATION")
+                                        .date("2011-11-26T11:27:55.000Z")
+                        )));
 
         List<FilingHistoryAnnotation> expected = List.of(
                 new FilingHistoryAnnotation()
-                        .annotation("annotation")
+                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT)
                         .category("annotation")
@@ -83,15 +88,19 @@ class AnnotationListMapperTest {
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
-                        .category(CategoryEnum.ANNOTATION)
-                        .date("2011-11-26T11:27:55.000Z")
-                        .description("annotation")
-                        .descriptionValues(requestDescriptionValues)
-                        .type("ANNOTATION"));
+                        .annotations(List.of(
+                                new FilingHistoryItemDataAnnotations()
+                                        .category("annotation")
+                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .description("annotation")
+                                        .descriptionValues(requestDescriptionValues)
+                                        .type("ANNOTATION")
+                                        .date("2011-11-26T11:27:55.000Z")
+                        )));
 
 
         FilingHistoryAnnotation expectedAnnotation = new FilingHistoryAnnotation()
-                .annotation("annotation")
+                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .category("annotation")
@@ -126,15 +135,19 @@ class AnnotationListMapperTest {
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
-                        .category(CategoryEnum.ANNOTATION)
-                        .date("2011-11-26T11:27:55.000Z")
-                        .description("annotation")
-                        .descriptionValues(requestDescriptionValues)
-                        .type("ANNOTATION"));
+                        .annotations(List.of(
+                                new FilingHistoryItemDataAnnotations()
+                                        .category("annotation")
+                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .description("annotation")
+                                        .descriptionValues(requestDescriptionValues)
+                                        .type("ANNOTATION")
+                                        .date("2011-11-26T11:27:55.000Z")
+                        )));
 
 
         FilingHistoryAnnotation expectedAnnotation = new FilingHistoryAnnotation()
-                .annotation("annotation")
+                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .category("annotation")

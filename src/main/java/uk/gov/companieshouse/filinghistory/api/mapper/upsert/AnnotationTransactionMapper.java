@@ -61,7 +61,7 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     protected FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request, FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
-        document.getData().paperFiled(request.getExternalData().getPaperFiled()); // TODO: Check where to set this field for annotation
+        document.getData().paperFiled(request.getExternalData().getPaperFiled());
         return document
                 .entityId(internalData.getParentEntityId())
                 .companyNumber(internalData.getCompanyNumber())

@@ -1,13 +1,18 @@
 {
   "external_data" : {
     "transaction_id": "<transaction_id>",
-    "category" : "annotation",
-    "type": "ANNOTATION",
-    "date" : "2011-11-26T11:27:55.000Z",
-    "description" : "annotation",
-    "description_values" : {
-      "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
-    },
+    "annotations": [
+      {
+        "category" : "annotation",
+        "annotation": "Clarification This document was second filed with the CH04 registered on 26/11/2011",
+        "type": "ANNOTATION",
+        "date" : "2011-11-26T11:27:55.000Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
+        }
+      }
+    ],
     "links" : {
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
     },

@@ -3,6 +3,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -10,23 +12,22 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
-class FilingHistoryPutRequestValidatorTest {
+class AnnotationPutRequestValidatorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String VALID_SELF_LINK = "/company/12345678/filing-history/transactionId";
     private static final String VALID_DELTA_AT = "20140916230459600643";
     private static final String TM01_TYPE = "TM01";
     private static final String DATE = "2011-08-06T00:00:00.00Z";
-    private static final String DESCRIPTION = "description";
     private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
 
-    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new FilingHistoryPutRequestValidator();
+    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new AnnotationPutRequestValidator();
 
     @ParameterizedTest
     @MethodSource("badRequestScenarios")
@@ -63,6 +64,26 @@ class FilingHistoryPutRequestValidatorTest {
                         Named.of("Null internal data object",
                                 RequestBodyTestArgument.builder()
                                         .modifyInternalData(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null annotations list",
+                                RequestBodyTestArgument.builder()
+                                        .modifyAnnotationList(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty annotations list",
+                                RequestBodyTestArgument.builder()
+                                        .modifyAnnotationList(Collections.emptyList())
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null annotation field",
+                                RequestBodyTestArgument.builder()
+                                        .modifyAnnotation(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty annotation field",
+                                RequestBodyTestArgument.builder()
+                                        .modifyAnnotation("")
                                         .build())),
                 Arguments.of(
                         Named.of("Null transaction ID",
@@ -110,21 +131,6 @@ class FilingHistoryPutRequestValidatorTest {
                                         .modifyDate("")
                                         .build())),
                 Arguments.of(
-                        Named.of("Null category",
-                                RequestBodyTestArgument.builder()
-                                        .modifyCategory(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Null description",
-                                RequestBodyTestArgument.builder()
-                                        .modifyDescription(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Empty description",
-                                RequestBodyTestArgument.builder()
-                                        .modifyDescription("")
-                                        .build())),
-                Arguments.of(
                         Named.of("Null entity ID",
                                 RequestBodyTestArgument.builder()
                                         .modifyEntityId(null)
@@ -159,8 +165,8 @@ class FilingHistoryPutRequestValidatorTest {
 
     private record RequestBodyTestArgument(InternalFilingHistoryApi requestBody) {
 
-        private static RequestBodyTestArgumentBuilder builder() {
-            return new RequestBodyTestArgumentBuilder();
+        private static RequestBodyTestArgument.RequestBodyTestArgumentBuilder builder() {
+            return new RequestBodyTestArgument.RequestBodyTestArgumentBuilder();
         }
 
         private static class RequestBodyTestArgumentBuilder {
@@ -171,10 +177,12 @@ class FilingHistoryPutRequestValidatorTest {
                 requestBody = new InternalFilingHistoryApi()
                         .externalData(new ExternalData()
                                 .transactionId(TRANSACTION_ID)
-                                .type(TM01_TYPE)
-                                .date(DATE)
-                                .category(CategoryEnum.OFFICERS)
-                                .description(DESCRIPTION)
+                                .annotations(List.of(
+                                        new FilingHistoryItemDataAnnotations()
+                                                .annotation("annotation field")
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                ))
                                 .links(new FilingHistoryItemDataLinks()
                                         .self(VALID_SELF_LINK)))
                         .internalData(new InternalData()
@@ -183,62 +191,62 @@ class FilingHistoryPutRequestValidatorTest {
                                 .deltaAt(VALID_DELTA_AT));
             }
 
-            public RequestBodyTestArgumentBuilder modifyExternalData(final ExternalData value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyExternalData(final ExternalData value) {
                 requestBody.externalData(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyInternalData(final InternalData value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyInternalData(final InternalData value) {
                 requestBody.internalData(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyTransactionId(final String value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyTransactionId(final String value) {
                 requestBody.getExternalData().transactionId(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
                 requestBody.getExternalData().links(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifySelfLink(final String value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifySelfLink(final String value) {
                 requestBody.getExternalData().getLinks().self(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyType(final String value) {
-                requestBody.getExternalData().type(value);
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyAnnotationList(List<FilingHistoryItemDataAnnotations> list) {
+                requestBody.getExternalData().annotations(list);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyDate(final String value) {
-                requestBody.getExternalData().date(value);
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyAnnotation(final String value) {
+                requestBody.getExternalData().getAnnotations().getFirst().annotation(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyCategory(CategoryEnum value) {
-                requestBody.getExternalData().category(value);
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyType(final String value) {
+                requestBody.getExternalData().getAnnotations().getFirst().type(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyDescription(final String value) {
-                requestBody.getExternalData().description(value);
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyDate(final String value) {
+                requestBody.getExternalData().getAnnotations().getFirst().date(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyEntityId(final String value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyEntityId(final String value) {
                 requestBody.getInternalData().entityId(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyDeltaAt(final String value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyDeltaAt(final String value) {
                 requestBody.getInternalData().deltaAt(value);
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyCompanyNumber(final String value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyCompanyNumber(final String value) {
                 requestBody.getInternalData().companyNumber(value);
                 return this;
             }
@@ -253,10 +261,13 @@ class FilingHistoryPutRequestValidatorTest {
         return new InternalFilingHistoryApi()
                 .externalData(new ExternalData()
                         .transactionId(TRANSACTION_ID)
-                        .type(TM01_TYPE)
-                        .date(DATE)
-                        .category(CategoryEnum.OFFICERS)
-                        .description(DESCRIPTION)
+                        .annotations(List.of(
+                                        new FilingHistoryItemDataAnnotations()
+                                                .annotation("annotation")
+                                                .type(TM01_TYPE)
+                                                .date(DATE)
+                                )
+                        )
                         .links(new FilingHistoryItemDataLinks()
                                 .self(VALID_SELF_LINK)))
                 .internalData(new InternalData()

@@ -364,6 +364,7 @@ class FilingHistoryControllerIT {
                                 .self(SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
+                        .transactionKind(TransactionKindEnum.TOP_LEVEL)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT));
 
         // when

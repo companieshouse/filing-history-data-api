@@ -7,12 +7,12 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
 @Component
-public class FilingHistoryPutRequestValidator implements Validator<InternalFilingHistoryApi> {
+public class TopLevelPutRequestValidator implements Validator<InternalFilingHistoryApi> {
 
     @Override
-    public boolean isValid(InternalFilingHistoryApi input) {
-        ExternalData externalData = input.getExternalData();
-        InternalData internalData = input.getInternalData();
+    public boolean isValid(InternalFilingHistoryApi request) {
+        ExternalData externalData = request.getExternalData();
+        InternalData internalData = request.getInternalData();
 
         return externalData != null
                 && internalData != null

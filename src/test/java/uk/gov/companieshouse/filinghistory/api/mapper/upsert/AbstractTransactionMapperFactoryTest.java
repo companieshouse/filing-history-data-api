@@ -60,7 +60,7 @@ class AbstractTransactionMapperFactoryTest {
         Executable executable = () -> factory.getTransactionMapper(TransactionKindEnum.fromValue(kind));
 
         // then
-        InvalidMapperException exception = assertThrows(InvalidMapperException.class, executable);
+        InvalidTransactionKindException exception = assertThrows(InvalidTransactionKindException.class, executable);
         assertEquals("Invalid transaction kind: %s".formatted(kind), exception.getMessage());
     }
 }
