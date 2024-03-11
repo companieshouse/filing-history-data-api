@@ -35,14 +35,14 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
             throw new ConflictException("Stale delta for upsert");
         }
-        existingDocument.data(mapFilingHistoryData(request.getExternalData(), existingDocument.getData()));
+        existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
 
         return mapFilingHistory(request, existingDocument);
     }
 
     @Override
-    protected FilingHistoryData mapFilingHistoryData(ExternalData externalData, FilingHistoryData existingData) {
-        return dataMapper.map(externalData, existingData);
+    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        return dataMapper.map(request.getExternalData(), data);
     }
 
     @Override

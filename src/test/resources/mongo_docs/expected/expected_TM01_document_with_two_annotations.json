@@ -13,10 +13,8 @@
       "officer_name" : "John Test Tester"
     },
     "links" : {
-      "document_metadata" : "/document/ABcdEFg_1234",
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
     },
-    "pages" : 1,
     "annotations" : [
       {
         "annotation" : "annotation",

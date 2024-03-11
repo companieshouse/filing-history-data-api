@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
@@ -15,21 +14,20 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 @Component
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
-    private final DataMapper dataMapper;
     private final AnnotationListMapper annotationListMapper;
     private final Supplier<Instant> instantSupplier;
 
-    public AnnotationTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
-                                       AnnotationListMapper annotationListMapper, Supplier<Instant> instantSupplier) {
+    public AnnotationTransactionMapper(LinksMapper linksMapper,
+                                       AnnotationListMapper annotationListMapper,
+                                       Supplier<Instant> instantSupplier) {
         super(linksMapper);
-        this.dataMapper = dataMapper;
         this.annotationListMapper = annotationListMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
-    protected FilingHistoryData mapFilingHistoryData(ExternalData externalData, FilingHistoryData existingData) {
-        return dataMapper.mapNewAnnotation(externalData, existingData);
+    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        return data.annotations(annotationListMapper.addNewAnnotationToList(new ArrayList<>(), request));
     }
 
     @Override

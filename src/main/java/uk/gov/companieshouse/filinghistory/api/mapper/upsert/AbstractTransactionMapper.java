@@ -5,6 +5,7 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import org.apache.commons.lang.StringUtils;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
@@ -27,14 +28,14 @@ public abstract class AbstractTransactionMapper {
     public FilingHistoryDocument mapNewFilingHistory(String id, InternalFilingHistoryApi request) {
         FilingHistoryDocument newDocument = new FilingHistoryDocument()
                 .transactionId(id)
-                .data(mapFilingHistoryData(request.getExternalData(), new FilingHistoryData())
+                .data(mapFilingHistoryData(request, new FilingHistoryData())
                         .links(linksMapper.map(request.getExternalData().getLinks())));
 
         return mapFilingHistory(request, newDocument);
     }
 
-    protected abstract FilingHistoryData mapFilingHistoryData(ExternalData externalData,
-            FilingHistoryData existingData);
+    protected abstract FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request,
+            FilingHistoryData data);
 
     public abstract FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument);
@@ -43,6 +44,9 @@ public abstract class AbstractTransactionMapper {
             FilingHistoryDocument document);
 
     protected static boolean isDeltaStale(final String requestDeltaAt, final String existingDeltaAt) {
+        if (StringUtils.isBlank(existingDeltaAt)) {
+            return false;
+        }
         return !OffsetDateTime.parse(requestDeltaAt, FORMATTER)
                 .isAfter(OffsetDateTime.parse(existingDeltaAt, FORMATTER));
     }

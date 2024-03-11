@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,6 +42,8 @@ class AnnotationTransactionMapperTest {
 
     @Mock
     private List<FilingHistoryAnnotation> annotationList;
+    @Mock
+    private InternalFilingHistoryApi mockRequest;
 
 
     @Test
@@ -153,6 +157,21 @@ class AnnotationTransactionMapperTest {
 
         // when
         final FilingHistoryDocument actual = annotationTransactionMapper.mapFilingHistory(request, document);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldMapFilingHistoryDataWhenNewAnnotationWithNoParent() {
+        // given
+        final FilingHistoryData expected = new FilingHistoryData()
+                .annotations(annotationList);
+
+        when(annotationListMapper.addNewAnnotationToList(any(), any())).thenReturn(annotationList);
+
+        // when
+        final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
 
         // then
         assertEquals(expected, actual);

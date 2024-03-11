@@ -579,6 +579,7 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/existing/TM01_document_with_no_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
+                .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID);
@@ -593,7 +594,8 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
                 .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT);
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -665,6 +667,121 @@ class FilingHistoryControllerIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<parent_entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        expectedDocument.updatedAt(actualDocument.getUpdatedAt());
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldInsertLimitedAnnotationDocumentWhenNoExistingParentDocumentAndReturn200OK() throws Exception {
+        // given
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/expected/expected_no_parent_annotation_doc.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT);
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/annotation-put-request.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        expectedDocument.updatedAt(actualDocument.getUpdatedAt());
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldUpdateExistingTopLevelDocumentWithAllTopLevelFieldsWhenExistingDocumentWasInsertedBeforeParentAnAndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/existing/no_parent_annotation_document.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/expected/expected_TM01_document_with_annotations.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE);
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/TM01_put_request.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<parent_entity_id>", "")
+                .replaceAll("<barcode>", BARCODE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))

@@ -13,12 +13,10 @@
       "officer_name" : "John Test Tester"
     },
     "links" : {
-      "document_metadata" : "/document/ABcdEFg_1234",
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
-    },
-    "pages" : 1
+    }
   },
-  "_barcode" : "X3GI11F3",
+  "_barcode" : "<barcode>",
   "delta_at" : "20140916230459600643",
   "_entity_id" : "<entity_id>",
   "updated_at" : "2014-09-17T18:52:08.001Z",
