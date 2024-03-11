@@ -132,7 +132,6 @@ class FilingHistoryControllerTest {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity
                 .status(HttpStatus.OK)
-                .header(LOCATION, "/filing-history/%s".formatted(TRANSACTION_ID))
                 .build();
 
         // when

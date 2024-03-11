@@ -1,9 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,10 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.util.Optional;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -29,12 +22,10 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @ExtendWith(MockitoExtension.class)
-//@WireMockTest(httpPort = 8889)
 class FilingHistoryServiceTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
 
     @InjectMocks
     private FilingHistoryService service;
@@ -178,6 +169,5 @@ class FilingHistoryServiceTest {
         // then
         assertThrows(ServiceUnavailableException.class, executable);
         verify(resourceChangedApiClient).callResourceChanged(any());
-//        verify(repository).save(existingDocument);
     }
 }
