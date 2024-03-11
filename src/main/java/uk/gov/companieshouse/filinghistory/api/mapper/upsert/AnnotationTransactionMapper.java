@@ -47,7 +47,7 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                                         throw new ConflictException(
                                                                 "Delta at stale when upserting annotation");
                                                     }
-                                                    annotationListMapper.updateExistingAnnotation(annotation);
+                                                    annotationListMapper.updateExistingAnnotation(annotation, request);
                                                 },
                                                 () -> annotationListMapper
                                                         .addNewAnnotationToList(annotationList, request)),

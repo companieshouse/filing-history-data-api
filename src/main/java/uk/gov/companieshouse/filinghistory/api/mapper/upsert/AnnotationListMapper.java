@@ -19,10 +19,20 @@ public class AnnotationListMapper {
     }
 
     public List<FilingHistoryAnnotation> addNewAnnotationToList(List<FilingHistoryAnnotation> annotationsList,
-                                       InternalFilingHistoryApi request) {
+                                                                InternalFilingHistoryApi request) {
+        annotationsList.add(mapAnnotation(new FilingHistoryAnnotation(), request));
+        return annotationsList;
+    }
+
+    public void updateExistingAnnotation(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
+        mapAnnotation(annotation, request);
+    }
+
+    private FilingHistoryAnnotation mapAnnotation(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
         ExternalData externalData = request.getExternalData();
         InternalData internalData = request.getInternalData();
-        annotationsList.add(new FilingHistoryAnnotation()
+
+        return annotation
                 .entityId(internalData.getEntityId())
                 .annotation("annotation") // TODO: Check where this field comes from
                 .category(externalData.getCategory().getValue())
@@ -30,12 +40,6 @@ public class AnnotationListMapper {
                 .description(externalData.getDescription())
                 .descriptionValues(descriptionValuesMapper.map(externalData.getDescriptionValues()))
                 .type(externalData.getType())
-                .deltaAt(internalData.getDeltaAt()));
-
-        return annotationsList;
-    }
-
-    public void updateExistingAnnotation(FilingHistoryAnnotation annotation) {
-        // Update existing annotation
+                .deltaAt(internalData.getDeltaAt());
     }
 }

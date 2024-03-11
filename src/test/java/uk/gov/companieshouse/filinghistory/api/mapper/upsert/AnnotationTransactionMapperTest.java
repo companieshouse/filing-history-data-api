@@ -118,7 +118,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).updateExistingAnnotation(annotationWithEntityIdMatch);
+        verify(annotationListMapper).updateExistingAnnotation(annotationWithEntityIdMatch, request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 

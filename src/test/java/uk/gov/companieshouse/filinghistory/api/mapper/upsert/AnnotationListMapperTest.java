@@ -117,4 +117,41 @@ class AnnotationListMapperTest {
         assertEquals(expectedList, existingList);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
+
+    @Test
+    void shouldUpdateExistingAnnotation() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID)
+                        .deltaAt(NEWEST_REQUEST_DELTA_AT))
+                .externalData(new ExternalData()
+                        .category(CategoryEnum.ANNOTATION)
+                        .date("2011-11-26T11:27:55.000Z")
+                        .description("annotation")
+                        .descriptionValues(requestDescriptionValues)
+                        .type("ANNOTATION"));
+
+
+        FilingHistoryAnnotation expectedAnnotation = new FilingHistoryAnnotation()
+                .annotation("annotation")
+                .entityId(ENTITY_ID)
+                .deltaAt(NEWEST_REQUEST_DELTA_AT)
+                .category("annotation")
+                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
+                .description("annotation")
+                .descriptionValues(descriptionValues)
+                .type("ANNOTATION");
+
+        FilingHistoryAnnotation existingAnnotation = new FilingHistoryAnnotation();
+
+        when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
+
+        // when
+        annotationListMapper.updateExistingAnnotation(existingAnnotation, request);
+
+        // then
+        assertEquals(expectedAnnotation, existingAnnotation);
+        verify(descriptionValuesMapper).map(requestDescriptionValues);
+    }
 }
