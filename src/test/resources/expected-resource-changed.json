@@ -1,0 +1,9 @@
+{
+  "resource_kind": "filing-history",
+  "resource_uri": "/company/12345678/filing-history/transactionId",
+  "context_id": "ABCD1234",
+  "event": {
+    "published_at": "<published_at>",
+    "type": "changed"
+  }
+}

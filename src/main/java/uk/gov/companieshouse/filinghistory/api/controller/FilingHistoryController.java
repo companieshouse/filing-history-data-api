@@ -83,7 +83,6 @@ public class FilingHistoryController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .header(LOCATION, "/filing-history/%s".formatted(transactionId))
                 .build();
     }
 }

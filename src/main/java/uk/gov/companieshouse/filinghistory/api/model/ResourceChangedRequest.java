@@ -1,10 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
-public record ResourceChangedRequest(String contextId, String companyNumber, String transactionId,
-                                     Object filingHistoryData, Boolean isDelete) {
+public record ResourceChangedRequest(String contextId, FilingHistoryDocument filingHistoryDocument,
+                                     boolean isDelete) {
 
-    public ResourceChangedRequest(ResourceChangedRequestBuilder builder) {
-        this(builder.getContextId(), builder.getCompanyNumber(), builder.getTransactionId(),
-                builder.getFilingHistoryData(), builder.isDelete());
-    }
 }

@@ -18,7 +18,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class Repository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
 
     private final MongoTemplate mongoTemplate;
 

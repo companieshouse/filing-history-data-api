@@ -1,0 +1,36 @@
+{
+  "resource_kind": "filing-history",
+  "resource_uri": "/company/12345678/filing-history/transactionId",
+  "context_id": "ABCD1234",
+  "deleted_data": {
+    "transaction_id": "transactionId",
+    "barcode": "X4BI89B6",
+    "type": "TM01",
+    "date": "2014-09-15",
+    "category": "officers",
+    "annotations": [
+      {
+        "annotation": "annotation",
+        "description_values": {
+          "description": "description"
+        }
+      }
+    ],
+    "subcategory": "termination",
+    "description": "termination-director-company-with-name-termination-date",
+    "description_values": {
+      "officer_name": "John Tester",
+      "termination_date": "2014-08-29"
+    },
+    "pages": 1,
+    "action_date": "2014-08-29",
+    "links": {
+      "self": "/company/12345678/filing-history/transactionId",
+      "document_metadata": "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"
+    }
+  },
+  "event": {
+    "published_at": "<published_at>",
+    "type": "deleted"
+  }
+}

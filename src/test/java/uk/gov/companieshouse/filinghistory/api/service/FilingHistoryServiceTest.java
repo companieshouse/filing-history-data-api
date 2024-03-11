@@ -110,7 +110,7 @@ class FilingHistoryServiceTest {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(503);
-        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
+//        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.updateFilingHistory(document, existingDocument);

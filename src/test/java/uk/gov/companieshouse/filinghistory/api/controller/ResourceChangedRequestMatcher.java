@@ -8,10 +8,8 @@ import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
-import java.io.DataInput;
-import java.io.IOException;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
 
 public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
 
@@ -19,9 +17,9 @@ public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
             .setSerializationInclusion(Include.NON_EMPTY)
             .registerModule(new JavaTimeModule());
     private final String expectedUrl;
-    private final ChangedResource expectedBody;
+    private final String expectedBody;
 
-    public ResourceChangedRequestMatcher(String expectedUrl, ChangedResource expectedBody) {
+    public ResourceChangedRequestMatcher(String expectedUrl, String expectedBody) {
         this.expectedUrl = expectedUrl;
         this.expectedBody = expectedBody;
     }
@@ -44,11 +42,19 @@ public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
 
     private MatchResult matchBody(String actualBody) {
         try {
-//            ChangedResource expected = mapper.readValue(expectedBody.toString(), ChangedResource.class);
             ChangedResource actual = mapper.readValue(actualBody, ChangedResource.class);
-            MatchResult result = MatchResult.of(expectedBody.equals(actual));
-            if(!result.isExactMatch()){
-//                System.out.printf("%nExpected: [%s]%n", expected);
+            actual.deletedData(
+                    mapper.readValue(mapper.writeValueAsString(actual.getDeletedData()),
+                    ExternalData.class));
+
+            ChangedResource expected = mapper.readValue(expectedBody, ChangedResource.class);
+            expected.deletedData(
+                    mapper.readValue(mapper.writeValueAsString(expected.getDeletedData()),
+                            ExternalData.class));
+
+            MatchResult result = MatchResult.of(expected.equals(actual));
+            if (!result.isExactMatch()) {
+                System.out.printf("%nExpected: [%s]%n", expected);
                 System.out.printf("%nActual: [%s]", actual);
             }
             return result;

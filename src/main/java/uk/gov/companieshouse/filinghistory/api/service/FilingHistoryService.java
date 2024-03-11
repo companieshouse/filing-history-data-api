@@ -12,7 +12,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableExcep
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
-import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequestBuilder;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -50,10 +49,7 @@ public class FilingHistoryService implements Service {
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
         ApiResponse<Void> response = apiClient.callResourceChanged(
-                buildBaseResourceChangedRequest(existingDocument)
-                .filingHistoryData(existingDocument)
-                .isDelete(true)
-                .build());
+                new ResourceChangedRequest(DataMapHolder.getRequestId(), existingDocument, true));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwServiceUnavailable();
         }
@@ -68,7 +64,7 @@ public class FilingHistoryService implements Service {
         repository.save(documentToSave);
 
         ApiResponse<Void> result = apiClient.callResourceChanged(
-                buildBaseResourceChangedRequest(documentToSave).build());
+                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave, false));
 
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
@@ -80,13 +76,6 @@ public class FilingHistoryService implements Service {
             }
             throwServiceUnavailable();
         }
-    }
-
-    private ResourceChangedRequestBuilder buildBaseResourceChangedRequest(FilingHistoryDocument document) {
-        return ResourceChangedRequestBuilder.builder()
-                .contextId(DataMapHolder.getRequestId())
-                .companyNumber(document.getCompanyNumber())
-                .transactionId(document.getTransactionId());
     }
 
     private void throwServiceUnavailable() {

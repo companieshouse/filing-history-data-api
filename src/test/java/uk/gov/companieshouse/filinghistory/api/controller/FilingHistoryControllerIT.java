@@ -19,10 +19,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.bson.Document;
@@ -42,8 +42,6 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
@@ -350,9 +348,6 @@ class FilingHistoryControllerIT {
         assertNull(actualDocument);
 
         verify(instantSupplier, times(1)).get();
-
-//        WireMock.verify(requestMadeFor(new PutRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete().toString())));/
-
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
 
@@ -602,27 +597,13 @@ class FilingHistoryControllerIT {
                 .documentId(DOCUMENT_ID);
     }
 
-    private static ChangedResource getExpectedChangedResource() {
-        return new ChangedResource()
-                .resourceUri("/company/12345678/filing-history/transactionId")
-                .resourceKind("filing-history")
-                .contextId(CONTEXT_ID)
-                .deletedData(null)
-                .event(new ChangedResourceEvent()
-                        .fieldsChanged(null)
-                        .publishedAt(UPDATED_AT.toString())
-                        .type("changed"));
+    private static String getExpectedChangedResource() throws IOException {
+        return IOUtils.resourceToString("/expected-resource-changed.json", StandardCharsets.UTF_8)
+                .replaceAll("<published_at>", UPDATED_AT.toString());
     }
 
-    private static ChangedResource getExpectedChangedResourceDelete() {
-        return new ChangedResource()
-                .resourceUri("/company/12345678/filing-history/transactionId")
-                .resourceKind("filing-history")
-                .contextId(CONTEXT_ID)
-                .deletedData(getExpectedFilingHistoryDocument(null, null, null))
-                .event(new ChangedResourceEvent()
-                        .fieldsChanged(null)
-                        .publishedAt(UPDATED_AT.toString())
-                        .type("deleted"));
+    private static String getExpectedChangedResourceDelete() throws IOException {
+        return IOUtils.resourceToString("/expected-delete-resource-changed.json", StandardCharsets.UTF_8)
+                .replaceAll("<published_at>", UPDATED_AT.toString());
     }
 }
