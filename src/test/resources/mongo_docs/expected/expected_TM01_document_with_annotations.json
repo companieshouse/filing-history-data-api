@@ -34,7 +34,7 @@
   "_barcode" : "<barcode>",
   "delta_at" : "<delta_at>",
   "_entity_id" : "<parent_entity_id>",
-  "updated_at" : "2014-09-17T18:52:08.001Z",
+  "updated_at" : "<updated_at>",
   "updated_by" : "context_id",
   "original_values" : {
     "officer_name" : "John Test Tester",
