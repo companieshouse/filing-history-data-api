@@ -10,7 +10,7 @@ public class LinksGetResponseMapper {
 
     private final String documentApiUrl;
 
-    public LinksGetResponseMapper(@Value("${document-api-url}") String documentApiUrl) {
+    public LinksGetResponseMapper(@Value("${api.document-api-url}") String documentApiUrl) {
         this.documentApiUrl = documentApiUrl;
     }
 

@@ -2,7 +2,7 @@
 
 ## Summary
 
-The `filing-history-data-api` is a service that receives filing history deltas from 
+The `filing-history-data-api` is a service that receives filing history deltas from
 `filing-history-data-consumer`. It transforms these deltas to a standardised structure and then:
 
 * stores these to the `company_filing_history collection` in MongoDB, and
@@ -23,19 +23,20 @@ The service is implemented in Java 21 using Spring Boot 3.2
    follow the steps in the
    README.
 2. Enable the following services using the command `./bin/chs-dev services enable <service>`.
-   * `filing-history-data-api`
+    * `filing-history-data-api`
 
 3. Boot up the services' containers on docker using tilt `tilt up`.
 
 ## Environment variables
-| Variable                       | Description                                              | Example (from docker-chs-development) |
-|--------------------------------|----------------------------------------------------------|---------------------------------------|
-| CHS_API_KEY                    | The client ID of an API key with internal app privileges | abc123def456ghi789                    |
-| CHS_KAFKA_API_URL              | The URL which the chs-kafka-api is hosted on             | http://api.chs.local:4001             |
-| SERVER_PORT                    | The server port of this service                          | 8080                                  |
-| LOGLEVEL                       | The level of log messages output to the logs             | debug                                 |
-| HUMAN_LOG                      | A boolean value to enable more readable log messages     | 1                                     |
-| RESOURCE_CHANGED_CALL_DISABLED | Toggles whether resource-changed calls are posted.       | false                                 | 
+
+| Variable                         | Description                                                                           | Example (from docker-chs-development) |
+|----------------------------------|---------------------------------------------------------------------------------------|---------------------------------------|
+| FILING_HISTORY_API_SUB_DELTA_KEY | The client ID of an API key, with internal app privileges, to call chs-kafka-api with | abc123def456ghi789                    |
+| CHS_KAFKA_API_URL                | The URL which the chs-kafka-api is hosted on                                          | http://api.chs.local:4001             |
+| PORT                             | The port at which the service is hosted in ECS                                        | 8080                                  |
+| LOGLEVEL                         | The level of log messages output to the logs                                          | debug                                 |
+| HUMAN_LOG                        | A boolean value to enable more readable log messages                                  | 1                                     |
+| RESOURCE_CHANGED_CALL_DISABLED   | Toggles whether resource-changed calls are posted.                                    | false                                 | 
 
 ## Building the docker image
 
