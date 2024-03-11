@@ -22,7 +22,7 @@ class AnnotationPutRequestValidatorTest {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String VALID_SELF_LINK = "/company/12345678/filing-history/transactionId";
     private static final String VALID_DELTA_AT = "20140916230459600643";
-    private static final String TM01_TYPE = "TM01";
+    private static final String TYPE = "ANNOTATION";
     private static final String DATE = "2011-08-06T00:00:00.00Z";
     private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -180,7 +180,7 @@ class AnnotationPutRequestValidatorTest {
                                 .annotations(List.of(
                                         new FilingHistoryItemDataAnnotations()
                                                 .annotation("annotation field")
-                                                .type(TM01_TYPE)
+                                                .type(TYPE)
                                                 .date(DATE)
                                 ))
                                 .links(new FilingHistoryItemDataLinks()
@@ -264,7 +264,7 @@ class AnnotationPutRequestValidatorTest {
                         .annotations(List.of(
                                         new FilingHistoryItemDataAnnotations()
                                                 .annotation("annotation")
-                                                .type(TM01_TYPE)
+                                                .type(TYPE)
                                                 .date(DATE)
                                 )
                         )
