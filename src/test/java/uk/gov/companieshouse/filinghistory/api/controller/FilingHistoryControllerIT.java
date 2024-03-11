@@ -71,7 +71,6 @@ class FilingHistoryControllerIT {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
-    private static final String DELETE_URI= "/filing-history/%s".formatted(TRANSACTION_ID);
     private static final String ENTITY_ID = "1234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
@@ -533,8 +532,6 @@ class FilingHistoryControllerIT {
 
         final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
                 FilingHistoryDocument.class);
-
-        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
