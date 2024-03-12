@@ -1,12 +1,13 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import java.time.Instant;
 import java.util.Objects;
 
 public class FilingHistoryAltCapital {
 
     private String currency;
     private String figure;
-    private String date;
+    private Instant date;
     private String description;
 
     public String getCurrency() {
@@ -27,11 +28,11 @@ public class FilingHistoryAltCapital {
         return this;
     }
 
-    public String getDate() {
+    public Instant getDate() {
         return date;
     }
 
-    public FilingHistoryAltCapital date(String date) {
+    public FilingHistoryAltCapital date(Instant date) {
         this.date = date;
         return this;
     }
