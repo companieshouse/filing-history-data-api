@@ -40,12 +40,16 @@ class RepositoryTest {
         // given
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
+        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID);
+        criteria.and("company_number").is(COMPANY_NUMBER);
+        Query query = new Query(criteria);
 
         // when
         Executable executable = () -> repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
+        verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
     }
 
     @Test
@@ -116,6 +120,4 @@ class RepositoryTest {
         assertThrows(ServiceUnavailableException.class, executable);
         verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
     }
-
-
 }
