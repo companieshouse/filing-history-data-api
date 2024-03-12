@@ -8,52 +8,51 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @Component
-public class AnnotationTransactionMapper extends AbstractTransactionMapper {
+public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper {
 
-    private final ChildListMapper<FilingHistoryAnnotation> annotationListMapper;
+    private final ChildListMapper<FilingHistoryAssociatedFiling> associatedFilingListMapper;
     private final Supplier<Instant> instantSupplier;
 
-    public AnnotationTransactionMapper(LinksMapper linksMapper,
-                                       ChildListMapper<FilingHistoryAnnotation> annotationListMapper,
-                                       Supplier<Instant> instantSupplier) {
+    public AssociatedFilingTransactionMapper(LinksMapper linksMapper,
+                                             ChildListMapper<FilingHistoryAssociatedFiling> associatedFilingListMapper,
+                                             Supplier<Instant> instantSupplier) {
         super(linksMapper);
-        this.annotationListMapper = annotationListMapper;
+        this.associatedFilingListMapper = associatedFilingListMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        return data.annotations(annotationListMapper.addNewChildToList(new ArrayList<>(), request));
+        return data.associatedFilings(associatedFilingListMapper.addNewChildToList(new ArrayList<>(), request));
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
-                                                             FilingHistoryDocument existingDocument) {
+    public FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
-        Optional.ofNullable(existingDocument.getData().getAnnotations())
+        Optional.ofNullable(existingDocument.getData().getAssociatedFilings())
                 .ifPresentOrElse(
-                        annotationList ->
-                                annotationList.stream()
-                                        .filter(annotation -> annotation.getEntityId().equals(requestEntityId))
+                        associatedFilingList ->
+                                associatedFilingList.stream()
+                                        .filter(associatedFiling -> associatedFiling.getEntityId().equals(requestEntityId))
                                         .findFirst()
-                                        .ifPresentOrElse(annotation -> {
+                                        .ifPresentOrElse(associatedFiling -> {
                                                     if (isDeltaStale(request.getInternalData().getDeltaAt(),
-                                                            annotation.getDeltaAt())) {
+                                                            associatedFiling.getDeltaAt())) {
                                                         throw new ConflictException(
-                                                                "Delta at stale when upserting annotation");
+                                                                "Delta at stale when upserting associated filing");
                                                     }
-                                                    annotationListMapper.updateExistingChild(annotation, request);
+                                                    associatedFilingListMapper.updateExistingChild(associatedFiling, request);
                                                 },
-                                                () -> annotationListMapper
-                                                        .addNewChildToList(annotationList, request)),
-                        () -> existingDocument.getData().annotations(
-                                annotationListMapper.addNewChildToList(new ArrayList<>(), request))
+                                                () -> associatedFilingListMapper
+                                                        .addNewChildToList(associatedFilingList, request)),
+                        () -> existingDocument.getData().associatedFilings(
+                                associatedFilingListMapper.addNewChildToList(new ArrayList<>(), request))
                 );
         return mapFilingHistory(request, existingDocument);
     }

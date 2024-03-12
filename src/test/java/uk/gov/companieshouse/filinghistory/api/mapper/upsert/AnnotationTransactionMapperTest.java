@@ -67,7 +67,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).addNewAnnotationToList(new ArrayList<>(), request);
+        verify(annotationListMapper).addNewChildToList(new ArrayList<>(), request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -88,7 +88,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).addNewAnnotationToList(annotationList, request);
+        verify(annotationListMapper).addNewChildToList(annotationList, request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -123,7 +123,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).updateExistingAnnotation(annotationWithEntityIdMatch, request);
+        verify(annotationListMapper).updateExistingChild(annotationWithEntityIdMatch, request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -173,7 +173,7 @@ class AnnotationTransactionMapperTest {
         final FilingHistoryData expected = new FilingHistoryData()
                 .annotations(annotationList);
 
-        when(annotationListMapper.addNewAnnotationToList(any(), any())).thenReturn(annotationList);
+        when(annotationListMapper.addNewChildToList(any(), any())).thenReturn(annotationList);
 
         // when
         final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());

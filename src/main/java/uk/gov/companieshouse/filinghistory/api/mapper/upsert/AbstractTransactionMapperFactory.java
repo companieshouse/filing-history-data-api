@@ -15,10 +15,12 @@ public class AbstractTransactionMapperFactory {
 
     private final TopLevelTransactionMapper topLevelTransactionMapper;
     private final AnnotationTransactionMapper annotationTransactionMapper;
+    private final AssociatedFilingTransactionMapper associatedFilingTransactionMapper;
 
-    public AbstractTransactionMapperFactory(TopLevelTransactionMapper topLevelTransactionMapper, AnnotationTransactionMapper annotationTransactionMapper) {
+    public AbstractTransactionMapperFactory(TopLevelTransactionMapper topLevelTransactionMapper, AnnotationTransactionMapper annotationTransactionMapper, AssociatedFilingTransactionMapper associatedFilingTransactionMapper) {
         this.topLevelTransactionMapper = topLevelTransactionMapper;
         this.annotationTransactionMapper = annotationTransactionMapper;
+        this.associatedFilingTransactionMapper = associatedFilingTransactionMapper;
     }
 
     public AbstractTransactionMapper getTransactionMapper(TransactionKindEnum kind) {
@@ -26,7 +28,8 @@ public class AbstractTransactionMapperFactory {
         return switch (kind) {
             case TOP_LEVEL -> topLevelTransactionMapper;
             case ANNOTATION -> annotationTransactionMapper;
-            case RESOLUTION, ASSOCIATED_FILING -> {
+            case ASSOCIATED_FILING -> associatedFilingTransactionMapper;
+            case RESOLUTION -> {
                 LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()));
                 throw new InvalidTransactionKindException("Invalid transaction kind: %s".formatted(kind.getValue()));
             }

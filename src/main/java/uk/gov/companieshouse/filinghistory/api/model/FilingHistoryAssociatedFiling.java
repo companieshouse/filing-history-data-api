@@ -12,8 +12,14 @@ public class FilingHistoryAssociatedFiling {
     private String type;
     private Instant date;
     @Field("description_values")
-	@JsonProperty("description_values")
+    @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
+    @Field("_entity_id")
+    @JsonProperty("_entity_id")
+    private String entityId;
+    @Field("delta_at")
+    @JsonProperty("delta_at")
+    private String deltaAt;
 
     public String getCategory() {
         return category;
@@ -60,6 +66,24 @@ public class FilingHistoryAssociatedFiling {
         return this;
     }
 
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public FilingHistoryAssociatedFiling entityId(String entityId) {
+        this.entityId = entityId;
+        return this;
+    }
+
+    public String getDeltaAt() {
+        return deltaAt;
+    }
+
+    public FilingHistoryAssociatedFiling deltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -69,15 +93,11 @@ public class FilingHistoryAssociatedFiling {
             return false;
         }
         FilingHistoryAssociatedFiling that = (FilingHistoryAssociatedFiling) o;
-        return Objects.equals(category, that.category)
-                && Objects.equals(description, that.description)
-                && Objects.equals(type, that.type)
-                && Objects.equals(date, that.date)
-                && Objects.equals(descriptionValues, that.descriptionValues);
+        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(entityId, that.entityId) && Objects.equals(deltaAt, that.deltaAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, description, type, date, descriptionValues);
+        return Objects.hash(category, description, type, date, descriptionValues, entityId, deltaAt);
     }
 }

@@ -13,9 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -73,7 +71,7 @@ class AnnotationListMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        List<FilingHistoryAnnotation> actual = annotationListMapper.addNewAnnotationToList(new ArrayList<>(), request);
+        List<FilingHistoryAnnotation> actual = annotationListMapper.addNewChildToList(new ArrayList<>(), request);
 
         // then
         assertEquals(expected, actual);
@@ -120,7 +118,7 @@ class AnnotationListMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        annotationListMapper.addNewAnnotationToList(existingList, request);
+        annotationListMapper.addNewChildToList(existingList, request);
 
         // then
         assertEquals(expectedList, existingList);
@@ -161,7 +159,7 @@ class AnnotationListMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        annotationListMapper.updateExistingAnnotation(existingAnnotation, request);
+        annotationListMapper.updateExistingChild(existingAnnotation, request);
 
         // then
         assertEquals(expectedAnnotation, existingAnnotation);

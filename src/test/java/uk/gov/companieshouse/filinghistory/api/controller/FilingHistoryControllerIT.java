@@ -1004,6 +1004,68 @@ class FilingHistoryControllerIT {
         verifyNoMoreInteractions(instantSupplier);
     }
 
+    @Test
+    void shouldInsertAssociatedFilingOnExistingDocumentWithNoAssociatedFilingListAndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/existing/associated_filings/with_zero_associated_filings.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/expected/associated_filings/with_one_associated_filing.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/associated_filings/associated_filing_put_request.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .internalData(buildInternalData(deltaAt))

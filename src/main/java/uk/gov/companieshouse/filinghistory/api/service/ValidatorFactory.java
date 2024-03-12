@@ -17,10 +17,12 @@ public class ValidatorFactory {
 
     private final TopLevelPutRequestValidator topLevelPutRequestValidator;
     private final AnnotationPutRequestValidator annotationPutRequestValidator;
+    private final AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator;
 
-    public ValidatorFactory(TopLevelPutRequestValidator topLevelPutRequestValidator, AnnotationPutRequestValidator annotationPutRequestValidator) {
+    public ValidatorFactory(TopLevelPutRequestValidator topLevelPutRequestValidator, AnnotationPutRequestValidator annotationPutRequestValidator, AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator) {
         this.topLevelPutRequestValidator = topLevelPutRequestValidator;
         this.annotationPutRequestValidator = annotationPutRequestValidator;
+        this.associatedFilingPutRequestValidator = associatedFilingPutRequestValidator;
     }
 
     public Validator<InternalFilingHistoryApi> getPutRequestValidator(TransactionKindEnum kind) {
@@ -28,7 +30,8 @@ public class ValidatorFactory {
         return switch (kind) {
             case TOP_LEVEL -> topLevelPutRequestValidator;
             case ANNOTATION -> annotationPutRequestValidator;
-            case RESOLUTION, ASSOCIATED_FILING -> {
+            case ASSOCIATED_FILING -> associatedFilingPutRequestValidator;
+            case RESOLUTION -> {
                 LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()));
                 throw new InvalidTransactionKindException("Invalid transaction kind: %s".formatted(kind.getValue()));
             }

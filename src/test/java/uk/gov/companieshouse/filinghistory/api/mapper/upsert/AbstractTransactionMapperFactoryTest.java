@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ANNOTATION;
+import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ASSOCIATED_FILING;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ class AbstractTransactionMapperFactoryTest {
     private TopLevelTransactionMapper topLevelTransactionMapper;
     @Mock
     private AnnotationTransactionMapper annotationTransactionMapper;
+    @Mock
+    private AssociatedFilingTransactionMapper associatedFilingTransactionMapper;
 
     @Test
     void shouldReturnTopLevelTransactionMapperWhenTopLevelKindPassed() {
@@ -51,16 +54,28 @@ class AbstractTransactionMapperFactoryTest {
         assertEquals(annotationTransactionMapper, actualMapper);
     }
 
-    @ParameterizedTest
-    @CsvSource({"resolution", "associated-filing"})
-    void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper(String kind) {
+    @Test
+    void shouldReturnAssociatedFilingTransactionMapperWhenAnnotationKindPassed() {
         // given
 
         // when
-        Executable executable = () -> factory.getTransactionMapper(TransactionKindEnum.fromValue(kind));
+        AbstractTransactionMapper actualMapper = factory.getTransactionMapper(ASSOCIATED_FILING);
+
+        // then
+        assertInstanceOf(AssociatedFilingTransactionMapper.class, actualMapper);
+        assertEquals(associatedFilingTransactionMapper, actualMapper);
+    }
+
+    // REMOVE TEST WHEN RESOLUTIONS ARE IMPLEMENTED
+    @Test
+    void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper() {
+        // given
+
+        // when
+        Executable executable = () -> factory.getTransactionMapper(TransactionKindEnum.fromValue("resolution"));
 
         // then
         InvalidTransactionKindException exception = assertThrows(InvalidTransactionKindException.class, executable);
-        assertEquals("Invalid transaction kind: %s".formatted(kind), exception.getMessage());
+        assertEquals("Invalid transaction kind: %s".formatted("resolution"), exception.getMessage());
     }
 }

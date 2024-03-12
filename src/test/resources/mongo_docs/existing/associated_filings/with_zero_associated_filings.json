@@ -1,0 +1,22 @@
+{
+  "_id" : "<transaction_id>",
+  "_entity_id" : "<parent_entity_id>",
+  "_document_id" : "000ABCDBMOS1234",
+  "company_number" : "<company_number>",
+  "data" : {
+    "category" : "annual-return",
+    "description" : "legacy",
+    "type" : "363s",
+    "date" : "2005-05-10T12:00:01.000Z",
+    "description_values" : {
+      "description" : "Return made up to 28/12/06; full list of members"
+    },
+    "links" : {
+      "document_metadata" : "/document/1234AafRR-Ty",
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "pages" : 7,
+    "paper_filed" : true
+  },
+  "delta_at": "<parent_delta_at>"
+}
