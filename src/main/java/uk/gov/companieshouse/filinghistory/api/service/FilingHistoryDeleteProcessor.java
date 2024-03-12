@@ -19,7 +19,6 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor{
 
     @Override
     public void processFilingHistoryDelete(String transactionId) {
-
         filingHistoryService.findExistingFilingHistoryById(transactionId)
                 .ifPresentOrElse(
                         filingHistoryService::deleteExistingFilingHistory,

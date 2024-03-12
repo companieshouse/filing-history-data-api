@@ -57,9 +57,7 @@ public class Repository {
 
     public void deleteById(final String id) {
         try {
-            mongoTemplate.remove(
-                    Query.query(Criteria.where("_id").is(id)),
-                    FilingHistoryDocument.class);
+            mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB unavailable when deleting document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());

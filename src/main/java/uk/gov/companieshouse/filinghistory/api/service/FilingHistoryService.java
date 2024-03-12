@@ -30,8 +30,13 @@ public class FilingHistoryService implements Service {
 
     @Override
     public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId,
-                                                                     final String companyNumber) {
+            final String companyNumber) {
         return repository.findByIdAndCompanyNumber(transactionId, companyNumber);
+    }
+
+    @Override
+    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
+        return repository.findById(transactionId);
     }
 
     @Override
@@ -48,24 +53,15 @@ public class FilingHistoryService implements Service {
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
-        ApiResponse<Void> response = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), existingDocument, true));
+        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwServiceUnavailable();
         }
     }
 
-    @Override
-    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
-        return repository.findById(transactionId);
-    }
-
     private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
-
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave, false));
-
+        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(documentToSave, false));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
                 repository.deleteById(documentToSave.getTransactionId());

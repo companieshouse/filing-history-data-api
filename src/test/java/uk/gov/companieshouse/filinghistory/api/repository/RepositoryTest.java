@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
@@ -104,11 +106,16 @@ class RepositoryTest {
         // given
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
+        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID);
+        Query query = new Query(criteria);
 
         // when
         Executable executable = () -> repository.findById(TRANSACTION_ID);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
+        verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
     }
+
+
 }

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -101,7 +102,6 @@ class FilingHistoryServiceTest {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(503);
-//        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.updateFilingHistory(document, existingDocument);
@@ -169,5 +169,33 @@ class FilingHistoryServiceTest {
         // then
         assertThrows(ServiceUnavailableException.class, executable);
         verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void findExistingFilingHistoryDocumentByIdShouldReturnDocument() {
+        // given
+        when(repository.findById(any())).thenReturn(Optional.of(document));
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+
+        // then
+        assertTrue(actualDocument.isPresent());
+        verify(repository).findById(TRANSACTION_ID);
+    }
+
+    @Test
+    void findExistingFilingHistoryDocumentByIdNoCompanyNumberShouldReturnDocument() {
+        // given
+        doCallRealMethod().when(repository).findById(any());
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenReturn(Optional.of(document));
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+
+        // then
+        assertTrue(actualDocument.isPresent());
+        verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, null);
+
     }
 }

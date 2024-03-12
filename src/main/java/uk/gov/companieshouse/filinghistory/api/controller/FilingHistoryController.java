@@ -26,11 +26,10 @@ public class FilingHistoryController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final UpsertProcessor serviceUpsertProcessor;
     private final GetResponseProcessor filingHistoryGetResponseProcessor;
-
     private final DeleteProcessor serviceDeleteProcessor;
 
     public FilingHistoryController(UpsertProcessor serviceUpsertProcessor,
-                                   GetResponseProcessor filingHistoryGetResponseProcessor,
+            GetResponseProcessor filingHistoryGetResponseProcessor,
             DeleteProcessor serviceDeleteProcessor) {
         this.serviceUpsertProcessor = serviceUpsertProcessor;
         this.filingHistoryGetResponseProcessor = filingHistoryGetResponseProcessor;
@@ -71,7 +70,7 @@ public class FilingHistoryController {
                 .body(filingHistoryGetResponseProcessor.processGetSingleFilingHistory(transactionId, companyNumber));
     }
 
-    @DeleteMapping("/filing-history-data-api/filing-history/{transaction_id}")
+    @DeleteMapping("/filing-history-data-api/filing-history/{transaction_id}/internal")
     public ResponseEntity<Void> deleteFilingHistoryTransaction(
             @PathVariable("transaction_id") final String transactionId) {
 

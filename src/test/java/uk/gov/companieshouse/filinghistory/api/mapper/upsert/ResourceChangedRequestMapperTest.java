@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
@@ -42,13 +44,17 @@ class ResourceChangedRequestMapperTest {
     @Mock
     private Supplier<Instant> instantSupplier;
 
+    @BeforeEach
+    void setUp() {
+        DataMapHolder.initialise(EXPECTED_CONTEXT_ID);
+    }
+
     @Test
     void testUpsertResourceChangedMapper() {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
-        ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(EXPECTED_CONTEXT_ID,
-                filingHistoryDocument, false);
+        ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, false);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
@@ -70,8 +76,7 @@ class ResourceChangedRequestMapperTest {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(deletedData);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(EXPECTED_CONTEXT_ID,
-                filingHistoryDocument, true);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)

@@ -65,7 +65,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
-    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{transaction_id}";
+    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{transaction_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
@@ -518,7 +518,6 @@ class FilingHistoryControllerIT {
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
-
     }
 
     @Test
@@ -550,11 +549,27 @@ class FilingHistoryControllerIT {
         result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
 
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
-        assertNotNull(expectedDocument);
 
         verify(instantSupplier, times(1)).get();
         WireMock.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
+    }
+
+    @Test
+    void shouldReturn404NotFoundWheDocumentCannotBeFoundOnDelete()
+            throws Exception {
+        // given
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
