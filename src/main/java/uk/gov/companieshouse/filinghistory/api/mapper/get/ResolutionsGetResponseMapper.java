@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.convertInstantToLocalDateString;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantToString;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class ResolutionsGetResponseMapper {
                                         .category(resolution.getCategory())
                                         .description(resolution.getDescription())
                                         .type(resolution.getType())
-                                        .date(convertInstantToLocalDateString(resolution.getDate()))
+                                        .date(instantToString(resolution.getDate()))
                                         .descriptionValues(mapper.map(resolution.getDescriptionValues())))
                         .toList())
                 .orElse(null);

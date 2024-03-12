@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.convertInstantToLocalDateString;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantToString;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class AnnotationsGetResponseMapper {
                                         .category(annotation.getCategory())
                                         .description(annotation.getDescription())
                                         .type(annotation.getType())
-                                        .date(convertInstantToLocalDateString(annotation.getDate()))
+                                        .date(instantToString(annotation.getDate()))
                                         .descriptionValues(mapper.map(annotation.getDescriptionValues())))
                         .toList())
                 .orElse(null);

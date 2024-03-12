@@ -19,6 +19,8 @@ public class DescriptionValuesMapper {
     FilingHistoryDescriptionValues map(final FilingHistoryItemDataDescriptionValues descriptionValues) {
         return Optional.ofNullable(descriptionValues)
                 .map(values -> new FilingHistoryDescriptionValues()
+                        .capital(capitalDescriptionMapper.mapCapitalDescriptionValueList(values.getCapital()))
+                        .altCapital(capitalDescriptionMapper.mapAltCapitalDescriptionValueList(values.getAltCapital()))
                         .terminationDate(stringToInstant(values.getTerminationDate()))
                         .officerName(values.getOfficerName())
                         .appointmentDate(stringToInstant(values.getAppointmentDate()))
@@ -58,12 +60,7 @@ public class DescriptionValuesMapper {
                         .withdrawalDate(stringToInstant(values.getWithdrawalDate()))
                         .caseStartDate(stringToInstant(values.getCaseStartDate()))
                         .resType(values.getResType())
-                        .resolutionDate(stringToInstant(values.getResolutionDate()))
-                        .capital(values.getCapital() != null ? capitalDescriptionMapper.mapCapitalDescriptionValueList(
-                                values.getCapital()) : null)
-                        .altCapital(values.getAltCapital() != null
-                                ? capitalDescriptionMapper.mapAltCapitalDescriptionValueList(values.getAltCapital())
-                                : null))
+                        .resolutionDate(stringToInstant(values.getResolutionDate())))
                 .orElse(null);
     }
 }

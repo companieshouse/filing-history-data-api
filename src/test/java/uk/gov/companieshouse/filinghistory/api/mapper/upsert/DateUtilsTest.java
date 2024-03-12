@@ -38,7 +38,7 @@ class DateUtilsTest {
         final Instant input = Instant.parse("2020-06-10T00:00:00.00Z");
 
         // when
-        final String actual = DateUtils.convertInstantToLocalDateString(input);
+        final String actual = DateUtils.instantToString(input);
 
         // then
         assertEquals(expected, actual);
@@ -49,7 +49,7 @@ class DateUtilsTest {
         // given
 
         // when
-        final String actual = DateUtils.convertInstantToLocalDateString(null);
+        final String actual = DateUtils.instantToString(null);
 
         // then
         assertNull(actual);

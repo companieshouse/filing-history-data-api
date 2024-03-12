@@ -16,7 +16,7 @@ public final class DateUtils {
                 .orElse(null);
     }
 
-    public static String convertInstantToLocalDateString(final Instant inputDate) {
+    public static String instantToString(final Instant inputDate) {
         return Optional.ofNullable(inputDate)
                 .map(date -> LocalDate.ofInstant(date, ZoneOffset.UTC).toString())
                 .orElse(null);

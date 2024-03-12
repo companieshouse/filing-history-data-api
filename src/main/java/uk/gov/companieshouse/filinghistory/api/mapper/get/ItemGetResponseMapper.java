@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.convertInstantToLocalDateString;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantToString;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -35,7 +35,7 @@ public class ItemGetResponseMapper {
                 .transactionId(document.getTransactionId())
                 .barcode(document.getBarcode())
                 .type(data.getType())
-                .date(convertInstantToLocalDateString(data.getDate()))
+                .date(instantToString(data.getDate()))
                 .category(CategoryEnum.fromValue(data.getCategory()))
                 .subcategory(data.getSubcategory())
                 .annotations(annotationsGetResponseMapper.map(data.getAnnotations()))
@@ -44,7 +44,7 @@ public class ItemGetResponseMapper {
                 .description(data.getDescription())
                 .descriptionValues(descriptionValuesGetResponseMapper.map(data.getDescriptionValues()))
                 .pages(data.getPages())
-                .actionDate(convertInstantToLocalDateString(data.getActionDate()))
+                .actionDate(instantToString(data.getActionDate()))
                 .paperFiled(data.getPaperFiled())
                 .links(linksGetResponseMapper.map(data.getLinks()));
     }
