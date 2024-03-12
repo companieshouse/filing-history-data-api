@@ -6,7 +6,6 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
-import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
