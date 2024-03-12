@@ -1,0 +1,26 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<parent_entity_id>",
+  "data" : {
+    "associated_filings" : [
+      {
+        "type" : "363(288)",
+        "description" : "legacy",
+        "category" : "annual-return",
+        "description_values" : {
+          "description" : "Secretary's particulars changed;director's particulars changed"
+        },
+        "date" : "2005-05-10T12:00:00.000Z",
+        "_entity_id": "<child_entity_id>",
+        "delta_at": "<child_delta_at>"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "updated_by": "context_id",
+  "updated_at": "2014-09-17T18:52:08.001Z"
+}
