@@ -92,7 +92,7 @@ class AnnotationTransactionIT {
     void shouldInsertAnnotationOnExistingDocumentWithNoAnnotationsListAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/existing/annotations/existing_doc_with_zero_annotations.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/existing_doc_with_zero_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -103,7 +103,7 @@ class AnnotationTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/expected/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -155,7 +155,7 @@ class AnnotationTransactionIT {
     void shouldInsertAnnotationOnExistingDocumentWithExistingAnnotationListAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/existing/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -169,7 +169,7 @@ class AnnotationTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/expected/annotations/expected_doc_with_two_annotations.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/expected_doc_with_two_annotations.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -223,7 +223,7 @@ class AnnotationTransactionIT {
     void shouldInsertLimitedAnnotationDocumentWhenNoExistingParentDocumentAndReturn200OK() throws Exception {
         // given
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/expected/annotations/expected_doc_no_parent_annotation.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/expected_doc_no_parent_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -274,7 +274,7 @@ class AnnotationTransactionIT {
     void shouldUpdateExistingTopLevelDocumentWithAllTopLevelFieldsWhenExistingDocumentWasInsertedBeforeParentAnAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/existing/annotations/existing_doc_no_parent_annotation.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/existing_doc_no_parent_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -287,7 +287,7 @@ class AnnotationTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/expected/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -341,7 +341,7 @@ class AnnotationTransactionIT {
     void shouldUpdateExistingAnnotationOnExistingDocumentAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/existing/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -355,7 +355,7 @@ class AnnotationTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/expected/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -407,7 +407,7 @@ class AnnotationTransactionIT {
     void shouldUpdateParentTransactionOnExistingDocumentAndNotChangeAnnotationAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/existing/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -421,7 +421,7 @@ class AnnotationTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/expected/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/expected_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -474,7 +474,7 @@ class AnnotationTransactionIT {
     void shouldThrowConflictExceptionWhenUpdatingChildAnnotationWithStaleDeltaAtAndReturn409Conflict() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/existing/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
+                "/mongo_docs/annotations/existing_doc_with_existing_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
