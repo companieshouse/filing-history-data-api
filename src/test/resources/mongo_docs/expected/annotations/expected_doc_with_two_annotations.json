@@ -44,7 +44,7 @@
     "paper_filed" : true
   },
   "_barcode" : "<barcode>",
-  "delta_at" : "<delta_at>",
+  "delta_at" : "<parent_delta_at>",
   "_entity_id" : "<parent_entity_id>",
   "updated_at" : "<updated_at>",
   "updated_by" : "context_id",

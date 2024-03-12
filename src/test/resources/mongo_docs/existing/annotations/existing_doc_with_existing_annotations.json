@@ -2,6 +2,20 @@
   "_id" : "<transaction_id>",
   "company_number" : "<company_number>",
   "data" : {
+    "annotations" : [
+      {
+        "annotation" : "Clarification This document was second filed with the CH04 registered on 26/11/2011",
+        "category" : "annotation",
+        "date" : "2011-11-26T11:27:55.000Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
+        },
+        "type" : "ANNOTATION",
+        "_entity_id": "<existing_child_entity_id>",
+        "delta_at": "<child_delta_at>"
+      }
+    ],
     "action_date" : "2014-09-15T00:00:00.000Z",
     "category" : "officers",
     "type" : "TM01",
@@ -14,26 +28,12 @@
     },
     "links" : {
       "self" : "/company/<company_number>/filing-history/<transaction_id>"
-    },
-    "associated_filings" : [
-      {
-        "type" : "363(288)",
-        "description" : "legacy",
-        "category" : "annual-return",
-        "description_values" : {
-          "description" : "Secretary's particulars changed;director's particulars changed"
-        },
-        "date" : "2005-05-10T12:00:00.000Z",
-        "_entity_id": "<child_entity_id>",
-        "delta_at": "<child_delta_at>"
-      }
-    ],
-    "paper_filed" : true
+    }
   },
   "_barcode" : "<barcode>",
-  "delta_at" : "<delta_at>",
+  "delta_at" : "<parent_delta_at>",
   "_entity_id" : "<parent_entity_id>",
-  "updated_at" : "<updated_at>",
+  "updated_at" : "2014-09-17T18:52:08.001Z",
   "updated_by" : "context_id",
   "original_values" : {
     "officer_name" : "John Test Tester",

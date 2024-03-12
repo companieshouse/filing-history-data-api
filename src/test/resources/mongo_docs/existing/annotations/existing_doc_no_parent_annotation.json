@@ -1,7 +1,7 @@
 {
   "_id" : "<transaction_id>",
   "company_number" : "<company_number>",
-  "_entity_id" : "<entity_id>",
+  "_entity_id" : "<parent_entity_id>",
   "data" : {
     "annotations" : [
       {

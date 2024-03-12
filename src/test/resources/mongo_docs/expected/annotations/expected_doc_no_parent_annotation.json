@@ -1,7 +1,7 @@
 {
   "_id" : "<transaction_id>",
   "company_number" : "<company_number>",
-  "_entity_id" : "<entity_id>",
+  "_entity_id" : "<parent_entity_id>",
   "data" : {
     "annotations" : [
       {
@@ -23,6 +23,5 @@
     "paper_filed" : true
   },
   "updated_by": "context_id",
-  "updated_at": "<updated_at>",
-  "delta_at": "<parent_delta_at>"
+  "updated_at": "<updated_at>"
 }
