@@ -8,7 +8,7 @@ public class FilingHistoryLinks {
 
     private String self;
     @Field("document_metadata")
-	@JsonProperty("document_metadata")
+    @JsonProperty("document_metadata")
     private String documentMetadata;
 
     public String getSelf() {

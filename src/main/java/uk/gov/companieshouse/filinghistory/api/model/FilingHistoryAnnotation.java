@@ -13,10 +13,10 @@ public class FilingHistoryAnnotation {
     private String type;
     private Instant date;
     @Field("_entity_id")
-	@JsonProperty("_entity_id")
+    @JsonProperty("_entity_id")
     private String entityId;
     @Field("description_values")
-	@JsonProperty("description_values")
+    @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
 
     @Field("delta_at")

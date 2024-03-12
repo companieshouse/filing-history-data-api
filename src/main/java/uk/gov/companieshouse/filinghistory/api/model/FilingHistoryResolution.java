@@ -12,7 +12,7 @@ public class FilingHistoryResolution {
     private String type;
     private Instant date;
     @Field("description_values")
-	@JsonProperty("description_values")
+    @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
 
     public String getCategory() {

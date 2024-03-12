@@ -9,126 +9,126 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class FilingHistoryDescriptionValues {
 
     @Field("appointment_date")
-	@JsonProperty("appointment_date")
+    @JsonProperty("appointment_date")
     private Instant appointmentDate;
     @Field("branch_number")
-	@JsonProperty("branch_number")
+    @JsonProperty("branch_number")
     private String branchNumber;
     @Field("brought_down_date")
-	@JsonProperty("brought_down_date")
+    @JsonProperty("brought_down_date")
     private Instant broughtDownDate;
     @Field("case_end_date")
-	@JsonProperty("case_end_date")
+    @JsonProperty("case_end_date")
     private Instant caseEndDate;
     @Field("case_number")
-	@JsonProperty("case_number")
+    @JsonProperty("case_number")
     private String caseNumber;
     @Field("cessation_date")
-	@JsonProperty("cessation_date")
+    @JsonProperty("cessation_date")
     private Instant cessationDate;
     @Field("change_address")
-	@JsonProperty("change_address")
+    @JsonProperty("change_address")
     private String changeAddress;
     @Field("change_date")
-	@JsonProperty("change_date")
+    @JsonProperty("change_date")
     private Instant changeDate;
     @Field("change_details")
-	@JsonProperty("change_details")
+    @JsonProperty("change_details")
     private String changeDetails;
     @Field("change_name")
-	@JsonProperty("change_name")
+    @JsonProperty("change_name")
     private String changeName;
     @Field("change_type")
-	@JsonProperty("change_type")
+    @JsonProperty("change_type")
     private String changeType;
     @Field("charge_creation_date")
-	@JsonProperty("charge_creation_date")
+    @JsonProperty("charge_creation_date")
     private Instant chargeCreationDate;
     @Field("charge_number")
-	@JsonProperty("charge_number")
+    @JsonProperty("charge_number")
     private String chargeNumber;
     @Field("close_date")
-	@JsonProperty("close_date")
+    @JsonProperty("close_date")
     private Instant closeDate;
     @Field("company_number")
-	@JsonProperty("company_number")
+    @JsonProperty("company_number")
     private String companyNumber;
     @Field("company_type")
-	@JsonProperty("company_type")
+    @JsonProperty("company_type")
     private String companyType;
     private Instant date;
     @Field("default_address")
-	@JsonProperty("default_address")
+    @JsonProperty("default_address")
     private String defaultAddress;
     private String description;
     @Field("form_attached")
-	@JsonProperty("form_attached")
+    @JsonProperty("form_attached")
     private String formAttached;
     @Field("form_type")
-	@JsonProperty("form_type")
+    @JsonProperty("form_type")
     private String formType;
     @Field("incorporation_date")
-	@JsonProperty("incorporation_date")
+    @JsonProperty("incorporation_date")
     private Instant incorporationDate;
     @Field("made_up_date")
-	@JsonProperty("made_up_date")
+    @JsonProperty("made_up_date")
     private Instant madeUpDate;
     @Field("new_address")
-	@JsonProperty("new_address")
+    @JsonProperty("new_address")
     private String newAddress;
     @Field("new_date")
-	@JsonProperty("new_date")
+    @JsonProperty("new_date")
     private Instant newDate;
     @Field("new_jurisdiction")
-	@JsonProperty("new_jurisdiction")
+    @JsonProperty("new_jurisdiction")
     private String newJurisdiction;
     @Field("notification_date")
-	@JsonProperty("notification_date")
+    @JsonProperty("notification_date")
     private Instant notificationDate;
     @Field("officer_address")
-	@JsonProperty("officer_address")
+    @JsonProperty("officer_address")
     private String officerAddress;
     @Field("termination_date")
-	@JsonProperty("termination_date")
+    @JsonProperty("termination_date")
     private Instant terminationDate;
     @Field("officer_name")
-	@JsonProperty("officer_name")
+    @JsonProperty("officer_name")
     private String officerName;
     @Field("old_address")
-	@JsonProperty("old_address")
+    @JsonProperty("old_address")
     private String oldAddress;
     @Field("old_jurisdiction")
-	@JsonProperty("old_jurisdiction")
+    @JsonProperty("old_jurisdiction")
     private String oldJurisdiction;
     @Field("original_description")
-	@JsonProperty("original_description")
+    @JsonProperty("original_description")
     private String originalDescription;
     @Field("property_acquired_date")
-	@JsonProperty("property_acquired_date")
+    @JsonProperty("property_acquired_date")
     private Instant propertyAcquiredDate;
     @Field("psc_name")
-	@JsonProperty("psc_name")
+    @JsonProperty("psc_name")
     private String pscName;
     @Field("representative_details")
-	@JsonProperty("representative_details")
+    @JsonProperty("representative_details")
     private String representativeDetails;
     @Field("withdrawal_date")
-	@JsonProperty("withdrawal_date")
+    @JsonProperty("withdrawal_date")
     private Instant withdrawalDate;
     @Field("case_start_date")
-	@JsonProperty("case_start_date")
+    @JsonProperty("case_start_date")
     private Instant caseStartDate;
     @Field("res_type")
-	@JsonProperty("res_type")
+    @JsonProperty("res_type")
     private String resType;
     @Field("resolution_date")
-	@JsonProperty("resolution_date")
+    @JsonProperty("resolution_date")
     private Instant resolutionDate;
     @Field("capital")
-	@JsonProperty("capital")
+    @JsonProperty("capital")
     private List<FilingHistoryCapital> capital;
     @Field("alt_capital")
-	@JsonProperty("alt_capital")
+    @JsonProperty("alt_capital")
     private List<FilingHistoryAltCapital> altCapital;
 
     public Instant getTerminationDate() {

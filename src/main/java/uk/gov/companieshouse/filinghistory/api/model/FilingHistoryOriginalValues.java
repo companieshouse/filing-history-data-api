@@ -8,87 +8,87 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class FilingHistoryOriginalValues {
 
     @Field("officer_name")
-	@JsonProperty("officer_name")
+    @JsonProperty("officer_name")
     private String officerName;
 
     @Field("resignation_date")
-	@JsonProperty("resignation_date")
+    @JsonProperty("resignation_date")
     private String resignationDate;
 
     @Field("charge_creation_date")
-	@JsonProperty("charge_creation_date")
+    @JsonProperty("charge_creation_date")
     private Instant chargeCreationDate;
 
     @Field("property_acquired_date")
-	@JsonProperty("property_acquired_date")
+    @JsonProperty("property_acquired_date")
     private Instant propertyAcquiredDate;
 
     @Field("appointment_date")
-	@JsonProperty("appointment_date")
+    @JsonProperty("appointment_date")
     private String appointmentDate;
 
     @Field("case_start_date")
-	@JsonProperty("case_start_date")
+    @JsonProperty("case_start_date")
     private String caseStartDate;
 
     @Field("case_end_date")
-	@JsonProperty("case_end_date")
+    @JsonProperty("case_end_date")
     private String caseEndDate;
 
     @Field("made_up_date")
-	@JsonProperty("made_up_date")
+    @JsonProperty("made_up_date")
     private String madeUpDate;
 
     @Field("acc_type")
-	@JsonProperty("acc_type")
+    @JsonProperty("acc_type")
     private String accType;
 
     @Field("change_date")
-	@JsonProperty("change_date")
+    @JsonProperty("change_date")
     private String changeDate;
 
     @Field("accounting_period")
-	@JsonProperty("accounting_period")
+    @JsonProperty("accounting_period")
     private String accountingPeriod;
 
     @Field("period_type")
-	@JsonProperty("period_type")
+    @JsonProperty("period_type")
     private String periodType;
 
     @Field("new_date")
-	@JsonProperty("new_date")
+    @JsonProperty("new_date")
     private String newDate;
 
     @Field("notification_date")
-	@JsonProperty("notification_date")
+    @JsonProperty("notification_date")
     private String notificationDate;
 
     @Field("psc_name")
-	@JsonProperty("psc_name")
+    @JsonProperty("psc_name")
     private String pscName;
 
     @Field("new_ro_address")
-	@JsonProperty("new_ro_address")
+    @JsonProperty("new_ro_address")
     private String newRoAddress;
 
     @Field("res_type")
-	@JsonProperty("res_type")
+    @JsonProperty("res_type")
     private String resType;
 
     @Field("cessation_date")
-	@JsonProperty("cessation_date")
+    @JsonProperty("cessation_date")
     private String cessationDate;
 
     @Field("action")
-	@JsonProperty("action")
+    @JsonProperty("action")
     private String action;
 
     @Field("capital_type")
-	@JsonProperty("capital_type")
+    @JsonProperty("capital_type")
     private String capitalType;
 
     @Field("mortgage_satisfaction_date")
-	@JsonProperty("mortgage_satisfaction_date")
+    @JsonProperty("mortgage_satisfaction_date")
     private String mortgageSatisfactionDate;
 
     public String getOfficerName() {
