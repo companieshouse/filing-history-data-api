@@ -196,6 +196,18 @@ class FilingHistoryServiceTest {
         // then
         assertTrue(actualDocument.isPresent());
         verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, null);
+    }
 
+    @Test
+    void findExistingFilingHistoryDocumentByIdShouldReturnEmptyWhenNoDocumentExists() {
+        // given
+        when(repository.findById(any())).thenReturn(Optional.empty());
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+
+        // then
+        assertTrue(actualDocument.isEmpty());
+        verify(repository).findById(TRANSACTION_ID);
     }
 }
