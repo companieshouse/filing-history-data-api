@@ -25,8 +25,7 @@ public class DataMapper {
     @SuppressWarnings("unchecked")
     FilingHistoryData map(final ExternalData data, final FilingHistoryData documentData) {
         switch (data.getSubcategory()) {
-            case null -> {
-            }
+            case null -> documentData.subcategory((String) null);
             case String subcategory -> documentData.subcategory(subcategory);
             case List<?> subcategory -> documentData.subcategory((List<String>) subcategory);
             default -> {

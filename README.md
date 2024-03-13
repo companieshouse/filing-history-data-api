@@ -5,7 +5,7 @@
 The `filing-history-data-api` is a service that receives filing history deltas from
 `filing-history-data-consumer`. It transforms these deltas to a standardised structure and then:
 
-* stores these to the `company_filing_history collection` in MongoDB, and
+* stores or deletes documents within the `company_filing_history collection` in MongoDB, and
 * enqueues a resource changed message that triggers further downstream processing.
 
 The service is implemented in Java 21 using Spring Boot 3.2

@@ -27,9 +27,11 @@ public class Repository {
 
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {
         try {
-            Query query = new Query(
-                    Criteria.where("_id").is(id)
-                            .and("company_number").is(companyNumber));
+            Criteria criteria = Criteria.where("_id").is(id);
+            if (companyNumber != null) {
+                criteria.and("company_number").is(companyNumber);
+            }
+            Query query = new Query(criteria);
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
@@ -37,6 +39,10 @@ public class Repository {
                     DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("MongoDB unavailable when finding the document");
         }
+    }
+
+    public Optional<FilingHistoryDocument> findById(final String id) {
+        return findByIdAndCompanyNumber(id, null);
     }
 
     public void save(final FilingHistoryDocument document) {
@@ -51,9 +57,7 @@ public class Repository {
 
     public void deleteById(final String id) {
         try {
-            mongoTemplate.remove(
-                    Query.query(Criteria.where("_id").is(id)),
-                    FilingHistoryDocument.class);
+            mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB unavailable when deleting document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());

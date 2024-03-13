@@ -5,6 +5,7 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
@@ -29,8 +30,13 @@ public class FilingHistoryService implements Service {
 
     @Override
     public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId,
-                                                                     final String companyNumber) {
+            final String companyNumber) {
         return repository.findByIdAndCompanyNumber(transactionId, companyNumber);
+    }
+
+    @Override
+    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
+        return repository.findById(transactionId);
     }
 
     @Override
@@ -43,13 +49,19 @@ public class FilingHistoryService implements Service {
         handleTransaction(documentToSave, originalDocumentCopy);
     }
 
+    @Transactional
+    @Override
+    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
+        repository.deleteById(existingDocument.getTransactionId());
+        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
+        if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+            throwServiceUnavailable();
+        }
+    }
+
     private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
-
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(DataMapHolder.getRequestId(), documentToSave.getCompanyNumber(),
-                        documentToSave.getTransactionId(), null, false));
-
+        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(documentToSave, false));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
                 repository.deleteById(documentToSave.getTransactionId());
@@ -58,8 +70,12 @@ public class FilingHistoryService implements Service {
                 repository.save(originalDocumentCopy);
                 LOGGER.info("Reverting previously inserted document", DataMapHolder.getLogMap());
             }
-            LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("Resource changed endpoint unavailable");
+            throwServiceUnavailable();
         }
+    }
+
+    private void throwServiceUnavailable() {
+        LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
+        throw new ServiceUnavailableException("Resource changed endpoint unavailable");
     }
 }

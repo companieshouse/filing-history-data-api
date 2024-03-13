@@ -41,6 +41,7 @@ class FilingHistoryServiceTest {
     @Mock
     private ApiResponse<Void> response;
 
+
     @Test
     void findExistingFilingHistoryDocumentShouldReturnDocument() {
         // given
@@ -100,7 +101,6 @@ class FilingHistoryServiceTest {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(503);
-        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.updateFilingHistory(document, existingDocument);
@@ -138,5 +138,61 @@ class FilingHistoryServiceTest {
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
         verifyNoInteractions(resourceChangedApiClient);
+    }
+
+    @Test
+    void deleteExistingFilingHistoryDocumentDeletesDocumentAndCallsChsKafkaApiReturningSuccessful(){
+        //given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(200);
+        when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
+
+        // when
+        service.deleteExistingFilingHistory(existingDocument);
+
+        // then
+        verify(repository).deleteById(TRANSACTION_ID);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void deleteFilingHistoryDeletesDocumentButResourceChangedCallReturnsNon200() {
+        // given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(503);
+        when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
+
+        // when
+        Executable executable = () -> service.deleteExistingFilingHistory(existingDocument);
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void findExistingFilingHistoryDocumentByIdShouldReturnDocument() {
+        // given
+        when(repository.findById(any())).thenReturn(Optional.of(document));
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+
+        // then
+        assertTrue(actualDocument.isPresent());
+        verify(repository).findById(TRANSACTION_ID);
+    }
+
+    @Test
+    void findExistingFilingHistoryDocumentByIdShouldReturnEmptyWhenNoDocumentExists() {
+        // given
+        when(repository.findById(any())).thenReturn(Optional.empty());
+
+        // when
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+
+        // then
+        assertTrue(actualDocument.isEmpty());
+        verify(repository).findById(TRANSACTION_ID);
     }
 }
