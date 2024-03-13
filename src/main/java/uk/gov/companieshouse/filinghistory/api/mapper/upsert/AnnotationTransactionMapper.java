@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        return data.annotations(annotationListMapper.addNewChildToList(new ArrayList<>(), request));
+        return data.annotations(List.of(annotationListMapper.mapChild(new FilingHistoryAnnotation(), request)));
     }
 
     @Override
@@ -38,22 +38,21 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
         Optional.ofNullable(existingDocument.getData().getAnnotations())
                 .ifPresentOrElse(
-                        annotationList ->
-                                annotationList.stream()
-                                        .filter(annotation -> annotation.getEntityId().equals(requestEntityId))
-                                        .findFirst()
-                                        .ifPresentOrElse(annotation -> {
-                                                    if (isDeltaStale(request.getInternalData().getDeltaAt(),
-                                                            annotation.getDeltaAt())) {
-                                                        throw new ConflictException(
-                                                                "Delta at stale when upserting annotation");
-                                                    }
-                                                    annotationListMapper.updateExistingChild(annotation, request);
-                                                },
-                                                () -> annotationListMapper
-                                                        .addNewChildToList(annotationList, request)),
-                        () -> existingDocument.getData().annotations(
-                                annotationListMapper.addNewChildToList(new ArrayList<>(), request))
+                        annotationList -> annotationList.stream()
+                                .filter(annotation -> annotation.getEntityId().equals(requestEntityId))
+                                .findFirst()
+                                .ifPresentOrElse(annotation -> {
+                                            if (isDeltaStale(request.getInternalData().getDeltaAt(),
+                                                    annotation.getDeltaAt())) {
+                                                throw new ConflictException(
+                                                        "Delta at stale when upserting annotation");
+                                            }
+                                            annotationListMapper.mapChild(annotation, request);
+                                        },
+                                        () -> annotationList
+                                                .add(annotationListMapper
+                                                        .mapChild(new FilingHistoryAnnotation(), request))),
+                        () -> mapFilingHistoryData(request, existingDocument.getData())
                 );
         return mapFilingHistory(request, existingDocument);
     }

@@ -48,6 +48,8 @@ class AnnotationTransactionMapperTest {
     @Mock
     private List<FilingHistoryAnnotation> annotationList;
     @Mock
+    private FilingHistoryAnnotation annotation;
+    @Mock
     private InternalFilingHistoryApi mockRequest;
 
 
@@ -67,7 +69,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).addNewChildToList(new ArrayList<>(), request);
+        verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -80,6 +82,7 @@ class AnnotationTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
+        annotationList.add(annotation);
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
                         .annotations(annotationList));
@@ -88,7 +91,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).addNewChildToList(annotationList, request);
+        verify(annotationListMapper).mapChild(annotation, request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -123,7 +126,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).updateExistingChild(annotationWithEntityIdMatch, request);
+        verify(annotationListMapper).mapChild(annotationWithEntityIdMatch, request);
         verifyNoMoreInteractions(annotationListMapper);
     }
 
@@ -170,10 +173,11 @@ class AnnotationTransactionMapperTest {
     @Test
     void shouldMapFilingHistoryDataWhenNewAnnotationWithNoParent() {
         // given
+        annotationList.add(annotation);
         final FilingHistoryData expected = new FilingHistoryData()
                 .annotations(annotationList);
 
-        when(annotationListMapper.addNewChildToList(any(), any())).thenReturn(annotationList);
+        when(annotationListMapper.mapChild(any(), any())).thenReturn(annotation);
 
         // when
         final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());

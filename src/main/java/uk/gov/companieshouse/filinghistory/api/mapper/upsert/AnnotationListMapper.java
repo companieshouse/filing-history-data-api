@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
-import java.util.List;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -19,18 +18,7 @@ public class AnnotationListMapper implements ChildListMapper<FilingHistoryAnnota
     }
 
     @Override
-    public List<FilingHistoryAnnotation> addNewChildToList(List<FilingHistoryAnnotation> annotationList,
-                                                           InternalFilingHistoryApi request) {
-        annotationList.add(mapAnnotation(new FilingHistoryAnnotation(), request));
-        return annotationList;
-    }
-
-    @Override
-    public void updateExistingChild(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
-        mapAnnotation(annotation, request);
-    }
-
-    private FilingHistoryAnnotation mapAnnotation(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
+    public FilingHistoryAnnotation mapChild(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
         InternalData internalData = request.getInternalData();
         FilingHistoryItemDataAnnotations requestAnnotation = request.getExternalData().getAnnotations().getFirst();
 

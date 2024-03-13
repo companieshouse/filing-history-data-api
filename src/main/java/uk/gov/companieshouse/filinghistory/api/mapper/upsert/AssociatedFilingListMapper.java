@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
-import java.util.List;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -19,19 +18,8 @@ public class AssociatedFilingListMapper implements ChildListMapper<FilingHistory
     }
 
     @Override
-    public List<FilingHistoryAssociatedFiling> addNewChildToList(List<FilingHistoryAssociatedFiling> associatedFilingList,
-                                                                 InternalFilingHistoryApi request) {
-        associatedFilingList.add(mapAssociatedFiling(new FilingHistoryAssociatedFiling(), request));
-        return associatedFilingList;
-    }
-
-    @Override
-    public void updateExistingChild(FilingHistoryAssociatedFiling associatedFiling, InternalFilingHistoryApi request) {
-        mapAssociatedFiling(associatedFiling, request);
-    }
-
-    private FilingHistoryAssociatedFiling mapAssociatedFiling(FilingHistoryAssociatedFiling associatedFiling,
-                                                              InternalFilingHistoryApi request) {
+    public FilingHistoryAssociatedFiling mapChild(FilingHistoryAssociatedFiling associatedFiling,
+                                                  InternalFilingHistoryApi request) {
         InternalData internalData = request.getInternalData();
         FilingHistoryItemDataAssociatedFilings requestAssociatedFilings =
                 request.getExternalData().getAssociatedFilings().getFirst();

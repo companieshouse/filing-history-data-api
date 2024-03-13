@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +38,7 @@ class AssociatedFilingListMapperTest {
     private FilingHistoryDescriptionValues descriptionValues;
 
     @Test
-    void shouldAddNewAssociatedFilingWhenNewListPassedInArgs() {
+    void shouldAddNewAssociatedFilingWhenNewObjectPassedInArgs() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -55,46 +54,7 @@ class AssociatedFilingListMapperTest {
                                         .date("2005-05-10T12:00:00.000Z")
                         )));
 
-        List<FilingHistoryAssociatedFiling> expected = List.of(
-                new FilingHistoryAssociatedFiling()
-                        .entityId(ENTITY_ID)
-                        .deltaAt(NEWEST_REQUEST_DELTA_AT)
-                        .category("annual-return")
-                        .date(Instant.parse("2005-05-10T12:00:00.000Z"))
-                        .description("legacy")
-                        .descriptionValues(descriptionValues)
-                        .type("363(288)")
-        );
-
-        when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
-
-        // when
-        List<FilingHistoryAssociatedFiling> actual = associatedFilingListMapper.addNewChildToList(new ArrayList<>(), request);
-
-        // then
-        assertEquals(expected, actual);
-        verify(descriptionValuesMapper).map(requestDescriptionValues);
-    }
-
-    @Test
-    void shouldAddNewAssociatedFilingToExistingListPassedInArgs() {
-        // given
-        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID)
-                        .deltaAt(NEWEST_REQUEST_DELTA_AT))
-                .externalData(new ExternalData()
-                        .associatedFilings(List.of(
-                                new FilingHistoryItemDataAssociatedFilings()
-                                        .category("annual-return")
-                                        .description("legacy")
-                                        .descriptionValues(requestDescriptionValues)
-                                        .type("363(288)")
-                                        .date("2005-05-10T12:00:00.000Z")
-                        )));
-
-
-        FilingHistoryAssociatedFiling expectedAssociatedFiling = new FilingHistoryAssociatedFiling()
+        FilingHistoryAssociatedFiling expected = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .category("annual-return")
@@ -103,21 +63,13 @@ class AssociatedFilingListMapperTest {
                 .descriptionValues(descriptionValues)
                 .type("363(288)");
 
-        List<FilingHistoryAssociatedFiling> existingList = new ArrayList<>();
-        existingList.add(new FilingHistoryAssociatedFiling());
-
-        List<FilingHistoryAssociatedFiling> expectedList = List.of(
-                new FilingHistoryAssociatedFiling(),
-                expectedAssociatedFiling
-        );
-
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        associatedFilingListMapper.addNewChildToList(existingList, request);
+        FilingHistoryAssociatedFiling actual = associatedFilingListMapper.mapChild(new FilingHistoryAssociatedFiling(), request);
 
         // then
-        assertEquals(expectedList, existingList);
+        assertEquals(expected, actual);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
 
@@ -138,7 +90,6 @@ class AssociatedFilingListMapperTest {
                                         .date("2005-05-10T12:00:00.000Z")
                         )));
 
-
         FilingHistoryAssociatedFiling expectedAssociatedFiling = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
@@ -153,7 +104,7 @@ class AssociatedFilingListMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        associatedFilingListMapper.updateExistingChild(existingAssociatedFiling, request);
+        associatedFilingListMapper.mapChild(existingAssociatedFiling, request);
 
         // then
         assertEquals(expectedAssociatedFiling, existingAssociatedFiling);
