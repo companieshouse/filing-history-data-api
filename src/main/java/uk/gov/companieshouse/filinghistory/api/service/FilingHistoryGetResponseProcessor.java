@@ -8,6 +8,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -37,7 +38,18 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
     }
 
     @Override
-    public FilingHistoryList processGetCompanyFilingHistoryList(String companyNumber) {
+    public FilingHistoryList processGetCompanyFilingHistoryList(FilingHistoryListParams params) {
+
+        // calc itemsPerPage
+        // get filingHistoryStatus
+        // build base FilingHistoryList response
+        // return if status matches ^filing-history-not-available(?!.*before)
+        // build category filter, if confirmation-statement then also annual-return
+
+        // get query count
+        // get docs with filter, limit, skip and sort
+        // map documents
+
         return null;
     }
 }

@@ -23,6 +23,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryDeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProcessor;
@@ -56,14 +57,19 @@ class FilingHistoryControllerTest {
                 .status(HttpStatus.OK)
                 .body(getListResponseBody);
 
+        final FilingHistoryListParams params = FilingHistoryListParams.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .build();
+
         when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenReturn(getListResponseBody);
 
         // when
-        final ResponseEntity<FilingHistoryList> actualResponse = controller.getCompanyFilingHistoryList(COMPANY_NUMBER);
+        final ResponseEntity<FilingHistoryList> actualResponse = controller.getCompanyFilingHistoryList(COMPANY_NUMBER,
+                null, null, null);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(getResponseProcessor).processGetCompanyFilingHistoryList(COMPANY_NUMBER);
+        verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
     }
 
     @Test
@@ -71,11 +77,17 @@ class FilingHistoryControllerTest {
         // given
         when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenThrow(NotFoundException.class);
 
+        final FilingHistoryListParams params = FilingHistoryListParams.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .build();
+
         // then
-        Executable executable = () -> controller.getCompanyFilingHistoryList(COMPANY_NUMBER);
+        Executable executable = () ->
+                controller.getCompanyFilingHistoryList(COMPANY_NUMBER, null, null, null);
 
         // when
         assertThrows(NotFoundException.class, executable);
+        verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
     }
 
     @Test
@@ -106,6 +118,7 @@ class FilingHistoryControllerTest {
 
         // when
         assertThrows(NotFoundException.class, executable);
+        verify(getResponseProcessor).processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.controller;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,11 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
 import uk.gov.companieshouse.filinghistory.api.service.DeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.GetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.UpsertProcessor;
@@ -38,15 +41,25 @@ public class FilingHistoryController {
 
     @GetMapping("/filing-history-data-api/company/{company_number}/filing-history")
     public ResponseEntity<FilingHistoryList> getCompanyFilingHistoryList(
-            @PathVariable("company_number") final String companyNumber) {
+            @PathVariable("company_number") final String companyNumber,
+            @RequestParam(required = false, name = "start_index") Integer startIndex,
+            @RequestParam(required = false, name = "items_per_page") Integer itemsPerPage,
+            @RequestParam(required = false, name = "categories") List<String> categories) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber);
         LOGGER.info("Processing GET company filing history list", DataMapHolder.getLogMap());
 
+        FilingHistoryListParams params = FilingHistoryListParams.builder()
+                .companyNumber(companyNumber)
+                .startIndex(startIndex)
+                .itemsPerPage(itemsPerPage)
+                .categories(categories)
+                .build();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(filingHistoryGetResponseProcessor.processGetCompanyFilingHistoryList(companyNumber));
+                .body(filingHistoryGetResponseProcessor.processGetCompanyFilingHistoryList(params));
     }
 
     @GetMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}")
