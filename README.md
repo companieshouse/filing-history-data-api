@@ -40,7 +40,7 @@ The service is implemented in Java 21 using Spring Boot 3.2
 
 ## Building the docker image
 
-    mvn compile jib:dockerBuild -Dimage=169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/filing-history-data-api
+    mvn compile jib:dockerBuild
 
 ## To make local changes
 
