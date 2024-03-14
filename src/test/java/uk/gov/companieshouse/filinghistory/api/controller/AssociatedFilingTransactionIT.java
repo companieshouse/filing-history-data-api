@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -515,8 +516,8 @@ class AssociatedFilingTransactionIT {
         verifyNoMoreInteractions(instantSupplier);
     }
 
-    private static ChangedResource getExpectedChangedResource() {
-        return new ChangedResource()
+    private String getExpectedChangedResource() throws JsonProcessingException {
+        return objectMapper.writeValueAsString(new ChangedResource()
                 .resourceUri("/company/12345678/filing-history/transactionId")
                 .resourceKind("filing-history")
                 .contextId(CONTEXT_ID)
@@ -524,6 +525,6 @@ class AssociatedFilingTransactionIT {
                 .event(new ChangedResourceEvent()
                         .fieldsChanged(null)
                         .publishedAt(UPDATED_AT.toString())
-                        .type("changed"));
+                        .type("changed")));
     }
 }
