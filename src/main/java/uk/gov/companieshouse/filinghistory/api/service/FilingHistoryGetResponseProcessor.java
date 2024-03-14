@@ -4,6 +4,7 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
@@ -33,5 +34,10 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
 
                             throw new NotFoundException("Record could not be found in MongoDB");
                         }));
+    }
+
+    @Override
+    public FilingHistoryList processGetCompanyFilingHistoryList(String companyNumber) {
+        return null;
     }
 }
