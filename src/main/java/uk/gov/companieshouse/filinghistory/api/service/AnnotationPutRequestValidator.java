@@ -25,8 +25,7 @@ public class AnnotationPutRequestValidator implements Validator<InternalFilingHi
         }
         FilingHistoryItemDataAnnotations annotation = annotationList.getFirst();
 
-        return annotation != null
-                && StringUtils.isNotBlank(internalData.getEntityId())
+        return StringUtils.isNotBlank(internalData.getEntityId())
                 && StringUtils.isNotBlank(internalData.getDeltaAt())
                 && StringUtils.isNotBlank(internalData.getCompanyNumber())
                 && StringUtils.isNotBlank(externalData.getTransactionId())
