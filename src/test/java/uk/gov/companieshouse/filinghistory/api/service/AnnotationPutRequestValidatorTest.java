@@ -31,7 +31,7 @@ class AnnotationPutRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("badRequestScenarios")
-    void testValidateThrowsBadRequestExceptionWhenExternalAndInternalDataAreBothNull(RequestBodyTestArgument argument) {
+    void testValidateReturnsFalseWhenExternalAndInternalDataAreBothNull(RequestBodyTestArgument argument) {
         // given
 
         // when
@@ -42,7 +42,7 @@ class AnnotationPutRequestValidatorTest {
     }
 
     @Test
-    void testValidRequestBodyDoesNotThrowException() {
+    void testValidRequestBodyReturnsTrue() {
         // given
         InternalFilingHistoryApi validRequestBody = getRequestBody();
 
