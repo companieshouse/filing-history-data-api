@@ -9,7 +9,8 @@ locals {
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority   = 41
-  lb_listener_paths           = ["/filing-history-data-api/company/*/filing-history*", "/filing-history-data-api/healthcheck"]
+  lb_listener_paths           = ["/filing-history-data-api/company/*/filing-history*", "/filing-history-data-api/healthcheck",
+    "/filing-history-data-api/filing-history/*/internal"]
   healthcheck_path            = "/filing-history-data-api/healthcheck" #healthcheck path for filing-history-data-api
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
