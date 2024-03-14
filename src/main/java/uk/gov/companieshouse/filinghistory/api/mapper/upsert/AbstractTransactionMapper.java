@@ -34,19 +34,16 @@ public abstract class AbstractTransactionMapper {
     }
 
     protected abstract FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request,
-            FilingHistoryData data);
+                                                              FilingHistoryData data);
 
     public abstract FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument);
+                                                                      FilingHistoryDocument existingDocument);
 
     protected abstract FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request,
-            FilingHistoryDocument document);
+                                                              FilingHistoryDocument document);
 
     protected static boolean isDeltaStale(final String requestDeltaAt, final String existingDeltaAt) {
-        if (StringUtils.isBlank(existingDeltaAt)) {
-            return false;
-        }
-        return !OffsetDateTime.parse(requestDeltaAt, FORMATTER)
+        return StringUtils.isNotBlank(existingDeltaAt) && !OffsetDateTime.parse(requestDeltaAt, FORMATTER)
                 .isAfter(OffsetDateTime.parse(existingDeltaAt, FORMATTER));
     }
 }

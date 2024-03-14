@@ -25,11 +25,12 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
-class AnnotationTransactionMapperTest {
+class AssociatedFilingTransactionMapperTest {
 
     private static final String ENTITY_ID = "1234567890";
     private static final String PARENT_ENTITY_ID = "0987654321";
@@ -40,23 +41,22 @@ class AnnotationTransactionMapperTest {
     private static final String UPDATED_BY = "84746291";
 
     @InjectMocks
-    private AnnotationTransactionMapper annotationTransactionMapper;
+    private AssociatedFilingTransactionMapper associatedFilingTransactionMapper;
 
     @Mock
-    private AnnotationListMapper annotationListMapper;
+    private AssociatedFilingListMapper associatedFilingListMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
 
     @Mock
-    private List<FilingHistoryAnnotation> annotationList;
+    private List<FilingHistoryAssociatedFiling> associatedFilingList;
     @Mock
-    private FilingHistoryAnnotation annotation;
+    private FilingHistoryAssociatedFiling associatedFiling;
     @Mock
     private InternalFilingHistoryApi mockRequest;
 
-
     @Test
-    void shouldAddNewAnnotationToNewAnnotationList() {
+    void shouldAddNewAssociatedFilingToNewAssociatedFilingList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -67,18 +67,18 @@ class AnnotationTransactionMapperTest {
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData());
 
-        when(annotationListMapper.mapChild(any(), any())).thenReturn(annotation);
+        when(associatedFilingListMapper.mapChild(any(), any())).thenReturn(associatedFiling);
 
         // when
-        annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
-        verifyNoMoreInteractions(annotationListMapper);
+        verify(associatedFilingListMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verifyNoMoreInteractions(associatedFilingListMapper);
     }
 
     @Test
-    void shouldAddNewAnnotationToExistingAnnotationList() {
+    void shouldAddNewAssociatedFilingToExistingAssociatedFilingList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -86,21 +86,21 @@ class AnnotationTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
-        annotationList.add(annotation);
+        associatedFilingList.add(associatedFiling);
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(annotationList));
+                        .associatedFilings(associatedFilingList));
 
         // when
-        annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
-        verifyNoMoreInteractions(annotationListMapper);
+        verify(associatedFilingListMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verifyNoMoreInteractions(associatedFilingListMapper);
     }
 
     @Test
-    void shouldUpdateAnnotationInExistingAnnotationList() {
+    void shouldUpdateAssociatedFilingInExistingAssociatedFilingList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -109,33 +109,33 @@ class AnnotationTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
-        FilingHistoryAnnotation annotationWithEntityIdMatch = new FilingHistoryAnnotation()
+        FilingHistoryAssociatedFiling associatedFilingWithEntityIdMatch = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(EXISTING_DOCUMENT_DELTA_AT);
 
-        FilingHistoryAnnotation annotationWithEntityIdNoMatch = new FilingHistoryAnnotation()
+        FilingHistoryAssociatedFiling associatedFilingWithEntityNoIdMatch = new FilingHistoryAssociatedFiling()
                 .entityId("1111111111")
                 .deltaAt(EXISTING_DOCUMENT_DELTA_AT);
 
-        List<FilingHistoryAnnotation> list = List.of(
-                annotationWithEntityIdNoMatch,
-                annotationWithEntityIdMatch
+        List<FilingHistoryAssociatedFiling> list = List.of(
+                associatedFilingWithEntityNoIdMatch,
+                associatedFilingWithEntityIdMatch
         );
 
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(list));
+                        .associatedFilings(list));
 
         // when
-        annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).mapChild(annotationWithEntityIdMatch, request);
-        verifyNoMoreInteractions(annotationListMapper);
+        verify(associatedFilingListMapper).mapChild(associatedFilingWithEntityIdMatch, request);
+        verifyNoMoreInteractions(associatedFilingListMapper);
     }
 
     @Test
-    void shouldReturnFilingHistoryDocumentWhenMappingAnnotation() {
+    void shouldReturnFilingHistoryDocumentWhenMappingAssociatedFiling() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -147,43 +147,43 @@ class AnnotationTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
-        FilingHistoryAnnotation annotation = new FilingHistoryAnnotation()
+        FilingHistoryAssociatedFiling associatedFiling = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(EXISTING_DOCUMENT_DELTA_AT);
 
-        List<FilingHistoryAnnotation> list = List.of(
-                annotation
+        List<FilingHistoryAssociatedFiling> list = List.of(
+                associatedFiling
         );
 
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(list));
+                        .associatedFilings(list));
 
         final FilingHistoryDocument expected = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(list)
+                        .associatedFilings(list)
                         .paperFiled(true))
                 .entityId(PARENT_ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .updatedBy(UPDATED_BY);
 
         // when
-        final FilingHistoryDocument actual = annotationTransactionMapper.mapFilingHistory(request, document);
+        final FilingHistoryDocument actual = associatedFilingTransactionMapper.mapFilingHistory(request, document);
 
         // then
         assertEquals(expected, actual);
     }
 
     @Test
-    void shouldMapFilingHistoryDataWhenNewAnnotationWithNoParent() {
+    void shouldMapFilingHistoryDataWhenNewAssociatedFilingWithNoParent() {
         // given
         final FilingHistoryData expected = new FilingHistoryData()
-                .annotations(List.of(annotation));
+                .associatedFilings(List.of(associatedFiling));
 
-        when(annotationListMapper.mapChild(any(), any())).thenReturn(annotation);
+        when(associatedFilingListMapper.mapChild(any(), any())).thenReturn(associatedFiling);
 
         // when
-        final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
+        final FilingHistoryData actual = associatedFilingTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
 
         // then
         assertEquals(expected, actual);
@@ -199,26 +199,26 @@ class AnnotationTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
-        FilingHistoryAnnotation annotation = new FilingHistoryAnnotation()
+        FilingHistoryAssociatedFiling associatedFiling = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(EXISTING_DOCUMENT_DELTA_AT);
 
-        List<FilingHistoryAnnotation> list = List.of(
-                annotation
+        List<FilingHistoryAssociatedFiling> list = List.of(
+                associatedFiling
         );
 
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(list));
+                        .associatedFilings(list));
         // when
-        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
         assertThrows(ConflictException.class, executable);
 
-        // Assert existing annotation was not updated
-        assertEquals(EXISTING_DOCUMENT_DELTA_AT, annotation.getDeltaAt());
-        verifyNoInteractions(annotationListMapper);
+        // Assert existing associated filing was not updated
+        assertEquals(EXISTING_DOCUMENT_DELTA_AT, associatedFiling.getDeltaAt());
+        verifyNoInteractions(associatedFilingListMapper);
     }
 
     @ParameterizedTest
@@ -235,19 +235,19 @@ class AnnotationTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
-        FilingHistoryAnnotation annotation = new FilingHistoryAnnotation()
+        FilingHistoryAssociatedFiling associatedFiling = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(existingDeltaAt);
 
-        List<FilingHistoryAnnotation> list = List.of(
-                annotation
+        List<FilingHistoryAssociatedFiling> list = List.of(
+                associatedFiling
         );
 
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .annotations(list));
+                        .associatedFilings(list));
         // when
-        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
 
         // then
         assertDoesNotThrow(executable);
