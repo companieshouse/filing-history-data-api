@@ -33,7 +33,7 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
+    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingDocument.getData().getAssociatedFilings())
@@ -47,18 +47,21 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
                                                 throw new ConflictException(
                                                         "Delta at stale when upserting associated filing");
                                             }
+                                            // Update already existing associated filing from existing list
                                             associatedFilingListMapper.mapChild(associatedFiling, request);
                                         },
+                                        // Add new associated filing to existing list
                                         () -> associatedFilingList
                                                 .add(associatedFilingListMapper
                                                         .mapChild(new FilingHistoryAssociatedFiling(), request))),
+                        // Add new associated filing to a new associated filing list
                         () -> mapFilingHistoryData(request, existingDocument.getData())
                 );
-        return mapFilingHistory(request, existingDocument);
+        return mapTopLevelFields(request, existingDocument);
     }
 
     @Override
-    protected FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request, FilingHistoryDocument document) {
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());

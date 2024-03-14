@@ -27,8 +27,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument) {
+    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
+                                                                               FilingHistoryDocument existingDocument) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
                     request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
@@ -37,7 +37,7 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
         }
         existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
 
-        return mapFilingHistory(request, existingDocument);
+        return mapTopLevelFields(request, existingDocument);
     }
 
     @Override
@@ -46,8 +46,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    protected FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request,
-            FilingHistoryDocument document) {
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
+                                                      FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 

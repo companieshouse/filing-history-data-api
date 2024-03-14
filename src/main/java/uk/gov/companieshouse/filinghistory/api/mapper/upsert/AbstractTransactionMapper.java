@@ -30,17 +30,18 @@ public abstract class AbstractTransactionMapper {
                 .data(mapFilingHistoryData(request, new FilingHistoryData())
                         .links(linksMapper.map(request.getExternalData().getLinks())));
 
-        return mapFilingHistory(request, newDocument);
+        return mapTopLevelFields(request, newDocument);
     }
 
     protected abstract FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request,
                                                               FilingHistoryData data);
 
-    public abstract FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
-                                                                      FilingHistoryDocument existingDocument);
+    public abstract FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(
+            InternalFilingHistoryApi request,
+            FilingHistoryDocument existingDocument);
 
-    protected abstract FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request,
-                                                              FilingHistoryDocument document);
+    protected abstract FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
+                                                               FilingHistoryDocument document);
 
     protected static boolean isDeltaStale(final String requestDeltaAt, final String existingDeltaAt) {
         return StringUtils.isNotBlank(existingDeltaAt) && !OffsetDateTime.parse(requestDeltaAt, FORMATTER)

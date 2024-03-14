@@ -32,8 +32,8 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryUnlessStale(InternalFilingHistoryApi request,
-                                                             FilingHistoryDocument existingDocument) {
+    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
+                                                                               FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingDocument.getData().getAnnotations())
@@ -47,18 +47,21 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                                 throw new ConflictException(
                                                         "Delta at stale when upserting annotation");
                                             }
+                                            // Update already existing annotation from list
                                             annotationListMapper.mapChild(annotation, request);
                                         },
+                                        // Add new annotation to existing annotations list
                                         () -> annotationList
                                                 .add(annotationListMapper
                                                         .mapChild(new FilingHistoryAnnotation(), request))),
+                        // Add new annotation to a new annotations list
                         () -> mapFilingHistoryData(request, existingDocument.getData())
                 );
-        return mapFilingHistory(request, existingDocument);
+        return mapTopLevelFields(request, existingDocument);
     }
 
     @Override
-    protected FilingHistoryDocument mapFilingHistory(InternalFilingHistoryApi request, FilingHistoryDocument document) {
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());

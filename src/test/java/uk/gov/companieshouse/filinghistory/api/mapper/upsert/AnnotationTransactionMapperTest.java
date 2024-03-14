@@ -70,7 +70,7 @@ class AnnotationTransactionMapperTest {
         when(annotationListMapper.mapChild(any(), any())).thenReturn(annotation);
 
         // when
-        annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
@@ -92,7 +92,7 @@ class AnnotationTransactionMapperTest {
                         .annotations(annotationList));
 
         // when
-        annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
@@ -127,7 +127,7 @@ class AnnotationTransactionMapperTest {
                         .annotations(list));
 
         // when
-        annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         verify(annotationListMapper).mapChild(annotationWithEntityIdMatch, request);
@@ -168,7 +168,7 @@ class AnnotationTransactionMapperTest {
                 .updatedBy(UPDATED_BY);
 
         // when
-        final FilingHistoryDocument actual = annotationTransactionMapper.mapFilingHistory(request, document);
+        final FilingHistoryDocument actual = annotationTransactionMapper.mapTopLevelFields(request, document);
 
         // then
         assertEquals(expected, actual);
@@ -211,7 +211,7 @@ class AnnotationTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .annotations(list));
         // when
-        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -247,7 +247,7 @@ class AnnotationTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .annotations(list));
         // when
-        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         assertDoesNotThrow(executable);

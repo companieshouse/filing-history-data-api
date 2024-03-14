@@ -24,7 +24,6 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
@@ -70,7 +69,7 @@ class AssociatedFilingTransactionMapperTest {
         when(associatedFilingListMapper.mapChild(any(), any())).thenReturn(associatedFiling);
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         verify(associatedFilingListMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
@@ -92,7 +91,7 @@ class AssociatedFilingTransactionMapperTest {
                         .associatedFilings(associatedFilingList));
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         verify(associatedFilingListMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
@@ -127,7 +126,7 @@ class AssociatedFilingTransactionMapperTest {
                         .associatedFilings(list));
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         verify(associatedFilingListMapper).mapChild(associatedFilingWithEntityIdMatch, request);
@@ -168,7 +167,7 @@ class AssociatedFilingTransactionMapperTest {
                 .updatedBy(UPDATED_BY);
 
         // when
-        final FilingHistoryDocument actual = associatedFilingTransactionMapper.mapFilingHistory(request, document);
+        final FilingHistoryDocument actual = associatedFilingTransactionMapper.mapTopLevelFields(request, document);
 
         // then
         assertEquals(expected, actual);
@@ -211,7 +210,7 @@ class AssociatedFilingTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .associatedFilings(list));
         // when
-        Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -247,7 +246,7 @@ class AssociatedFilingTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .associatedFilings(list));
         // when
-        Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryUnlessStale(request, document);
+        Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
         assertDoesNotThrow(executable);
