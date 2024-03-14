@@ -13,21 +13,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
-class AnnotationListMapperTest {
+class AssociatedFilingChildMapperTest {
 
     private static final String ENTITY_ID = "1234567890";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
 
     @InjectMocks
-    private AnnotationListMapper annotationListMapper;
+    private AssociatedFilingChildMapper associatedFilingChildMapper;
 
     @Mock
     private DescriptionValuesMapper descriptionValuesMapper;
@@ -38,37 +38,35 @@ class AnnotationListMapperTest {
     private FilingHistoryDescriptionValues descriptionValues;
 
     @Test
-    void shouldAddNewAnnotationWhenNewObjectPassedInArgs() {
+    void shouldAddNewAssociatedFilingWhenNewObjectPassedInArgs() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
-                        .annotations(List.of(
-                                new FilingHistoryItemDataAnnotations()
-                                        .category("annotation")
-                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
-                                        .description("annotation")
+                        .associatedFilings(List.of(
+                                new FilingHistoryItemDataAssociatedFilings()
+                                        .category("annual-return")
+                                        .description("legacy")
                                         .descriptionValues(requestDescriptionValues)
-                                        .type("ANNOTATION")
-                                        .date("2011-11-26T11:27:55.000Z")
+                                        .type("363(288)")
+                                        .date("2005-05-10T12:00:00.000Z")
                         )));
 
-        FilingHistoryAnnotation expected = new FilingHistoryAnnotation()
-                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+        FilingHistoryAssociatedFiling expected = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
-                .category("annotation")
-                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
-                .description("annotation")
+                .category("annual-return")
+                .date(Instant.parse("2005-05-10T12:00:00.000Z"))
+                .description("legacy")
                 .descriptionValues(descriptionValues)
-                .type("ANNOTATION");
+                .type("363(288)");
 
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        FilingHistoryAnnotation actual = annotationListMapper.mapChild(new FilingHistoryAnnotation(), request);
+        FilingHistoryAssociatedFiling actual = associatedFilingChildMapper.mapChild(new FilingHistoryAssociatedFiling(), request);
 
         // then
         assertEquals(expected, actual);
@@ -76,43 +74,40 @@ class AnnotationListMapperTest {
     }
 
     @Test
-    void shouldUpdateExistingAnnotation() {
+    void shouldUpdateExistingAssociatedFiling() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
-                        .annotations(List.of(
-                                new FilingHistoryItemDataAnnotations()
-                                        .category("annotation")
-                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
-                                        .description("annotation")
+                        .associatedFilings(List.of(
+                                new FilingHistoryItemDataAssociatedFilings()
+                                        .category("annual-return")
+                                        .description("legacy")
                                         .descriptionValues(requestDescriptionValues)
-                                        .type("ANNOTATION")
-                                        .date("2011-11-26T11:27:55.000Z")
+                                        .type("363(288)")
+                                        .date("2005-05-10T12:00:00.000Z")
                         )));
 
-
-        FilingHistoryAnnotation expectedAnnotation = new FilingHistoryAnnotation()
-                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+        FilingHistoryAssociatedFiling expectedAssociatedFiling = new FilingHistoryAssociatedFiling()
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
-                .category("annotation")
-                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
-                .description("annotation")
+                .category("annual-return")
+                .date(Instant.parse("2005-05-10T12:00:00.000Z"))
+                .description("legacy")
                 .descriptionValues(descriptionValues)
-                .type("ANNOTATION");
+                .type("363(288)");
 
-        FilingHistoryAnnotation existingAnnotation = new FilingHistoryAnnotation();
+        FilingHistoryAssociatedFiling existingAssociatedFiling = new FilingHistoryAssociatedFiling();
 
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        annotationListMapper.mapChild(existingAnnotation, request);
+        associatedFilingChildMapper.mapChild(existingAssociatedFiling, request);
 
         // then
-        assertEquals(expectedAnnotation, existingAnnotation);
+        assertEquals(expectedAssociatedFiling, existingAssociatedFiling);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
 }

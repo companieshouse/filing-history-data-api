@@ -43,7 +43,7 @@ class AssociatedFilingTransactionMapperTest {
     private AssociatedFilingTransactionMapper associatedFilingTransactionMapper;
 
     @Mock
-    private AssociatedFilingListMapper associatedFilingListMapper;
+    private AssociatedFilingChildMapper associatedFilingChildMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
 
@@ -66,14 +66,14 @@ class AssociatedFilingTransactionMapperTest {
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData());
 
-        when(associatedFilingListMapper.mapChild(any(), any())).thenReturn(associatedFiling);
+        when(associatedFilingChildMapper.mapChild(any(), any())).thenReturn(associatedFiling);
 
         // when
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingListMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
-        verifyNoMoreInteractions(associatedFilingListMapper);
+        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 
     @Test
@@ -94,8 +94,8 @@ class AssociatedFilingTransactionMapperTest {
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingListMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
-        verifyNoMoreInteractions(associatedFilingListMapper);
+        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 
     @Test
@@ -129,8 +129,8 @@ class AssociatedFilingTransactionMapperTest {
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingListMapper).mapChild(associatedFilingWithEntityIdMatch, request);
-        verifyNoMoreInteractions(associatedFilingListMapper);
+        verify(associatedFilingChildMapper).mapChild(associatedFilingWithEntityIdMatch, request);
+        verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 
     @Test
@@ -179,7 +179,7 @@ class AssociatedFilingTransactionMapperTest {
         final FilingHistoryData expected = new FilingHistoryData()
                 .associatedFilings(List.of(associatedFiling));
 
-        when(associatedFilingListMapper.mapChild(any(), any())).thenReturn(associatedFiling);
+        when(associatedFilingChildMapper.mapChild(any(), any())).thenReturn(associatedFiling);
 
         // when
         final FilingHistoryData actual = associatedFilingTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
@@ -217,7 +217,7 @@ class AssociatedFilingTransactionMapperTest {
 
         // Assert existing associated filing was not updated
         assertEquals(EXISTING_DOCUMENT_DELTA_AT, associatedFiling.getDeltaAt());
-        verifyNoInteractions(associatedFilingListMapper);
+        verifyNoInteractions(associatedFilingChildMapper);
     }
 
     @ParameterizedTest

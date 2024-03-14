@@ -9,11 +9,11 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
 
 @Component
-public class AnnotationListMapper implements ChildListMapper<FilingHistoryAnnotation> {
+public class AnnotationChildMapper implements ChildMapper<FilingHistoryAnnotation> {
 
     private final DescriptionValuesMapper descriptionValuesMapper;
 
-    public AnnotationListMapper(DescriptionValuesMapper descriptionValuesMapper) {
+    public AnnotationChildMapper(DescriptionValuesMapper descriptionValuesMapper) {
         this.descriptionValuesMapper = descriptionValuesMapper;
     }
 

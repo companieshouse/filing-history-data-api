@@ -43,7 +43,7 @@ class AnnotationTransactionMapperTest {
     private AnnotationTransactionMapper annotationTransactionMapper;
 
     @Mock
-    private AnnotationListMapper annotationListMapper;
+    private AnnotationChildMapper annotationChildMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
 
@@ -67,14 +67,14 @@ class AnnotationTransactionMapperTest {
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData());
 
-        when(annotationListMapper.mapChild(any(), any())).thenReturn(annotation);
+        when(annotationChildMapper.mapChild(any(), any())).thenReturn(annotation);
 
         // when
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
-        verifyNoMoreInteractions(annotationListMapper);
+        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verifyNoMoreInteractions(annotationChildMapper);
     }
 
     @Test
@@ -95,8 +95,8 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).mapChild(new FilingHistoryAnnotation(), request);
-        verifyNoMoreInteractions(annotationListMapper);
+        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verifyNoMoreInteractions(annotationChildMapper);
     }
 
     @Test
@@ -130,8 +130,8 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationListMapper).mapChild(annotationWithEntityIdMatch, request);
-        verifyNoMoreInteractions(annotationListMapper);
+        verify(annotationChildMapper).mapChild(annotationWithEntityIdMatch, request);
+        verifyNoMoreInteractions(annotationChildMapper);
     }
 
     @Test
@@ -180,7 +180,7 @@ class AnnotationTransactionMapperTest {
         final FilingHistoryData expected = new FilingHistoryData()
                 .annotations(List.of(annotation));
 
-        when(annotationListMapper.mapChild(any(), any())).thenReturn(annotation);
+        when(annotationChildMapper.mapChild(any(), any())).thenReturn(annotation);
 
         // when
         final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
@@ -218,7 +218,7 @@ class AnnotationTransactionMapperTest {
 
         // Assert existing annotation was not updated
         assertEquals(EXISTING_DOCUMENT_DELTA_AT, annotation.getDeltaAt());
-        verifyNoInteractions(annotationListMapper);
+        verifyNoInteractions(annotationChildMapper);
     }
 
     @ParameterizedTest

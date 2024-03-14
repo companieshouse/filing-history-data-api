@@ -9,11 +9,11 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
 
 @Component
-public class AssociatedFilingListMapper implements ChildListMapper<FilingHistoryAssociatedFiling> {
+public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAssociatedFiling> {
 
     private final DescriptionValuesMapper descriptionValuesMapper;
 
-    public AssociatedFilingListMapper(DescriptionValuesMapper descriptionValuesMapper) {
+    public AssociatedFilingChildMapper(DescriptionValuesMapper descriptionValuesMapper) {
         this.descriptionValuesMapper = descriptionValuesMapper;
     }
 
