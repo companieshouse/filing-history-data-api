@@ -298,7 +298,7 @@ class FilingHistoryControllerIT {
                 .pages(1)
                 .paperFiled(true);
 
-        final String jsonToInsert = IOUtils.resourceToString("/filing-history-document-list-subcategory.json",
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document-list-subcategory.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
@@ -650,12 +650,12 @@ class FilingHistoryControllerIT {
     }
 
     private static String getExpectedChangedResource() throws IOException {
-        return IOUtils.resourceToString("/expected-resource-changed.json", StandardCharsets.UTF_8)
+        return IOUtils.resourceToString("/resource_changed/expected-resource-changed.json", StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", UPDATED_AT.toString());
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
-        return IOUtils.resourceToString("/expected-delete-resource-changed.json", StandardCharsets.UTF_8)
+        return IOUtils.resourceToString("/resource_changed/expected-delete-resource-changed.json", StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", UPDATED_AT.toString());
     }
 }

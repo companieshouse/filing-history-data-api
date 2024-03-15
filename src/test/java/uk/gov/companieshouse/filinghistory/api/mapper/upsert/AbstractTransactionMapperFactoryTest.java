@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ANNOTATION;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ASSOCIATED_FILING;
+import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.RESOLUTION;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractTransactionMapperFactoryTest {
@@ -70,7 +70,7 @@ class AbstractTransactionMapperFactoryTest {
         // given
 
         // when
-        Executable executable = () -> factory.getTransactionMapper(TransactionKindEnum.fromValue("resolution"));
+        Executable executable = () -> factory.getTransactionMapper(RESOLUTION);
 
         // then
         InvalidTransactionKindException exception = assertThrows(InvalidTransactionKindException.class, executable);

@@ -90,10 +90,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldInsertAssociatedFilingOnExistingDocumentWithNoAssociatedFilingListAndReturn200OK() throws Exception {
+    void shouldAddAssociatedFilingToExistingDocumentAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_doc_with_zero_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_zero_associated_filings.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -104,7 +104,7 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -152,10 +152,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldInsertAssociatedFilingOnExistingDocumentWithExistingAssociatedFilingListAndReturn200OK() throws Exception {
+    void shouldAddAssociatedFilingToExistingAssociatedFilingListAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_doc_with_existing_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -168,7 +168,7 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_doc_with_two_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -218,10 +218,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldInsertLimitedAssociatedFilingDocumentWhenNoExistingParentDocumentAndReturn200OK() throws Exception {
+    void shouldInsertNoParentAssociatedFilingDocumentAndReturn200OK() throws Exception {
         // given
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_doc_no_parent_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_associated_filing_doc_with_no_parent.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -269,10 +269,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldUpdateExistingTopLevelDocumentWithAllTopLevelFieldsWhenExistingDocumentWasInsertedBeforeParentAnAndReturn200OK() throws Exception {
+    void shouldUpdateNoParentDocumentWithParentFieldsAndNotChangeAssociatedFilingAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_doc_no_parent_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -285,7 +285,7 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -336,10 +336,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldUpdateExistingAssociatedFilingOnExistingDocumentAndReturn200OK() throws Exception {
+    void shouldUpdateExistingAssociatedFilingAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_doc_with_existing_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -353,7 +353,7 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -402,10 +402,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldUpdateParentTransactionOnExistingDocumentAndNotChangeAssociatedFilingAndReturn200OK() throws Exception {
+    void shouldUpdateParentDocumentAndNotChangeAssociatedFilingAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_doc_with_existing_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -419,7 +419,7 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -473,7 +473,7 @@ class AssociatedFilingTransactionIT {
     void shouldThrowConflictExceptionWhenUpdatingChildAssociatedFilingWithStaleDeltaAtAndReturn409Conflict() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_doc_with_existing_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)

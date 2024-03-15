@@ -30,7 +30,7 @@ class AssociatedFilingPutRequestValidatorTest {
     Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new AssociatedFilingPutRequestValidator();
 
     @ParameterizedTest
-    @MethodSource("badRequestScenarios")
+    @MethodSource("scenarios")
     void testValidateReturnsFalseWhenExternalAndInternalDataAreBothNull(RequestBodyTestArgument argument) {
         // given
 
@@ -53,7 +53,7 @@ class AssociatedFilingPutRequestValidatorTest {
         assertTrue(actual);
     }
 
-    private static Stream<Arguments> badRequestScenarios() {
+    private static Stream<Arguments> scenarios() {
         return Stream.of(
                 Arguments.of(
                         Named.of("Null external data object",
