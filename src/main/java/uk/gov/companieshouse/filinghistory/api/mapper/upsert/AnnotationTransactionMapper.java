@@ -15,20 +15,20 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 @Component
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
-    private final ChildMapper<FilingHistoryAnnotation> annotationListMapper;
+    private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
-                                       ChildMapper<FilingHistoryAnnotation> annotationListMapper,
+                                       ChildMapper<FilingHistoryAnnotation> annotationChildMapper,
                                        Supplier<Instant> instantSupplier) {
         super(linksMapper);
-        this.annotationListMapper = annotationListMapper;
+        this.annotationChildMapper = annotationChildMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        return data.annotations(List.of(annotationListMapper.mapChild(new FilingHistoryAnnotation(), request)));
+        return data.annotations(List.of(annotationChildMapper.mapChild(new FilingHistoryAnnotation(), request)));
     }
 
     @Override
@@ -45,14 +45,14 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     annotation.getDeltaAt())) {
                                                 throw new ConflictException(
-                                                        "Delta at stale when upserting annotation");
+                                                        "Delta at stale when updating annotation");
                                             }
                                             // Update already existing annotation from list
-                                            annotationListMapper.mapChild(annotation, request);
+                                            annotationChildMapper.mapChild(annotation, request);
                                         },
                                         // Add new annotation to existing annotations list
                                         () -> annotationList
-                                                .add(annotationListMapper
+                                                .add(annotationChildMapper
                                                         .mapChild(new FilingHistoryAnnotation(), request))),
                         // Add new annotation to a new annotations list
                         () -> mapFilingHistoryData(request, existingDocument.getData())

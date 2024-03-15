@@ -15,21 +15,21 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 @Component
 public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper {
 
-    private final ChildMapper<FilingHistoryAssociatedFiling> associatedFilingListMapper;
+    private final ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public AssociatedFilingTransactionMapper(LinksMapper linksMapper,
-                                             ChildMapper<FilingHistoryAssociatedFiling> associatedFilingListMapper,
+                                             ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper,
                                              Supplier<Instant> instantSupplier) {
         super(linksMapper);
-        this.associatedFilingListMapper = associatedFilingListMapper;
+        this.associatedFilingChildMapper = associatedFilingChildMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
         return data.associatedFilings(List.of(
-                associatedFilingListMapper.mapChild(new FilingHistoryAssociatedFiling(), request)));
+                associatedFilingChildMapper.mapChild(new FilingHistoryAssociatedFiling(), request)));
     }
 
     @Override
@@ -45,14 +45,14 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     associatedFiling.getDeltaAt())) {
                                                 throw new ConflictException(
-                                                        "Delta at stale when upserting associated filing");
+                                                        "Delta at stale when updating associated filing");
                                             }
                                             // Update already existing associated filing from existing list
-                                            associatedFilingListMapper.mapChild(associatedFiling, request);
+                                            associatedFilingChildMapper.mapChild(associatedFiling, request);
                                         },
                                         // Add new associated filing to existing list
                                         () -> associatedFilingList
-                                                .add(associatedFilingListMapper
+                                                .add(associatedFilingChildMapper
                                                         .mapChild(new FilingHistoryAssociatedFiling(), request))),
                         // Add new associated filing to a new associated filing list
                         () -> mapFilingHistoryData(request, existingDocument.getData())
