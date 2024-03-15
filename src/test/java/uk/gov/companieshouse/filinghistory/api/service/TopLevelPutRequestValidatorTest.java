@@ -29,8 +29,8 @@ class TopLevelPutRequestValidatorTest {
     Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new TopLevelPutRequestValidator();
 
     @ParameterizedTest
-    @MethodSource("badRequestScenarios")
-    void testValidateThrowsBadRequestExceptionWhenExternalAndInternalDataAreBothNull(RequestBodyTestArgument argument) {
+    @MethodSource("scenarios")
+    void testValidateReturnsFalse(RequestBodyTestArgument argument) {
         // given
 
         // when
@@ -41,7 +41,7 @@ class TopLevelPutRequestValidatorTest {
     }
 
     @Test
-    void testValidRequestBodyDoesNotThrowException() {
+    void testValidReturnsTrue() {
         // given
         InternalFilingHistoryApi validRequestBody = getRequestBody();
 
@@ -52,7 +52,7 @@ class TopLevelPutRequestValidatorTest {
         assertTrue(actual);
     }
 
-    private static Stream<Arguments> badRequestScenarios() {
+    private static Stream<Arguments> scenarios() {
         return Stream.of(
                 Arguments.of(
                         Named.of("Null external data object",
