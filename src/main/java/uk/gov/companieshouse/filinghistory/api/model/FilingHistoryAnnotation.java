@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -11,8 +12,25 @@ public class FilingHistoryAnnotation {
     private String description;
     private String type;
     private Instant date;
+    @Field("_entity_id")
+    @JsonProperty("_entity_id")
+    private String entityId;
     @Field("description_values")
+    @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
+
+    @Field("delta_at")
+    @JsonProperty("delta_at")
+    private String deltaAt;
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public FilingHistoryAnnotation entityId(String entityId) {
+        this.entityId = entityId;
+        return this;
+    }
 
     public String getAnnotation() {
         return annotation;
@@ -68,6 +86,15 @@ public class FilingHistoryAnnotation {
         return this;
     }
 
+    public String getDeltaAt() {
+        return deltaAt;
+    }
+
+    public FilingHistoryAnnotation deltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -77,16 +104,25 @@ public class FilingHistoryAnnotation {
             return false;
         }
         FilingHistoryAnnotation that = (FilingHistoryAnnotation) o;
-        return Objects.equals(annotation, that.annotation)
-                && Objects.equals(category, that.category)
-                && Objects.equals(description, that.description)
-                && Objects.equals(type, that.type)
-                && Objects.equals(date, that.date)
-                && Objects.equals(descriptionValues, that.descriptionValues);
+        return Objects.equals(annotation, that.annotation) && Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(entityId, that.entityId) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(deltaAt, that.deltaAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(annotation, category, description, type, date, descriptionValues);
+        return Objects.hash(annotation, category, description, type, date, entityId, descriptionValues, deltaAt);
+    }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryAnnotation{" +
+                "annotation='" + annotation + '\'' +
+                ", category='" + category + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", date=" + date +
+                ", entityId='" + entityId + '\'' +
+                ", descriptionValues=" + descriptionValues +
+                ", deltaAt='" + deltaAt + '\'' +
+                '}';
     }
 }

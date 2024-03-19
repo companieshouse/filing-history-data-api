@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -7,6 +8,7 @@ public class FilingHistoryLinks {
 
     private String self;
     @Field("document_metadata")
+    @JsonProperty("document_metadata")
     private String documentMetadata;
 
     public String getSelf() {

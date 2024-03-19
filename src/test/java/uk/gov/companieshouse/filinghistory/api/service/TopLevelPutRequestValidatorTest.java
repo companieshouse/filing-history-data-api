@@ -15,7 +15,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
-class FilingHistoryPutRequestValidatorTest {
+class TopLevelPutRequestValidatorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String VALID_SELF_LINK = "/company/12345678/filing-history/transactionId";
@@ -26,11 +26,11 @@ class FilingHistoryPutRequestValidatorTest {
     private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
 
-    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new FilingHistoryPutRequestValidator();
+    Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new TopLevelPutRequestValidator();
 
     @ParameterizedTest
-    @MethodSource("badRequestScenarios")
-    void testValidateThrowsBadRequestExceptionWhenExternalAndInternalDataAreBothNull(RequestBodyTestArgument argument) {
+    @MethodSource("scenarios")
+    void testValidateReturnsFalse(RequestBodyTestArgument argument) {
         // given
 
         // when
@@ -41,7 +41,7 @@ class FilingHistoryPutRequestValidatorTest {
     }
 
     @Test
-    void testValidRequestBodyDoesNotThrowException() {
+    void testValidReturnsTrue() {
         // given
         InternalFilingHistoryApi validRequestBody = getRequestBody();
 
@@ -52,7 +52,7 @@ class FilingHistoryPutRequestValidatorTest {
         assertTrue(actual);
     }
 
-    private static Stream<Arguments> badRequestScenarios() {
+    private static Stream<Arguments> scenarios() {
         return Stream.of(
                 Arguments.of(
                         Named.of("Null external data object",

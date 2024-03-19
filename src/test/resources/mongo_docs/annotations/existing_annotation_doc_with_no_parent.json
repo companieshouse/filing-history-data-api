@@ -1,0 +1,27 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<parent_entity_id>",
+  "data" : {
+    "annotations" : [
+      {
+        "annotation" : "Clarification This document was second filed with the CH04 registered on 26/11/2011",
+        "category" : "annotation",
+        "date" : "2011-11-26T11:27:55.000Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
+        },
+        "type" : "ANNOTATION",
+        "_entity_id": "<child_entity_id>",
+        "delta_at": "<child_delta_at>"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "updated_by": "context_id",
+  "updated_at": "2014-09-17T18:52:08.001Z"
+}
