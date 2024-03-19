@@ -22,6 +22,7 @@ import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AnnotationTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
@@ -40,9 +41,13 @@ class FilingHistoryUpsertProcessorTest {
     @Mock
     private AbstractTransactionMapperFactory mapperFactory;
     @Mock
+    private ValidatorFactory validatorFactory;
+    @Mock
     private TopLevelTransactionMapper topLevelMapper;
     @Mock
-    private Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator;
+    private AnnotationTransactionMapper annotationTransactionMapper;
+    @Mock
+    private Validator<InternalFilingHistoryApi> topLevelPutRequestValidator;
     @Mock
     private FilingHistoryDocumentCopier filingHistoryDocumentCopier;
 
@@ -58,11 +63,11 @@ class FilingHistoryUpsertProcessorTest {
     @Mock
     private FilingHistoryDocument existingDocumentCopy;
 
-
     @Test
     void shouldSuccessfullyCallSaveWhenInsert() {
         // given
-        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(true);
+        when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
+        when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
@@ -84,13 +89,14 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenUpdate() {
         // given
-        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(true);
+        when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
+        when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(filingHistoryDocumentCopier.deepCopy(any())).thenReturn(existingDocumentCopy);
-        when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(documentToUpsert);
+        when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any(FilingHistoryDocument.class))).thenReturn(documentToUpsert);
 
         // when
         filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -98,7 +104,7 @@ class FilingHistoryUpsertProcessorTest {
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
-        verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
+        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
         verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocumentCopy);
     }
@@ -106,12 +112,13 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
         // given
-        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(true);
+        when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
+        when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
-        when(topLevelMapper.mapFilingHistoryUnlessStale(any(), any())).thenThrow(ConflictException.class);
+        when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any())).thenThrow(ConflictException.class);
 
         // when
         Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -120,7 +127,7 @@ class FilingHistoryUpsertProcessorTest {
         assertThrows(ConflictException.class, executable);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
-        verify(topLevelMapper).mapFilingHistoryUnlessStale(request, existingDocument);
+        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
     }
@@ -128,7 +135,8 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldThrowServiceUnavailableWhenFindingDocumentInDB() {
         // given
-        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(true);
+        when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
+        when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
@@ -149,7 +157,10 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldThrowBadRequestWhenValidatorReturnsFalse() {
         // given
-        when(filingHistoryPutRequestValidator.isValid(any())).thenReturn(false);
+        when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
+        when(topLevelPutRequestValidator.isValid(any())).thenReturn(false);
+        when(request.getInternalData()).thenReturn(internalData);
+        when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
 
         // when
         Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -160,6 +171,7 @@ class FilingHistoryUpsertProcessorTest {
         verifyNoInteractions(filingHistoryService);
         verifyNoInteractions(filingHistoryDocumentCopier);
         verifyNoInteractions(topLevelMapper);
+        verifyNoInteractions(annotationTransactionMapper);
         verifyNoInteractions(filingHistoryService);
     }
 }

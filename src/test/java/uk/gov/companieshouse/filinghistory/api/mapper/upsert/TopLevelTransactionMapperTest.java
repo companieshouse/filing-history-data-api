@@ -27,7 +27,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
-class TopLevelMapperTest {
+class TopLevelTransactionMapperTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String ENTITY_ID = "1234567890";
@@ -120,7 +120,7 @@ class TopLevelMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument);
+        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument);
 
         // then
         assertEquals(expectedDocument, actualDocument);
@@ -141,7 +141,7 @@ class TopLevelMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Executable executable = () -> topLevelMapper.mapFilingHistoryUnlessStale(request, existingDocument);
+        Executable executable = () -> topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument);
 
         // then
         assertThrows(ConflictException.class, executable);

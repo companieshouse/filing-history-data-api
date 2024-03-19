@@ -113,6 +113,23 @@ class FilingHistoryServiceTest {
     }
 
     @Test
+    void deleteInsertedFilingHistoryDocumentWhenResourceChangedCallReturnsNon200AndOriginalDocumentCopyIsNull() {
+        // given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(503);
+        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
+
+        // when
+        Executable executable = () -> service.insertFilingHistory(document);
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(repository).save(document);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+        verify(repository).deleteById(TRANSACTION_ID);
+    }
+
+    @Test
     void findExistingFilingHistoryDocumentShouldThrowServiceUnavailableExceptionWhenCatchingServiceUnavailableException() {
         // given
         when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);

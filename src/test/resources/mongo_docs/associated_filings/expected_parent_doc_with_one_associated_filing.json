@@ -1,0 +1,44 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "data" : {
+    "action_date" : "2014-09-15T00:00:00.000Z",
+    "category" : "officers",
+    "type" : "TM01",
+    "description" : "termination-director-company-with-name-termination-date",
+    "subcategory" : "termination",
+    "date" : "2014-09-15T23:21:18.000Z",
+    "description_values" : {
+      "termination_date" : "2014-09-15T00:00:00.000Z",
+      "officer_name" : "John Test Tester"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "associated_filings" : [
+      {
+        "type" : "363(288)",
+        "description" : "legacy",
+        "category" : "annual-return",
+        "description_values" : {
+          "description" : "Secretary's particulars changed;director's particulars changed"
+        },
+        "date" : "2005-05-10T12:00:00.000Z",
+        "_entity_id": "<child_entity_id>",
+        "delta_at": "<child_delta_at>"
+      }
+    ],
+    "paper_filed" : true
+  },
+  "_barcode" : "<barcode>",
+  "delta_at" : "<parent_delta_at>",
+  "_entity_id" : "<parent_entity_id>",
+  "updated_at" : "<updated_at>",
+  "updated_by" : "context_id",
+  "original_values" : {
+    "officer_name" : "John Test Tester",
+    "resignation_date" : "15/09/2014"
+  },
+  "original_description" : "Appointment Terminated, Director john tester",
+  "_document_id" : "000X3GI11F35672"
+}

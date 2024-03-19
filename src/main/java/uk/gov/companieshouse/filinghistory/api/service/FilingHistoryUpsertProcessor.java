@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
@@ -19,16 +20,16 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
-    private final Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator;
+    private final ValidatorFactory validatorFactory;
     private final ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
                                         AbstractTransactionMapperFactory mapperFactory,
-                                        Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator,
+                                        ValidatorFactory validatorFactory,
                                         ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
-        this.filingHistoryPutRequestValidator = filingHistoryPutRequestValidator;
+        this.validatorFactory = validatorFactory;
         this.filingHistoryDocumentCopier = filingHistoryDocumentCopier;
     }
 
@@ -36,19 +37,21 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
     public void processFilingHistory(final String transactionId,
                                      final String companyNumber,
                                      final InternalFilingHistoryApi request) {
-        if (!filingHistoryPutRequestValidator.isValid(request)) {
+        final TransactionKindEnum transactionKind = request.getInternalData().getTransactionKind();
+
+        if (!validatorFactory.getPutRequestValidator(transactionKind).isValid(request)) {
             LOGGER.error("Request body missing required field", DataMapHolder.getLogMap());
             throw new BadRequestException("Required field missing");
         }
 
-        AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(
-                request.getInternalData().getTransactionKind());
+        AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(transactionKind);
 
         filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                 .ifPresentOrElse(
                         existingDoc -> {
                             FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
-                            FilingHistoryDocument docToSave = mapper.mapFilingHistoryUnlessStale(request, existingDoc);
+                            FilingHistoryDocument docToSave =
+                                    mapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDoc);
 
                             filingHistoryService.updateFilingHistory(docToSave, existingDocCopy);
                         },
