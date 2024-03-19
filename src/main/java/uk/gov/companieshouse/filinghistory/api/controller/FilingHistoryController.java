@@ -42,8 +42,8 @@ public class FilingHistoryController {
     @GetMapping("/filing-history-data-api/company/{company_number}/filing-history")
     public ResponseEntity<FilingHistoryList> getCompanyFilingHistoryList(
             @PathVariable("company_number") final String companyNumber,
-            @RequestParam(required = false, name = "start_index") Integer startIndex,
-            @RequestParam(required = false, name = "items_per_page") Integer itemsPerPage,
+            @RequestParam(defaultValue = "0", name = "start_index") Integer startIndex,
+            @RequestParam(defaultValue = "25", name = "items_per_page") Integer itemsPerPage,
             @RequestParam(required = false, name = "categories") List<String> categories) {
 
         DataMapHolder.get()

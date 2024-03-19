@@ -183,6 +183,8 @@ class ItemGetResponseMapperTest {
         verify(linksGetResponseMapper).map(any());
     }
 
+
+
     private FilingHistoryDocument buildFilingHistoryDocument() {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
