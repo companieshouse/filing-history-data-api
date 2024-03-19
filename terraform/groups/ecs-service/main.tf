@@ -39,11 +39,11 @@ module "ecs-service" {
     "priva-api-lb": {
           listener_arn            = data.aws_lb_listener.secondary_lb_listener.arn,
           load_balancer_arn       = data.aws_lb.secondary_lb.arn
-      }
-#    "publ-api-lb": {
-#      load_balancer_arn           = data.aws_lb.service_lb.arn
-#      listener_arn                = data.aws_lb_listener.service_lb_listener.arn
-#    }
+    }
+    "publ-api-lb": {
+      load_balancer_arn           = data.aws_lb.service_lb.arn
+      listener_arn                = data.aws_lb_listener.service_lb_listener.arn
+    }
   }
 
   # ECS Task container health check
