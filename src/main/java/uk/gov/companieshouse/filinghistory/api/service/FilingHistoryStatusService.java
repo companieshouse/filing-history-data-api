@@ -29,6 +29,7 @@ public class FilingHistoryStatusService implements StatusService {
                         // If prefix == ""
                         return getPrefixProperties("NORMAL").status();
                     }
+                    // If prefix is not null nor empty
                     return getStatusFromValidPrefix(prefix, extractedNumber);
                 })
                 .orElse(getPrefixProperties("INVALID_FORMAT").status());
@@ -41,7 +42,6 @@ public class FilingHistoryStatusService implements StatusService {
     }
 
     private String getStatusFromValidPrefix(final String validPrefix, final int number) {
-        // If prefix is not null nor empty
         return Optional.ofNullable(getPrefixProperties(validPrefix))
                 // If a prefix property exists for prefix
                 .map(prefixProperties -> {
