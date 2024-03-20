@@ -5,7 +5,7 @@ filing-history:
     status: 'filing-history-available-assurance-company-before-2004'
     from:
       -
-        number: 001839
+        number: 1839
         status: 'filing-history-not-available-assurance-company-from-2004'
   BR:
     type: 'branch-of-an-overseas-company'
@@ -39,17 +39,17 @@ filing-history:
     status: 'filing-history-not-available-limited-partnership-before-1988'
     from:
       -
-        number: 003370
+        number: 3370
         status: 'filing-history-available-no-images-limited-partnership-from-1988'
       -
-        number: 015997
+        number: 15997
         status: 'filing-history-available-limited-partnership-from-2014'
   NA:
     type: 'assurance-company-ireland'
     status: 'filing-history-available-assurance-company-before-2004'
     from:
       -
-        number: 000000
+        number: 0
         status: 'filing-history-not-available-assurance-company-from-2004'
   NC:
     type: 'limited-liability-partnership-northern-ireland'
@@ -65,10 +65,10 @@ filing-history:
     status: 'filing-history-not-available-limited-partnership-before-1988'
     from:
       -
-        number: 000011
+        number: 11
         status: 'filing-history-available-no-images-limited-partnership-from-1988'
       -
-        number: 000076
+        number: 76
         status: 'filing-history-available-limited-partnership-from-2014'
   NO:
     type: 'other-industrial-provident-company-northern-ireland'
@@ -127,10 +127,10 @@ filing-history:
     status: 'filing-history-not-available-limited-partnership-before-1988'
     from:
       -
-        number: 001083
+        number: 1083
         status: 'filing-history-available-no-images-limited-partnership-from-1988'
       -
-        number: 016384
+        number: 16384
         status: 'filing-history-available-limited-partnership-from-2014'
   SO:
     type: 'limited-liability-partnership-scotland'

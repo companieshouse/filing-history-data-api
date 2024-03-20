@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.statusrules.parsers;
+package uk.gov.companieshouse.filinghistory.api.statusrules;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
