@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryDeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProcessor;
@@ -57,7 +57,7 @@ class FilingHistoryControllerTest {
                 .status(HttpStatus.OK)
                 .body(getListResponseBody);
 
-        final FilingHistoryListParams params = FilingHistoryListParams.builder()
+        final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
@@ -77,7 +77,7 @@ class FilingHistoryControllerTest {
         // given
         when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenThrow(NotFoundException.class);
 
-        final FilingHistoryListParams params = FilingHistoryListParams.builder()
+        final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 

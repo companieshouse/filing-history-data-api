@@ -1,13 +1,14 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
 
+@Component
 public class ListGetResponseMapper {
 
     private final ItemGetResponseMapper itemGetResponseMapper;
-
 
     public ListGetResponseMapper(ItemGetResponseMapper itemGetResponseMapper) {
         this.itemGetResponseMapper = itemGetResponseMapper;
@@ -20,7 +21,9 @@ public class ListGetResponseMapper {
                 .totalCount(0)
                 .filingHistoryStatus(FilingHistoryStatusEnum.fromValue(status));
     }
-    public FilingHistoryList mapFilingHistoryList(Object aggregate) {
+
+    public FilingHistoryList mapFilingHistoryList(int startIndex, int itemsPerPage, String status,
+            FilingHistoryListAggregate listAggregate) {
         return null;
     }
 }

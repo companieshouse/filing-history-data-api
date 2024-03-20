@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 import uk.gov.companieshouse.logging.Logger;
@@ -26,6 +28,14 @@ public class FilingHistoryService implements Service {
     public FilingHistoryService(ResourceChangedApiClient apiClient, Repository repository) {
         this.apiClient = apiClient;
         this.repository = repository;
+    }
+
+
+    @Override
+    public Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber, int startIndex,
+            int itemsPerPage, List<String> categories) {
+        // build category filter, if confirmation-statement then also annual-return
+        return Optional.empty();
     }
 
     @Override

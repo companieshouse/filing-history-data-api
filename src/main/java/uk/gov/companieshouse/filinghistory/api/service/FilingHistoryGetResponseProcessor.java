@@ -11,7 +11,8 @@ import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ListGetResponseMapper;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -19,7 +20,9 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private static final Pattern STATUS_NOT_AVAILABLE_PATTERN = Pattern.compile("^filing-history-not-available(?!.*before)");
+    private static final int MAX_ITEMS_PER_PAGE = 100;
+    private static final Pattern STATUS_NOT_AVAILABLE_PATTERN = Pattern.compile(
+            "^filing-history-not-available(?!.*before)");
 
     private final Service filingHistoryService;
     private final ItemGetResponseMapper itemGetResponseMapper;
@@ -47,27 +50,26 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
     }
 
     @Override
-    public FilingHistoryList processGetCompanyFilingHistoryList(FilingHistoryListParams params) {
+    public FilingHistoryList processGetCompanyFilingHistoryList(FilingHistoryListRequestParams requestParams) {
+        final String companyNumber = requestParams.companyNumber();
+        final int itemsPerPage = Math.min(requestParams.itemsPerPage(), MAX_ITEMS_PER_PAGE);
+        final int startIndex = requestParams.startIndex();
 
-        // calc itemsPerPage and startIndex
+        String status = statusService.processStatus(companyNumber);
 
-        // get filingHistoryStatus
-        String status = statusService.processStatus(params.companyNumber());
-        // build base FilingHistoryList response
-        FilingHistoryList baseResponse = listGetResponseMapper.mapBaseFilingHistoryList(params.startIndex(), params.itemsPerPage(), status);
-
-        // return if status matches ^filing-history-not-available(?!.*before)
         Matcher statusMatcher = STATUS_NOT_AVAILABLE_PATTERN.matcher(status);
         if (statusMatcher.find()) {
-            return baseResponse;
+            return listGetResponseMapper.mapBaseFilingHistoryList(startIndex, itemsPerPage, status);
         }
 
-        // build category filter, if confirmation-statement then also annual-return
+        FilingHistoryListAggregate listAggregate =
+                filingHistoryService.findCompanyFilingHistoryList(
+                                companyNumber, startIndex, itemsPerPage, requestParams.categories())
+                        .orElseGet(() -> {
+                            LOGGER.error("Company filing history not be found", DataMapHolder.getLogMap());
+                            throw new NotFoundException("Company filing history not be found");
+                        });
 
-        // get query count
-        // get docs with filter, limit, skip and sort
-        // map documents
-
-        return null;
+        return listGetResponseMapper.mapFilingHistoryList(startIndex, itemsPerPage, status, listAggregate);
     }
 }

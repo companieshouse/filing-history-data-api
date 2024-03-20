@@ -2,7 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.model;
 
 import java.util.List;
 
-public record FilingHistoryListParams(String companyNumber, Integer startIndex, Integer itemsPerPage, List<String> categories) {
+public record FilingHistoryListRequestParams(String companyNumber, int startIndex, int itemsPerPage,
+                                             List<String> categories) {
 
     public static Builder builder() {
         return new Builder();
@@ -11,8 +12,8 @@ public record FilingHistoryListParams(String companyNumber, Integer startIndex, 
     public static class Builder {
 
         private String companyNumber;
-        private Integer startIndex;
-        private Integer itemsPerPage;
+        private int startIndex;
+        private int itemsPerPage;
         private List<String> categories;
 
         private Builder() {
@@ -23,12 +24,12 @@ public record FilingHistoryListParams(String companyNumber, Integer startIndex, 
             return this;
         }
 
-        public Builder startIndex(Integer startIndex) {
+        public Builder startIndex(int startIndex) {
             this.startIndex = startIndex;
             return this;
         }
 
-        public Builder itemsPerPage(Integer itemsPerPage) {
+        public Builder itemsPerPage(int itemsPerPage) {
             this.itemsPerPage = itemsPerPage;
             return this;
         }
@@ -38,8 +39,8 @@ public record FilingHistoryListParams(String companyNumber, Integer startIndex, 
             return this;
         }
 
-        public FilingHistoryListParams build() {
-            return new FilingHistoryListParams(companyNumber, startIndex, itemsPerPage, categories);
+        public FilingHistoryListRequestParams build() {
+            return new FilingHistoryListRequestParams(companyNumber, startIndex, itemsPerPage, categories);
         }
     }
 }

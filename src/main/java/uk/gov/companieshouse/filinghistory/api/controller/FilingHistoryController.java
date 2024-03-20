@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListParams;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 import uk.gov.companieshouse.filinghistory.api.service.DeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.GetResponseProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.UpsertProcessor;
@@ -44,13 +44,13 @@ public class FilingHistoryController {
             @PathVariable("company_number") final String companyNumber,
             @RequestParam(defaultValue = "0", name = "start_index") Integer startIndex,
             @RequestParam(defaultValue = "25", name = "items_per_page") Integer itemsPerPage,
-            @RequestParam(required = false, name = "categories") List<String> categories) {
+            @RequestParam(required = false, name = "category") List<String> categories) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber);
         LOGGER.info("Processing GET company filing history list", DataMapHolder.getLogMap());
 
-        FilingHistoryListParams params = FilingHistoryListParams.builder()
+        FilingHistoryListRequestParams requestParams = FilingHistoryListRequestParams.builder()
                 .companyNumber(companyNumber)
                 .startIndex(startIndex)
                 .itemsPerPage(itemsPerPage)
@@ -59,7 +59,7 @@ public class FilingHistoryController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(filingHistoryGetResponseProcessor.processGetCompanyFilingHistoryList(params));
+                .body(filingHistoryGetResponseProcessor.processGetCompanyFilingHistoryList(requestParams));
     }
 
     @GetMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}")
