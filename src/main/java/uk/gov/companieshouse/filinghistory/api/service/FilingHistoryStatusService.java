@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import java.util.Optional;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import uk.gov.companieshouse.filinghistory.api.statusrules.FromProperties;
@@ -20,44 +20,26 @@ public class FilingHistoryStatusService implements StatusService {
         Pattern pattern = Pattern.compile("^([A-Z]{2}|R0|)(\\d+)");
         Matcher matcher = pattern.matcher(companyNumber);
 
-        final String companyNumberPrefix = matcher.find() ? matcher.group(1) : null;
-        final int extractedNumber = Integer.parseInt(matcher.group(2));
+        final String prefix;
+        if (matcher.find()) {
+            prefix = matcher.group(1).isEmpty() ? "NORMAL" : matcher.group(1);
+        } else {
+            prefix = "INVALID_FORMAT";
+        }
 
-        return Optional.ofNullable(companyNumberPrefix)
-                .map(prefix -> {
-                    if (prefix.isEmpty()) {
-                        // If prefix == ""
-                        return getPrefixProperties("NORMAL").status();
-                    }
-                    // If prefix is not null nor empty
-                    return getStatusFromValidPrefix(prefix, extractedNumber);
-                })
-                .orElse(getPrefixProperties("INVALID_FORMAT").status());
-    }
+        Map<String, PrefixProperties> filingHistory = statusRuleProperties.filingHistory();
+        PrefixProperties prefixProperties = filingHistory.getOrDefault(prefix, filingHistory.get("UNKNOWN_PREFIX"));
 
-    private PrefixProperties getPrefixProperties(final String prefix) {
-        return statusRuleProperties
-                .filingHistory()
-                .getOrDefault(prefix, null);
-    }
-
-    private String getStatusFromValidPrefix(final String validPrefix, final int number) {
-        return Optional.ofNullable(getPrefixProperties(validPrefix))
-                // If a prefix property exists for prefix
-                .map(prefixProperties -> {
-                    // If prefixProperties contains a 'from' array
-                    if (prefixProperties.from() != null) {
-                        for (FromProperties fromProperties : prefixProperties.from()) {
-                            if (fromProperties.number() > number) {
-                                return fromProperties.status();
-                            }
-                        }
-                    }
-                    // If prefixProperties does not contain a 'from' array
-                    return prefixProperties.status();
-                })
-                // If a prefix property does not exist for prefix
-                .orElse(getPrefixProperties("UNKNOWN_PREFIX").status());
+        String status = prefixProperties.status();
+        if (prefixProperties.from() != null) {
+            for (FromProperties fromProperties : prefixProperties.from()) {
+                if (fromProperties.number() > Integer.parseInt(matcher.group(2))) {
+                    break;
+                }
+                status = fromProperties.status();
+            }
+        }
+        return status;
     }
 }
 
