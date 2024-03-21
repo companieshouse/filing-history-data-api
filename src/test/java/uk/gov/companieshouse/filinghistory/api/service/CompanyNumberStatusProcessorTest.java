@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor.CompanyNumberAffixes;
 import uk.gov.companieshouse.filinghistory.api.statusrules.FromProperties;
 import uk.gov.companieshouse.filinghistory.api.statusrules.PrefixProperties;
 
@@ -18,16 +19,16 @@ class CompanyNumberStatusProcessorTest {
 
     @ParameterizedTest
     @CsvSource({
-            "AB123456 , AB",
-            "12345678 , NORMAL",
-            "ABC12345 , INVALID_FORMAT"
+            "AB123456 , AB , 123456",
+            "12345678 , NORMAL , 12345678",
+            "ABC12345 , INVALID_FORMAT , ''"
     })
-    void shouldSetPrefixFromMatcher(final String companyNumber, final String expected) {
+    void shouldSplitCompanyNumberAffixes(final String companyNumber, final String expectedPrefix, final String expectedSuffix) {
         // given
-        Matcher matcher = Pattern.compile("^([A-Z]{2}|R0|)(\\d+)").matcher(companyNumber);
+        final CompanyNumberAffixes expected = new CompanyNumberAffixes(expectedPrefix, expectedSuffix);
 
         // when
-        final String actual = companyNumberStatusProcessor.getPrefixFromRegexMatch(matcher);
+        final CompanyNumberAffixes actual = companyNumberStatusProcessor.splitCompanyNumberAffixes(companyNumber);
 
         // then
         assertEquals(expected, actual);
@@ -36,12 +37,11 @@ class CompanyNumberStatusProcessorTest {
     @Test
     void shouldSetStatusFromPrefixPropertiesWithNoFromProperties() {
         // given
-        Matcher matcher = Pattern.compile("^([A-Z]{2}|R0|)(\\d+)").matcher("AB123456");
         PrefixProperties prefixProperties = new PrefixProperties("type", "status", null);
         final String expected = "status";
 
         // when
-        final String actual = companyNumberStatusProcessor.getStatusFromPrefixProperties(prefixProperties, matcher);
+        final String actual = companyNumberStatusProcessor.getStatusFromPrefixProperties(prefixProperties, "123456");
 
         // then
         assertEquals(expected, actual);
@@ -49,11 +49,11 @@ class CompanyNumberStatusProcessorTest {
 
     @ParameterizedTest
     @CsvSource({
-            "LP000999 , status",
-            "LP001999 , from_status_one",
-            "LP999999 , from_status_two"
+            "LP000999 , status , 000999",
+            "LP001999 , from_status_one , 001999",
+            "LP999999 , from_status_two , 999999"
     })
-    void shouldSetStatusFromPrefixPropertiesWithFromProperties(final String companyNumber, final String expected) {
+    void shouldSetStatusFromPrefixPropertiesWithFromProperties(final String companyNumber, final String expected, final String suffix) {
         // given
         Matcher matcher = Pattern.compile("^([A-Z]{2}|R0|)(\\d+)").matcher(companyNumber);
         final boolean matchFound = matcher.find();
@@ -68,7 +68,7 @@ class CompanyNumberStatusProcessorTest {
                                 "from_status_two")));
 
         // when
-        final String actual = companyNumberStatusProcessor.getStatusFromPrefixProperties(prefixProperties, matcher);
+        final String actual = companyNumberStatusProcessor.getStatusFromPrefixProperties(prefixProperties, suffix);
 
         // then
         assertTrue(matchFound);

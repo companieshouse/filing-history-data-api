@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor.CompanyNumberAffixes;
 import uk.gov.companieshouse.filinghistory.api.statusrules.PrefixProperties;
 import uk.gov.companieshouse.filinghistory.api.statusrules.StatusRuleProperties;
 
@@ -32,14 +33,20 @@ class FilingHistoryStatusServiceTest {
                 "status",
                 null);
 
-        when(companyNumberStatusProcessor.getPrefixFromRegexMatch(any())).thenReturn("AB");
-        when(statusRuleProperties.filingHistory()).thenReturn(Map.of("AB", prefixProperties));
+        final String prefix = "AB";
+        final String suffix = "123456";
+        final String companyNumber = prefix + suffix;
+
+        CompanyNumberAffixes companyNumberAffixes = new CompanyNumberAffixes(prefix, suffix);
+
+        when(companyNumberStatusProcessor.splitCompanyNumberAffixes(any())).thenReturn(companyNumberAffixes);
+        when(statusRuleProperties.filingHistory()).thenReturn(Map.of(prefix, prefixProperties));
         when(companyNumberStatusProcessor.getStatusFromPrefixProperties(any(), any())).thenReturn(prefixProperties.status());
 
         final String expected = "status";
 
         // when
-        final String actual = filingHistoryStatusService.processStatus("AB123456");
+        final String actual = filingHistoryStatusService.processStatus(companyNumber);
 
         // then
         assertEquals(expected, actual);
