@@ -7,10 +7,10 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.StatusRuleProperties;
 import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryStatusService;
 import uk.gov.companieshouse.filinghistory.api.service.StatusService;
-import uk.gov.companieshouse.filinghistory.api.model.statusrules.StatusRuleProperties;
 
 @Configuration
 public class StatusConfig {

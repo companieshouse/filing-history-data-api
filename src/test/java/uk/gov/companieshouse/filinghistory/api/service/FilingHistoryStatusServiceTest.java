@@ -10,9 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor.CompanyNumberAffixes;
 import uk.gov.companieshouse.filinghistory.api.model.statusrules.PrefixProperties;
 import uk.gov.companieshouse.filinghistory.api.model.statusrules.StatusRuleProperties;
+import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor.CompanyNumberAffixes;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryStatusServiceTest {
