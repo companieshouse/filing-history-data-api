@@ -102,6 +102,29 @@ class RepositoryIT {
     }
 
     @Test
+    void testAggregationQueryToFindTwoDocumentsCategoriesNotEmpty() throws IOException {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID_TWO)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+        mongoTemplate.insert(Document.parse(jsonToInsertTwo), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
+
+        // when
+        final Optional<FilingHistoryListAggregate> actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
+    }
+
+    @Test
     void testInvalidCompanyNumber() throws IOException {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
@@ -171,7 +194,7 @@ class RepositoryIT {
                                         .description("description"))))
                         .links(new FilingHistoryLinks()
                                 .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA")
-                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, transactionId)))
                         .pages(1))
                 .barcode("X4BI89B6")
                 .deltaAt("20140815230459600643")

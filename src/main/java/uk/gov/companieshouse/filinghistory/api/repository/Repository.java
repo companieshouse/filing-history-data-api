@@ -2,21 +2,17 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
-import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.data.mongodb.core.aggregation.CountOperation;
 import org.springframework.data.mongodb.core.aggregation.FacetOperation;
-import org.springframework.data.mongodb.core.aggregation.FacetOperation.FacetOperationBuilder;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
-import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -42,9 +38,11 @@ public class Repository {
     public Optional<FilingHistoryListAggregate> findCompanyFilingHistory(String companyNumber,
             int startIndex, int itemsPerPage, List<String> categories) {
 
-        MatchOperation match = Aggregation.match(
-                Criteria.where("company_number").is(companyNumber)
-                        .and("data.category").in(categories));
+        Criteria criteria = Criteria.where("company_number").is(companyNumber);
+                if(!categories.isEmpty()) {
+                criteria.and("data.category").in(categories);
+                }
+        MatchOperation match = Aggregation.match(criteria);
         CountOperation count = Aggregation.count().as("count");
         MatchOperation facetMatch = Aggregation.match(new Criteria());
 
@@ -52,10 +50,9 @@ public class Repository {
                 .and(facetMatch).as("document_list");
         UnwindOperation unwind = Aggregation.unwind("$total_count", true);
 
-        ProjectionOperation project = Aggregation.project().andExpression("$total_count.count").as("total_count")
+        ProjectionOperation project = Aggregation.project()
+                .and(ConditionalOperators.ifNull("$total_count.count").then(0)).as("total_count")
                 .andExpression("$document_list").as("document_list");
-
-        { '$ifNull': ['$total_results.count', NumberInt(0)] }
 
         Aggregation aggregation = Aggregation.newAggregation(match, facet, unwind, project);
 
