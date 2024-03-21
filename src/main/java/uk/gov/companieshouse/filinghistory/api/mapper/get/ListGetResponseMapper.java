@@ -24,6 +24,13 @@ public class ListGetResponseMapper {
 
     public FilingHistoryList mapFilingHistoryList(int startIndex, int itemsPerPage, String status,
             FilingHistoryListAggregate listAggregate) {
-        return null;
+        return new FilingHistoryList()
+                .startIndex(startIndex)
+                .itemsPerPage(itemsPerPage)
+                .filingHistoryStatus(FilingHistoryStatusEnum.fromValue(status))
+                .totalCount(listAggregate.getTotalCount())
+                .items(listAggregate.getDocumentList().stream()
+                        .map(itemGetResponseMapper::mapFilingHistoryItem)
+                        .toList());
     }
 }
