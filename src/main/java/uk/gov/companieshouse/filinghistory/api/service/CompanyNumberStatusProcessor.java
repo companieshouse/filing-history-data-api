@@ -22,12 +22,16 @@ public class CompanyNumberStatusProcessor {
         String status = prefixProperties.status();
         if (prefixProperties.from() != null) {
             for (FromProperties fromProperties : prefixProperties.from()) {
-                if (fromProperties.number() > Integer.parseInt(matcher.group(2))) {
+                if (isFromNumberGreaterThanInputNumber(fromProperties.number(), matcher.group(2))) {
                     break;
                 }
                 status = fromProperties.status();
             }
         }
         return status;
+    }
+
+    private static boolean isFromNumberGreaterThanInputNumber(final String fromNumber, final String inputNumber) {
+        return Integer.parseInt(fromNumber) > Integer.parseInt(inputNumber);
     }
 }

@@ -61,10 +61,10 @@ class CompanyNumberStatusProcessorTest {
                 "type",
                 "status",
                 List.of(new FromProperties(
-                                1000,
+                                "1000",
                                 "from_status_one"),
                         new FromProperties(
-                                2000,
+                                "2000",
                                 "from_status_two")));
 
         // when
