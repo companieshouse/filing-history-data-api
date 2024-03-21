@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -35,15 +36,16 @@ public class FilingHistoryService implements Service {
     public Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber,
             int startIndex,
             int itemsPerPage, List<String> categories) {
-        if (categories.contains("confirmation-statement")) {
-            categories.add("annual-return");
+        List<String> categoryList = categories == null ? new ArrayList<>() : new ArrayList<>(categories);
+        if (categoryList.contains("confirmation-statement")) {
+            categoryList.add("annual-return");
         }
-        if (categories.contains("incorporation")) {
-            categories.addAll(
+        if (categoryList.contains("incorporation")) {
+            categoryList.addAll(
                     List.of("change-of-constitution", "change-of-name", "court-order",
                             "gazette", "reregistration", "resolution", "restoration"));
         }
-        return repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categories);
+        return repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categoryList);
     }
 
     @Override

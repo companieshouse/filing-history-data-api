@@ -39,9 +39,9 @@ public class Repository {
             int startIndex, int itemsPerPage, List<String> categories) {
 
         Criteria criteria = Criteria.where("company_number").is(companyNumber);
-                if(!categories.isEmpty()) {
-                criteria.and("data.category").in(categories);
-                }
+        if (!categories.isEmpty()) {
+            criteria.and("data.category").in(categories);
+        }
         MatchOperation match = Aggregation.match(criteria);
         CountOperation count = Aggregation.count().as("count");
         MatchOperation facetMatch = Aggregation.match(new Criteria());

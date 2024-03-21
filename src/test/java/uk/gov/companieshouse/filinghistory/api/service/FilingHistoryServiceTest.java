@@ -99,6 +99,7 @@ class FilingHistoryServiceTest {
 
     private static Stream<Object> categoriesListCases() {
         return Stream.of(
+                Arguments.of(null, List.of()),
                 Arguments.of(List.of(), List.of()),
                 Arguments.of(Stream.of("confirmation-statement").collect(Collectors.toList()), List.of("confirmation-statement", "annual-return")),
                 Arguments.of(Stream.of("incorporation").collect(Collectors.toList()),

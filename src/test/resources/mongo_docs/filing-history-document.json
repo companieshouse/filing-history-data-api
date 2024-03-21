@@ -3,7 +3,7 @@
   "company_number" : "<company_number>",
   "data" : {
     "action_date" : ISODate("2014-08-29T00:00:00.000Z"),
-    "category" : "officers",
+    "category" : "<category>",
     "type" : "TM01",
     "description" : "termination-director-company-with-name-termination-date",
     "subcategory" : "termination",

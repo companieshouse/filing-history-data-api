@@ -41,7 +41,7 @@ class RepositoryIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
-
+    private static final String OFFICERS_CATEGORY = "officers";
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -63,15 +63,18 @@ class RepositoryIT {
     @Test
     void testMappingsFromMongoToDocument() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
+        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID,
+                COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isPresent());
@@ -81,12 +84,16 @@ class RepositoryIT {
     @Test
     void testAggregationQueryToFindTwoDocuments() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
-        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
+        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID_TWO)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
         mongoTemplate.insert(Document.parse(jsonToInsertTwo), FILING_HISTORY_COLLECTION);
 
@@ -102,22 +109,27 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindTwoDocumentsCategoriesNotEmpty() throws IOException {
+    void testAggregationQueryToFindOneDocumentWhenCategoryFilter() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
-        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
+        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID_TWO)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", "incorporation");
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
         mongoTemplate.insert(Document.parse(jsonToInsertTwo), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
+        final FilingHistoryListAggregate expected = getFilingHistoryListAggregateOneDocument();
+        expected.getDocumentList().getFirst().getData().category("incorporation");
 
         // when
         final Optional<FilingHistoryListAggregate> actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
-                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of("incorporation"));
 
         // then
         assertTrue(actual.isPresent());
@@ -127,13 +139,16 @@ class RepositoryIT {
     @Test
     void testInvalidCompanyNumber() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, "87654321");
+        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID,
+                "87654321");
 
         // then
         assertTrue(actualDocument.isEmpty());
@@ -155,9 +170,11 @@ class RepositoryIT {
     @Test
     void shouldSuccessfullyDeleteDocumentById() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -168,10 +185,21 @@ class RepositoryIT {
         assertNull(actual);
     }
 
+    private static FilingHistoryListAggregate getFilingHistoryListAggregateOneDocument() {
+        return new FilingHistoryListAggregate()
+                .totalCount(1)
+                .documentList(
+                        List.of(
+                                getFilingHistoryDocument(TRANSACTION_ID_TWO)));
+    }
+
     private static FilingHistoryListAggregate getFilingHistoryListAggregate() {
         return new FilingHistoryListAggregate()
                 .totalCount(2)
-                .documentList(List.of(getFilingHistoryDocument(TRANSACTION_ID), getFilingHistoryDocument(TRANSACTION_ID_TWO)));
+                .documentList(
+                        List.of(
+                                getFilingHistoryDocument(TRANSACTION_ID),
+                                getFilingHistoryDocument(TRANSACTION_ID_TWO)));
     }
 
     private static FilingHistoryDocument getFilingHistoryDocument(final String transactionId) {
@@ -180,7 +208,7 @@ class RepositoryIT {
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
                         .actionDate(Instant.parse("2014-08-29T00:00:00.000Z"))
-                        .category("officers")
+                        .category(OFFICERS_CATEGORY)
                         .type("TM01")
                         .description("termination-director-company-with-name-termination-date")
                         .subcategory("termination")
