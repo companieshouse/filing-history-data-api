@@ -13,8 +13,11 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.CountOperation;
 import org.springframework.data.mongodb.core.aggregation.FacetOperation;
+import org.springframework.data.mongodb.core.aggregation.FacetOperation.FacetOperationBuilder;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -42,14 +45,19 @@ public class Repository {
         MatchOperation match = Aggregation.match(
                 Criteria.where("company_number").is(companyNumber)
                         .and("data.category").in(categories));
-        CountOperation count = Aggregation.count().as("total_count");
+        CountOperation count = Aggregation.count().as("count");
+        MatchOperation facetMatch = Aggregation.match(new Criteria());
 
+        FacetOperation facet = Aggregation.facet(count).as("total_count")
+                .and(facetMatch).as("document_list");
+        UnwindOperation unwind = Aggregation.unwind("$total_count", true);
 
+        ProjectionOperation project = Aggregation.project().andExpression("$total_count.count").as("total_count")
+                .andExpression("$document_list").as("document_list");
 
+        { '$ifNull': ['$total_results.count', NumberInt(0)] }
 
-        FacetOperation facet = Aggregation.facet().and(count);
-
-        Aggregation aggregation = Aggregation.newAggregation(match);
+        Aggregation aggregation = Aggregation.newAggregation(match, facet, unwind, project);
 
         AggregationResults<FilingHistoryListAggregate> aggregationResults =
                 mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class);
