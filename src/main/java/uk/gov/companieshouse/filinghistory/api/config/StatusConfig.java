@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryStatusService;
 import uk.gov.companieshouse.filinghistory.api.service.StatusService;
 import uk.gov.companieshouse.filinghistory.api.statusrules.StatusRuleProperties;
@@ -19,6 +20,8 @@ public class StatusConfig {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         InputStream stream = getClass().getResourceAsStream("/%s".formatted(rulesFile));
 
-        return new FilingHistoryStatusService(mapper.readValue(stream, StatusRuleProperties.class));
+        return new FilingHistoryStatusService(
+                mapper.readValue(stream, StatusRuleProperties.class),
+                new CompanyNumberStatusProcessor());
     }
 }
