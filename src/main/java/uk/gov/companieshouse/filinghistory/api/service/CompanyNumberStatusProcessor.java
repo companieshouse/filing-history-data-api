@@ -3,8 +3,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.filinghistory.api.statusrules.FromProperties;
-import uk.gov.companieshouse.filinghistory.api.statusrules.PrefixProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.FromProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.PrefixProperties;
 
 @Component
 public class CompanyNumberStatusProcessor {

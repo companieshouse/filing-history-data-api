@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor.CompanyNumberAffixes;
-import uk.gov.companieshouse.filinghistory.api.statusrules.FromProperties;
-import uk.gov.companieshouse.filinghistory.api.statusrules.PrefixProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.FromProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.PrefixProperties;
 
 class CompanyNumberStatusProcessorTest {
 

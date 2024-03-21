@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryStatusService;
 import uk.gov.companieshouse.filinghistory.api.service.StatusService;
-import uk.gov.companieshouse.filinghistory.api.statusrules.StatusRuleProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.StatusRuleProperties;
 
 @Configuration
 public class StatusConfig {

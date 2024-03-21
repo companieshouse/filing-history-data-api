@@ -2,8 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.util.Map;
 import uk.gov.companieshouse.filinghistory.api.service.CompanyNumberStatusProcessor.CompanyNumberAffixes;
-import uk.gov.companieshouse.filinghistory.api.statusrules.PrefixProperties;
-import uk.gov.companieshouse.filinghistory.api.statusrules.StatusRuleProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.PrefixProperties;
+import uk.gov.companieshouse.filinghistory.api.model.statusrules.StatusRuleProperties;
 
 public class FilingHistoryStatusService implements StatusService {
 
