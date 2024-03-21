@@ -33,6 +33,8 @@ class FilingHistoryControllerTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final int START_INDEX = 0;
+    private static final int DEFAULT_ITEMS_PER_PAGE = 25;
 
     @InjectMocks
     private FilingHistoryController controller;
@@ -59,13 +61,15 @@ class FilingHistoryControllerTest {
 
         final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
                 .companyNumber(COMPANY_NUMBER)
+                .startIndex(START_INDEX)
+                .itemsPerPage(DEFAULT_ITEMS_PER_PAGE)
                 .build();
 
         when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenReturn(getListResponseBody);
 
         // when
         final ResponseEntity<FilingHistoryList> actualResponse = controller.getCompanyFilingHistoryList(COMPANY_NUMBER,
-                null, null, null);
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, null);
 
         // then
         assertEquals(expectedResponse, actualResponse);
@@ -79,11 +83,14 @@ class FilingHistoryControllerTest {
 
         final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
                 .companyNumber(COMPANY_NUMBER)
+                .startIndex(START_INDEX)
+                .itemsPerPage(DEFAULT_ITEMS_PER_PAGE)
                 .build();
 
         // then
         Executable executable = () ->
-                controller.getCompanyFilingHistoryList(COMPANY_NUMBER, null, null, null);
+                controller.getCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
+                        DEFAULT_ITEMS_PER_PAGE, null);
 
         // when
         assertThrows(NotFoundException.class, executable);

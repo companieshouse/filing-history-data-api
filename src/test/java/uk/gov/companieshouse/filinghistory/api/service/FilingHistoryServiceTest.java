@@ -3,15 +3,22 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,13 +26,16 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryServiceTest {
 
+    public static final int DEFAULT_ITEMS_PER_PAGE = 25;
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
+    public static final int START_INDEX = 0;
 
     @InjectMocks
     private FilingHistoryService service;
@@ -36,6 +46,8 @@ class FilingHistoryServiceTest {
     private Repository repository;
     @Mock
     private FilingHistoryDocument document;
+    @Mock
+    private FilingHistoryListAggregate filingHistoryListAggregate;
     @Mock
     private FilingHistoryDocument existingDocument;
     @Mock
@@ -66,6 +78,37 @@ class FilingHistoryServiceTest {
         // then
         assertTrue(actualDocument.isEmpty());
         verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
+    }
+
+    @ParameterizedTest
+    @MethodSource("categoriesListCases")
+    void findCompanyFilingHistoryListShouldCallRepositoryWithCorrectCategories(List<String> actualCategories, List<String> expectedCategories) {
+        // given
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any()))
+                .thenReturn(Optional.of(filingHistoryListAggregate));
+
+        // when
+        final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
+                .findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, actualCategories);
+
+        // then
+        assertTrue(actualFilingHistoryListAggregate.isPresent());
+        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, expectedCategories);
+
+    }
+
+    private static Stream<Object> categoriesListCases() {
+        return Stream.of(
+                Arguments.of(List.of(), List.of()),
+                Arguments.of(Stream.of("confirmation-statement").collect(Collectors.toList()), List.of("confirmation-statement", "annual-return")),
+                Arguments.of(Stream.of("incorporation").collect(Collectors.toList()),
+                        List.of("incorporation", "change-of-constitution", "change-of-name", "court-order",
+                        "gazette", "reregistration", "resolution", "restoration")),
+                Arguments.of(Stream.of("gibberish").collect(Collectors.toList()), List.of("gibberish")),
+                Arguments.of(Stream.of("confirmation-statement", "incorporation").collect(Collectors.toList()),
+                        List.of("confirmation-statement", "incorporation", "annual-return", "change-of-constitution",
+                                "change-of-name", "court-order", "gazette", "reregistration", "resolution", "restoration"))
+        );
     }
 
     @Test

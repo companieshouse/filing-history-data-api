@@ -2,15 +2,26 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import java.util.List;
 import java.util.Optional;
+import javax.swing.text.html.Option;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.CountOperation;
+import org.springframework.data.mongodb.core.aggregation.FacetOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -23,6 +34,27 @@ public class Repository {
 
     public Repository(final MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
+    }
+
+    public Optional<FilingHistoryListAggregate> findCompanyFilingHistory(String companyNumber,
+            int startIndex, int itemsPerPage, List<String> categories) {
+
+        MatchOperation match = Aggregation.match(
+                Criteria.where("company_number").is(companyNumber)
+                        .and("data.category").in(categories));
+        CountOperation count = Aggregation.count().as("total_count");
+
+
+
+
+        FacetOperation facet = Aggregation.facet().and(count);
+
+        Aggregation aggregation = Aggregation.newAggregation(match);
+
+        AggregationResults<FilingHistoryListAggregate> aggregationResults =
+                mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class);
+
+        return Optional.ofNullable(aggregationResults.getUniqueMappedResult());
     }
 
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {

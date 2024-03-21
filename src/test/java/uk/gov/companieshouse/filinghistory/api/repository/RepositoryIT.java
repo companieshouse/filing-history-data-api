@@ -25,6 +25,7 @@ import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
 
 @Testcontainers
@@ -33,10 +34,14 @@ class RepositoryIT {
 
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String TRANSACTION_ID_TWO = "transactionIdTwo";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final int START_INDEX = 0;
+    private static final int DEFAULT_ITEMS_PER_PAGE = 25;
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -63,7 +68,7 @@ class RepositoryIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument();
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
         final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
@@ -71,6 +76,29 @@ class RepositoryIT {
         // then
         assertTrue(actualDocument.isPresent());
         assertEquals(expectedDocument, actualDocument.get());
+    }
+
+    @Test
+    void testAggregationQueryToFindTwoDocuments() throws IOException {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID_TWO)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+        mongoTemplate.insert(Document.parse(jsonToInsertTwo), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
+
+        // when
+        final Optional<FilingHistoryListAggregate> actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
     @Test
@@ -91,7 +119,7 @@ class RepositoryIT {
     @Test
     void shouldSuccessfullyInsertDocumentById() {
         // given
-        final FilingHistoryDocument document = getFilingHistoryDocument();
+        final FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
         repository.save(document);
@@ -117,9 +145,15 @@ class RepositoryIT {
         assertNull(actual);
     }
 
-    private static FilingHistoryDocument getFilingHistoryDocument() {
+    private static FilingHistoryListAggregate getFilingHistoryListAggregate() {
+        return new FilingHistoryListAggregate()
+                .totalCount(2)
+                .documentList(List.of(getFilingHistoryDocument(TRANSACTION_ID), getFilingHistoryDocument(TRANSACTION_ID_TWO)));
+    }
+
+    private static FilingHistoryDocument getFilingHistoryDocument(final String transactionId) {
         return new FilingHistoryDocument()
-                .transactionId(TRANSACTION_ID)
+                .transactionId(transactionId)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
                         .actionDate(Instant.parse("2014-08-29T00:00:00.000Z"))

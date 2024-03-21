@@ -32,10 +32,18 @@ public class FilingHistoryService implements Service {
 
 
     @Override
-    public Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber, int startIndex,
+    public Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber,
+            int startIndex,
             int itemsPerPage, List<String> categories) {
-        // build category filter, if confirmation-statement then also annual-return
-        return Optional.empty();
+        if (categories.contains("confirmation-statement")) {
+            categories.add("annual-return");
+        }
+        if (categories.contains("incorporation")) {
+            categories.addAll(
+                    List.of("change-of-constitution", "change-of-name", "court-order",
+                            "gazette", "reregistration", "resolution", "restoration"));
+        }
+        return repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categories);
     }
 
     @Override
@@ -55,7 +63,8 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
+    public void updateFilingHistory(FilingHistoryDocument documentToSave,
+            FilingHistoryDocument originalDocumentCopy) {
         handleTransaction(documentToSave, originalDocumentCopy);
     }
 
@@ -63,15 +72,18 @@ public class FilingHistoryService implements Service {
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
-        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
+        ApiResponse<Void> response = apiClient.callResourceChanged(
+                new ResourceChangedRequest(existingDocument, true));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwServiceUnavailable();
         }
     }
 
-    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
+    private void handleTransaction(FilingHistoryDocument documentToSave,
+            FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
-        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(documentToSave, false));
+        ApiResponse<Void> result = apiClient.callResourceChanged(
+                new ResourceChangedRequest(documentToSave, false));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
                 repository.deleteById(documentToSave.getTransactionId());
