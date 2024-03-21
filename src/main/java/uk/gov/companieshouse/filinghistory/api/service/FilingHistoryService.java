@@ -5,6 +5,7 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.swing.text.html.Option;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,9 @@ public class FilingHistoryService implements Service {
                     List.of("change-of-constitution", "change-of-name", "court-order",
                             "gazette", "reregistration", "resolution", "restoration"));
         }
-        return repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categoryList);
+
+        return Optional.of(repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categoryList))
+                .filter(listAggregate -> listAggregate.getTotalCount() > 0);
     }
 
     @Override

@@ -267,7 +267,8 @@ class FilingHistoryControllerIT {
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -330,7 +331,8 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -534,7 +536,8 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,

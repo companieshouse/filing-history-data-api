@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,7 +86,7 @@ class FilingHistoryServiceTest {
     void findCompanyFilingHistoryListShouldCallRepositoryWithCorrectCategories(List<String> actualCategories, List<String> expectedCategories) {
         // given
         when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any()))
-                .thenReturn(Optional.of(filingHistoryListAggregate));
+                .thenReturn(filingHistoryListAggregate);
 
         // when
         final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
@@ -95,6 +96,22 @@ class FilingHistoryServiceTest {
         assertTrue(actualFilingHistoryListAggregate.isPresent());
         verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, expectedCategories);
 
+    }
+
+    @Test
+    void findCompanyFilingHistoryListShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
+        // given
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any()))
+                .thenReturn(filingHistoryListAggregate);
+        when(filingHistoryListAggregate.getTotalCount()).thenReturn(0);
+
+        // when
+        final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
+                .findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertTrue(actualFilingHistoryListAggregate.isEmpty());
+        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
     private static Stream<Object> categoriesListCases() {

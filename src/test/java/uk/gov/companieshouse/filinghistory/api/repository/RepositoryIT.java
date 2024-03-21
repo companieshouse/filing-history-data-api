@@ -38,10 +38,11 @@ class RepositoryIT {
     private static final String COMPANY_NUMBER = "12345678";
     private static final int START_INDEX = 0;
     private static final int DEFAULT_ITEMS_PER_PAGE = 25;
+    private static final String OFFICERS_CATEGORY = "officers";
+    private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
-    private static final String OFFICERS_CATEGORY = "officers";
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -100,12 +101,11 @@ class RepositoryIT {
         final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
 
         // when
-        final Optional<FilingHistoryListAggregate> actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
 
         // then
-        assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -128,12 +128,63 @@ class RepositoryIT {
         expected.getDocumentList().getFirst().getData().category("incorporation");
 
         // when
-        final Optional<FilingHistoryListAggregate> actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of("incorporation"));
 
         // then
-        assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithLargeStartIndex() {
+        // Adding over 50 filing-history-documents for a third transaction id to test pagination works
+        for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID +i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            mongoTemplate.insert(filingHistoryDocument);
+        }
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                20, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
+        assertEquals(TRANSACTION_ID + 20, actual.getDocumentList().getFirst().getTransactionId());
+        assertEquals(DEFAULT_ITEMS_PER_PAGE, actual.getDocumentList().size());
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithStartIndexHigherThanItemsPerPage() {
+        // Adding over 50 filing-history-documents for a third transaction id to test pagination works
+        for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID +i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            mongoTemplate.insert(filingHistoryDocument);
+        }
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                60, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
+        assertTrue(actual.getDocumentList().isEmpty());
+    }
+
+    @Test
+    void testAggregateQueryWhenNoDocumentsInDatabase() {
+        // given
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(0, actual.getTotalCount());
+        assertTrue(actual.getDocumentList().isEmpty());
     }
 
     @Test
