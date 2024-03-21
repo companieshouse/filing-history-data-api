@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,7 +60,8 @@ class FilingHistoryServiceTest {
         when(repository.findByIdAndCompanyNumber(any(), any())).thenReturn(Optional.of(document));
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID,
+                COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isPresent());
@@ -74,7 +74,8 @@ class FilingHistoryServiceTest {
         when(repository.findByIdAndCompanyNumber(any(), any())).thenReturn(Optional.empty());
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistory(TRANSACTION_ID,
+                COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isEmpty());
@@ -83,10 +84,12 @@ class FilingHistoryServiceTest {
 
     @ParameterizedTest
     @MethodSource("categoriesListCases")
-    void findCompanyFilingHistoryListShouldCallRepositoryWithCorrectCategories(List<String> actualCategories, List<String> expectedCategories) {
+    void findCompanyFilingHistoryListShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
+            List<String> expectedCategories) {
         // given
         when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any()))
                 .thenReturn(filingHistoryListAggregate);
+        when(filingHistoryListAggregate.getTotalCount()).thenReturn(1);
 
         // when
         final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
@@ -94,7 +97,8 @@ class FilingHistoryServiceTest {
 
         // then
         assertTrue(actualFilingHistoryListAggregate.isPresent());
-        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, expectedCategories);
+        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
+                expectedCategories);
 
     }
 
@@ -112,21 +116,6 @@ class FilingHistoryServiceTest {
         // then
         assertTrue(actualFilingHistoryListAggregate.isEmpty());
         verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
-    }
-
-    private static Stream<Object> categoriesListCases() {
-        return Stream.of(
-                Arguments.of(null, List.of()),
-                Arguments.of(List.of(), List.of()),
-                Arguments.of(Stream.of("confirmation-statement").collect(Collectors.toList()), List.of("confirmation-statement", "annual-return")),
-                Arguments.of(Stream.of("incorporation").collect(Collectors.toList()),
-                        List.of("incorporation", "change-of-constitution", "change-of-name", "court-order",
-                        "gazette", "reregistration", "resolution", "restoration")),
-                Arguments.of(Stream.of("gibberish").collect(Collectors.toList()), List.of("gibberish")),
-                Arguments.of(Stream.of("confirmation-statement", "incorporation").collect(Collectors.toList()),
-                        List.of("confirmation-statement", "incorporation", "annual-return", "change-of-constitution",
-                                "change-of-name", "court-order", "gazette", "reregistration", "resolution", "restoration"))
-        );
     }
 
     @Test
@@ -219,7 +208,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void deleteExistingFilingHistoryDocumentDeletesDocumentAndCallsChsKafkaApiReturningSuccessful(){
+    void deleteExistingFilingHistoryDocumentDeletesDocumentAndCallsChsKafkaApiReturningSuccessful() {
         //given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -272,5 +261,22 @@ class FilingHistoryServiceTest {
         // then
         assertTrue(actualDocument.isEmpty());
         verify(repository).findById(TRANSACTION_ID);
+    }
+
+    private static Stream<Object> categoriesListCases() {
+        return Stream.of(
+                Arguments.of(null, List.of()),
+                Arguments.of(List.of(), List.of()),
+                Arguments.of(Stream.of("confirmation-statement").collect(Collectors.toList()),
+                        List.of("confirmation-statement", "annual-return")),
+                Arguments.of(Stream.of("incorporation").collect(Collectors.toList()),
+                        List.of("incorporation", "change-of-constitution", "change-of-name", "court-order",
+                                "gazette", "reregistration", "resolution", "restoration")),
+                Arguments.of(Stream.of("gibberish").collect(Collectors.toList()), List.of("gibberish")),
+                Arguments.of(Stream.of("confirmation-statement", "incorporation").collect(Collectors.toList()),
+                        List.of("confirmation-statement", "incorporation", "annual-return", "change-of-constitution",
+                                "change-of-name", "court-order", "gazette", "reregistration", "resolution",
+                                "restoration"))
+        );
     }
 }

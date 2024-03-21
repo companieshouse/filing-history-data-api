@@ -5,6 +5,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.face
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 import static org.springframework.data.mongodb.core.aggregation.ConditionalOperators.ifNull;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
@@ -12,9 +13,9 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -48,14 +49,14 @@ public class Repository {
                 match(criteria),
                 facet(
                         count().as("count")).as("total_count")
-                        .and(match(new Criteria())).as("document_list"),
+                        .and(match(new Criteria()), sort(Direction.DESC, "data.date")).as("document_list"),
                 unwind("$total_count", true),
                 project()
                         .and(ifNull("$total_count.count").then(0)).as("total_count")
                         .andExpression("$document_list").slice(itemsPerPage, startIndex).as("document_list"));
 
         return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
-                        .getUniqueMappedResult();
+                .getUniqueMappedResult();
     }
 
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id,

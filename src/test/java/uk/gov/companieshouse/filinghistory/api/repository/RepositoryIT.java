@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.bson.Document;
@@ -137,10 +138,9 @@ class RepositoryIT {
 
     @Test
     void testAggregationQueryToFindDocumentsWithLargeStartIndex() {
-        // Adding over 50 filing-history-documents for a third transaction id to test pagination works
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
-            filingHistoryDocument.transactionId(TRANSACTION_ID +i);
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
             filingHistoryDocument.companyNumber(COMPANY_NUMBER);
             mongoTemplate.insert(filingHistoryDocument);
         }
@@ -157,10 +157,9 @@ class RepositoryIT {
 
     @Test
     void testAggregationQueryToFindDocumentsWithStartIndexHigherThanItemsPerPage() {
-        // Adding over 50 filing-history-documents for a third transaction id to test pagination works
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
-            filingHistoryDocument.transactionId(TRANSACTION_ID +i);
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
             filingHistoryDocument.companyNumber(COMPANY_NUMBER);
             mongoTemplate.insert(filingHistoryDocument);
         }
@@ -185,6 +184,46 @@ class RepositoryIT {
         // then
         assertEquals(0, actual.getTotalCount());
         assertTrue(actual.getDocumentList().isEmpty());
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithSortingOnDate() {
+        for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            filingHistoryDocument.data(new FilingHistoryData().date(Instant.now()));
+            mongoTemplate.insert(filingHistoryDocument);
+        }
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
+        assertEquals("transactionId54", actual.getDocumentList().getFirst().getTransactionId());
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithSortingAndPaginationOnVeryLargeDataSet() {
+        List<FilingHistoryDocument> documentList = new ArrayList<>();
+        for (int i = 0; i < 500_000; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            filingHistoryDocument.data(new FilingHistoryData().date(Instant.now().plusMillis(i)));
+            documentList.add(filingHistoryDocument);
+        }
+        mongoTemplate.insert(documentList, FILING_HISTORY_COLLECTION);
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                499_974, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(500_000, actual.getTotalCount());
+        assertEquals("transactionId25", actual.getDocumentList().getFirst().getTransactionId());
     }
 
     @Test
