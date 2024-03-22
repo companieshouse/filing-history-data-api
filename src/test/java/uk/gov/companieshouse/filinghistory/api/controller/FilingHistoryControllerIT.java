@@ -26,7 +26,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
 import org.bson.Document;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,11 +99,6 @@ class FilingHistoryControllerIT {
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
 
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
-
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
@@ -115,9 +109,9 @@ class FilingHistoryControllerIT {
     @MockBean
     private Supplier<Instant> instantSupplier;
 
-    @BeforeAll
-    static void start() {
-        System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
