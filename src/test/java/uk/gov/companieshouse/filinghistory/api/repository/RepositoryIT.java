@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.bson.Document;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,20 +39,14 @@ class RepositoryIT {
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
 
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
-
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
     private Repository repository;
 
-
-    @BeforeAll
-    static void start() {
-        System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach

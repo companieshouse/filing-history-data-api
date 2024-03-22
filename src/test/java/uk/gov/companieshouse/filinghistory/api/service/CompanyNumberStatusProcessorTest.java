@@ -1,11 +1,8 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -21,6 +18,7 @@ class CompanyNumberStatusProcessorTest {
     @CsvSource({
             "AB123456 , AB , 123456",
             "12345678 , NORMAL , 12345678",
+            "R0123456 , R0 , 123456",
             "ABC12345 , INVALID_FORMAT , ''"
     })
     void shouldSplitCompanyNumberAffixes(final String companyNumber, final String expectedPrefix, final String expectedSuffix) {
@@ -49,14 +47,12 @@ class CompanyNumberStatusProcessorTest {
 
     @ParameterizedTest
     @CsvSource({
-            "LP000999 , status , 000999",
-            "LP001999 , from_status_one , 001999",
-            "LP999999 , from_status_two , 999999"
+            "status , 000999",
+            "from_status_one , 001999",
+            "from_status_two , 999999"
     })
-    void shouldSetStatusFromPrefixPropertiesWithFromProperties(final String companyNumber, final String expected, final String suffix) {
+    void shouldSetStatusFromPrefixPropertiesWithFromProperties(final String expected, final String suffix) {
         // given
-        Matcher matcher = Pattern.compile("^([A-Z]{2}|R0|)(\\d+)").matcher(companyNumber);
-        final boolean matchFound = matcher.find();
         PrefixProperties prefixProperties = new PrefixProperties(
                 "type",
                 "status",
@@ -71,7 +67,6 @@ class CompanyNumberStatusProcessorTest {
         final String actual = companyNumberStatusProcessor.getStatusFromPrefixProperties(prefixProperties, suffix);
 
         // then
-        assertTrue(matchFound);
         assertEquals(expected, actual);
     }
 }
