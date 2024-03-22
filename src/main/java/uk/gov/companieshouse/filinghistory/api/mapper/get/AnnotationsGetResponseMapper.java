@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 
 @Component
 public class AnnotationsGetResponseMapper {

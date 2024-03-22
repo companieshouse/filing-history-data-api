@@ -21,8 +21,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 

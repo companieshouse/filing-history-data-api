@@ -7,8 +7,8 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 

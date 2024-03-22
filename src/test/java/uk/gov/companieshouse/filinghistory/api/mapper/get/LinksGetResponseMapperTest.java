@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 
 class LinksGetResponseMapperTest {
 

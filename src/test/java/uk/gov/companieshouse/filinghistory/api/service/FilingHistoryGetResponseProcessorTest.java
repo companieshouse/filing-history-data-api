@@ -22,8 +22,8 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ListGetResponseMapper;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 
 @ExtendWith(MockitoExtension.class)

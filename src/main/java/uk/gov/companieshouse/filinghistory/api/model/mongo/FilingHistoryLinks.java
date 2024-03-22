@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.filinghistory.api.model;
+package uk.gov.companieshouse.filinghistory.api.model.mongo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;

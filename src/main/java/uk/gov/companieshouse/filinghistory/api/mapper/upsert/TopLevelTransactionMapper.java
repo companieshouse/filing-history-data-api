@@ -8,8 +8,8 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Component
 public class TopLevelTransactionMapper extends AbstractTransactionMapper {

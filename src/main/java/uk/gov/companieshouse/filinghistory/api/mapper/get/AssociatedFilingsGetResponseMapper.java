@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 
 @Component
 public class AssociatedFilingsGetResponseMapper {

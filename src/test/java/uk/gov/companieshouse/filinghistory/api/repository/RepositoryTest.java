@@ -21,8 +21,8 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 
 @ExtendWith(MockitoExtension.class)
 class RepositoryTest {

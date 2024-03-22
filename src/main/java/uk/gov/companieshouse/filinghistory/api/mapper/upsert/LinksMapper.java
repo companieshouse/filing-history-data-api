@@ -3,7 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 
 @Component
 public class LinksMapper {

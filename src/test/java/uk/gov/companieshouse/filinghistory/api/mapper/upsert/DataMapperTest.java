@@ -19,9 +19,9 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class DataMapperTest {

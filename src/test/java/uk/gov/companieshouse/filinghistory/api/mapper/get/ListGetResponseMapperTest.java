@@ -14,8 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 
 @ExtendWith(MockitoExtension.class)
 class ListGetResponseMapperTest {
@@ -28,7 +28,11 @@ class ListGetResponseMapperTest {
     @Mock
     private ItemGetResponseMapper itemGetResponseMapper;
     @Mock
-    private ExternalData externalData;
+    private FilingHistoryItemCleanser filingHistoryItemCleanser;
+    @Mock
+    private ExternalData dirtyExternalData;
+    @Mock
+    private ExternalData cleansedExternalData;
     @Mock
     private FilingHistoryDocument filingHistoryDocument;
 
@@ -52,7 +56,8 @@ class ListGetResponseMapperTest {
     @Test
     void shouldMapFullFilingHistoryList() {
         // given
-        when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(externalData);
+        when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(dirtyExternalData);
+        when(filingHistoryItemCleanser.cleanseFilingHistoryItem(any())).thenReturn(cleansedExternalData);
 
         FilingHistoryListAggregate listAggregate = new FilingHistoryListAggregate()
                 .documentList(List.of(filingHistoryDocument))
@@ -63,7 +68,7 @@ class ListGetResponseMapperTest {
                 .itemsPerPage(ITEMS_PER_PAGE)
                 .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
-                .items(List.of(externalData));
+                .items(List.of(cleansedExternalData));
 
         // when
         FilingHistoryList actual = listGetResponseMapper.mapFilingHistoryList(START_INDEX, ITEMS_PER_PAGE, STATUS,
@@ -72,5 +77,6 @@ class ListGetResponseMapperTest {
         // then
         assertEquals(expected, actual);
         verify(itemGetResponseMapper).mapFilingHistoryItem(filingHistoryDocument);
+        verify(filingHistoryItemCleanser).cleanseFilingHistoryItem(dirtyExternalData);
     }
 }

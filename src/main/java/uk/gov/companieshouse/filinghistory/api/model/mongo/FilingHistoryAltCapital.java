@@ -1,19 +1,20 @@
-package uk.gov.companieshouse.filinghistory.api.model;
+package uk.gov.companieshouse.filinghistory.api.model.mongo;
 
 import java.time.Instant;
 import java.util.Objects;
 
-public class FilingHistoryCapital {
+public class FilingHistoryAltCapital {
 
     private String currency;
     private String figure;
     private Instant date;
+    private String description;
 
     public String getCurrency() {
         return currency;
     }
 
-    public FilingHistoryCapital currency(String currency) {
+    public FilingHistoryAltCapital currency(String currency) {
         this.currency = currency;
         return this;
     }
@@ -22,7 +23,7 @@ public class FilingHistoryCapital {
         return figure;
     }
 
-    public FilingHistoryCapital figure(String figure) {
+    public FilingHistoryAltCapital figure(String figure) {
         this.figure = figure;
         return this;
     }
@@ -31,8 +32,17 @@ public class FilingHistoryCapital {
         return date;
     }
 
-    public FilingHistoryCapital date(Instant date) {
+    public FilingHistoryAltCapital date(Instant date) {
         this.date = date;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public FilingHistoryAltCapital description(String description) {
+        this.description = description;
         return this;
     }
 
@@ -44,22 +54,24 @@ public class FilingHistoryCapital {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FilingHistoryCapital that = (FilingHistoryCapital) o;
+        FilingHistoryAltCapital that = (FilingHistoryAltCapital) o;
         return Objects.equals(currency, that.currency) && Objects.equals(figure,
-                that.figure) && Objects.equals(date, that.date);
+                that.figure) && Objects.equals(date, that.date) && Objects.equals(
+                description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currency, figure, date);
+        return Objects.hash(currency, figure, date, description);
     }
 
     @Override
     public String toString() {
-        return "FilingHistoryCapital{" +
+        return "FilingHistoryAltCapital{" +
                 "currency='" + currency + '\'' +
                 ", figure='" + figure + '\'' +
                 ", date='" + date + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

@@ -8,8 +8,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.AltCapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.CapitalDescriptionValue;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAltCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAltCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryCapital;
 
 class CapitalDescriptionMapperTest {
 

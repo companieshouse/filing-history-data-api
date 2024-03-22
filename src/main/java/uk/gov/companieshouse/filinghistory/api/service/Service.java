@@ -2,8 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.util.List;
 import java.util.Optional;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 
 public interface Service {
 

@@ -17,12 +17,12 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
 
 @ExtendWith(MockitoExtension.class)
 class ItemGetResponseMapperTest {

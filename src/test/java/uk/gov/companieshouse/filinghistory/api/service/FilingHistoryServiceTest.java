@@ -25,8 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @ExtendWith(MockitoExtension.class)

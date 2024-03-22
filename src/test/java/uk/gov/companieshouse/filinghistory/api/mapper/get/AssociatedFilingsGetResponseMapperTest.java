@@ -15,8 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class AssociatedFilingsGetResponseMapperTest {

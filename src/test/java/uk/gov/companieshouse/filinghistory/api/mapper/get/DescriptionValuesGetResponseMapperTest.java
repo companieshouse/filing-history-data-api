@@ -16,9 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.AltCapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.CapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAltCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAltCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class DescriptionValuesGetResponseMapperTest {

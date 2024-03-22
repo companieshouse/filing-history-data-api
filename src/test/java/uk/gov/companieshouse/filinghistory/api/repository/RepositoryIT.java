@@ -22,13 +22,13 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListAggregate;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
 
 @Testcontainers
 @SpringBootTest

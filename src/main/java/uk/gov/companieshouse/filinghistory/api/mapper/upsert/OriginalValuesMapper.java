@@ -5,7 +5,7 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToI
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
 
 @Component
 public class OriginalValuesMapper {

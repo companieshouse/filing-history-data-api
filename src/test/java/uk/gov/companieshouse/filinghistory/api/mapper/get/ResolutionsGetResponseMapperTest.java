@@ -15,8 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataResolutions;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryResolution;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
 @ExtendWith(MockitoExtension.class)
 class ResolutionsGetResponseMapperTest {

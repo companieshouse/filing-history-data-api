@@ -17,8 +17,8 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFi
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class AssociatedFilingChildMapperTest {

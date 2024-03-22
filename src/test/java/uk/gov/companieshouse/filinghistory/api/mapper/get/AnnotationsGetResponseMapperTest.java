@@ -15,8 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationsGetResponseMapperTest {
