@@ -5,7 +5,6 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,8 +67,7 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument documentToSave,
-            FilingHistoryDocument originalDocumentCopy) {
+    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         handleTransaction(documentToSave, originalDocumentCopy);
     }
 
@@ -77,18 +75,15 @@ public class FilingHistoryService implements Service {
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
-        ApiResponse<Void> response = apiClient.callResourceChanged(
-                new ResourceChangedRequest(existingDocument, true));
+        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwServiceUnavailable();
         }
     }
 
-    private void handleTransaction(FilingHistoryDocument documentToSave,
-            FilingHistoryDocument originalDocumentCopy) {
+    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
         repository.save(documentToSave);
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(documentToSave, false));
+        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(documentToSave, false));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             if (originalDocumentCopy == null) {
                 repository.deleteById(documentToSave.getTransactionId());

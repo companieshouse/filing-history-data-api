@@ -9,6 +9,7 @@ public interface Service {
 
     Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber, int startIndex,
             int itemsPerPage, List<String> categories);
+
     Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId, final String companyNumber);
 
     Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId);

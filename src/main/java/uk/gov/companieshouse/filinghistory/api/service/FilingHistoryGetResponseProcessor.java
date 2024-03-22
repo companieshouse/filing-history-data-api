@@ -21,8 +21,8 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final int MAX_ITEMS_PER_PAGE = 100;
-    private static final Pattern STATUS_NOT_AVAILABLE_PATTERN = Pattern.compile(
-            "^filing-history-not-available(?!.*before)");
+    private static final Pattern STATUS_NOT_AVAILABLE_PATTERN =
+            Pattern.compile("^filing-history-not-available(?!.*before)");
 
     private final Service filingHistoryService;
     private final ItemGetResponseMapper itemGetResponseMapper;
@@ -63,8 +63,8 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
         }
 
         FilingHistoryListAggregate listAggregate =
-                filingHistoryService.findCompanyFilingHistoryList(
-                                companyNumber, startIndex, itemsPerPage, requestParams.categories())
+                filingHistoryService.findCompanyFilingHistoryList(companyNumber, startIndex, itemsPerPage,
+                                requestParams.categories())
                         .orElseGet(() -> {
                             LOGGER.error("Company filing history not be found", DataMapHolder.getLogMap());
                             throw new NotFoundException("Company filing history not be found");

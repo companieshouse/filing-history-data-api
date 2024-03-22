@@ -59,8 +59,7 @@ public class Repository {
                 .getUniqueMappedResult();
     }
 
-    public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id,
-            final String companyNumber) {
+    public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {
         try {
             Criteria criteria = Criteria.where("_id").is(id);
             if (companyNumber != null) {
@@ -70,8 +69,7 @@ public class Repository {
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
-            LOGGER.error(
-                    "MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("MongoDB unavailable when finding the document");
         }
@@ -85,8 +83,7 @@ public class Repository {
         try {
             mongoTemplate.save(document);
         } catch (DataAccessException ex) {
-            LOGGER.error(
-                    "MongoDB unavailable when saving the document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB unavailable when saving the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("MongoDB unavailable when saving the document");
         }
@@ -94,11 +91,9 @@ public class Repository {
 
     public void deleteById(final String id) {
         try {
-            mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)),
-                    FilingHistoryDocument.class);
+            mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
-            LOGGER.error(
-                    "MongoDB unavailable when deleting document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB unavailable when deleting document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("MongoDB unavailable when deleting document");
         }
