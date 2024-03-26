@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
+import static java.util.Comparator.comparing;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class AssociatedFilingCleanser {
                 filings.add(modelArticles.getFirst());
 
                 return filings.stream()
-                        .sorted(Comparator.comparing(FilingHistoryItemDataAssociatedFilings::getDescription).reversed())
+                        .sorted(comparing(FilingHistoryItemDataAssociatedFilings::getDescription).reversed())
                         .toList();
             }
         }

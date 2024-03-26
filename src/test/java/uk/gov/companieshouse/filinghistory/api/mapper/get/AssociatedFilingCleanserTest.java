@@ -35,8 +35,8 @@ class AssociatedFilingCleanserTest {
         List<FilingHistoryItemDataAssociatedFilings> expected = List.of(filingNotDuplicate, modelArticle);
 
         // when
-        List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingCleanser.removeDuplicateModelArticles(
-                duplicateFilings);
+        List<FilingHistoryItemDataAssociatedFilings> actual =
+                associatedFilingCleanser.removeDuplicateModelArticles(duplicateFilings);
 
         // then
         assertEquals(expected, actual);
@@ -52,8 +52,8 @@ class AssociatedFilingCleanserTest {
                 new FilingHistoryItemDataAssociatedFilings().description(STATEMENT_OF_CAPITAL));
 
         // when
-        List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingCleanser.removeDuplicateModelArticles(
-                unsortedFilings);
+        List<FilingHistoryItemDataAssociatedFilings> actual =
+                associatedFilingCleanser.removeDuplicateModelArticles(unsortedFilings);
 
         // then
         assertEquals(unsortedFilings, actual);
@@ -61,7 +61,27 @@ class AssociatedFilingCleanserTest {
 
     @Test
     void shouldNotDoAnythingWhenSingletonAssociatedFilingsList() {
+        // given
+        List<FilingHistoryItemDataAssociatedFilings> filings = List.of(new FilingHistoryItemDataAssociatedFilings());
 
+        // when
+        List<FilingHistoryItemDataAssociatedFilings> actual =
+                associatedFilingCleanser.removeDuplicateModelArticles(filings);
+
+        // then
+        assertEquals(filings, actual);
     }
 
+    @Test
+    void shouldRemoveOriginalDescription() {
+        // given
+        List<FilingHistoryItemDataAssociatedFilings> filings = List.of(new FilingHistoryItemDataAssociatedFilings());
+
+
+        // when
+        List<FilingHistoryItemDataAssociatedFilings> actual =
+                associatedFilingCleanser.removeOriginalDescription()
+        // then
+
+    }
 }
