@@ -18,10 +18,6 @@ public class AssociatedFilingCleanser {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String MODEL_ARTICLES_ADOPTED = "model-articles-adopted";
 
-    List<AssociatedFiling> removeOriginalDescription(List<AssociatedFiling> associatedFilings) {
-        return null;
-    }
-
     List<AssociatedFiling> removeDuplicateModelArticles(List<AssociatedFiling> associatedFilings) {
         if (associatedFilings.size() > 1) {
             List<AssociatedFiling> modelArticles = associatedFilings.stream()

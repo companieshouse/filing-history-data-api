@@ -3,7 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -31,8 +31,6 @@ class FilingHistoryItemCleanserTest {
     @Mock
     private AssociatedFiling filingsWithDuplicates;
     @Mock
-    private AssociatedFiling filingsDeDuplicated;
-    @Mock
     private AssociatedFiling cleanFilings;
     @Mock
     private DescriptionValues valuesWithBackslashes;
@@ -42,9 +40,7 @@ class FilingHistoryItemCleanserTest {
     @Test
     void shouldCleanseAssociatedFilings() {
         // given
-        when(associatedFilingCleanser.removeDuplicateModelArticles(any())).thenReturn(List.of(filingsDeDuplicated));
-        when(associatedFilingCleanser.removeOriginalDescription(any()))
-                .thenReturn(List.of(cleanFilings));
+        when(associatedFilingCleanser.removeDuplicateModelArticles(any())).thenReturn(List.of(cleanFilings));
 
         ExternalData externalData = new ExternalData()
                 .type(NEW_INC)
@@ -60,28 +56,23 @@ class FilingHistoryItemCleanserTest {
         // then
         assertEquals(expected, actual);
         verify(associatedFilingCleanser).removeDuplicateModelArticles(List.of(filingsWithDuplicates));
-        verify(associatedFilingCleanser).removeOriginalDescription(List.of(filingsDeDuplicated));
     }
 
     @Test
     void shouldNotRemoveDuplicateAssociatedFilingsIfTypeNotNewInc() {
         // given
-        when(associatedFilingCleanser.removeOriginalDescription(any()))
-                .thenReturn(List.of(cleanFilings));
-
         ExternalData externalData = new ExternalData()
                 .associatedFilings(List.of(filingsWithDuplicates));
 
         ExternalData expected = new ExternalData()
-                .associatedFilings(List.of(cleanFilings));
+                .associatedFilings(List.of(filingsWithDuplicates));
 
         // when
         ExternalData actual = filingHistoryItemCleanser.cleanseFilingHistoryItem(externalData);
 
         // then
         assertEquals(expected, actual);
-        verify(associatedFilingCleanser).removeOriginalDescription(List.of(filingsWithDuplicates));
-        verifyNoMoreInteractions(associatedFilingCleanser);
+        verifyNoInteractions(associatedFilingCleanser);
     }
 
     @Test
@@ -104,7 +95,7 @@ class FilingHistoryItemCleanserTest {
     @Test
     void shouldCleanseDescriptionValues() {
         // given
-        when(descriptionValuesCleanser.replaceBackslashesWithWhiteSpace(any(), any()))
+        when(descriptionValuesCleanser.replaceBackslashesWithWhitespace(any(), any()))
                 .thenReturn(cleanDescriptionValues);
 
         ExternalData externalData = new ExternalData()
@@ -120,6 +111,6 @@ class FilingHistoryItemCleanserTest {
 
         // then
         assertEquals(expected, actual);
-        verify(descriptionValuesCleanser).replaceBackslashesWithWhiteSpace(CategoryEnum.ADDRESS, valuesWithBackslashes);
+        verify(descriptionValuesCleanser).replaceBackslashesWithWhitespace(CategoryEnum.ADDRESS, valuesWithBackslashes);
     }
 }

@@ -24,7 +24,6 @@ public class FilingHistoryItemCleanser {
                     }
                     return filings;
                 })
-                .map(associatedFilingCleanser::removeOriginalDescription)
                 .ifPresent(externalData::associatedFilings);
 
         if ("ANNOTATION".equals(externalData.getType())) {
@@ -32,8 +31,8 @@ public class FilingHistoryItemCleanser {
         }
 
         Optional.ofNullable(externalData.getDescriptionValues())
-                .map(values -> descriptionValuesCleanser.replaceBackslashesWithWhiteSpace(
-                        externalData.getCategory(), values))
+                .map(values ->
+                        descriptionValuesCleanser.replaceBackslashesWithWhitespace(externalData.getCategory(), values))
                 .ifPresent(externalData::descriptionValues);
 
         return externalData;

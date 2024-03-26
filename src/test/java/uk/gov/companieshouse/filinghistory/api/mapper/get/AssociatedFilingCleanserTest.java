@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,17 +67,5 @@ class AssociatedFilingCleanserTest {
 
         // then
         assertEquals(filings, actual);
-    }
-
-    @Test
-    void shouldRemoveOriginalDescription() {
-        // given
-        List<AssociatedFiling> filings = List.of(new AssociatedFiling());
-
-        // when
-        List<AssociatedFiling> actual = associatedFilingCleanser.removeOriginalDescription(filings);
-
-        // then
-        assertNull(actual);
     }
 }
