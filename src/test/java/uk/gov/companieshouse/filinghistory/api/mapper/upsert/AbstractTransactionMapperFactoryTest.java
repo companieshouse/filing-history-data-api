@@ -27,6 +27,8 @@ class AbstractTransactionMapperFactoryTest {
     private AnnotationTransactionMapper annotationTransactionMapper;
     @Mock
     private AssociatedFilingTransactionMapper associatedFilingTransactionMapper;
+    @Mock
+    private ResolutionTransactionMapper resolutionTransactionMapper;
 
     @Test
     void shouldReturnTopLevelTransactionMapperWhenTopLevelKindPassed() {
@@ -64,16 +66,15 @@ class AbstractTransactionMapperFactoryTest {
         assertEquals(associatedFilingTransactionMapper, actualMapper);
     }
 
-    // REMOVE TEST WHEN RESOLUTIONS ARE IMPLEMENTED
     @Test
-    void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper() {
+    void shouldReturnResolutionFilingTransactionMapperWhenResolutionKindPassed() {
         // given
 
         // when
-        Executable executable = () -> factory.getTransactionMapper(RESOLUTION);
+        AbstractTransactionMapper actualMapper = factory.getTransactionMapper(RESOLUTION);
 
         // then
-        InvalidTransactionKindException exception = assertThrows(InvalidTransactionKindException.class, executable);
-        assertEquals("Invalid transaction kind: %s".formatted("resolution"), exception.getMessage());
+        assertInstanceOf(ResolutionTransactionMapper.class, actualMapper);
+        assertEquals(resolutionTransactionMapper, actualMapper);
     }
 }
