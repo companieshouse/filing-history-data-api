@@ -46,8 +46,7 @@ public class FilingHistoryController {
             @RequestParam(defaultValue = "25", name = "items_per_page") Integer itemsPerPage,
             @RequestParam(required = false, name = "category") List<String> categories) {
 
-        DataMapHolder.get()
-                .companyNumber(companyNumber);
+        DataMapHolder.get().companyNumber(companyNumber);
         LOGGER.info("Processing GET company filing history list", DataMapHolder.getLogMap());
 
         FilingHistoryListRequestParams requestParams = FilingHistoryListRequestParams.builder()
@@ -100,8 +99,7 @@ public class FilingHistoryController {
     public ResponseEntity<Void> deleteFilingHistoryTransaction(
             @PathVariable("transaction_id") final String transactionId) {
 
-        DataMapHolder.get()
-                .transactionId(transactionId);
+        DataMapHolder.get().transactionId(transactionId);
         LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
 
         serviceDeleteProcessor.processFilingHistoryDelete(transactionId);

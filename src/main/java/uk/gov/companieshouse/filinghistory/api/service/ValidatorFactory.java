@@ -32,7 +32,7 @@ public class ValidatorFactory {
             case ANNOTATION -> annotationPutRequestValidator;
             case ASSOCIATED_FILING -> associatedFilingPutRequestValidator;
             case RESOLUTION -> {
-                LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()));
+                LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()), DataMapHolder.getLogMap());
                 throw new InvalidTransactionKindException("Invalid transaction kind: %s".formatted(kind.getValue()));
             }
         };

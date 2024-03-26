@@ -15,6 +15,9 @@ public class LinksGetResponseMapper {
     }
 
     public Links map(FilingHistoryLinks links) {
+        if (links == null) {
+            return null;
+        }
         final String metadataLink = links.getDocumentMetadata() == null ?
                 null : "%s%s".formatted(documentApiUrl, links.getDocumentMetadata());
 

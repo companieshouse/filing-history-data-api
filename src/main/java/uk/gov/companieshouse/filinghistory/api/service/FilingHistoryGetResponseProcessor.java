@@ -41,9 +41,7 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
         return itemGetResponseMapper.mapFilingHistoryItem(
                 filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                         .orElseGet(() -> {
-                            LOGGER.error("Record could not be found in MongoDB",
-                                    DataMapHolder.getLogMap());
-
+                            LOGGER.error("Record could not be found in MongoDB", DataMapHolder.getLogMap());
                             throw new NotFoundException("Record could not be found in MongoDB");
                         }));
     }
@@ -55,11 +53,13 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
         final int startIndex = requestParams.startIndex();
 
         String status = statusService.processStatus(companyNumber);
+        DataMapHolder.get().status(status);
         Matcher statusMatcher = STATUS_NOT_AVAILABLE_PATTERN.matcher(status);
+
         FilingHistoryList baseResponse = listGetResponseMapper.mapBaseFilingHistoryList(startIndex, itemsPerPage,
                 status);
-
         if (statusMatcher.find()) {
+            LOGGER.info("Filing history has status not available", DataMapHolder.getLogMap());
             return baseResponse;
         }
 

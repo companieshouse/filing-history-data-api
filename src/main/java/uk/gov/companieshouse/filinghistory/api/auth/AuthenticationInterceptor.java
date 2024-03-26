@@ -17,6 +17,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -32,20 +33,20 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         String ericIdentityType = request.getHeader(ERIC_IDENTITY_TYPE);
 
         if (StringUtils.isBlank(ericIdentity)) {
-            LOGGER.error("Request received without eric identity");
+            LOGGER.error("Request received without eric identity", DataMapHolder.getLogMap());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
 
         if (!(API_KEY_IDENTITY_TYPE.equalsIgnoreCase(ericIdentityType)
                 || (OAUTH2_IDENTITY_TYPE.equalsIgnoreCase(ericIdentityType)))) {
-            LOGGER.error("Request received without correct eric identity type");
+            LOGGER.error("Request received without correct eric identity type", DataMapHolder.getLogMap());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
 
         if (!isKeyAuthorised(request, ericIdentityType)) {
-            LOGGER.info("Supplied key does not have sufficient privilege for the action");
+            LOGGER.error("Supplied key does not have sufficient privileges", DataMapHolder.getLogMap());
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }

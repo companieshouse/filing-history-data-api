@@ -30,7 +30,7 @@ public class AbstractTransactionMapperFactory {
             case ANNOTATION -> annotationTransactionMapper;
             case ASSOCIATED_FILING -> associatedFilingTransactionMapper;
             case RESOLUTION -> {
-                LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()));
+                LOGGER.error("Invalid transaction kind: %s".formatted(kind.getValue()), DataMapHolder.getLogMap());
                 throw new InvalidTransactionKindException("Invalid transaction kind: %s".formatted(kind.getValue()));
             }
         };

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.Links;
@@ -40,6 +41,17 @@ class LinksGetResponseMapperTest {
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldSuccessfullyMapNullLinks() {
+        // given
+
+        // when
+        final Links actual = mapper.map(null);
+
+        // then
+        assertNull(actual);
     }
 
     private static FilingHistoryLinks buildDocumentFilingHistoryLinks() {
