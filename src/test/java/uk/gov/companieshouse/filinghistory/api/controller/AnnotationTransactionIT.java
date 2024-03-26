@@ -46,7 +46,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
-@WireMockTest(httpPort = 8888)
+@WireMockTest(httpPort = 8889)
 class AnnotationTransactionIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";

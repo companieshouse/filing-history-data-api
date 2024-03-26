@@ -43,7 +43,7 @@ import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
-@WireMockTest(httpPort = 8888)
+@WireMockTest(httpPort = 8889)
 class FilingHistoryControllerMongoUnavailableIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
