@@ -4,7 +4,6 @@ import static java.util.Comparator.comparing;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -19,13 +18,11 @@ public class AssociatedFilingCleanser {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String MODEL_ARTICLES_ADOPTED = "model-articles-adopted";
 
-    List<AssociatedFiling> removeOriginalDescription(
-            List<AssociatedFiling> associatedFilings) {
+    List<AssociatedFiling> removeOriginalDescription(List<AssociatedFiling> associatedFilings) {
         return null;
     }
 
-    List<AssociatedFiling> removeDuplicateModelArticles(
-            List<AssociatedFiling> associatedFilings) {
+    List<AssociatedFiling> removeDuplicateModelArticles(List<AssociatedFiling> associatedFilings) {
         if (associatedFilings.size() > 1) {
             List<AssociatedFiling> modelArticles = associatedFilings.stream()
                     .filter(filing -> MODEL_ARTICLES_ADOPTED.equals(filing.getDescription()))

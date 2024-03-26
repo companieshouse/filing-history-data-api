@@ -36,8 +36,7 @@ class AssociatedFilingCleanserTest {
         List<AssociatedFiling> expected = List.of(filingNotDuplicate, modelArticle);
 
         // when
-        List<AssociatedFiling> actual =
-                associatedFilingCleanser.removeDuplicateModelArticles(duplicateFilings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(duplicateFilings);
 
         // then
         assertEquals(expected, actual);
@@ -53,8 +52,7 @@ class AssociatedFilingCleanserTest {
                 new AssociatedFiling().description(STATEMENT_OF_CAPITAL));
 
         // when
-        List<AssociatedFiling> actual =
-                associatedFilingCleanser.removeDuplicateModelArticles(unsortedFilings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(unsortedFilings);
 
         // then
         assertEquals(unsortedFilings, actual);
@@ -66,8 +64,7 @@ class AssociatedFilingCleanserTest {
         List<AssociatedFiling> filings = List.of(new AssociatedFiling());
 
         // when
-        List<AssociatedFiling> actual =
-                associatedFilingCleanser.removeDuplicateModelArticles(filings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(filings);
 
         // then
         assertEquals(filings, actual);
@@ -79,8 +76,7 @@ class AssociatedFilingCleanserTest {
         List<AssociatedFiling> filings = List.of(new AssociatedFiling());
 
         // when
-        List<AssociatedFiling> actual =
-                associatedFilingCleanser.removeOriginalDescription(filings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeOriginalDescription(filings);
 
         // then
         assertNull(actual);
