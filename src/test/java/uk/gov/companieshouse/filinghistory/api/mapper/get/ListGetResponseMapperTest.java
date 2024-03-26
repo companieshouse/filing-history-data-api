@@ -42,7 +42,7 @@ class ListGetResponseMapperTest {
         FilingHistoryList expected = new FilingHistoryList()
                 .startIndex(START_INDEX)
                 .itemsPerPage(ITEMS_PER_PAGE)
-                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .totalCount(0)
                 .items(List.of());
 
@@ -66,7 +66,7 @@ class ListGetResponseMapperTest {
         FilingHistoryList expected = new FilingHistoryList()
                 .startIndex(START_INDEX)
                 .itemsPerPage(ITEMS_PER_PAGE)
-                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .totalCount(1)
                 .items(List.of(cleansedExternalData));
 

@@ -173,6 +173,7 @@ class FilingHistoryGetResponseProcessorTest {
     void shouldThrowNotFoundExceptionWhenNoDocumentsInDBForFilingHistoryList() {
         // given
         when(statusService.processStatus(any())).thenReturn(STATUS);
+        when(listGetResponseMapper.mapBaseFilingHistoryList(anyInt(), anyInt(), any())).thenReturn(filingHistoryList);
         when(filingHistoryService.findCompanyFilingHistoryList(any(), anyInt(), anyInt(), any()))
                 .thenReturn(Optional.empty());
 
@@ -184,13 +185,14 @@ class FilingHistoryGetResponseProcessorTest {
                 .build();
 
         // when
-        Executable executable = () -> processor.processGetCompanyFilingHistoryList(requestParams);
+        final FilingHistoryList actual = processor.processGetCompanyFilingHistoryList(requestParams);
 
         // then
-        assertThrows(NotFoundException.class, executable);
+        assertEquals(filingHistoryList, actual);
         verify(statusService).processStatus(COMPANY_NUMBER);
+        verify(listGetResponseMapper).mapBaseFilingHistoryList(START_INDEX, DEFAULT_ITEMS_PER_PAGE, STATUS);
         verify(filingHistoryService).findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
                 CATEGORIES);
-        verifyNoInteractions(listGetResponseMapper);
+        verifyNoMoreInteractions(listGetResponseMapper);
     }
 }

@@ -73,7 +73,7 @@ class AssociatedFilingCleanserTest {
     @Test
     void shouldNotRemoveDuplicateAssociatedFilingsIfTypeNotNewInc() {
         // given
-        List<AssociatedFiling> filings = List.of(new AssociatedFiling());
+        List<AssociatedFiling> filings = List.of(new AssociatedFiling(), new AssociatedFiling());
 
         // when
         List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles("", filings);

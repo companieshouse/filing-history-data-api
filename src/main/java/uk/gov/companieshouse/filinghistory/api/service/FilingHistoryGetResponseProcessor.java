@@ -12,7 +12,6 @@ import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ListGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -56,20 +55,21 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
         final int startIndex = requestParams.startIndex();
 
         String status = statusService.processStatus(companyNumber);
-
         Matcher statusMatcher = STATUS_NOT_AVAILABLE_PATTERN.matcher(status);
+        FilingHistoryList baseResponse = listGetResponseMapper.mapBaseFilingHistoryList(startIndex, itemsPerPage,
+                status);
+
         if (statusMatcher.find()) {
-            return listGetResponseMapper.mapBaseFilingHistoryList(startIndex, itemsPerPage, status);
+            return baseResponse;
         }
 
-        FilingHistoryListAggregate listAggregate =
-                filingHistoryService.findCompanyFilingHistoryList(companyNumber, startIndex, itemsPerPage,
-                                requestParams.categories())
-                        .orElseGet(() -> {
-                            LOGGER.error("Company filing history not be found", DataMapHolder.getLogMap());
-                            throw new NotFoundException("Company filing history not be found");
-                        });
-
-        return listGetResponseMapper.mapFilingHistoryList(startIndex, itemsPerPage, status, listAggregate);
+        return filingHistoryService.findCompanyFilingHistoryList(companyNumber, startIndex, itemsPerPage,
+                        requestParams.categories())
+                .map(listAggregate -> listGetResponseMapper.mapFilingHistoryList(startIndex, itemsPerPage, status,
+                        listAggregate))
+                .orElseGet(() -> {
+                    LOGGER.error("Company filing history not found", DataMapHolder.getLogMap());
+                    return baseResponse;
+                });
     }
 }

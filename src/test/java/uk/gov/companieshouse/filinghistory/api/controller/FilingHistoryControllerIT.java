@@ -244,7 +244,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .totalCount(1)
                 .items(List.of(new ExternalData()
                         .transactionId(TRANSACTION_ID)
@@ -293,12 +293,38 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void shouldGetBaseCompanyFilingHistoryListWhenStatusNotAvailableAndReturn200OK() throws Exception {
+        // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(25)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.NOT_AVAILABLE_PROTECTED_CELL_COMPANY)
+                .totalCount(0)
+                .items(List.of());
+
+        // when
+        ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, "PC000001")
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
     void shouldGetCompanyFilingHistoryListWithPaginationAndFilterAndReturn200OK() throws Exception {
         // given
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(100)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .totalCount(1)
                 .items(List.of(new ExternalData()
                         .transactionId(TRANSACTION_ID)
@@ -577,6 +603,12 @@ class FilingHistoryControllerIT {
     @Test
     void shouldReturn404WhenGetCompanyFilingHistoryAndNoDocumentInDB() throws Exception {
         // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(25)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(0)
+                .items(List.of());
 
         // when
         ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, COMPANY_NUMBER)
@@ -586,7 +618,12 @@ class FilingHistoryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isNotFound());
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
     }
 
     @Test
