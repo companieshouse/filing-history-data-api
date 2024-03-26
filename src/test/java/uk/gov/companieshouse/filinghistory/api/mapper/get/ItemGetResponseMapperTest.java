@@ -14,9 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
@@ -49,11 +49,11 @@ class ItemGetResponseMapperTest {
     private LinksGetResponseMapper linksGetResponseMapper;
 
     @Mock
-    private List<FilingHistoryItemDataAnnotations> itemAnnotations;
+    private List<Annotation> itemAnnotations;
     @Mock
-    private FilingHistoryItemDataDescriptionValues itemDescriptionValues;
+    private DescriptionValues itemDescriptionValues;
     @Mock
-    private FilingHistoryItemDataLinks itemLinks;
+    private Links itemLinks;
 
     @Mock
     private FilingHistoryDescriptionValues documentDescriptionValues;

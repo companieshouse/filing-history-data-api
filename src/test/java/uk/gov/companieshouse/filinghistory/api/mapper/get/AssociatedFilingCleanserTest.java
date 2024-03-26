@@ -1,11 +1,12 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 
 class AssociatedFilingCleanserTest {
 
@@ -17,25 +18,25 @@ class AssociatedFilingCleanserTest {
     @Test
     void shouldRemoveDuplicateModelArticlesAndSortAssociatedFilingsDescendingAlphabeticalOrder() {
         // given
-        var filingNotDuplicate = new FilingHistoryItemDataAssociatedFilings()
+        var filingNotDuplicate = new AssociatedFiling()
                 .description(STATEMENT_OF_CAPITAL);
-        var modelArticle = new FilingHistoryItemDataAssociatedFilings()
+        var modelArticle = new AssociatedFiling()
                 .description(MODEL_ARTICLES_ADOPTED)
                 .date("1998-12-12");
 
-        List<FilingHistoryItemDataAssociatedFilings> duplicateFilings = List.of(
+        List<AssociatedFiling> duplicateFilings = List.of(
                 modelArticle,
-                new FilingHistoryItemDataAssociatedFilings()
+                new AssociatedFiling()
                         .description(MODEL_ARTICLES_ADOPTED)
                         .date("2001-03-20"),
-                new FilingHistoryItemDataAssociatedFilings().description(MODEL_ARTICLES_ADOPTED),
-                new FilingHistoryItemDataAssociatedFilings().description(MODEL_ARTICLES_ADOPTED),
+                new AssociatedFiling().description(MODEL_ARTICLES_ADOPTED),
+                new AssociatedFiling().description(MODEL_ARTICLES_ADOPTED),
                 filingNotDuplicate);
 
-        List<FilingHistoryItemDataAssociatedFilings> expected = List.of(filingNotDuplicate, modelArticle);
+        List<AssociatedFiling> expected = List.of(filingNotDuplicate, modelArticle);
 
         // when
-        List<FilingHistoryItemDataAssociatedFilings> actual =
+        List<AssociatedFiling> actual =
                 associatedFilingCleanser.removeDuplicateModelArticles(duplicateFilings);
 
         // then
@@ -45,14 +46,14 @@ class AssociatedFilingCleanserTest {
     @Test
     void shouldNotRemoveDuplicateFilingsWithDescriptionsOtherThanModelArticlesAdopted() {
         // given
-        List<FilingHistoryItemDataAssociatedFilings> unsortedFilings = Arrays.asList(
-                new FilingHistoryItemDataAssociatedFilings().description(MODEL_ARTICLES_ADOPTED),
-                new FilingHistoryItemDataAssociatedFilings().description(STATEMENT_OF_CAPITAL),
-                new FilingHistoryItemDataAssociatedFilings().description(STATEMENT_OF_CAPITAL),
-                new FilingHistoryItemDataAssociatedFilings().description(STATEMENT_OF_CAPITAL));
+        List<AssociatedFiling> unsortedFilings = Arrays.asList(
+                new AssociatedFiling().description(MODEL_ARTICLES_ADOPTED),
+                new AssociatedFiling().description(STATEMENT_OF_CAPITAL),
+                new AssociatedFiling().description(STATEMENT_OF_CAPITAL),
+                new AssociatedFiling().description(STATEMENT_OF_CAPITAL));
 
         // when
-        List<FilingHistoryItemDataAssociatedFilings> actual =
+        List<AssociatedFiling> actual =
                 associatedFilingCleanser.removeDuplicateModelArticles(unsortedFilings);
 
         // then
@@ -62,10 +63,10 @@ class AssociatedFilingCleanserTest {
     @Test
     void shouldNotDoAnythingWhenSingletonAssociatedFilingsList() {
         // given
-        List<FilingHistoryItemDataAssociatedFilings> filings = List.of(new FilingHistoryItemDataAssociatedFilings());
+        List<AssociatedFiling> filings = List.of(new AssociatedFiling());
 
         // when
-        List<FilingHistoryItemDataAssociatedFilings> actual =
+        List<AssociatedFiling> actual =
                 associatedFilingCleanser.removeDuplicateModelArticles(filings);
 
         // then
@@ -75,13 +76,13 @@ class AssociatedFilingCleanserTest {
     @Test
     void shouldRemoveOriginalDescription() {
         // given
-        List<FilingHistoryItemDataAssociatedFilings> filings = List.of(new FilingHistoryItemDataAssociatedFilings());
-
+        List<AssociatedFiling> filings = List.of(new AssociatedFiling());
 
         // when
-        List<FilingHistoryItemDataAssociatedFilings> actual =
-                associatedFilingCleanser.removeOriginalDescription()
-        // then
+        List<AssociatedFiling> actual =
+                associatedFilingCleanser.removeOriginalDescription(filings);
 
+        // then
+        assertNull(actual);
     }
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
@@ -19,11 +19,11 @@ public class AssociatedFilingPutRequestValidator implements Validator<InternalFi
             return false;
         }
 
-        List<FilingHistoryItemDataAssociatedFilings> associatedFilingList = externalData.getAssociatedFilings();
+        List<AssociatedFiling> associatedFilingList = externalData.getAssociatedFilings();
         if (associatedFilingList == null || associatedFilingList.isEmpty()) {
             return false;
         }
-        FilingHistoryItemDataAssociatedFilings associatedFiling = associatedFilingList.getFirst();
+        AssociatedFiling associatedFiling = associatedFilingList.getFirst();
 
         return StringUtils.isNotBlank(internalData.getEntityId())
                 && StringUtils.isNotBlank(internalData.getDeltaAt())

@@ -12,8 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
@@ -178,12 +178,12 @@ class AnnotationPutRequestValidatorTest {
                         .externalData(new ExternalData()
                                 .transactionId(TRANSACTION_ID)
                                 .annotations(List.of(
-                                        new FilingHistoryItemDataAnnotations()
+                                        new Annotation()
                                                 .annotation("annotation field")
                                                 .type(TYPE)
                                                 .date(DATE)
                                 ))
-                                .links(new FilingHistoryItemDataLinks()
+                                .links(new Links()
                                         .self(VALID_SELF_LINK)))
                         .internalData(new InternalData()
                                 .entityId(ENTITY_ID)
@@ -206,7 +206,7 @@ class AnnotationPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyLinks(Links value) {
                 requestBody.getExternalData().links(value);
                 return this;
             }
@@ -216,7 +216,7 @@ class AnnotationPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyAnnotationList(List<FilingHistoryItemDataAnnotations> list) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyAnnotationList(List<Annotation> list) {
                 requestBody.getExternalData().annotations(list);
                 return this;
             }
@@ -262,13 +262,13 @@ class AnnotationPutRequestValidatorTest {
                 .externalData(new ExternalData()
                         .transactionId(TRANSACTION_ID)
                         .annotations(List.of(
-                                        new FilingHistoryItemDataAnnotations()
+                                        new Annotation()
                                                 .annotation("annotation")
                                                 .type(TYPE)
                                                 .date(DATE)
                                 )
                         )
-                        .links(new FilingHistoryItemDataLinks()
+                        .links(new Links()
                                 .self(VALID_SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)

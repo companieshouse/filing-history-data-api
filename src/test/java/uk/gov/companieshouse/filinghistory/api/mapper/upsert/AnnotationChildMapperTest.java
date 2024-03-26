@@ -13,8 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
@@ -33,7 +33,7 @@ class AnnotationChildMapperTest {
     private DescriptionValuesMapper descriptionValuesMapper;
 
     @Mock
-    private FilingHistoryItemDataDescriptionValues requestDescriptionValues;
+    private DescriptionValues requestDescriptionValues;
     @Mock
     private FilingHistoryDescriptionValues descriptionValues;
 
@@ -46,7 +46,7 @@ class AnnotationChildMapperTest {
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
                         .annotations(List.of(
-                                new FilingHistoryItemDataAnnotations()
+                                new Annotation()
                                         .category("annotation")
                                         .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                         .description("annotation")
@@ -84,7 +84,7 @@ class AnnotationChildMapperTest {
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
                         .annotations(List.of(
-                                new FilingHistoryItemDataAnnotations()
+                                new Annotation()
                                         .category("annotation")
                                         .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                         .description("annotation")

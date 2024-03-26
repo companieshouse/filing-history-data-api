@@ -45,9 +45,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
@@ -246,15 +246,15 @@ class FilingHistoryControllerIT {
                 .description(DESCRIPTION)
                 .subcategory(SUBCATEGORY)
                 .date("2014-09-15")
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                .descriptionValues(new DescriptionValues()
                         .officerName("John Tester")
                         .terminationDate("2014-08-29"))
                 .annotations(List.of(
-                        new FilingHistoryItemDataAnnotations()
+                        new Annotation()
                                 .annotation("annotation")
-                                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                                .descriptionValues(new DescriptionValues()
                                         .description("description"))))
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK)
                         .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
                 .pages(1);
@@ -292,7 +292,7 @@ class FilingHistoryControllerIT {
                 .description("liquidation-voluntary-removal-liquidator")
                 .subcategory(SUBCATEGORY_LIST)
                 .date("2014-09-15")
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK)
                         .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
                 .pages(1)
@@ -361,7 +361,7 @@ class FilingHistoryControllerIT {
                         .date(DATE)
                         .category(ExternalData.CategoryEnum.OFFICERS)
                         .description(DESCRIPTION)
-                        .links(new FilingHistoryItemDataLinks()
+                        .links(new Links()
                                 .self(SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
@@ -608,12 +608,12 @@ class FilingHistoryControllerIT {
                 .annotations(null)
                 .subcategory(SUBCATEGORY)
                 .description(DESCRIPTION)
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                .descriptionValues(new DescriptionValues()
                         .officerName(OFFICER_NAME)
                         .terminationDate(ACTION_AND_TERMINATION_DATE))
                 .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE)
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK));
     }
 

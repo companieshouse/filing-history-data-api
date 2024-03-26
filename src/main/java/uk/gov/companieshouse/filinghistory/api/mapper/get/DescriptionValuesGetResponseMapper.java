@@ -4,7 +4,7 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantTo
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @Component
@@ -16,9 +16,9 @@ public class DescriptionValuesGetResponseMapper {
         this.capitalDescriptionMapper = capitalDescriptionMapper;
     }
 
-    public FilingHistoryItemDataDescriptionValues map(FilingHistoryDescriptionValues descriptionValues) {
+    public DescriptionValues map(FilingHistoryDescriptionValues descriptionValues) {
         return Optional.ofNullable(descriptionValues)
-                .map(values -> new FilingHistoryItemDataDescriptionValues()
+                .map(values -> new DescriptionValues()
                         .capital(capitalDescriptionMapper.mapFilingHistoryCapital(values.getCapital()))
                         .altCapital(capitalDescriptionMapper.mapFilingHistoryAltCapital(values.getAltCapital()))
                         .appointmentDate(instantToString(values.getAppointmentDate()))

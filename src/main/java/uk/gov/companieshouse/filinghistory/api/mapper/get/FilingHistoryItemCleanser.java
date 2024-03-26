@@ -1,10 +1,8 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
 
 @Component
 public class FilingHistoryItemCleanser {
@@ -19,13 +17,15 @@ public class FilingHistoryItemCleanser {
     }
 
     ExternalData cleanseFilingHistoryItem(ExternalData externalData) {
-        //so get the associated filings and remove any duplicate model items that come back if the type is NEWINC
-        Optional<List<FilingHistoryItemDataAssociatedFilings>> associatedFilings = Optional.ofNullable(externalData.getAssociatedFilings());
-                if("NEWINC".equals(externalData.getType())) {
-                    associatedFilings.map(associatedFilingCleanser::removeDuplicateModelArticles);
-                }
-                associatedFilings.map(associatedFilingCleanser::removeOriginalDescription)
-                        .ifPresent(externalData::associatedFilings);
+        Optional.ofNullable(externalData.getAssociatedFilings())
+                .map(filings -> {
+                    if ("NEWINC".equals(externalData.getType())) {
+                        return associatedFilingCleanser.removeDuplicateModelArticles(filings);
+                    }
+                    return filings;
+                })
+                .map(associatedFilingCleanser::removeOriginalDescription)
+                .ifPresent(externalData::associatedFilings);
 
         if ("ANNOTATION".equals(externalData.getType())) {
             externalData.annotations(null);

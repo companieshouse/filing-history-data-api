@@ -32,8 +32,8 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -171,12 +171,12 @@ class FilingHistoryControllerMongoUnavailableIT {
                 .annotations(null)
                 .subcategory(SUBCATEGORY)
                 .description(DESCRIPTION)
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                .descriptionValues(new DescriptionValues()
                         .officerName(OFFICER_NAME)
                         .terminationDate(ACTION_AND_TERMINATION_DATE))
                 .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE)
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK));
     }
 }

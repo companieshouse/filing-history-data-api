@@ -2,7 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 
 @Component
@@ -14,11 +14,11 @@ public class LinksGetResponseMapper {
         this.documentApiUrl = documentApiUrl;
     }
 
-    public FilingHistoryItemDataLinks map(FilingHistoryLinks links) {
+    public Links map(FilingHistoryLinks links) {
         final String metadataLink = links.getDocumentMetadata() == null ?
                 null : "%s%s".formatted(documentApiUrl, links.getDocumentMetadata());
 
-        return new FilingHistoryItemDataLinks()
+        return new Links()
                 .self(links.getSelf())
                 .documentMetadata(metadataLink);
     }

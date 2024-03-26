@@ -3,7 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
@@ -20,7 +20,7 @@ public class AnnotationChildMapper implements ChildMapper<FilingHistoryAnnotatio
     @Override
     public FilingHistoryAnnotation mapChild(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
         InternalData internalData = request.getInternalData();
-        FilingHistoryItemDataAnnotations requestAnnotation = request.getExternalData().getAnnotations().getFirst();
+        Annotation requestAnnotation = request.getExternalData().getAnnotations().getFirst();
 
         return annotation
                 .entityId(internalData.getEntityId())
