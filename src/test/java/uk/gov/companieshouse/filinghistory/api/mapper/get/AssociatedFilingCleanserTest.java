@@ -11,6 +11,7 @@ class AssociatedFilingCleanserTest {
 
     private static final String MODEL_ARTICLES_ADOPTED = "model-articles-adopted";
     private static final String STATEMENT_OF_CAPITAL = "statement-of-capital";
+    private static final String NEW_INC = "NEWINC";
 
     private final AssociatedFilingCleanser associatedFilingCleanser = new AssociatedFilingCleanser();
 
@@ -35,7 +36,7 @@ class AssociatedFilingCleanserTest {
         List<AssociatedFiling> expected = List.of(filingNotDuplicate, modelArticle);
 
         // when
-        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(duplicateFilings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(NEW_INC, duplicateFilings);
 
         // then
         assertEquals(expected, actual);
@@ -51,7 +52,7 @@ class AssociatedFilingCleanserTest {
                 new AssociatedFiling().description(STATEMENT_OF_CAPITAL));
 
         // when
-        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(unsortedFilings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(NEW_INC, unsortedFilings);
 
         // then
         assertEquals(unsortedFilings, actual);
@@ -63,7 +64,19 @@ class AssociatedFilingCleanserTest {
         List<AssociatedFiling> filings = List.of(new AssociatedFiling());
 
         // when
-        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(filings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles(NEW_INC, filings);
+
+        // then
+        assertEquals(filings, actual);
+    }
+
+    @Test
+    void shouldNotRemoveDuplicateAssociatedFilingsIfTypeNotNewInc() {
+        // given
+        List<AssociatedFiling> filings = List.of(new AssociatedFiling());
+
+        // when
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeDuplicateModelArticles("", filings);
 
         // then
         assertEquals(filings, actual);

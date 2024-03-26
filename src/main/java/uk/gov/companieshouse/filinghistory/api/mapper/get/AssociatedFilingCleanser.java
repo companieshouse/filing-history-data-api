@@ -17,9 +17,10 @@ public class AssociatedFilingCleanser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String MODEL_ARTICLES_ADOPTED = "model-articles-adopted";
+    private static final String NEW_INC = "NEWINC";
 
-    List<AssociatedFiling> removeDuplicateModelArticles(List<AssociatedFiling> associatedFilings) {
-        if (associatedFilings.size() > 1) {
+    List<AssociatedFiling> removeDuplicateModelArticles(String type, List<AssociatedFiling> associatedFilings) {
+        if (associatedFilings.size() > 1 && NEW_INC.equals(type)) {
             List<AssociatedFiling> modelArticles = associatedFilings.stream()
                     .filter(filing -> MODEL_ARTICLES_ADOPTED.equals(filing.getDescription()))
                     .toList();

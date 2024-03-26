@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -40,7 +39,7 @@ class FilingHistoryItemCleanserTest {
     @Test
     void shouldCleanseAssociatedFilings() {
         // given
-        when(associatedFilingCleanser.removeDuplicateModelArticles(any())).thenReturn(List.of(cleanFilings));
+        when(associatedFilingCleanser.removeDuplicateModelArticles(any(), any())).thenReturn(List.of(cleanFilings));
 
         ExternalData externalData = new ExternalData()
                 .type(NEW_INC)
@@ -55,24 +54,7 @@ class FilingHistoryItemCleanserTest {
 
         // then
         assertEquals(expected, actual);
-        verify(associatedFilingCleanser).removeDuplicateModelArticles(List.of(filingsWithDuplicates));
-    }
-
-    @Test
-    void shouldNotRemoveDuplicateAssociatedFilingsIfTypeNotNewInc() {
-        // given
-        ExternalData externalData = new ExternalData()
-                .associatedFilings(List.of(filingsWithDuplicates));
-
-        ExternalData expected = new ExternalData()
-                .associatedFilings(List.of(filingsWithDuplicates));
-
-        // when
-        ExternalData actual = filingHistoryItemCleanser.cleanseFilingHistoryItem(externalData);
-
-        // then
-        assertEquals(expected, actual);
-        verifyNoInteractions(associatedFilingCleanser);
+        verify(associatedFilingCleanser).removeDuplicateModelArticles(NEW_INC, List.of(filingsWithDuplicates));
     }
 
     @Test

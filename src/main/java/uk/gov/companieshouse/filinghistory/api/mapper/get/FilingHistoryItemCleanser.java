@@ -7,6 +7,7 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 @Component
 public class FilingHistoryItemCleanser {
 
+    private static final String ANNOTATION = "ANNOTATION";
     private final AssociatedFilingCleanser associatedFilingCleanser;
     private final DescriptionValuesCleanser descriptionValuesCleanser;
 
@@ -18,15 +19,10 @@ public class FilingHistoryItemCleanser {
 
     ExternalData cleanseFilingHistoryItem(ExternalData externalData) {
         Optional.ofNullable(externalData.getAssociatedFilings())
-                .map(filings -> {
-                    if ("NEWINC".equals(externalData.getType())) {
-                        return associatedFilingCleanser.removeDuplicateModelArticles(filings);
-                    }
-                    return filings;
-                })
+                .map(filings -> associatedFilingCleanser.removeDuplicateModelArticles(externalData.getType(), filings))
                 .ifPresent(externalData::associatedFilings);
 
-        if ("ANNOTATION".equals(externalData.getType())) {
+        if (ANNOTATION.equals(externalData.getType())) {
             externalData.annotations(null);
         }
 
