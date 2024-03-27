@@ -2,6 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -10,8 +12,9 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -26,6 +29,25 @@ public class FilingHistoryService implements Service {
     public FilingHistoryService(ResourceChangedApiClient apiClient, Repository repository) {
         this.apiClient = apiClient;
         this.repository = repository;
+    }
+
+
+    @Override
+    public Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber,
+            int startIndex,
+            int itemsPerPage, List<String> categories) {
+        List<String> categoryList = categories == null ? new ArrayList<>() : new ArrayList<>(categories);
+        if (categoryList.contains("confirmation-statement")) {
+            categoryList.add("annual-return");
+        }
+        if (categoryList.contains("incorporation")) {
+            categoryList.addAll(
+                    List.of("change-of-constitution", "change-of-name", "court-order",
+                            "gazette", "reregistration", "resolution", "restoration"));
+        }
+
+        return Optional.of(repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categoryList))
+                .filter(listAggregate -> listAggregate.getTotalCount() > 0);
     }
 
     @Override

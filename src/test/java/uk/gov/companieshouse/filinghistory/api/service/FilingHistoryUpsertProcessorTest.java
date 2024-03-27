@@ -24,7 +24,7 @@ import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableExcep
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AnnotationTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
 
 @ExtendWith(MockitoExtension.class)

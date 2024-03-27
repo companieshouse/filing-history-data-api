@@ -43,31 +43,34 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
+import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
 
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
-@WireMockTest(httpPort = 8888)
+@WireMockTest(httpPort = 8889)
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{transaction_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
+    private static final String LIST_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -194,7 +197,8 @@ class FilingHistoryControllerIT {
     @Test
     void shouldUpdateDocumentAndReturn200OKWhenExistingDocumentInDB() throws Exception {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -235,6 +239,141 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void shouldGetCompanyFilingHistoryListAndReturn200OK() throws Exception {
+        // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(25)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(1)
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .barcode(BARCODE)
+                        .actionDate("2014-08-29")
+                        .category(ExternalData.CategoryEnum.OFFICERS)
+                        .type(TM01_TYPE)
+                        .description(DESCRIPTION)
+                        .subcategory(SUBCATEGORY)
+                        .date("2014-09-15")
+                        .descriptionValues(new DescriptionValues()
+                                .officerName("John Tester")
+                                .terminationDate("2014-08-29"))
+                        .annotations(List.of(
+                                new Annotation()
+                                        .annotation("annotation")
+                                        .descriptionValues(new DescriptionValues()
+                                                .description("description"))))
+                        .links(new Links()
+                                .self(SELF_LINK)
+                                .documentMetadata(
+                                        "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                        .pages(1)));
+
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    void shouldGetBaseCompanyFilingHistoryListWhenStatusNotAvailableAndReturn200OK() throws Exception {
+        // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(25)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.NOT_AVAILABLE_PROTECTED_CELL_COMPANY)
+                .totalCount(0)
+                .items(List.of());
+
+        // when
+        ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, "PC000001")
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    void shouldGetCompanyFilingHistoryListWithPaginationAndFilterAndReturn200OK() throws Exception {
+        // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(100)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(1)
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .barcode(BARCODE)
+                        .actionDate("2014-08-29")
+                        .category(ExternalData.CategoryEnum.OFFICERS)
+                        .type(TM01_TYPE)
+                        .description(DESCRIPTION)
+                        .subcategory(SUBCATEGORY)
+                        .date("2014-09-15")
+                        .descriptionValues(new DescriptionValues()
+                                .officerName("John Tester")
+                                .terminationDate("2014-08-29"))
+                        .annotations(List.of(
+                                new Annotation()
+                                        .annotation("annotation")
+                                        .descriptionValues(new DescriptionValues()
+                                                .description("description"))))
+                        .links(new Links()
+                                .self(SELF_LINK)
+                                .documentMetadata(
+                                        "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                        .pages(1)));
+
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(
+                get(LIST_GET_REQUEST_URI + "?items_per_page=200&category=officers", COMPANY_NUMBER)
+                        .header("ERIC-Identity", "123")
+                        .header("ERIC-Identity-Type", "key")
+                        .header("X-Request-Id", CONTEXT_ID)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
     void shouldGetSingleDocumentAndReturn200OK() throws Exception {
         // given
         final ExternalData expectedResponseBody = new ExternalData()
@@ -246,22 +385,24 @@ class FilingHistoryControllerIT {
                 .description(DESCRIPTION)
                 .subcategory(SUBCATEGORY)
                 .date("2014-09-15")
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                .descriptionValues(new DescriptionValues()
                         .officerName("John Tester")
                         .terminationDate("2014-08-29"))
                 .annotations(List.of(
-                        new FilingHistoryItemDataAnnotations()
+                        new Annotation()
                                 .annotation("annotation")
-                                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                                .descriptionValues(new DescriptionValues()
                                         .description("description"))))
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK)
                         .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
                 .pages(1);
 
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -291,13 +432,14 @@ class FilingHistoryControllerIT {
                 .description("liquidation-voluntary-removal-liquidator")
                 .subcategory(SUBCATEGORY_LIST)
                 .date("2014-09-15")
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK)
                         .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
                 .pages(1)
                 .paperFiled(true);
 
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document-list-subcategory.json",
+        final String jsonToInsert = IOUtils.resourceToString(
+                        "/mongo_docs/filing-history-document-list-subcategory.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
@@ -322,9 +464,11 @@ class FilingHistoryControllerIT {
     @Test
     void shouldDeleteDocumentAndReturn200OKWhenExistingDocumentInDB() throws Exception {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -347,7 +491,8 @@ class FilingHistoryControllerIT {
         assertNull(actualDocument);
 
         verify(instantSupplier, times(1)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
+        WireMock.verify(requestMadeFor(
+                new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
 
     @Test
@@ -359,7 +504,7 @@ class FilingHistoryControllerIT {
                         .date(DATE)
                         .category(ExternalData.CategoryEnum.OFFICERS)
                         .description(DESCRIPTION)
-                        .links(new FilingHistoryItemDataLinks()
+                        .links(new Links()
                                 .self(SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
@@ -415,7 +560,8 @@ class FilingHistoryControllerIT {
     @Test
     void shouldNotUpdateDocumentAndShouldReturn409ConflictWhenDeltaStale() throws Exception {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -455,6 +601,32 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void shouldReturn404WhenGetCompanyFilingHistoryAndNoDocumentInDB() throws Exception {
+        // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(25)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(0)
+                .items(List.of());
+
+        // when
+        ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
     void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB()
             throws Exception {
         // given
@@ -488,7 +660,8 @@ class FilingHistoryControllerIT {
     void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseOnUpsertAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -526,9 +699,11 @@ class FilingHistoryControllerIT {
     void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseOnDeleteAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
@@ -554,7 +729,8 @@ class FilingHistoryControllerIT {
 
         verify(instantSupplier, times(1)).get();
         WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
+                requestMadeFor(
+                        new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
 
     @Test
@@ -605,18 +781,18 @@ class FilingHistoryControllerIT {
                 .annotations(null)
                 .subcategory(SUBCATEGORY)
                 .description(DESCRIPTION)
-                .descriptionValues(new FilingHistoryItemDataDescriptionValues()
+                .descriptionValues(new DescriptionValues()
                         .officerName(OFFICER_NAME)
                         .terminationDate(ACTION_AND_TERMINATION_DATE))
                 .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE)
-                .links(new FilingHistoryItemDataLinks()
+                .links(new Links()
                         .self(SELF_LINK));
     }
 
     private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
-                                                                          Integer pages,
-                                                                          List<FilingHistoryAnnotation> annotations) {
+            Integer pages,
+            List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
@@ -654,7 +830,8 @@ class FilingHistoryControllerIT {
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
-        return IOUtils.resourceToString("/resource_changed/expected-delete-resource-changed.json", StandardCharsets.UTF_8)
+        return IOUtils.resourceToString("/resource_changed/expected-delete-resource-changed.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", UPDATED_AT.toString());
     }
 }

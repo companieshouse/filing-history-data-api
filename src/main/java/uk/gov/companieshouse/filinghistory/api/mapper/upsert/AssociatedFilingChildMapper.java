@@ -3,10 +3,10 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 
 @Component
 public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAssociatedFiling> {
@@ -21,7 +21,7 @@ public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAss
     public FilingHistoryAssociatedFiling mapChild(FilingHistoryAssociatedFiling associatedFiling,
                                                   InternalFilingHistoryApi request) {
         InternalData internalData = request.getInternalData();
-        FilingHistoryItemDataAssociatedFilings requestAssociatedFilings =
+        AssociatedFiling requestAssociatedFilings =
                 request.getExternalData().getAssociatedFilings().getFirst();
 
         return associatedFiling

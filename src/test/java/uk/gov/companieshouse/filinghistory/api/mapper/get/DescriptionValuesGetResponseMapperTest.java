@@ -15,10 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.AltCapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.CapitalDescriptionValue;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAltCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAltCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class DescriptionValuesGetResponseMapperTest {
@@ -71,7 +71,7 @@ class DescriptionValuesGetResponseMapperTest {
     @Test
     void shouldSuccessfullyMapDescriptionValues() {
         // given
-        final FilingHistoryItemDataDescriptionValues expected = buildExpectedResponseDescriptionValues();
+        final DescriptionValues expected = buildExpectedResponseDescriptionValues();
 
         when(capitalDescriptionGetResponseMapper.mapFilingHistoryCapital(any())).thenReturn(
                 List.of(capitalDescriptionValue));
@@ -79,7 +79,7 @@ class DescriptionValuesGetResponseMapperTest {
                 List.of(altCapitalDescriptionValue));
 
         // when
-        final FilingHistoryItemDataDescriptionValues actual = mapper.map(buildDocumentDescriptionValues());
+        final DescriptionValues actual = mapper.map(buildDocumentDescriptionValues());
 
         // then
         assertEquals(expected, actual);
@@ -92,7 +92,7 @@ class DescriptionValuesGetResponseMapperTest {
         // given
 
         // when
-        final FilingHistoryItemDataDescriptionValues actual = mapper.map(null);
+        final DescriptionValues actual = mapper.map(null);
 
         // then
         assertNull(actual);
@@ -141,8 +141,8 @@ class DescriptionValuesGetResponseMapperTest {
                 .withdrawalDate(WITHDRAWAL_DATE_INSTANT);
     }
 
-    private FilingHistoryItemDataDescriptionValues buildExpectedResponseDescriptionValues() {
-        return new FilingHistoryItemDataDescriptionValues()
+    private DescriptionValues buildExpectedResponseDescriptionValues() {
+        return new DescriptionValues()
                 .altCapital(List.of(altCapitalDescriptionValue))
                 .appointmentDate(APPOINTMENT_DATE)
                 .branchNumber("50")

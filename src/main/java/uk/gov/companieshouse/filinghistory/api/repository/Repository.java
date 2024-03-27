@@ -1,16 +1,28 @@
 package uk.gov.companieshouse.filinghistory.api.repository;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.count;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.facet;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
+import static org.springframework.data.mongodb.core.aggregation.ConditionalOperators.ifNull;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -23,6 +35,28 @@ public class Repository {
 
     public Repository(final MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
+    }
+
+    public FilingHistoryListAggregate findCompanyFilingHistory(String companyNumber,
+            int startIndex, int itemsPerPage, List<String> categories) {
+
+        Criteria criteria = Criteria.where("company_number").is(companyNumber);
+        if (!categories.isEmpty()) {
+            criteria.and("data.category").in(categories);
+        }
+
+        Aggregation aggregation = newAggregation(
+                match(criteria),
+                facet(
+                        count().as("count")).as("total_count")
+                        .and(match(new Criteria()), sort(Direction.DESC, "data.date")).as("document_list"),
+                unwind("$total_count", true),
+                project()
+                        .and(ifNull("$total_count.count").then(0)).as("total_count")
+                        .andExpression("$document_list").slice(itemsPerPage, startIndex).as("document_list"));
+
+        return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
+                .getUniqueMappedResult();
     }
 
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {

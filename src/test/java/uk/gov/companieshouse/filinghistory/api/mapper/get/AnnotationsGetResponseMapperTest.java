@@ -13,10 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationsGetResponseMapperTest {
@@ -31,23 +31,23 @@ class AnnotationsGetResponseMapperTest {
     @Mock
     private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
-    private FilingHistoryItemDataDescriptionValues filingHistoryItemDataDescriptionValues;
+    private DescriptionValues DescriptionValues;
 
     @Test
     void shouldSuccessfullyMapAnnotations() {
         // given
-        final List<FilingHistoryItemDataAnnotations> expected = List.of(
-                new FilingHistoryItemDataAnnotations()
+        final List<Annotation> expected = List.of(
+                new Annotation()
                         .annotation("annotations_1")
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION)
-                        .descriptionValues(filingHistoryItemDataDescriptionValues));
+                        .descriptionValues(DescriptionValues));
 
-        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(filingHistoryItemDataDescriptionValues);
+        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(DescriptionValues);
 
         // when
-        final List<FilingHistoryItemDataAnnotations> actual = annotationsGetResponseMapper.map(buildDocumentAnnotationsList());
+        final List<Annotation> actual = annotationsGetResponseMapper.map(buildDocumentAnnotationsList());
 
         // then
         assertEquals(expected, actual);
@@ -57,15 +57,15 @@ class AnnotationsGetResponseMapperTest {
     @Test
     void shouldSuccessfullyMapAnnotationsWithNulLDescriptionValues() {
         // given
-        final List<FilingHistoryItemDataAnnotations> expected = List.of(
-                new FilingHistoryItemDataAnnotations()
+        final List<Annotation> expected = List.of(
+                new Annotation()
                         .annotation("annotations_1")
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION));
 
         // when
-        final List<FilingHistoryItemDataAnnotations> actual = annotationsGetResponseMapper.map(List.of(
+        final List<Annotation> actual = annotationsGetResponseMapper.map(List.of(
                 new FilingHistoryAnnotation()
                         .annotation("annotations_1")
                         .category(CATEGORY)
@@ -82,7 +82,7 @@ class AnnotationsGetResponseMapperTest {
         // given
 
         // when
-        final List<FilingHistoryItemDataAnnotations> actual = annotationsGetResponseMapper.map(null);
+        final List<Annotation> actual = annotationsGetResponseMapper.map(null);
 
         // then
         assertNull(actual);

@@ -15,13 +15,13 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class DataMapperTest {
@@ -42,12 +42,12 @@ class DataMapperTest {
     private DescriptionValuesMapper descriptionValuesMapper;
 
     @Mock
-    private FilingHistoryItemDataDescriptionValues requestDescriptionValues;
+    private DescriptionValues requestDescriptionValues;
     @Mock
     private FilingHistoryDescriptionValues expectedDescriptionValues;
 
     @Mock
-    private FilingHistoryItemDataLinks requestLinks;
+    private Links requestLinks;
 
     @Test
     void mapShouldReturnFilingHistoryDataWithNullSubcategoryWhenNewData() {

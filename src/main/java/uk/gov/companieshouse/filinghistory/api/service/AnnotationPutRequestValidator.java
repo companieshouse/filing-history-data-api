@@ -3,8 +3,8 @@ package uk.gov.companieshouse.filinghistory.api.service;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 
@@ -19,11 +19,11 @@ public class AnnotationPutRequestValidator implements Validator<InternalFilingHi
             return false;
         }
 
-        List<FilingHistoryItemDataAnnotations> annotationList = externalData.getAnnotations();
+        List<Annotation> annotationList = externalData.getAnnotations();
         if (annotationList == null || annotationList.isEmpty()) {
             return false;
         }
-        FilingHistoryItemDataAnnotations annotation = annotationList.getFirst();
+        Annotation annotation = annotationList.getFirst();
 
         return StringUtils.isNotBlank(internalData.getEntityId())
                 && StringUtils.isNotBlank(internalData.getDeltaAt())

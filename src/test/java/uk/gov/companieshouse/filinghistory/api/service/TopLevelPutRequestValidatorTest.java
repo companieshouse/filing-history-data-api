@@ -11,9 +11,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.api.filinghistory.Links;
 
 class TopLevelPutRequestValidatorTest {
 
@@ -175,7 +175,7 @@ class TopLevelPutRequestValidatorTest {
                                 .date(DATE)
                                 .category(CategoryEnum.OFFICERS)
                                 .description(DESCRIPTION)
-                                .links(new FilingHistoryItemDataLinks()
+                                .links(new Links()
                                         .self(VALID_SELF_LINK)))
                         .internalData(new InternalData()
                                 .entityId(ENTITY_ID)
@@ -198,7 +198,7 @@ class TopLevelPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
+            public RequestBodyTestArgumentBuilder modifyLinks(Links value) {
                 requestBody.getExternalData().links(value);
                 return this;
             }
@@ -257,7 +257,7 @@ class TopLevelPutRequestValidatorTest {
                         .date(DATE)
                         .category(CategoryEnum.OFFICERS)
                         .description(DESCRIPTION)
-                        .links(new FilingHistoryItemDataLinks()
+                        .links(new Links()
                                 .self(VALID_SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)

@@ -5,8 +5,8 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantTo
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAnnotations;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 
 @Component
 public class AnnotationsGetResponseMapper {
@@ -17,12 +17,12 @@ public class AnnotationsGetResponseMapper {
         this.mapper = mapper;
     }
 
-    public List<FilingHistoryItemDataAnnotations> map(List<FilingHistoryAnnotation> documentAnnotations) {
+    public List<Annotation> map(List<FilingHistoryAnnotation> documentAnnotations) {
         return Optional.ofNullable(documentAnnotations)
                 .map(inputAnnotations -> inputAnnotations
                         .stream()
                         .map(annotation ->
-                                new FilingHistoryItemDataAnnotations()
+                                new Annotation()
                                         .annotation(annotation.getAnnotation())
                                         .category(annotation.getCategory())
                                         .description(annotation.getDescription())

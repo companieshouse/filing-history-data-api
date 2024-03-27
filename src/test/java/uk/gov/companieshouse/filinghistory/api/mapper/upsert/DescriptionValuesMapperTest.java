@@ -14,10 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.AltCapitalDescriptionValue;
 import uk.gov.companieshouse.api.filinghistory.CapitalDescriptionValue;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAltCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryCapital;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAltCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryCapital;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class DescriptionValuesMapperTest {
@@ -76,7 +76,7 @@ class DescriptionValuesMapperTest {
         when(capitalDescriptionMapper.mapAltCapitalDescriptionValueList(anyList())).thenReturn(
                 List.of(filingHistoryAltCapital));
 
-        FilingHistoryItemDataDescriptionValues descriptionValues = new FilingHistoryItemDataDescriptionValues()
+        DescriptionValues descriptionValues = new DescriptionValues()
                 .altCapital(List.of(new AltCapitalDescriptionValue()))
                 .appointmentDate(APPOINTMENT_DATE)
                 .branchNumber("50")

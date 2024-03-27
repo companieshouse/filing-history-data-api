@@ -1,10 +1,11 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
+import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 
 class LinksGetResponseMapperTest {
 
@@ -18,12 +19,12 @@ class LinksGetResponseMapperTest {
     @Test
     void shouldSuccessfullyMapLinks() {
         // given
-        final FilingHistoryItemDataLinks expected = new FilingHistoryItemDataLinks()
+        final Links expected = new Links()
                 .self(SELF_LINK)
                 .documentMetadata(GET_RESPONSE_METADATA);
 
         // when
-        final FilingHistoryItemDataLinks actual = mapper.map(buildDocumentFilingHistoryLinks());
+        final Links actual = mapper.map(buildDocumentFilingHistoryLinks());
 
         // then
         assertEquals(expected, actual);
@@ -32,14 +33,25 @@ class LinksGetResponseMapperTest {
     @Test
     void shouldSuccessfullyMapLinksWithNullDocumentMetadata() {
         // given
-        final FilingHistoryItemDataLinks expected = new FilingHistoryItemDataLinks()
+        final Links expected = new Links()
                 .self(SELF_LINK);
 
         // when
-        final FilingHistoryItemDataLinks actual = mapper.map(buildDocumentFilingHistoryLinksWithNullMetadata());
+        final Links actual = mapper.map(buildDocumentFilingHistoryLinksWithNullMetadata());
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldSuccessfullyMapNullLinks() {
+        // given
+
+        // when
+        final Links actual = mapper.map(null);
+
+        // then
+        assertNull(actual);
     }
 
     private static FilingHistoryLinks buildDocumentFilingHistoryLinks() {

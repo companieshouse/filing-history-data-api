@@ -13,10 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class AssociatedFilingsGetResponseMapperTest {
@@ -31,13 +31,13 @@ class AssociatedFilingsGetResponseMapperTest {
     @Mock
     private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
-    private FilingHistoryItemDataDescriptionValues descriptionValues;
+    private DescriptionValues descriptionValues;
 
     @Test
     void shouldSuccessfullyMapAssociatedFilings() {
         // given
-        final List<FilingHistoryItemDataAssociatedFilings> expected = List.of(
-                new FilingHistoryItemDataAssociatedFilings()
+        final List<AssociatedFiling> expected = List.of(
+                new AssociatedFiling()
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION)
@@ -46,7 +46,7 @@ class AssociatedFilingsGetResponseMapperTest {
         when(descriptionValuesGetResponseMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        final List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingsGetResponseMapper.map(buildDocumentAssociatedFilingsList());
+        final List<AssociatedFiling> actual = associatedFilingsGetResponseMapper.map(buildDocumentAssociatedFilingsList());
 
         // then
         assertEquals(expected, actual);
@@ -56,14 +56,14 @@ class AssociatedFilingsGetResponseMapperTest {
     @Test
     void shouldSuccessfullyMapAssociatedFilingsWithNullDescriptionValues() {
         // given
-        final List<FilingHistoryItemDataAssociatedFilings> expected = List.of(
-                new FilingHistoryItemDataAssociatedFilings()
+        final List<AssociatedFiling> expected = List.of(
+                new AssociatedFiling()
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION));
 
         // when
-        final List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingsGetResponseMapper.map(List.of(
+        final List<AssociatedFiling> actual = associatedFilingsGetResponseMapper.map(List.of(
                 new FilingHistoryAssociatedFiling()
                         .category(CATEGORY)
                         .type(TYPE)
@@ -79,7 +79,7 @@ class AssociatedFilingsGetResponseMapperTest {
         // given
 
         // when
-        final List<FilingHistoryItemDataAssociatedFilings> actual = associatedFilingsGetResponseMapper.map(null);
+        final List<AssociatedFiling> actual = associatedFilingsGetResponseMapper.map(null);
 
         // then
         assertNull(actual);

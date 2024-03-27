@@ -5,8 +5,9 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantTo
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataResolutions;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryResolution;
+import uk.gov.companieshouse.api.filinghistory.Resolution;
+import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
 @Component
 public class ResolutionsGetResponseMapper {
@@ -17,13 +18,13 @@ public class ResolutionsGetResponseMapper {
         this.mapper = mapper;
     }
 
-    public List<FilingHistoryItemDataResolutions> map(List<FilingHistoryResolution> documentResolutions) {
+    public List<Resolution> map(List<FilingHistoryResolution> documentResolutions) {
         return Optional.ofNullable(documentResolutions)
                 .map(inputResolutions -> inputResolutions
                         .stream()
                         .map(resolution ->
-                                new FilingHistoryItemDataResolutions()
-                                        .category(resolution.getCategory())
+                                new Resolution()
+                                        .category(CategoryEnum.fromValue(resolution.getCategory()))
                                         .description(resolution.getDescription())
                                         .type(resolution.getType())
                                         .date(instantToString(resolution.getDate()))

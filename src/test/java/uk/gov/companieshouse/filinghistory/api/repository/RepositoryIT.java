@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.bson.Document;
@@ -21,12 +22,13 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAnnotation;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryOriginalValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
 
 @Testcontainers
 @SpringBootTest
@@ -34,7 +36,12 @@ class RepositoryIT {
 
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String TRANSACTION_ID_TWO = "transactionIdTwo";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final int START_INDEX = 0;
+    private static final int DEFAULT_ITEMS_PER_PAGE = 25;
+    private static final String OFFICERS_CATEGORY = "officers";
+    private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
@@ -58,15 +65,18 @@ class RepositoryIT {
     @Test
     void testMappingsFromMongoToDocument() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument();
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
+        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID,
+                COMPANY_NUMBER);
 
         // then
         assertTrue(actualDocument.isPresent());
@@ -74,15 +84,161 @@ class RepositoryIT {
     }
 
     @Test
+    void testAggregationQueryToFindTwoDocuments() throws IOException {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
+        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID_TWO)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+        mongoTemplate.insert(Document.parse(jsonToInsertTwo), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testAggregationQueryToFindOneDocumentWhenCategoryFilter() throws IOException {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
+        final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID_TWO)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", "incorporation");
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+        mongoTemplate.insert(Document.parse(jsonToInsertTwo), FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryListAggregate expected = getFilingHistoryListAggregateOneDocument();
+        expected.getDocumentList().getFirst().getData().category("incorporation");
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of("incorporation"));
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithLargeStartIndex() {
+        for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            mongoTemplate.insert(filingHistoryDocument);
+        }
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                20, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
+        assertEquals(TRANSACTION_ID + 20, actual.getDocumentList().getFirst().getTransactionId());
+        assertEquals(DEFAULT_ITEMS_PER_PAGE, actual.getDocumentList().size());
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithStartIndexHigherThanItemsPerPage() {
+        for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            mongoTemplate.insert(filingHistoryDocument);
+        }
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                60, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
+        assertTrue(actual.getDocumentList().isEmpty());
+    }
+
+    @Test
+    void testAggregateQueryWhenNoDocumentsInDatabase() {
+        // given
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(0, actual.getTotalCount());
+        assertTrue(actual.getDocumentList().isEmpty());
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithSortingOnDate() {
+        for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            filingHistoryDocument.data(new FilingHistoryData().date(Instant.now()));
+            mongoTemplate.insert(filingHistoryDocument);
+        }
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
+        assertEquals("transactionId54", actual.getDocumentList().getFirst().getTransactionId());
+    }
+
+    @Test
+    void testAggregationQueryToFindDocumentsWithSortingAndPaginationOnVeryLargeDataSet() {
+        List<FilingHistoryDocument> documentList = new ArrayList<>();
+        for (int i = 0; i < 500_000; i++) {
+            FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
+            filingHistoryDocument.transactionId(TRANSACTION_ID + i);
+            filingHistoryDocument.companyNumber(COMPANY_NUMBER);
+            filingHistoryDocument.data(new FilingHistoryData().date(Instant.now().plusMillis(i)));
+            documentList.add(filingHistoryDocument);
+        }
+        mongoTemplate.insert(documentList, FILING_HISTORY_COLLECTION);
+
+        // when
+        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+                499_974, DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertEquals(500_000, actual.getTotalCount());
+        assertEquals("transactionId25", actual.getDocumentList().getFirst().getTransactionId());
+    }
+
+    @Test
     void testInvalidCompanyNumber() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID, "87654321");
+        final Optional<FilingHistoryDocument> actualDocument = repository.findByIdAndCompanyNumber(TRANSACTION_ID,
+                "87654321");
 
         // then
         assertTrue(actualDocument.isEmpty());
@@ -91,7 +247,7 @@ class RepositoryIT {
     @Test
     void shouldSuccessfullyInsertDocumentById() {
         // given
-        final FilingHistoryDocument document = getFilingHistoryDocument();
+        final FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
         repository.save(document);
@@ -104,9 +260,11 @@ class RepositoryIT {
     @Test
     void shouldSuccessfullyDeleteDocumentById() throws IOException {
         // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json", StandardCharsets.UTF_8)
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -117,13 +275,30 @@ class RepositoryIT {
         assertNull(actual);
     }
 
-    private static FilingHistoryDocument getFilingHistoryDocument() {
+    private static FilingHistoryListAggregate getFilingHistoryListAggregateOneDocument() {
+        return new FilingHistoryListAggregate()
+                .totalCount(1)
+                .documentList(
+                        List.of(
+                                getFilingHistoryDocument(TRANSACTION_ID_TWO)));
+    }
+
+    private static FilingHistoryListAggregate getFilingHistoryListAggregate() {
+        return new FilingHistoryListAggregate()
+                .totalCount(2)
+                .documentList(
+                        List.of(
+                                getFilingHistoryDocument(TRANSACTION_ID),
+                                getFilingHistoryDocument(TRANSACTION_ID_TWO)));
+    }
+
+    private static FilingHistoryDocument getFilingHistoryDocument(final String transactionId) {
         return new FilingHistoryDocument()
-                .transactionId(TRANSACTION_ID)
+                .transactionId(transactionId)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
                         .actionDate(Instant.parse("2014-08-29T00:00:00.000Z"))
-                        .category("officers")
+                        .category(OFFICERS_CATEGORY)
                         .type("TM01")
                         .description("termination-director-company-with-name-termination-date")
                         .subcategory("termination")
@@ -137,7 +312,7 @@ class RepositoryIT {
                                         .description("description"))))
                         .links(new FilingHistoryLinks()
                                 .documentMetadata("/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA")
-                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, transactionId)))
                         .pages(1))
                 .barcode("X4BI89B6")
                 .deltaAt("20140815230459600643")

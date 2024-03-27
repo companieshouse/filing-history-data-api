@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryLinks;
+import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 
 class LinksMapperTest {
 
@@ -15,7 +15,7 @@ class LinksMapperTest {
     @Test
     void shouldMapRequestLinksToPersistenceModelLinks() {
         // given
-        FilingHistoryItemDataLinks requestLinks = new FilingHistoryItemDataLinks()
+        Links requestLinks = new Links()
                 .self(SELF_LINK);
 
         FilingHistoryLinks expected = new FilingHistoryLinks()

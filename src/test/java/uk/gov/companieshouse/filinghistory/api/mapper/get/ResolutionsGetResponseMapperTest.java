@@ -13,15 +13,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataResolutions;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryResolution;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.Resolution;
+import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
 @ExtendWith(MockitoExtension.class)
 class ResolutionsGetResponseMapperTest {
 
-    private static final String CATEGORY = "category";
+    private static final String CATEGORY = "resolution";
     private static final String TYPE = "type";
     private static final String DESCRIPTION = "description";
 
@@ -31,22 +32,22 @@ class ResolutionsGetResponseMapperTest {
     @Mock
     private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
-    private FilingHistoryItemDataDescriptionValues filingHistoryItemDataDescriptionValues;
+    private DescriptionValues DescriptionValues;
 
     @Test
     void shouldSuccessfullyMapResolutions() {
         // given
-        final List<FilingHistoryItemDataResolutions> expected = List.of(
-                new FilingHistoryItemDataResolutions()
-                        .category(CATEGORY)
+        final List<Resolution> expected = List.of(
+                new Resolution()
+                        .category(CategoryEnum.RESOLUTION)
                         .type(TYPE)
                         .description(DESCRIPTION)
-                        .descriptionValues(filingHistoryItemDataDescriptionValues));
+                        .descriptionValues(DescriptionValues));
 
-        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(filingHistoryItemDataDescriptionValues);
+        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(DescriptionValues);
 
         // when
-        final List<FilingHistoryItemDataResolutions> actual = resolutionsGetResponseMapper.map(buildDocumentResolutionsList());
+        final List<Resolution> actual = resolutionsGetResponseMapper.map(buildDocumentResolutionsList());
 
         // then
         assertEquals(expected, actual);
@@ -56,14 +57,14 @@ class ResolutionsGetResponseMapperTest {
     @Test
     void shouldSuccessfullyMapResolutionsWithNullDescriptionValues() {
         // given
-        final List<FilingHistoryItemDataResolutions> expected = List.of(
-                new FilingHistoryItemDataResolutions()
-                        .category(CATEGORY)
+        final List<Resolution> expected = List.of(
+                new Resolution()
+                        .category(CategoryEnum.RESOLUTION)
                         .type(TYPE)
                         .description(DESCRIPTION));
 
         // when
-        final List<FilingHistoryItemDataResolutions> actual = resolutionsGetResponseMapper.map(
+        final List<Resolution> actual = resolutionsGetResponseMapper.map(
                 List.of(
                         new FilingHistoryResolution()
                                 .category(CATEGORY)
@@ -81,7 +82,7 @@ class ResolutionsGetResponseMapperTest {
         // given
 
         // when
-        final List<FilingHistoryItemDataResolutions> actual = resolutionsGetResponseMapper.map(null);
+        final List<Resolution> actual = resolutionsGetResponseMapper.map(null);
 
         // then
         assertNull(actual);

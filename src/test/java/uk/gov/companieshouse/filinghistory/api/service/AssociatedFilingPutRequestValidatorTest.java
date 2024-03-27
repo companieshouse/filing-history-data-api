@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.api.filinghistory.Links;
 
 class AssociatedFilingPutRequestValidatorTest {
 
@@ -168,11 +168,11 @@ class AssociatedFilingPutRequestValidatorTest {
                         .externalData(new ExternalData()
                                 .transactionId(TRANSACTION_ID)
                                 .associatedFilings(List.of(
-                                        new FilingHistoryItemDataAssociatedFilings()
+                                        new AssociatedFiling()
                                                 .type(TYPE)
                                                 .date(DATE)
                                 ))
-                                .links(new FilingHistoryItemDataLinks()
+                                .links(new Links()
                                         .self(VALID_SELF_LINK)))
                         .internalData(new InternalData()
                                 .entityId(ENTITY_ID)
@@ -195,7 +195,7 @@ class AssociatedFilingPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyLinks(Links value) {
                 requestBody.getExternalData().links(value);
                 return this;
             }
@@ -205,7 +205,7 @@ class AssociatedFilingPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyAssociatedFilingList(List<FilingHistoryItemDataAssociatedFilings> list) {
+            public RequestBodyTestArgument.RequestBodyTestArgumentBuilder modifyAssociatedFilingList(List<AssociatedFiling> list) {
                 requestBody.getExternalData().associatedFilings(list);
                 return this;
             }
@@ -246,12 +246,12 @@ class AssociatedFilingPutRequestValidatorTest {
                 .externalData(new ExternalData()
                         .transactionId(TRANSACTION_ID)
                         .associatedFilings(List.of(
-                                        new FilingHistoryItemDataAssociatedFilings()
+                                        new AssociatedFiling()
                                                 .type(TYPE)
                                                 .date(DATE)
                                 )
                         )
-                        .links(new FilingHistoryItemDataLinks()
+                        .links(new Links()
                                 .self(VALID_SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)

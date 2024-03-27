@@ -12,13 +12,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataAssociatedFilings;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataDescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryAssociatedFiling;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDescriptionValues;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 
 @ExtendWith(MockitoExtension.class)
 class AssociatedFilingChildMapperTest {
@@ -33,7 +33,7 @@ class AssociatedFilingChildMapperTest {
     private DescriptionValuesMapper descriptionValuesMapper;
 
     @Mock
-    private FilingHistoryItemDataDescriptionValues requestDescriptionValues;
+    private DescriptionValues requestDescriptionValues;
     @Mock
     private FilingHistoryDescriptionValues descriptionValues;
 
@@ -46,7 +46,7 @@ class AssociatedFilingChildMapperTest {
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
                         .associatedFilings(List.of(
-                                new FilingHistoryItemDataAssociatedFilings()
+                                new AssociatedFiling()
                                         .category("annual-return")
                                         .description("legacy")
                                         .descriptionValues(requestDescriptionValues)
@@ -82,7 +82,7 @@ class AssociatedFilingChildMapperTest {
                         .deltaAt(NEWEST_REQUEST_DELTA_AT))
                 .externalData(new ExternalData()
                         .associatedFilings(List.of(
-                                new FilingHistoryItemDataAssociatedFilings()
+                                new AssociatedFiling()
                                         .category("annual-return")
                                         .description("legacy")
                                         .descriptionValues(requestDescriptionValues)
