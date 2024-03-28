@@ -11,6 +11,9 @@ public class FilingHistoryResolution {
     private String description;
     private String type;
     private Instant date;
+    @Field("_entity_id")
+    @JsonProperty("_entity_id")
+    private String entityId;
     @Field("description_values")
     @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
@@ -103,12 +106,15 @@ public class FilingHistoryResolution {
             return false;
         }
         FilingHistoryResolution that = (FilingHistoryResolution) o;
-        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(originalDescription, that.originalDescription) && Objects.equals(subcategory, that.subcategory) && Objects.equals(deltaAt, that.deltaAt);
+        return Objects.equals(category, that.category) && Objects.equals(description, that.description)
+                && Objects.equals(type, that.type) && Objects.equals(date, that.date)
+                && Objects.equals(entityId, that.entityId) && Objects.equals(descriptionValues,
+                that.descriptionValues) && Objects.equals(deltaAt, that.deltaAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, description, type, date, descriptionValues, originalDescription, subcategory, deltaAt);
+        return Objects.hash(category, description, type, date, entityId, descriptionValues, deltaAt);
     }
 
     @Override
