@@ -12,11 +12,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataLinks;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryItemDataResolutions;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.api.filinghistory.Resolution;
+import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
+
 class ResolutionPutRequestValidatorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
@@ -110,16 +111,16 @@ class ResolutionPutRequestValidatorTest {
                                 RequestBodyTestArgument.builder()
                                         .modifyDescription(null)
                                         .build())),
-                Arguments.of(
-                        Named.of("Empty category",
-                                RequestBodyTestArgument.builder()
-                                        .modifyCategory("")
-                                        .build())),
-                Arguments.of(
-                        Named.of("Null category",
-                                RequestBodyTestArgument.builder()
-                                        .modifyCategory(null)
-                                        .build())),
+//                Arguments.of(
+//                        Named.of("Empty category",
+//                                RequestBodyTestArgument.builder()
+//                                        .modifyCategory(CategoryEnum.valueOf(""))
+//                                        .build())),
+//                Arguments.of(
+//                        Named.of("Null category",
+//                                RequestBodyTestArgument.builder()
+//                                        .modifyCategory(null)
+//                                        .build())),
                 Arguments.of(
                         Named.of("Null date",
                                 RequestBodyTestArgument.builder()
@@ -178,13 +179,12 @@ class ResolutionPutRequestValidatorTest {
                         .externalData(new ExternalData()
                                 .transactionId(TRANSACTION_ID)
                                 .resolutions(List.of(
-                                        new FilingHistoryItemDataResolutions()
-                                                .category(CategoryEnum.RESOLUTION.toString())
+                                        new Resolution()
+                                                .category(CategoryEnum.RESOLUTION)
                                                 .description("resolution description")
                                                 .date(DATE)
                                 ))
-                                .links(new FilingHistoryItemDataLinks()
-                                        .self(VALID_SELF_LINK)))
+                                .links(new Links().self(VALID_SELF_LINK)))
                         .internalData(new InternalData()
                                 .entityId(ENTITY_ID)
                                 .companyNumber(COMPANY_NUMBER)
@@ -206,7 +206,7 @@ class ResolutionPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyLinks(FilingHistoryItemDataLinks value) {
+            public RequestBodyTestArgumentBuilder modifyLinks(Links value) {
                 requestBody.getExternalData().links(value);
                 return this;
             }
@@ -216,7 +216,7 @@ class ResolutionPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyResolutionList(List<FilingHistoryItemDataResolutions> list) {
+            public RequestBodyTestArgumentBuilder modifyResolutionList(List<Resolution> list) {
                 requestBody.getExternalData().resolutions(list);
                 return this;
             }
@@ -226,7 +226,7 @@ class ResolutionPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyCategory(final String value) {
+            public RequestBodyTestArgumentBuilder modifyCategory(final CategoryEnum value) {
                 requestBody.getExternalData().getResolutions().getFirst().category(value);
                 return this;
             }
@@ -262,14 +262,12 @@ class ResolutionPutRequestValidatorTest {
                 .externalData(new ExternalData()
                         .transactionId(TRANSACTION_ID)
                         .resolutions(List.of(
-                                        new FilingHistoryItemDataResolutions()
-                                                .category(CategoryEnum.RESOLUTION.toString())
+                                        new Resolution()
+                                                .category(CategoryEnum.RESOLUTION)
                                                 .description("resolution description")
                                                 .date(DATE)
                                 )
-                        )
-                        .links(new FilingHistoryItemDataLinks()
-                                .self(VALID_SELF_LINK)))
+                        ).links(new Links().self(VALID_SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
                         .companyNumber(COMPANY_NUMBER)

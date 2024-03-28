@@ -2,20 +2,19 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
 import java.util.function.Supplier;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryResolution;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
+@Component
 public class ResolutionTransactionMapper extends AbstractTransactionMapper{
 
-    private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
-    protected ResolutionTransactionMapper(LinksMapper linksMapper,
-            ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
+    protected ResolutionTransactionMapper(LinksMapper linksMapper, Supplier<Instant> instantSupplier) {
         super(linksMapper);
-        this.resolutionChildMapper = resolutionChildMapper;
         this.instantSupplier = instantSupplier;
     }
 

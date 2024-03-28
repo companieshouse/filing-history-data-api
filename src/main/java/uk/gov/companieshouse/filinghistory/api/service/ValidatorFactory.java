@@ -19,7 +19,9 @@ public class ValidatorFactory {
     private final AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator;
     private final ResolutionPutRequestValidator resolutionPutRequestValidator;
 
-    public ValidatorFactory(TopLevelPutRequestValidator topLevelPutRequestValidator, AnnotationPutRequestValidator annotationPutRequestValidator, AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator,
+    public ValidatorFactory(TopLevelPutRequestValidator topLevelPutRequestValidator,
+            AnnotationPutRequestValidator annotationPutRequestValidator,
+            AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator,
             ResolutionPutRequestValidator resolutionPutRequestValidator) {
         this.topLevelPutRequestValidator = topLevelPutRequestValidator;
         this.annotationPutRequestValidator = annotationPutRequestValidator;
@@ -28,7 +30,8 @@ public class ValidatorFactory {
     }
 
     public Validator<InternalFilingHistoryApi> getPutRequestValidator(TransactionKindEnum kind) {
-        LOGGER.debug("Getting validator for [%s] transaction kind".formatted(kind.getValue()), DataMapHolder.getLogMap());
+        LOGGER.debug("Getting validator for [%s] transaction kind".formatted(kind.getValue()),
+                DataMapHolder.getLogMap());
         return switch (kind) {
             case TOP_LEVEL -> topLevelPutRequestValidator;
             case ANNOTATION -> annotationPutRequestValidator;
