@@ -4,16 +4,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +50,8 @@ import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 class FilingHistoryControllerMongoUnavailableIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
+    private static final String GET_SINGLE_TRANSACTION_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
+    private static final String GET_FILING_HISTORY_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -66,6 +71,9 @@ class FilingHistoryControllerMongoUnavailableIT {
     private static final String SUBCATEGORY = "termination";
     private static final String CONTEXT_ID = "ABCD1234";
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
+    private static final int START_INDEX = 0;
+    private static final int ITEMS_PER_PAGE = 25;
+    private static final String CATEGORY = "officers";
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
@@ -138,6 +146,37 @@ class FilingHistoryControllerMongoUnavailableIT {
 
         verify(instantSupplier, times(0)).get();
         WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
+    }
+
+    @Test
+    void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringGetSingleFilingHistory() throws Exception {
+        // given
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+    }
+
+    @Test
+    void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringFindFilingHistory() throws Exception {
+        // given
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(ServiceUnavailableException.class);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER,
+                START_INDEX, ITEMS_PER_PAGE, List.of(CATEGORY))
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody() {

@@ -160,4 +160,19 @@ class RepositoryTest {
         assertThrows(ServiceUnavailableException.class, executable);
         verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
     }
+
+    @Test
+    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindCompanyFilingHistory() {
+        // given
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class)))
+                .thenThrow(new DataAccessException("...") {});
+
+        // when
+        Executable executable = () -> repository.findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX,
+                ITEMS_PER_PAGE, List.of(CATEGORY));
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class));
+    }
 }
