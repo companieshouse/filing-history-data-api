@@ -98,6 +98,27 @@ class FilingHistoryControllerTest {
     }
 
     @Test
+    void shouldReturn503ServiceUnavailableWhenGetCompanyFilingHistoryList() {
+        // given
+        when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenThrow(ServiceUnavailableException.class);
+
+        final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .startIndex(START_INDEX)
+                .itemsPerPage(DEFAULT_ITEMS_PER_PAGE)
+                .build();
+
+        // then
+        Executable executable = () ->
+                controller.getCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
+                        DEFAULT_ITEMS_PER_PAGE, null);
+
+        // when
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
+    }
+
+    @Test
     void shouldReturn200OKWhenGetSingleTransaction() {
         // given
         final ResponseEntity<ExternalData> expectedResponse = ResponseEntity
@@ -125,6 +146,20 @@ class FilingHistoryControllerTest {
 
         // when
         assertThrows(NotFoundException.class, executable);
+        verify(getResponseProcessor).processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+    }
+
+    @Test
+    void shouldReturn503ServiceUnavailableWhenGetSingleTransaction() {
+        // given
+        when(getResponseProcessor.processGetSingleFilingHistory(any(), any()))
+                .thenThrow(ServiceUnavailableException.class);
+
+        // then
+        Executable executable = () -> controller.getSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
+
+        // when
+        assertThrows(ServiceUnavailableException.class, executable);
         verify(getResponseProcessor).processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
 

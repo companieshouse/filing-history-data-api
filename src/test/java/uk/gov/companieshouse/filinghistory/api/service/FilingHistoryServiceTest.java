@@ -119,6 +119,20 @@ class FilingHistoryServiceTest {
     }
 
     @Test
+    void findCompanyFilingHistoryThrowsServiceUnavailableException() {
+        // given
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(ServiceUnavailableException.class);
+
+        // when
+        Executable executable = () -> service.findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
+                DEFAULT_ITEMS_PER_PAGE, List.of());
+
+        // then
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+    }
+
+    @Test
     void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);

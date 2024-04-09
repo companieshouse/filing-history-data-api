@@ -39,24 +39,29 @@ public class Repository {
 
     public FilingHistoryListAggregate findCompanyFilingHistory(String companyNumber,
             int startIndex, int itemsPerPage, List<String> categories) {
+        try {
+            Criteria criteria = Criteria.where("company_number").is(companyNumber);
+            if (!categories.isEmpty()) {
+                criteria.and("data.category").in(categories);
+            }
 
-        Criteria criteria = Criteria.where("company_number").is(companyNumber);
-        if (!categories.isEmpty()) {
-            criteria.and("data.category").in(categories);
+            Aggregation aggregation = newAggregation(
+                    match(criteria),
+                    facet(
+                            count().as("count")).as("total_count")
+                            .and(match(new Criteria()), sort(Direction.DESC, "data.date")).as("document_list"),
+                    unwind("$total_count", true),
+                    project()
+                            .and(ifNull("$total_count.count").then(0)).as("total_count")
+                            .andExpression("$document_list").slice(itemsPerPage, startIndex).as("document_list"));
+
+            return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
+                    .getUniqueMappedResult();
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB unavailable when trying to retrieve filing history list.: %s".formatted(
+                    ex.getMessage()), DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("MongoDB unavailable when trying to retrieve filing history list.");
         }
-
-        Aggregation aggregation = newAggregation(
-                match(criteria),
-                facet(
-                        count().as("count")).as("total_count")
-                        .and(match(new Criteria()), sort(Direction.DESC, "data.date")).as("document_list"),
-                unwind("$total_count", true),
-                project()
-                        .and(ifNull("$total_count.count").then(0)).as("total_count")
-                        .andExpression("$document_list").slice(itemsPerPage, startIndex).as("document_list"));
-
-        return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
-                .getUniqueMappedResult();
     }
 
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {
