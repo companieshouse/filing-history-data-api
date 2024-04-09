@@ -58,9 +58,8 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
                     .getUniqueMappedResult();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when locating documents for company number: %s with message: %s"
-                            .formatted(companyNumber,ex.getMessage()),
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB unavailable when trying to retrieve filing history list.: %s".formatted(
+                    ex.getMessage()), DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("MongoDB unavailable when trying to retrieve filing history list.");
         }
     }
