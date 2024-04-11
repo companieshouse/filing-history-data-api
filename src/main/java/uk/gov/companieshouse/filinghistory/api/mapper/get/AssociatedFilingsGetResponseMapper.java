@@ -23,6 +23,7 @@ public class AssociatedFilingsGetResponseMapper {
                         .stream()
                         .map(associatedFiling ->
                                 new AssociatedFiling()
+                                        .originalDescription(associatedFiling.getOriginalDescription())
                                         .category(associatedFiling.getCategory())
                                         .type(associatedFiling.getType())
                                         .description(associatedFiling.getDescription())

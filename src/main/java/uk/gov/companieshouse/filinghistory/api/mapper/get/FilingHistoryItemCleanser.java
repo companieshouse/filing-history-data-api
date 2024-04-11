@@ -1,7 +1,9 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 
 @Component
@@ -18,7 +20,12 @@ public class FilingHistoryItemCleanser {
 
     ExternalData cleanseFilingHistoryItem(ExternalData externalData) {
         Optional.ofNullable(externalData.getAssociatedFilings())
-                .map(filings -> associatedFilingCleanser.removeDuplicateModelArticles(externalData.getType(), filings))
+                .map(filings -> {
+                    List<AssociatedFiling> associatedFilings =
+                            associatedFilingCleanser.removeDuplicateModelArticles(externalData.getType(), filings);
+                    associatedFilingCleanser.removeOriginalDescription(associatedFilings);
+                    return associatedFilings;
+                })
                 .ifPresent(externalData::associatedFilings);
 
         Optional.ofNullable(externalData.getDescriptionValues())
