@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum.OFFICERS;
 
@@ -32,6 +33,7 @@ class ItemGetResponseMapperTest {
     private static final String TRANSACTION_ID = "Mkv9213";
     private static final String DESCRIPTION = "termination-director-company-with-name-termination-date";
     private static final String TM01_TYPE = "TM01";
+    private static final String ANNOTATION_TYPE = "ANNOTATION";
     private static final String SUBCATEGORY = "termination";
 
     @InjectMocks
@@ -179,6 +181,41 @@ class ItemGetResponseMapperTest {
         // then
         assertEquals(expected, actual);
         verify(annotationsGetResponseMapper).map(any());
+        verify(descriptionValuesGetResponseMapper).map(any());
+        verify(linksGetResponseMapper).map(any());
+    }
+
+    @Test
+    void shouldSuccessfullyMapDocumentToExternalDataWithoutAnnotationsListWhenDocumentIsTopLevelAnnotation() {
+        // given
+        final ExternalData expected = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .barcode(BARCODE)
+                .actionDate("2014-09-15")
+                .category(OFFICERS)
+                .type(ANNOTATION_TYPE)
+                .description(DESCRIPTION)
+                .subcategory(SUBCATEGORY)
+                .date("2014-09-15")
+                .descriptionValues(itemDescriptionValues)
+                .annotations(null)
+                .links(itemLinks)
+                .pages(1);
+
+        FilingHistoryDocument document = buildFilingHistoryDocument();
+        document.getData().type(ANNOTATION_TYPE);
+
+        when(associatedFilingsGetResponseMapper.map(any())).thenReturn(null);
+        when(resolutionsGetResponseMapper.map(any())).thenReturn(null);
+        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(itemDescriptionValues);
+        when(linksGetResponseMapper.map(any())).thenReturn(itemLinks);
+
+        // when
+        final ExternalData actual = itemGetResponseMapper.mapFilingHistoryItem(document);
+
+        // then
+        assertEquals(expected, actual);
+        verifyNoInteractions(annotationsGetResponseMapper);
         verify(descriptionValuesGetResponseMapper).map(any());
         verify(linksGetResponseMapper).map(any());
     }

@@ -58,23 +58,6 @@ class FilingHistoryItemCleanserTest {
     }
 
     @Test
-    void shouldCleanseTopLevelAnnotations() {
-        // given
-        ExternalData externalData = new ExternalData()
-                .type("ANNOTATION")
-                .annotations(List.of());
-
-        ExternalData expected = new ExternalData()
-                .type("ANNOTATION");
-
-        // when
-        ExternalData actual = filingHistoryItemCleanser.cleanseFilingHistoryItem(externalData);
-
-        // then
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void shouldCleanseDescriptionValues() {
         // given
         when(descriptionValuesCleanser.replaceBackslashesWithWhitespace(any(), any()))

@@ -293,6 +293,31 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void shouldGetCompanyFilingHistoryListAndReturn200OKForTopLevelAnnotationWithoutAnnotationsList() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/top_level_annotation_doc.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertNull(actualResponseBody.getItems().getFirst().getAnnotations());
+    }
+
+    @Test
     void shouldGetBaseCompanyFilingHistoryListWhenStatusNotAvailableAndReturn200OK() throws Exception {
         // given
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()

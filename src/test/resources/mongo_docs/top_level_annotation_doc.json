@@ -1,0 +1,32 @@
+{
+  "_id" : "<id>",
+  "_entity_id" : "3058819821",
+  "data" : {
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<id>"
+    },
+    "description" : "legacy",
+    "type" : "ANNOTATION",
+    "category" : "miscellaneous",
+    "annotations" : [
+      {
+        "annotation" : "Clarification",
+        "category" : "annotation",
+        "date" : "2012-06-08T11:57:11Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification"
+        },
+        "type" : "ANNOTATION"
+      }
+    ],
+    "paper_filed" : true,
+    "description_values" : {
+      "description" : "Clarification"
+    },
+    "date" : "2012-06-08T11:57:11Z"
+  },
+  "company_number" : "<company_number>",
+  "original_description" : "Clarification",
+  "matched_default" : 1
+}
