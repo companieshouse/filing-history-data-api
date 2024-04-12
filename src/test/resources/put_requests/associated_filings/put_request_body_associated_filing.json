@@ -9,7 +9,8 @@
         "description" : "legacy",
         "description_values" : {
           "description" : "Secretary's particulars changed;director's particulars changed"
-        }
+        },
+        "original_description" : "original description"
       }
     ],
     "links" : {

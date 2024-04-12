@@ -1,9 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 
 @Component

@@ -48,6 +48,7 @@ class AssociatedFilingChildMapperTest {
                         .associatedFilings(List.of(
                                 new AssociatedFiling()
                                         .category("annual-return")
+                                        .originalDescription("original description")
                                         .description("legacy")
                                         .descriptionValues(requestDescriptionValues)
                                         .type("363(288)")
@@ -58,6 +59,7 @@ class AssociatedFilingChildMapperTest {
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .category("annual-return")
+                .originalDescription("original description")
                 .date(Instant.parse("2005-05-10T12:00:00.000Z"))
                 .description("legacy")
                 .descriptionValues(descriptionValues)
