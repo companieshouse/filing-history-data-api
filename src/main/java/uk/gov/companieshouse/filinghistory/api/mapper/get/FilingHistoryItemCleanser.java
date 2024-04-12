@@ -8,11 +8,13 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 public class FilingHistoryItemCleanser {
 
     private final AssociatedFilingCleanser associatedFilingCleanser;
+    private final ResolutionCleanser resolutionCleanser;
     private final DescriptionValuesCleanser descriptionValuesCleanser;
 
-    public FilingHistoryItemCleanser(AssociatedFilingCleanser associatedFilingCleanser,
-            DescriptionValuesCleanser descriptionValuesCleanser) {
+    public FilingHistoryItemCleanser(AssociatedFilingCleanser associatedFilingCleanser, ResolutionCleanser resolutionCleanser,
+                                     DescriptionValuesCleanser descriptionValuesCleanser) {
         this.associatedFilingCleanser = associatedFilingCleanser;
+        this.resolutionCleanser = resolutionCleanser;
         this.descriptionValuesCleanser = descriptionValuesCleanser;
     }
 
@@ -26,6 +28,10 @@ public class FilingHistoryItemCleanser {
                 .map(values ->
                         descriptionValuesCleanser.replaceBackslashesWithWhitespace(externalData.getCategory(), values))
                 .ifPresent(externalData::descriptionValues);
+
+        Optional.ofNullable(externalData.getResolutions())
+                .map(resolutionCleanser::removeDeltaAt)
+                .ifPresent(externalData::resolutions);
 
         return externalData;
     }

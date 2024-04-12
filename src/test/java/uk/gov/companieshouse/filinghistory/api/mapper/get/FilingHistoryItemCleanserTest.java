@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
+import uk.gov.companieshouse.api.filinghistory.Resolution;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryItemCleanserTest {
@@ -25,12 +26,18 @@ class FilingHistoryItemCleanserTest {
     @Mock
     private AssociatedFilingCleanser associatedFilingCleanser;
     @Mock
+    private ResolutionCleanser resolutionCleanser;
+    @Mock
     private DescriptionValuesCleanser descriptionValuesCleanser;
 
     @Mock
     private AssociatedFiling filingsWithDuplicates;
     @Mock
+    private Resolution resolutionsWithDeltaAts;
+    @Mock
     private AssociatedFiling cleanFilings;
+    @Mock
+    private Resolution cleanResolutions;
     @Mock
     private DescriptionValues valuesWithBackslashes;
     @Mock
@@ -79,5 +86,24 @@ class FilingHistoryItemCleanserTest {
         // then
         assertEquals(expected, actual);
         verify(descriptionValuesCleanser).replaceBackslashesWithWhitespace(CategoryEnum.ADDRESS, valuesWithBackslashes);
+    }
+
+    @Test
+    void shouldCleanseResolutions() {
+        // given
+        when(resolutionCleanser.removeDeltaAt(any())).thenReturn(List.of(cleanResolutions));
+
+        ExternalData externalData = new ExternalData()
+                .resolutions(List.of(resolutionsWithDeltaAts));
+
+        ExternalData expected = new ExternalData()
+                .resolutions(List.of(cleanResolutions));
+
+        // when
+        ExternalData actual = filingHistoryItemCleanser.cleanseFilingHistoryItem(externalData);
+
+        // then
+        assertEquals(expected, actual);
+        verify(resolutionCleanser).removeDeltaAt(List.of(resolutionsWithDeltaAts));
     }
 }

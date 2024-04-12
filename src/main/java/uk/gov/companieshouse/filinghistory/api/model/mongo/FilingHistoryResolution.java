@@ -17,7 +17,7 @@ public class FilingHistoryResolution {
     @Field("original_description")
     @JsonProperty("original_description")
     private String originalDescription;
-    private String subcategory;
+    private Object subcategory;
     @Field("delta_at")
     @JsonProperty("delta_at")
     private String deltaAt;
@@ -76,11 +76,11 @@ public class FilingHistoryResolution {
         return this;
     }
 
-    public String getSubcategory() {
+    public Object getSubcategory() {
         return subcategory;
     }
 
-    public FilingHistoryResolution subcategory(String subcategory) {
+    public FilingHistoryResolution subcategory(Object subcategory) {
         this.subcategory = subcategory;
         return this;
     }

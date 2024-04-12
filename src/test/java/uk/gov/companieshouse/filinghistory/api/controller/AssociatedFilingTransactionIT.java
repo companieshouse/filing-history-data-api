@@ -626,7 +626,7 @@ class AssociatedFilingTransactionIT {
                 .startIndex(0);
 
         // when
-        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER, TRANSACTION_ID)
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("X-Request-Id", CONTEXT_ID));

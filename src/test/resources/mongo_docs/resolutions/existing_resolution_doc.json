@@ -18,12 +18,12 @@
     "resolutions" : [
       {
         "category" : "liquidation",
-        "delta_at" : "20150610144341501607",
+        "delta_at" : "<delta_at>",
         "description" : "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",
         "description_values" : {
           "case_start_date" : "2015-05-12T00:00:00Z"
         },
-        "original_description" : "Special resolution to wind up",
+        "original_description" : "original description",
         "subcategory" : [
           "voluntary",
           "resolution"
@@ -32,12 +32,12 @@
       },
       {
         "category" : "liquidation",
-        "delta_at" : "20150615230008511683",
+        "delta_at" : "<delta_at>",
         "description" : "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",
         "description_values" : {
           "case_start_date" : "2015-05-12T00:00:00Z"
         },
-        "original_description" : "Special resolution to wind up",
+        "original_description" : "original description",
         "subcategory" : [
           "voluntary",
           "resolution"
