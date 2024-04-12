@@ -20,12 +20,8 @@ public class FilingHistoryItemCleanser {
 
     ExternalData cleanseFilingHistoryItem(ExternalData externalData) {
         Optional.ofNullable(externalData.getAssociatedFilings())
-                .map(filings -> {
-                    List<AssociatedFiling> associatedFilings =
-                            associatedFilingCleanser.removeDuplicateModelArticles(externalData.getType(), filings);
-                    associatedFilingCleanser.removeOriginalDescription(associatedFilings);
-                    return associatedFilings;
-                })
+                .map(filings -> associatedFilingCleanser.removeDuplicateModelArticles(externalData.getType(), filings))
+                .map(associatedFilingCleanser::removeOriginalDescription)
                 .ifPresent(externalData::associatedFilings);
 
         Optional.ofNullable(externalData.getDescriptionValues())

@@ -40,6 +40,7 @@ class FilingHistoryItemCleanserTest {
     void shouldCleanseAssociatedFilings() {
         // given
         when(associatedFilingCleanser.removeDuplicateModelArticles(any(), any())).thenReturn(List.of(cleanFilings));
+        when(associatedFilingCleanser.removeOriginalDescription(any())).thenReturn(List.of(cleanFilings));
 
         ExternalData externalData = new ExternalData()
                 .type(NEW_INC)
@@ -55,6 +56,7 @@ class FilingHistoryItemCleanserTest {
         // then
         assertEquals(expected, actual);
         verify(associatedFilingCleanser).removeDuplicateModelArticles(NEW_INC, List.of(filingsWithDuplicates));
+        verify(associatedFilingCleanser).removeOriginalDescription(List.of(cleanFilings));
     }
 
     @Test

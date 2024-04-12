@@ -91,9 +91,9 @@ class AssociatedFilingCleanserTest {
         List<AssociatedFiling> expected = List.of(new AssociatedFiling());
 
         // when
-        associatedFilingCleanser.removeOriginalDescription(filings);
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeOriginalDescription(filings);
 
         // then
-        assertEquals(expected, filings);
+        assertEquals(expected, actual);
     }
 }

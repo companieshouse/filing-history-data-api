@@ -40,7 +40,8 @@ public class AssociatedFilingCleanser {
         return associatedFilings;
     }
 
-    void removeOriginalDescription(List<AssociatedFiling> associatedFilings) {
+    List<AssociatedFiling> removeOriginalDescription(List<AssociatedFiling> associatedFilings) {
         associatedFilings.forEach(associatedFiling -> associatedFiling.originalDescription(null));
+        return associatedFilings;
     }
 }
