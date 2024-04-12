@@ -1,0 +1,41 @@
+//this is just an example of the RES(NI) that works being sent from CHIPS to the mongoDB properly.
+
+{
+  "_id" : "MDAwMDkxNzRhZGlxemtjeA",
+  "company_number" : "NI035170",
+  "data" : {
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "type" : "RESOLUTIONS",
+    "category" : "resolution",
+    "date" : ISODate("2004-11-26T00:00:00.000+0000"),
+    "links" : {
+      "self" : "/company/NI035170/filing-history/MDAwMDkxNzRhZGlxemtjeA"
+    },
+    "description" : "resolution",
+    "paper_filed" : true,
+    "resolutions" : [
+      {
+        "category" : "insolvency",
+        "delta_at" : "20180723091906627635",
+        "description" : "legacy",
+        "description_values" : {
+          "description" : "Special/extra resolution"
+        },
+        "type" : "RES(NI)"
+      },
+      {
+        "category" : "insolvency",
+        "delta_at" : "20240409160832700086",
+        "description" : "legacy",
+        "description_values" : {
+          "description" : "Special/extra resolution"
+        },
+        "type" : "RES(NI)"
+      }
+    ]
+  },
+  "original_description" : "Resolutions",
+  "barcode" : "00009174"
+}

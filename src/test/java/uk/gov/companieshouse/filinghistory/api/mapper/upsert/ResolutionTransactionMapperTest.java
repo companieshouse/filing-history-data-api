@@ -46,7 +46,6 @@ class ResolutionTransactionMapperTest {
     private ResolutionChildMapper resolutionChildMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
-
     @Mock
     private List<FilingHistoryResolution> resolutionList;
     @Mock

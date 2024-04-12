@@ -8,6 +8,9 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import java.time.Instant;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -195,4 +198,18 @@ public class ResolutionTransactionIT {
 
         assertEquals(expectedResponse, actualResponse);
     }
+    void shouldMapFirstResolutionToTopLevelFields() {
+        // given
+
+
+
+        // when
+
+        // then
+
+
+    }
+
+
+
 }

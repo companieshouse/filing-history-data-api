@@ -1,0 +1,50 @@
+{
+  "_id" : "QTRFQVBLOFJhZGlxemtjeA",
+  "company_number" : "02695160",
+  "original_description" : "Resolutions",
+  "data" : {
+    "links" : {
+      "self" : "/company/02695160/filing-history/QTRFQVBLOFJhZGlxemtjeA"
+    },
+    "description" : "resolution",
+    "paper_filed" : true,
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "type" : "RESOLUTIONS",
+    "category" : "resolution",
+    "date" : ISODate("2015-08-29T00:00:00.000+0000"),
+    "resolutions" : [
+      {
+        "category" : "liquidation",
+        "delta_at" : "20180723091906627635",
+        "description" : "liquidation-voluntary-extraordinary-resolution-to-wind-up-with-case-start-date",
+        "description_values" : {
+          "case_start_date" : ISODate("2015-08-18T00:00:00.000+0000")
+        },
+        "original_description" : "Extraordinary resolution to wind up",
+        "subcategory" : [
+          "voluntary",
+          "resolution"
+        ],
+        "type" : "LRESEX"
+      },
+      {
+        "category" : "liquidation",
+        "delta_at" : "20240409161042986621",
+        "description" : "liquidation-voluntary-extraordinary-resolution-to-wind-up-with-case-start-date",
+        "description_values" : {
+          "case_start_date" : ISODate("2015-08-18T00:00:00.000+0000")
+        },
+        "original_description" : "Extraordinary resolution to wind up",
+        "subcategory" : [
+          "voluntary",
+          "resolution"
+        ],
+        "type" : "LRESEX"
+      }
+    ]
+  },
+  "barcode" : "A4EAPK8R"
+  //interestingly no _barcode here - checking staging to see if any of the ones with subcategory have _barcode. They don't. Chris says just make it _barcode.
+}

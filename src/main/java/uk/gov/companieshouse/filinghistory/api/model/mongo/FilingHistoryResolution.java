@@ -10,6 +10,7 @@ public class FilingHistoryResolution {
     private String category;
     private String description;
     private String type;
+    private Object subcategory;
     private Instant date;
     @Field("_entity_id")
     @JsonProperty("_entity_id")
@@ -49,6 +50,15 @@ public class FilingHistoryResolution {
 
     public FilingHistoryResolution type(String type) {
         this.type = type;
+        return this;
+    }
+
+    public Object getSubcategory() {
+        return subcategory;
+    }
+
+    public FilingHistoryResolution subcategory(Object subcategory) {
+        this.subcategory = subcategory;
         return this;
     }
 
@@ -107,14 +117,29 @@ public class FilingHistoryResolution {
         }
         FilingHistoryResolution that = (FilingHistoryResolution) o;
         return Objects.equals(category, that.category) && Objects.equals(description, that.description)
-                && Objects.equals(type, that.type) && Objects.equals(date, that.date)
-                && Objects.equals(entityId, that.entityId) && Objects.equals(descriptionValues,
-                that.descriptionValues) && Objects.equals(deltaAt, that.deltaAt);
+                && Objects.equals(type, that.type) && Objects.equals(subcategory, that.subcategory)
+                && Objects.equals(date, that.date) && Objects.equals(entityId, that.entityId)
+                && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(deltaAt,
+                that.deltaAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, description, type, date, entityId, descriptionValues, deltaAt);
+        return Objects.hash(category, description, type, subcategory, date, entityId, descriptionValues, deltaAt);
+    }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryResolution{" +
+                "category='" + category + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", subcategory=" + subcategory +
+                ", date=" + date +
+                ", entityId='" + entityId + '\'' +
+                ", descriptionValues=" + descriptionValues +
+                ", deltaAt='" + deltaAt + '\'' +
+                '}';
     }
 
     @Override

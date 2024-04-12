@@ -67,11 +67,13 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
             FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
-        document.getData().paperFiled(request.getExternalData().getPaperFiled());  //TODO need to double-check where paperFiled gets set in the Perl
+        document.getData().paperFiled(request.getExternalData().getPaperFiled());
         return document
-                .entityId(internalData.getEntityId())  //TODO resolutions never have a parent_entity_id do they?
+                .entityId(internalData.getEntityId())  //TODO resolutions never have a parent_entity_id do they? looks like no but will check on cidev kermit tomorrow morning.
                 .companyNumber(internalData.getCompanyNumber())
                 .updatedAt(instantSupplier.get())
-                .updatedBy(internalData.getUpdatedBy());
+                .updatedBy(internalData.getUpdatedBy())
+                .barcode(request.getExternalData().getBarcode())
+                .originalDescription(internalData.getOriginalDescription());
     }
 }

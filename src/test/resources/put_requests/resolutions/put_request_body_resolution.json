@@ -1,0 +1,18 @@
+{
+  "filing_history": [
+    {
+      "category": "9",
+      "receive_date": "20091211145304",
+      "form_type": "MORT MISC RES",
+      "description": "MORTGAGE MISCELLANEOUS RESOLUTION :- \"in specie\"",
+      "barcode": "PTLU9FPA",
+      "document_id": "",
+      "company_number": "02402064",
+      "entity_id": "3004819654",
+      "parent_entity_id": "",
+      "parent_form_type": "",
+      "pre_scanned_batch": "0"
+    }
+  ],
+  "delta_at": "20211029142043360560"
+}
