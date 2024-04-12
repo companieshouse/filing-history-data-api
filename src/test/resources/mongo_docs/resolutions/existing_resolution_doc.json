@@ -1,0 +1,52 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<parent_entity_id>",
+  "data" : {
+    "description" : "resolution",
+    "type" : "RESOLUTIONS",
+    "category" : "resolution",
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>",
+      "document_metadata" : "/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"
+    },
+    "paper_filed" : true,
+    "date" : "2015-06-10T14:43:41Z",
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "resolutions" : [
+      {
+        "category" : "liquidation",
+        "delta_at" : "20150610144341501607",
+        "description" : "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",
+        "description_values" : {
+          "case_start_date" : "2015-05-12T00:00:00Z"
+        },
+        "original_description" : "Special resolution to wind up",
+        "subcategory" : [
+          "voluntary",
+          "resolution"
+        ],
+        "type" : "LRESSP"
+      },
+      {
+        "category" : "liquidation",
+        "delta_at" : "20150615230008511683",
+        "description" : "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",
+        "description_values" : {
+          "case_start_date" : "2015-05-12T00:00:00Z"
+        },
+        "original_description" : "Special resolution to wind up",
+        "subcategory" : [
+          "voluntary",
+          "resolution"
+        ],
+        "type" : "LRESSP"
+      }
+    ],
+    "pages" : 1
+  },
+  "original_description" : "Resolutions",
+  "barcode" : "<barcode>"
+}

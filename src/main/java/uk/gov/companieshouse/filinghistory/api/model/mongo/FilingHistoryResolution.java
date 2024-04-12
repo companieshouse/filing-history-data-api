@@ -14,6 +14,13 @@ public class FilingHistoryResolution {
     @Field("description_values")
     @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
+    @Field("original_description")
+    @JsonProperty("original_description")
+    private String originalDescription;
+    private String subcategory;
+    @Field("delta_at")
+    @JsonProperty("delta_at")
+    private String deltaAt;
 
     public String getCategory() {
         return category;
@@ -60,6 +67,33 @@ public class FilingHistoryResolution {
         return this;
     }
 
+    public String getOriginalDescription() {
+        return originalDescription;
+    }
+
+    public FilingHistoryResolution originalDescription(String originalDescription) {
+        this.originalDescription = originalDescription;
+        return this;
+    }
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public FilingHistoryResolution subcategory(String subcategory) {
+        this.subcategory = subcategory;
+        return this;
+    }
+
+    public String getDeltaAt() {
+        return deltaAt;
+    }
+
+    public FilingHistoryResolution deltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -69,13 +103,25 @@ public class FilingHistoryResolution {
             return false;
         }
         FilingHistoryResolution that = (FilingHistoryResolution) o;
-        return Objects.equals(category, that.category) && Objects.equals(description, that.description)
-                && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(
-                descriptionValues, that.descriptionValues);
+        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(originalDescription, that.originalDescription) && Objects.equals(subcategory, that.subcategory) && Objects.equals(deltaAt, that.deltaAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, description, type, date, descriptionValues);
+        return Objects.hash(category, description, type, date, descriptionValues, originalDescription, subcategory, deltaAt);
+    }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryResolution{" +
+                "category='" + category + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", date=" + date +
+                ", descriptionValues=" + descriptionValues +
+                ", originalDescription='" + originalDescription + '\'' +
+                ", subcategory='" + subcategory + '\'' +
+                ", deltaAt='" + deltaAt + '\'' +
+                '}';
     }
 }

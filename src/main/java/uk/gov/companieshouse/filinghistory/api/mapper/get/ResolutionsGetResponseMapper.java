@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.instantToString;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,25 @@ public class ResolutionsGetResponseMapper {
     }
 
     public List<Resolution> map(List<FilingHistoryResolution> documentResolutions) {
+//        if (documentResolutions == null) {
+//            return null;
+//        }
+//
+//        List<Resolution> resolutionList = new ArrayList<>();
+//        for (FilingHistoryResolution resolution : documentResolutions) {
+//            resolutionList.add(
+//                    new Resolution()
+//                            .deltaAt(resolution.getDeltaAt())
+//                            .originalDescription(resolution.getOriginalDescription())
+//                            .category(CategoryEnum.fromValue(resolution.getCategory()))
+//                            .description(resolution.getDescription())
+//                            .type(resolution.getType())
+//                            .date(instantToString(resolution.getDate()))
+//                            .descriptionValues(mapper.map(resolution.getDescriptionValues()))
+//            );
+//        }
+
+        // TODO: Currently not mapping and going straight to the orElse call
         return Optional.ofNullable(documentResolutions)
                 .map(inputResolutions -> inputResolutions
                         .stream()

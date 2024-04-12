@@ -1,0 +1,46 @@
+{
+  "description": "resolution",
+  "type": "RESOLUTIONS",
+  "category": "resolution",
+  "links": {
+    "self": "/company/00770589/filing-history/QTQ4RTA0SVphZGlxemtjeA",
+    "document_metadata": "http://document-api-staging-2023-05-04.eh3bmpabme.eu-west-2.elasticbeanstalk.com/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"
+  },
+  "paper_filed": true,
+  "date": "2015-06-10",
+  "description_values": {
+    "description": "Resolutions"
+  },
+  "resolutions": [
+    {
+      "category": "liquidation",
+      "delta_at": "20150610144341501607",
+      "description": "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",
+      "description_values": {
+        "case_start_date": "2015-05-12"
+      },
+      "original_description": "Special resolution to wind up",
+      "subcategory": [
+        "voluntary",
+        "resolution"
+      ],
+      "type": "LRESSP"
+    },
+    {
+      "category": "liquidation",
+      "delta_at": "20150615230008511683",
+      "description": "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",
+      "description_values": {
+        "case_start_date": "2015-05-12"
+      },
+      "original_description": "Special resolution to wind up",
+      "subcategory": [
+        "voluntary",
+        "resolution"
+      ],
+      "type": "LRESSP"
+    }
+  ],
+  "pages": 1,
+  "transaction_id": "QTQ4RTA0SVphZGlxemtjeA"
+}
