@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,22 +39,15 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @WireMockTest(httpPort = 8889)
 public class ResolutionTransactionIT {
 
-    private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String GET_SINGLE_TRANSACTION_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String GET_FILING_HISTORY_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final String ENTITY_ID = "1234567890";
-    private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String BARCODE = "X4BI89B6";
-    private static final String NEWEST_REQUEST_DELTA_AT = "20140916230459600643";
-    private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
     private static final String EXISTING_DELTA_AT = "20140815230459600643";
-    private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     private static final String CONTEXT_ID = "ABCD1234";
-    private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");

@@ -20,7 +20,6 @@ public class FilingHistoryAssociatedFiling {
     @Field("delta_at")
     @JsonProperty("delta_at")
     private String deltaAt;
-
     @Field("original_description")
     @JsonProperty("original_description")
     private String originalDescription;
