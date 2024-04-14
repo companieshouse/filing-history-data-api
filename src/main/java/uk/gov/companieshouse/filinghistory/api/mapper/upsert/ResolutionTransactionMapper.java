@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -15,18 +17,21 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 @Component
 public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
+    private final TopLevelTransactionMapper topLevelTransactionMapper;
     private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
-    protected ResolutionTransactionMapper(LinksMapper linksMapper,
+    public ResolutionTransactionMapper(LinksMapper linksMapper, TopLevelTransactionMapper topLevelTransactionMapper,
             ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
         super(linksMapper);
+        this.topLevelTransactionMapper = topLevelTransactionMapper;
         this.resolutionChildMapper = resolutionChildMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        topLevelTransactionMapper.mapFilingHistoryData(request, data);
         return data.resolutions(List.of(resolutionChildMapper.mapChild(new FilingHistoryResolution(), request)));
     }
 
@@ -68,9 +73,10 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());
+        document.getData().date(stringToInstant(request.getExternalData().getDate()));
         return document
-                .entityId(internalData.getEntityId())  //TODO resolutions never have a parent_entity_id do they? looks like no but will check on cidev kermit tomorrow morning.
                 .companyNumber(internalData.getCompanyNumber())
+                .deltaAt(internalData.getDeltaAt())
                 .updatedAt(instantSupplier.get())
                 .updatedBy(internalData.getUpdatedBy())
                 .barcode(request.getExternalData().getBarcode())

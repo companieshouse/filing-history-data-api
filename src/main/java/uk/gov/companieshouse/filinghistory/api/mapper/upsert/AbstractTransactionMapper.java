@@ -18,7 +18,7 @@ public abstract class AbstractTransactionMapper {
     protected static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
             .withZone(UTC);
 
-    private final LinksMapper linksMapper;
+    protected final LinksMapper linksMapper;
 
     protected AbstractTransactionMapper(LinksMapper linksMapper) {
         this.linksMapper = linksMapper;
