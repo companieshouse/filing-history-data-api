@@ -45,6 +45,8 @@ class ResolutionTransactionMapperTest {
     @Mock
     private ResolutionChildMapper resolutionChildMapper;
     @Mock
+    private TopLevelTransactionMapper topLevelTransactionMapper;
+    @Mock
     private Supplier<Instant> instantSupplier;
     @Mock
     private List<FilingHistoryResolution> resolutionList;
@@ -162,9 +164,9 @@ class ResolutionTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .resolutions(list)
                         .paperFiled(true))
-                .entityId(ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
-                .updatedBy(UPDATED_BY);
+                .updatedBy(UPDATED_BY)
+                .deltaAt(NEWEST_REQUEST_DELTA_AT);
 
         // when
         final FilingHistoryDocument actual = resolutionTransactionMapper.mapTopLevelFields(request, document);

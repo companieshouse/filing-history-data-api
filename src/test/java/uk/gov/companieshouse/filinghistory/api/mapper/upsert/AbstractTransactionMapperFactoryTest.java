@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ANNOTATION;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.ASSOCIATED_FILING;
 import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.RESOLUTION;
@@ -10,7 +9,6 @@ import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKi
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;

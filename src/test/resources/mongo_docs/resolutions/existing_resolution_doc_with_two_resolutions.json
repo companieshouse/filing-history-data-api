@@ -1,0 +1,46 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_barcode" : "<barcode>",
+  "data" : {
+    "category" : "resolution",
+    "date" : "2007-03-27T00:00:00.000Z",
+    "description" : "resolution",
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true,
+    "resolutions" : [
+      {
+        "category" : "liquidation",
+        "description" : "liquidation-voluntary-extraordinary-resolution-to-wind-up",
+        "original_description" : "Extraordinary resolution to wind up",
+        "subcategory" : [
+          "voluntary",
+          "resolution"
+        ],
+        "type" : "LRESEX",
+        "_entity_id": "<first_resolution_entity_id>",
+        "delta_at": "<first_resolution_delta_at>"
+      },
+      {
+        "category" : "insolvency",
+        "description" : "legacy",
+        "description_values" : {
+          "description" : "Special/extra resolution"
+        },
+        "type" : "RES(NI)",
+        "_entity_id": "<second_resolution_entity_id>",
+        "delta_at": "<second_resolution_delta_at>"
+      }
+    ],
+    "type" : "RESOLUTIONS"
+  },
+  "delta_at" : "<second_resolution_delta_at>",
+  "original_description" : "Resolutions",
+  "updated_by": "context_id",
+  "updated_at": "<updated_at>"
+}

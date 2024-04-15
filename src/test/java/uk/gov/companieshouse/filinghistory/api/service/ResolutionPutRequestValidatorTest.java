@@ -111,16 +111,6 @@ class ResolutionPutRequestValidatorTest {
                                 RequestBodyTestArgument.builder()
                                         .modifyDescription(null)
                                         .build())),
-//                Arguments.of(
-//                        Named.of("Empty category",
-//                                RequestBodyTestArgument.builder()
-//                                        .modifyCategory(CategoryEnum.valueOf(""))
-//                                        .build())),
-//                Arguments.of(
-//                        Named.of("Null category",
-//                                RequestBodyTestArgument.builder()
-//                                        .modifyCategory(null)
-//                                        .build())),
                 Arguments.of(
                         Named.of("Null date",
                                 RequestBodyTestArgument.builder()
@@ -265,9 +255,10 @@ class ResolutionPutRequestValidatorTest {
                                         new Resolution()
                                                 .category(CategoryEnum.RESOLUTION)
                                                 .description("resolution description")
-                                                .date(DATE)
                                 )
-                        ).links(new Links().self(VALID_SELF_LINK)))
+                        )
+                        .date(DATE)
+                        .links(new Links().self(VALID_SELF_LINK)))
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
                         .companyNumber(COMPANY_NUMBER)
