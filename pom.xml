@@ -22,7 +22,7 @@
     <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
     <structured-logging.version>3.0.1</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.1</api-sdk-manager-java-library.version>
-    <private-api-sdk-java.version>unversioned</private-api-sdk-java.version>
+    <private-api-sdk-java.version>4.0.101</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
     <maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
     <maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
