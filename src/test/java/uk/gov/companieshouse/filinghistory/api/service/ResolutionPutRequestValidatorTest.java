@@ -16,7 +16,6 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.api.filinghistory.Resolution;
-import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
 
 class ResolutionPutRequestValidatorTest {
 
