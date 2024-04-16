@@ -775,6 +775,52 @@ class FilingHistoryControllerIT {
         result.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    void shouldUpdateDocumentAndReturn200OKWhenExistingDocumentHasNoDeltaAt() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        Document doc = Document.parse(jsonToInsert);
+        doc.remove("delta_at");
+        mongoTemplate.insert(doc, FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
+                        List.of(new FilingHistoryAnnotation()
+                                .annotation("annotation")
+                                .descriptionValues(new FilingHistoryDescriptionValues()
+                                        .description("description"))));
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .internalData(buildInternalData(deltaAt))

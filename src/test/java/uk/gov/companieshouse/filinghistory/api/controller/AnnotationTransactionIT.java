@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
+import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -515,6 +516,72 @@ class AnnotationTransactionIT {
         assertEquals(existingDocument, actualDocument);
 
         verifyNoMoreInteractions(instantSupplier);
+    }
+
+    @Test
+    void shouldUpdateExistingAnnotationOnDocumentWhenChildHasNoDeltaAt() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        existingDocument.getData().getAnnotations().getFirst().deltaAt(null);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {
