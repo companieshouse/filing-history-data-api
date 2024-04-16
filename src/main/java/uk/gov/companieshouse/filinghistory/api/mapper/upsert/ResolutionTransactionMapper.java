@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
@@ -17,22 +18,23 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 @Component
 public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
-    private final TopLevelTransactionMapper topLevelTransactionMapper;
+    private final DataMapper dataMapper;
     private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
-    public ResolutionTransactionMapper(LinksMapper linksMapper, TopLevelTransactionMapper topLevelTransactionMapper,
-            ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
+    public ResolutionTransactionMapper(LinksMapper linksMapper,
+            DataMapper dataMapper, ChildMapper<FilingHistoryResolution> resolutionChildMapper,
+            Supplier<Instant> instantSupplier) {
         super(linksMapper);
-        this.topLevelTransactionMapper = topLevelTransactionMapper;
+        this.dataMapper = dataMapper;
         this.resolutionChildMapper = resolutionChildMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        topLevelTransactionMapper.mapFilingHistoryData(request, data);
-        return data.resolutions(List.of(resolutionChildMapper.mapChild(new FilingHistoryResolution(), request)));
+        return dataMapper.map(request.getExternalData(), data)
+                .resolutions(List.of(resolutionChildMapper.mapChild(new FilingHistoryResolution(), request)));
     }
 
     @Override
@@ -50,7 +52,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     resolution.getDeltaAt())) {
                                                 throw new ConflictException(
-                                                        "Delta at stale when updating annotation");
+                                                        "Delta at stale when updating resolution");
                                             }
 
                                             // Update already existing resolution from list
@@ -61,9 +63,12 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                                 .add(resolutionChildMapper
                                                         .mapChild(new FilingHistoryResolution(), request))),
                         // Add new resolution to a new resolutions list
-                        () -> mapFilingHistoryData(request, existingDocument.getData())
+                        () -> {
+                            LOGGER.error("Unexpected resolution data structure, adding new resolutions array",
+                                    DataMapHolder.getLogMap());
+                            mapFilingHistoryData(request, existingDocument.getData());
+                        }
                 );
-
         return mapTopLevelFields(request, existingDocument);
     }
 

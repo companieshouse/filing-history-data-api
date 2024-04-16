@@ -29,8 +29,7 @@ public class ResolutionPutRequestValidator implements Validator<InternalFilingHi
                 && StringUtils.isNotBlank(internalData.getDeltaAt())
                 && StringUtils.isNotBlank(internalData.getCompanyNumber())
                 && StringUtils.isNotBlank(externalData.getTransactionId())
-                && StringUtils.isNotBlank(resolution.getCategory().getValue())
-                && StringUtils.isNotBlank(resolution.getDescription())
+                && StringUtils.isNotBlank(resolution.getType())
                 && StringUtils.isNotBlank(externalData.getDate())
                 && externalData.getLinks() != null
                 && StringUtils.isNotBlank(externalData.getLinks().getSelf());

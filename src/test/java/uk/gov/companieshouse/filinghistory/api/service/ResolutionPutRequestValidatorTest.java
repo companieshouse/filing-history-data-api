@@ -26,6 +26,7 @@ class ResolutionPutRequestValidatorTest {
     private static final String DATE = "2011-08-06T00:00:00.00Z";
     private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String RESOLUTION_TYPE = "RES(NI)";
 
     Validator<InternalFilingHistoryApi> filingHistoryPutRequestValidator = new ResolutionPutRequestValidator();
 
@@ -77,51 +78,6 @@ class ResolutionPutRequestValidatorTest {
                                         .modifyResolutionList(Collections.emptyList())
                                         .build())),
                 Arguments.of(
-                        Named.of("Null transaction ID",
-                                RequestBodyTestArgument.builder()
-                                        .modifyTransactionId(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Empty transaction ID",
-                                RequestBodyTestArgument.builder()
-                                        .modifyTransactionId("")
-                                        .build())),
-                Arguments.of(
-                        Named.of("Null link object",
-                                RequestBodyTestArgument.builder()
-                                        .modifyLinks(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Null self link",
-                                RequestBodyTestArgument.builder()
-                                        .modifySelfLink(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Empty self link",
-                                RequestBodyTestArgument.builder()
-                                        .modifySelfLink("")
-                                        .build())),
-                Arguments.of(
-                        Named.of("Empty description",
-                        RequestBodyTestArgument.builder()
-                                .modifyDescription("")
-                                .build())),
-                Arguments.of(
-                        Named.of("Null description",
-                                RequestBodyTestArgument.builder()
-                                        .modifyDescription(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Null date",
-                                RequestBodyTestArgument.builder()
-                                        .modifyDate(null)
-                                        .build())),
-                Arguments.of(
-                        Named.of("Empty date",
-                                RequestBodyTestArgument.builder()
-                                        .modifyDate("")
-                                        .build())),
-                Arguments.of(
                         Named.of("Null entity ID",
                                 RequestBodyTestArgument.builder()
                                         .modifyEntityId(null)
@@ -150,6 +106,51 @@ class ResolutionPutRequestValidatorTest {
                         Named.of("Empty company number",
                                 RequestBodyTestArgument.builder()
                                         .modifyCompanyNumber("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null transaction ID",
+                                RequestBodyTestArgument.builder()
+                                        .modifyTransactionId(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty transaction ID",
+                                RequestBodyTestArgument.builder()
+                                        .modifyTransactionId("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null resolution type",
+                                RequestBodyTestArgument.builder()
+                                        .modifyResolutionType(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty resolution type",
+                                RequestBodyTestArgument.builder()
+                                        .modifyResolutionType("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null date",
+                                RequestBodyTestArgument.builder()
+                                        .modifyDate(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty date",
+                                RequestBodyTestArgument.builder()
+                                        .modifyDate("")
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null link object",
+                                RequestBodyTestArgument.builder()
+                                        .modifyLinks(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Null self link",
+                                RequestBodyTestArgument.builder()
+                                        .modifySelfLink(null)
+                                        .build())),
+                Arguments.of(
+                        Named.of("Empty self link",
+                                RequestBodyTestArgument.builder()
+                                        .modifySelfLink("")
                                         .build()))
         );
     }
@@ -165,20 +166,7 @@ class ResolutionPutRequestValidatorTest {
             private final InternalFilingHistoryApi requestBody;
 
             public RequestBodyTestArgumentBuilder() {
-                requestBody = new InternalFilingHistoryApi()
-                        .externalData(new ExternalData()
-                                .transactionId(TRANSACTION_ID)
-                                .resolutions(List.of(
-                                        new Resolution()
-                                                .category(CategoryEnum.RESOLUTION)
-                                                .description("resolution description")
-                                                .date(DATE)
-                                ))
-                                .links(new Links().self(VALID_SELF_LINK)))
-                        .internalData(new InternalData()
-                                .entityId(ENTITY_ID)
-                                .companyNumber(COMPANY_NUMBER)
-                                .deltaAt(VALID_DELTA_AT));
+                requestBody = getRequestBody();
             }
 
             public RequestBodyTestArgumentBuilder modifyExternalData(final ExternalData value) {
@@ -193,6 +181,11 @@ class ResolutionPutRequestValidatorTest {
 
             public RequestBodyTestArgumentBuilder modifyTransactionId(final String value) {
                 requestBody.getExternalData().transactionId(value);
+                return this;
+            }
+
+            public RequestBodyTestArgumentBuilder modifyResolutionType(final String value) {
+                requestBody.getExternalData().getResolutions().getFirst().type(value);
                 return this;
             }
 
@@ -211,18 +204,8 @@ class ResolutionPutRequestValidatorTest {
                 return this;
             }
 
-            public RequestBodyTestArgumentBuilder modifyDescription(final String value) {
-                requestBody.getExternalData().getResolutions().getFirst().description(value);
-                return this;
-            }
-
-            public RequestBodyTestArgumentBuilder modifyCategory(final CategoryEnum value) {
-                requestBody.getExternalData().getResolutions().getFirst().category(value);
-                return this;
-            }
-
             public RequestBodyTestArgumentBuilder modifyDate(final String value) {
-                requestBody.getExternalData().getResolutions().getFirst().date(value);
+                requestBody.getExternalData().date(value);
                 return this;
             }
 
@@ -253,8 +236,7 @@ class ResolutionPutRequestValidatorTest {
                         .transactionId(TRANSACTION_ID)
                         .resolutions(List.of(
                                         new Resolution()
-                                                .category(CategoryEnum.RESOLUTION)
-                                                .description("resolution description")
+                                                .type(RESOLUTION_TYPE)
                                 )
                         )
                         .date(DATE)
