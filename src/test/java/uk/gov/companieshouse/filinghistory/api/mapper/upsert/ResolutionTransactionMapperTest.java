@@ -24,9 +24,9 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
 @ExtendWith(MockitoExtension.class)
 class ResolutionTransactionMapperTest {
@@ -45,7 +45,7 @@ class ResolutionTransactionMapperTest {
     @Mock
     private ResolutionChildMapper resolutionChildMapper;
     @Mock
-    private TopLevelTransactionMapper topLevelTransactionMapper;
+    private DataMapper dataMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
     @Mock
@@ -54,6 +54,8 @@ class ResolutionTransactionMapperTest {
     private FilingHistoryResolution resolution;
     @Mock
     private InternalFilingHistoryApi mockRequest;
+    @Mock
+    private FilingHistoryData filingHistoryData;
 
 
     @Test
@@ -68,6 +70,7 @@ class ResolutionTransactionMapperTest {
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData());
 
+        when(dataMapper.map(any(), any())).thenReturn(filingHistoryData);
         when(resolutionChildMapper.mapChild(any(), any())).thenReturn(resolution);
 
         // when
@@ -181,6 +184,7 @@ class ResolutionTransactionMapperTest {
         final FilingHistoryData expected = new FilingHistoryData()
                 .resolutions(List.of(resolution));
 
+        when(dataMapper.map(any(), any())).thenReturn(new FilingHistoryData());
         when(resolutionChildMapper.mapChild(any(), any())).thenReturn(resolution);
 
         // when

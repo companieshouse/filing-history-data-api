@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
+import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
@@ -32,6 +33,7 @@ import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProces
 class FilingHistoryControllerTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String ENTITY_ID = "entity_id";
     private static final String COMPANY_NUMBER = "12345678";
     private static final int START_INDEX = 0;
     private static final int DEFAULT_ITEMS_PER_PAGE = 25;
@@ -47,6 +49,8 @@ class FilingHistoryControllerTest {
 
     @Mock
     private InternalFilingHistoryApi requestBody;
+    @Mock
+    private InternalData internalData;
     @Mock
     private ExternalData getSingleResponseBody;
     @Mock
@@ -166,6 +170,9 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn200OKWhenPutRequest() {
         // given
+        when(requestBody.getInternalData()).thenReturn(internalData);
+        when(internalData.getEntityId()).thenReturn(ENTITY_ID);
+
         final ResponseEntity<Void> expectedResponse = ResponseEntity
                 .status(HttpStatus.OK)
                 .header(LOCATION, "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
@@ -183,6 +190,9 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn409ConflictWhenPutRequestWithStaleDelta() {
         // given
+        when(requestBody.getInternalData()).thenReturn(internalData);
+        when(internalData.getEntityId()).thenReturn(ENTITY_ID);
+
         doThrow(ConflictException.class)
                 .when(upsertProcessor).processFilingHistory(anyString(), anyString(), any());
 
@@ -198,6 +208,9 @@ class FilingHistoryControllerTest {
     @Test
     void shouldReturn503ErrorCodeWhenPutRequestAndServiceUnavailable() {
         // given
+        when(requestBody.getInternalData()).thenReturn(internalData);
+        when(internalData.getEntityId()).thenReturn(ENTITY_ID);
+
         doThrow(ServiceUnavailableException.class)
                 .when(upsertProcessor).processFilingHistory(anyString(), anyString(), any());
 
