@@ -11,6 +11,8 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @Component
 public class ItemGetResponseMapper {
 
+    private static final String TOP_LEVEL_ANNOTATION_TYPE = "ANNOTATION";
+
     private final AnnotationsGetResponseMapper annotationsGetResponseMapper;
     private final ResolutionsGetResponseMapper resolutionsGetResponseMapper;
     private final AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper;
@@ -18,10 +20,10 @@ public class ItemGetResponseMapper {
     private final LinksGetResponseMapper linksGetResponseMapper;
 
     public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper,
-            ResolutionsGetResponseMapper resolutionsGetResponseMapper,
-            AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
-            DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
-            LinksGetResponseMapper linksGetResponseMapper) {
+                                 ResolutionsGetResponseMapper resolutionsGetResponseMapper,
+                                 AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
+                                 DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
+                                 LinksGetResponseMapper linksGetResponseMapper) {
         this.annotationsGetResponseMapper = annotationsGetResponseMapper;
         this.resolutionsGetResponseMapper = resolutionsGetResponseMapper;
         this.associatedFilingsGetResponseMapper = associatedFilingsGetResponseMapper;
@@ -38,7 +40,8 @@ public class ItemGetResponseMapper {
                 .date(instantToString(data.getDate()))
                 .category(CategoryEnum.fromValue(data.getCategory()))
                 .subcategory(data.getSubcategory())
-                .annotations(annotationsGetResponseMapper.map(data.getAnnotations()))
+                .annotations(TOP_LEVEL_ANNOTATION_TYPE.equals(data.getType()) ?
+                        null : annotationsGetResponseMapper.map(data.getAnnotations()))
                 .resolutions(resolutionsGetResponseMapper.map(data.getResolutions()))
                 .associatedFilings(associatedFilingsGetResponseMapper.map(data.getAssociatedFilings()))
                 .description(data.getDescription())

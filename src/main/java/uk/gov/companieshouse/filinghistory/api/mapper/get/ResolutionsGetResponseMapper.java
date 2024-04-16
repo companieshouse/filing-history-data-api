@@ -25,10 +25,13 @@ public class ResolutionsGetResponseMapper {
                         .map(resolution ->
                                 new Resolution()
                                         .category(CategoryEnum.fromValue(resolution.getCategory()))
+                                        .subcategory(resolution.getSubcategory())
                                         .description(resolution.getDescription())
                                         .type(resolution.getType())
                                         .date(instantToString(resolution.getDate()))
-                                        .descriptionValues(mapper.map(resolution.getDescriptionValues())))
+                                        .descriptionValues(mapper.map(resolution.getDescriptionValues()))
+                                        .originalDescription(resolution.getOriginalDescription())
+                                        .deltaAt(resolution.getDeltaAt()))
                         .toList())
                 .orElse(null);
     }

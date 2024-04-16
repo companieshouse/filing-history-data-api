@@ -20,6 +20,9 @@ public class FilingHistoryAssociatedFiling {
     @Field("delta_at")
     @JsonProperty("delta_at")
     private String deltaAt;
+    @Field("original_description")
+    @JsonProperty("original_description")
+    private String originalDescription;
 
     public String getCategory() {
         return category;
@@ -84,6 +87,15 @@ public class FilingHistoryAssociatedFiling {
         return this;
     }
 
+    public String getOriginalDescription() {
+        return originalDescription;
+    }
+
+    public FilingHistoryAssociatedFiling originalDescription(String originalDescription) {
+        this.originalDescription = originalDescription;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -93,11 +105,25 @@ public class FilingHistoryAssociatedFiling {
             return false;
         }
         FilingHistoryAssociatedFiling that = (FilingHistoryAssociatedFiling) o;
-        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(entityId, that.entityId) && Objects.equals(deltaAt, that.deltaAt);
+        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(entityId, that.entityId) && Objects.equals(deltaAt, that.deltaAt) && Objects.equals(originalDescription, that.originalDescription);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, description, type, date, descriptionValues, entityId, deltaAt);
+        return Objects.hash(category, description, type, date, descriptionValues, entityId, deltaAt, originalDescription);
+    }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryAssociatedFiling{" +
+                "category='" + category + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", date=" + date +
+                ", descriptionValues=" + descriptionValues +
+                ", entityId='" + entityId + '\'' +
+                ", deltaAt='" + deltaAt + '\'' +
+                ", originalDescription='" + originalDescription + '\'' +
+                '}';
     }
 }

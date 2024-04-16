@@ -24,6 +24,7 @@ class AssociatedFilingsGetResponseMapperTest {
     private static final String CATEGORY = "category";
     private static final String TYPE = "type";
     private static final String DESCRIPTION = "description";
+    private static final String ORIGINAL_DESCRIPTION = "original description";
 
     @InjectMocks
     private AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper;
@@ -40,6 +41,7 @@ class AssociatedFilingsGetResponseMapperTest {
                 new AssociatedFiling()
                         .category(CATEGORY)
                         .type(TYPE)
+                        .originalDescription(ORIGINAL_DESCRIPTION)
                         .description(DESCRIPTION)
                         .descriptionValues(descriptionValues));
 
@@ -91,6 +93,7 @@ class AssociatedFilingsGetResponseMapperTest {
                 new FilingHistoryAssociatedFiling()
                         .category(CATEGORY)
                         .type(TYPE)
+                        .originalDescription(ORIGINAL_DESCRIPTION)
                         .description(DESCRIPTION)
                         .descriptionValues(new FilingHistoryDescriptionValues()));
     }

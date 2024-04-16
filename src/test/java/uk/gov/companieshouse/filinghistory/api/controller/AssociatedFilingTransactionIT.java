@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +22,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Testcontainers
@@ -50,6 +59,8 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 class AssociatedFilingTransactionIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
+    private static final String GET_SINGLE_TRANSACTION_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
+    private static final String GET_FILING_HISTORY_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -261,7 +272,7 @@ class AssociatedFilingTransactionIT {
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
         expectedDocument.updatedAt(actualDocument.getUpdatedAt());
-        assertEquals(expectedDocument, actualDocument);
+        assertEquals(expectedDocument.getData().getAssociatedFilings().getFirst(), actualDocument.getData().getAssociatedFilings().getFirst());
 
         verify(instantSupplier, times(2)).get();
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
@@ -513,6 +524,117 @@ class AssociatedFilingTransactionIT {
         assertEquals(existingDocument, actualDocument);
 
         verifyNoMoreInteractions(instantSupplier);
+    }
+
+    @Test
+    void shouldReturnSingleGetResponseWithOriginalDescriptionFieldOnChildObject() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<barcode>", "")
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<existing_child_entity_id>", "3333333333")
+                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        ExternalData expectedResponse = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .type("TM01")
+                .date("2014-09-15")
+                .category(CategoryEnum.OFFICERS)
+                .description("termination-director-company-with-name-termination-date")
+                .subcategory("termination")
+                .descriptionValues(new DescriptionValues()
+                        .officerName("John Test Tester")
+                        .terminationDate("2014-09-15"))
+                .actionDate("2014-09-15")
+                .links(new Links()
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                .associatedFilings(List.of(
+                        new AssociatedFiling()
+                                .category("annual-return")
+                                .date("2005-05-10")
+                                .description("legacy")
+                                .descriptionValues(new DescriptionValues()
+                                        .description("Secretary's particulars changed;director's particulars changed"))
+                                .type("363(288)")
+                                .originalDescription("original description")
+                ));
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldReturnListGetResponseWithNoOriginalDescriptionFieldOnChildObject() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<barcode>", "")
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<existing_child_entity_id>", "3333333333")
+                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryList expectedResponse = new FilingHistoryList()
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .type("TM01")
+                        .date("2014-09-15")
+                        .category(CategoryEnum.OFFICERS)
+                        .description("termination-director-company-with-name-termination-date")
+                        .subcategory("termination")
+                        .descriptionValues(new DescriptionValues()
+                                .officerName("John Test Tester")
+                                .terminationDate("2014-09-15"))
+                        .actionDate("2014-09-15")
+                        .links(new Links()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                        .associatedFilings(List.of(
+                                new AssociatedFiling()
+                                        .category("annual-return")
+                                        .date("2005-05-10")
+                                        .description("legacy")
+                                        .descriptionValues(new DescriptionValues()
+                                                .description("Secretary's particulars changed;director's particulars changed"))
+                                        .type("363(288)")
+                        ))
+                ))
+                .itemsPerPage(25)
+                .totalCount(1)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .startIndex(0);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {

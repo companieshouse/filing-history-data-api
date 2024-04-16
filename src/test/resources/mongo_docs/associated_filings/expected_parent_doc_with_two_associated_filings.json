@@ -12,7 +12,8 @@
         },
         "date" : "2005-05-10T12:00:00.000Z",
         "_entity_id": "<existing_child_entity_id>",
-        "delta_at": "<existing_child_delta_at>"
+        "delta_at": "<existing_child_delta_at>",
+        "original_description": "original description"
       },
       {
         "type" : "363(288)",
@@ -23,7 +24,8 @@
         },
         "date" : "2005-05-10T12:00:00.000Z",
         "_entity_id": "<child_entity_id>",
-        "delta_at": "<child_delta_at>"
+        "delta_at": "<child_delta_at>",
+        "original_description": "original description"
       }
     ],
     "action_date" : "2014-09-15T00:00:00.000Z",

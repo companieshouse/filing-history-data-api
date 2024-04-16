@@ -81,4 +81,19 @@ class AssociatedFilingCleanserTest {
         // then
         assertEquals(filings, actual);
     }
+
+    @Test
+    void shouldRemoveOriginalDescription() {
+        // given
+        List<AssociatedFiling> filings = List.of(new AssociatedFiling()
+                .originalDescription("original description"));
+
+        List<AssociatedFiling> expected = List.of(new AssociatedFiling());
+
+        // when
+        List<AssociatedFiling> actual = associatedFilingCleanser.removeOriginalDescription(filings);
+
+        // then
+        assertEquals(expected, actual);
+    }
 }
