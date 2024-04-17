@@ -108,33 +108,6 @@ public class FilingHistoryResolution {
         return this;
     }
 
-    public String getOriginalDescription() {
-        return originalDescription;
-    }
-
-    public FilingHistoryResolution originalDescription(String originalDescription) {
-        this.originalDescription = originalDescription;
-        return this;
-    }
-
-    public Object getSubcategory() {
-        return subcategory;
-    }
-
-    public FilingHistoryResolution subcategory(Object subcategory) {
-        this.subcategory = subcategory;
-        return this;
-    }
-
-    public String getDeltaAt() {
-        return deltaAt;
-    }
-
-    public FilingHistoryResolution deltaAt(String deltaAt) {
-        this.deltaAt = deltaAt;
-        return this;
-    }
-
     public String getDeltaAt() {
         return deltaAt;
     }
@@ -179,20 +152,6 @@ public class FilingHistoryResolution {
                 ", originalDescription='" + originalDescription + '\'' +
                 ", entityId='" + entityId + '\'' +
                 ", descriptionValues=" + descriptionValues +
-                ", deltaAt='" + deltaAt + '\'' +
-                '}';
-    }
-
-    @Override
-    public String toString() {
-        return "FilingHistoryResolution{" +
-                "category='" + category + '\'' +
-                ", description='" + description + '\'' +
-                ", type='" + type + '\'' +
-                ", date=" + date +
-                ", descriptionValues=" + descriptionValues +
-                ", originalDescription='" + originalDescription + '\'' +
-                ", subcategory='" + subcategory + '\'' +
                 ", deltaAt='" + deltaAt + '\'' +
                 '}';
     }

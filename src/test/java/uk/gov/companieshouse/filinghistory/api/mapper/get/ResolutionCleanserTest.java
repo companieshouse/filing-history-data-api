@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.Resolution;
 
-public class ResolutionCleanserTest {
+class ResolutionCleanserTest {
 
     private final ResolutionCleanser resolutionCleanser = new ResolutionCleanser();
 
