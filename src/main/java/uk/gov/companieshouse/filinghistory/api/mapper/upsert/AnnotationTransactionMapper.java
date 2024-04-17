@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -44,34 +45,37 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
                                                                                FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
-        List<FilingHistoryAnnotation> existingAnnotationsList = existingDocument.getData().getAnnotations();
 
-        if (existingAnnotationsList == null) {
-            // Add new annotation to a new annotations list
-            mapFilingHistoryData(request, existingDocument.getData());
-        } else {
-            // Check for legacy data without entity id
-            if (existingAnnotationsList.stream().anyMatch(annotation -> annotation.getEntityId() == null)) {
-                LOGGER.error(MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId), DataMapHolder.getLogMap());
-            }
-
-            existingAnnotationsList.stream()
-                    .filter(annotation -> requestEntityId.equals(annotation.getEntityId()))
-                    .findFirst()
-                    .ifPresentOrElse(annotation -> {
-                                if (isDeltaStale(request.getInternalData().getDeltaAt(),
-                                        annotation.getDeltaAt())) {
-                                    throw new ConflictException(
-                                            "Delta at stale when updating annotation");
-                                }
-                                // Update already existing annotation from list
-                                annotationChildMapper.mapChild(annotation, request);
-                            },
-                            // Add new annotation to existing annotations list
-                            () -> existingAnnotationsList
-                                    .add(annotationChildMapper
-                                            .mapChild(new FilingHistoryAnnotation(), request)));
-        }
+        Optional.ofNullable(existingDocument.getData().getAnnotations())
+                .ifPresentOrElse(
+                        annotationList -> annotationList.stream()
+                                .filter(annotation -> requestEntityId.equals(annotation.getEntityId()))
+                                .findFirst()
+                                .ifPresentOrElse(annotation -> {
+                                            if (isDeltaStale(request.getInternalData().getDeltaAt(),
+                                                    annotation.getDeltaAt())) {
+                                                throw new ConflictException(
+                                                        "Delta at stale when updating annotation");
+                                            }
+                                            // Update already existing annotation from list
+                                            annotationChildMapper.mapChild(annotation, request);
+                                        },
+                                        // Add new annotation to existing annotations list
+                                        () -> {
+                                            if (annotationList.stream()
+                                                    .anyMatch(annotation -> StringUtils.isBlank(annotation.getEntityId()))) {
+                                                LOGGER.error(
+                                                        MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
+                                                        DataMapHolder.getLogMap()
+                                                );
+                                            }
+                                            annotationList
+                                                    .add(annotationChildMapper
+                                                            .mapChild(new FilingHistoryAnnotation(), request));
+                                        }),
+                        // Add new annotation to a new annotations list
+                        () -> mapFilingHistoryData(request, existingDocument.getData())
+                );
         return mapTopLevelFields(request, existingDocument);
     }
 
