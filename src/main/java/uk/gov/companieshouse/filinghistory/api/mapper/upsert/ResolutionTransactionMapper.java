@@ -22,9 +22,8 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
     private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
-    public ResolutionTransactionMapper(LinksMapper linksMapper,
-            DataMapper dataMapper, ChildMapper<FilingHistoryResolution> resolutionChildMapper,
-            Supplier<Instant> instantSupplier) {
+    public ResolutionTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
+            ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.resolutionChildMapper = resolutionChildMapper;
