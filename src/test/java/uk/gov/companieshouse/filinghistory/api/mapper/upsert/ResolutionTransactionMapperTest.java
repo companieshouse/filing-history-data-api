@@ -32,7 +32,6 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 class ResolutionTransactionMapperTest {
 
     private static final String ENTITY_ID = "1234567890";
-    private static final String PARENT_ENTITY_ID = "0987654321";
     private static final String COMPANY_NUMBER = "123456789";
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
@@ -144,7 +143,6 @@ class ResolutionTransactionMapperTest {
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
                         .companyNumber(COMPANY_NUMBER)
-                        .parentEntityId(PARENT_ENTITY_ID)
                         .entityId(ENTITY_ID)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT)
                         .updatedBy(UPDATED_BY))
@@ -164,6 +162,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(list));
 
         final FilingHistoryDocument expected = new FilingHistoryDocument()
+                .entityId(ENTITY_ID)
                 .data(new FilingHistoryData()
                         .resolutions(list)
                         .paperFiled(true))

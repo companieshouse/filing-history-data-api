@@ -23,6 +23,7 @@ public class ResolutionChildMapper implements ChildMapper<FilingHistoryResolutio
         Resolution requestResolution = request.getExternalData().getResolutions().getFirst();
 
         return resolution
+                .barcode(requestResolution.getBarcode())
                 .category(requestResolution.getCategory().getValue())
                 .description(requestResolution.getDescription())
                 .type(requestResolution.getType())
@@ -30,6 +31,7 @@ public class ResolutionChildMapper implements ChildMapper<FilingHistoryResolutio
                 .date(stringToInstant(requestResolution.getDate()))
                 .entityId(internalData.getEntityId())
                 .descriptionValues(descriptionValuesMapper.map(requestResolution.getDescriptionValues()))
+                .originalDescription(requestResolution.getOriginalDescription())
                 .deltaAt(internalData.getDeltaAt());
     }
 }

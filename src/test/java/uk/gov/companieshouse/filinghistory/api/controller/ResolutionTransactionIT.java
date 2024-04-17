@@ -284,7 +284,7 @@ public class ResolutionTransactionIT {
     void shouldAddResolutionToExistingResolutionListAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/resolutions/existing_resolution_document_with_one_resolution.json", StandardCharsets.UTF_8);
+                "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -349,7 +349,7 @@ public class ResolutionTransactionIT {
     void shouldUpdateExistingResolutionOnDocumentAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/resolutions/existing_resolution_document_with_one_resolution.json", StandardCharsets.UTF_8);
+                "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -481,7 +481,7 @@ public class ResolutionTransactionIT {
     void shouldThrowConflictExceptionWhenUpdatingChildAnnotationWithStaleDeltaAtAndReturn409Conflict() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/resolutions/existing_resolution_document_with_one_resolution.json", StandardCharsets.UTF_8);
+                "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)

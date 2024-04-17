@@ -1,6 +1,7 @@
 {
   "_id" : "<transaction_id>",
   "company_number" : "<company_number>",
+  "_entity_id": "<existing_resolution_entity_id>",
   "_barcode" : "<barcode>",
   "data" : {
     "category" : "resolution",

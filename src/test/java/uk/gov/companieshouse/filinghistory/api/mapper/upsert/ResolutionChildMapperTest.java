@@ -67,7 +67,9 @@ class ResolutionChildMapperTest {
                 .description("Resolution description")
                 .type("Resolution")
                 .subcategory(SUBCATEGORY_ARRAY)
-                .descriptionValues(descriptionValues);
+                .descriptionValues(descriptionValues)
+                .originalDescription("resolution original description")
+                .barcode("barcode");
 
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
@@ -107,7 +109,9 @@ class ResolutionChildMapperTest {
                 .description("Resolution description")
                 .type("Resolution")
                 .subcategory(SUBCATEGORY_ARRAY)
-                .descriptionValues(descriptionValues);
+                .descriptionValues(descriptionValues)
+                .originalDescription("resolution original description")
+                .barcode("barcode");
 
         FilingHistoryResolution existingResolution = new FilingHistoryResolution();
 

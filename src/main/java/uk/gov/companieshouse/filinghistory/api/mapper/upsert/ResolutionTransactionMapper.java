@@ -80,6 +80,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
         document.getData().date(stringToInstant(request.getExternalData().getDate()));
         return document
                 .companyNumber(internalData.getCompanyNumber())
+                .entityId(internalData.getEntityId())
                 .deltaAt(internalData.getDeltaAt())
                 .updatedAt(instantSupplier.get())
                 .updatedBy(internalData.getUpdatedBy())
