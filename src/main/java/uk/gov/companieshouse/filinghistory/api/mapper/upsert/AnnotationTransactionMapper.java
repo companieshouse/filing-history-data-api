@@ -51,11 +51,8 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
             mapFilingHistoryData(request, existingDocument.getData());
         } else {
             // Check for legacy data without entity id
-            for (FilingHistoryAnnotation annotation : existingAnnotationsList) {
-                if (annotation.getEntityId() == null) {
-                    LOGGER.error(MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId), DataMapHolder.getLogMap());
-                    break;
-                }
+            if (existingAnnotationsList.stream().anyMatch(annotation -> annotation.getEntityId() == null)) {
+                LOGGER.error(MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId), DataMapHolder.getLogMap());
             }
 
             existingAnnotationsList.stream()
