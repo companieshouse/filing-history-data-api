@@ -43,7 +43,8 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request, FilingHistoryDocument existingDocument) {
+    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
+                                                                               FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingDocument.getData().getAssociatedFilings())
