@@ -2,17 +2,14 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.InternalData;
+import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.InvalidTransactionKindException;
 
 @ExtendWith(MockitoExtension.class)
 class ValidatorFactoryTest {
@@ -26,13 +23,15 @@ class ValidatorFactoryTest {
     private AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator;
     @Mock
     private TopLevelPutRequestValidator topLevelPutRequestValidator;
+    @Mock
+    private ResolutionPutRequestValidator resolutionPutRequestValidator;
 
     @Test
     void shouldReturnTopLevelValidatorForTopLevelKind() {
         // given
 
         // when
-        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(InternalData.TransactionKindEnum.TOP_LEVEL);
+        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(TransactionKindEnum.TOP_LEVEL);
 
         // then
         assertInstanceOf(TopLevelPutRequestValidator.class, actual);
@@ -44,7 +43,7 @@ class ValidatorFactoryTest {
         // given
 
         // when
-        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(InternalData.TransactionKindEnum.ANNOTATION);
+        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(TransactionKindEnum.ANNOTATION);
 
         // then
         assertInstanceOf(AnnotationPutRequestValidator.class, actual);
@@ -56,23 +55,22 @@ class ValidatorFactoryTest {
         // given
 
         // when
-        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(InternalData.TransactionKindEnum.ASSOCIATED_FILING);
+        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(TransactionKindEnum.ASSOCIATED_FILING);
 
         // then
         assertInstanceOf(AssociatedFilingPutRequestValidator.class, actual);
         assertEquals(associatedFilingPutRequestValidator, actual);
     }
 
-    // REMOVE TEST WHEN RESOLUTIONS ARE IMPLEMENTED
     @Test
-    void shouldReturnInvalidMapperExceptionWhenKindDoesNotReturnAMapper() {
+    void shouldReturnResolutionValidatorForResolutionKind() {
         // given
 
         // when
-        Executable executable = () -> factory.getPutRequestValidator(InternalData.TransactionKindEnum.fromValue("resolution"));
+        Validator<InternalFilingHistoryApi> actual = factory.getPutRequestValidator(TransactionKindEnum.RESOLUTION);
 
         // then
-        InvalidTransactionKindException exception = assertThrows(InvalidTransactionKindException.class, executable);
-        assertEquals("Invalid transaction kind: %s".formatted("resolution"), exception.getMessage());
+        assertInstanceOf(ResolutionPutRequestValidator.class, actual);
+        assertEquals(resolutionPutRequestValidator, actual);
     }
 }

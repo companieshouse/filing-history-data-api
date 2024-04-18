@@ -1,0 +1,36 @@
+{
+  "external_data" : {
+    "transaction_id" : "<transaction_id>",
+    "barcode" : "<barcode>",
+    "date" : "2007-03-27T00:00:00.000Z",
+    "category" : "resolution",
+    "type" : "RESOLUTIONS",
+    "resolutions" : [
+      {
+        "category" : "insolvency",
+        "delta_at" : "20211030142043360560",
+        "description" : "legacy",
+        "description_values" : {
+          "description" : "Special/extra resolution"
+        },
+        "type" : "RES(NI)"
+      }
+    ],
+    "description" : "resolution",
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "internal_data": {
+    "company_number" : "<company_number>",
+    "entity_id" : "<second_resolution_entity_id>",
+    "original_description" : "Resolutions",
+    "delta_at": "<second_resolution_delta_at>",
+    "transaction_kind": "resolution",
+    "updated_by": "context_id"
+  }
+}

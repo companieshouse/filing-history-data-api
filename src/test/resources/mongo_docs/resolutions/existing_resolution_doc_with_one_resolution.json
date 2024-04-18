@@ -1,0 +1,37 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id": "<existing_resolution_entity_id>",
+  "_barcode" : "<barcode>",
+  "data" : {
+    "category" : "resolution",
+    "date" : "1999-12-29T11:59:36.000Z",
+    "description" : "resolution",
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true,
+    "resolutions" : [
+      {
+        "category" : "liquidation",
+        "description" : "liquidation-voluntary-extraordinary-resolution-to-wind-up",
+        "original_description" : "Extraordinary resolution to wind up",
+        "subcategory" : [
+          "voluntary",
+          "resolution"
+        ],
+        "type" : "LRESEX",
+        "delta_at" : "<first_resolution_delta_at>",
+        "_entity_id": "<existing_resolution_entity_id>"
+      }
+    ],
+    "type" : "RESOLUTIONS"
+  },
+  "delta_at" : "<first_resolution_delta_at>",
+  "original_description" : "Resolutions",
+  "updated_by": "context_id",
+  "updated_at": "2014-09-17T18:52:08.001Z"
+}
