@@ -63,7 +63,8 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                         // Add new annotation to existing annotations list
                                         () -> {
                                             if (annotationList.stream()
-                                                    .anyMatch(annotation -> StringUtils.isBlank(annotation.getEntityId()))) {
+                                                    .anyMatch(annotation ->
+                                                            StringUtils.isBlank(annotation.getEntityId()))) {
                                                 LOGGER.error(
                                                         MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
                                                         DataMapHolder.getLogMap()

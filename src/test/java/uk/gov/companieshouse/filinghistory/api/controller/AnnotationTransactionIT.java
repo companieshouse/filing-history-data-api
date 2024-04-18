@@ -21,8 +21,8 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.function.Supplier;
-import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Testcontainers
@@ -593,18 +594,14 @@ class AnnotationTransactionIT {
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
                 .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        // Remove entity id from pre-existing child in existing document
-        existingDocument.getData().getAnnotations()
-                .stream()
-                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
-                .findFirst()
-                .ifPresent(child -> child.entityId(null));
+        removeEntityIdFromChild(existingDocument.getData().getAnnotations());
+
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
@@ -623,12 +620,7 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
-        // Remove entity id from pre-existing child in expected document
-        expectedDocument.getData().getAnnotations()
-                .stream()
-                .filter(child -> EXISTING_CHILD_ENTITY_ID.equals(child.getEntityId()))
-                .findFirst()
-                .ifPresent(child -> child.entityId(null));
+        removeEntityIdFromChild(expectedDocument.getData().getAnnotations());
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
@@ -663,6 +655,13 @@ class AnnotationTransactionIT {
 
         verify(instantSupplier, times(2)).get();
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    private static void removeEntityIdFromChild(List<FilingHistoryAnnotation> annotations) {
+        annotations.stream()
+                .filter(child -> EXISTING_CHILD_ENTITY_ID.equals(child.getEntityId()))
+                .findFirst()
+                .ifPresent(child -> child.entityId(null));
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {
