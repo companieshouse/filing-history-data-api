@@ -654,8 +654,8 @@ class ResolutionTransactionIT {
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
-    private static void removeEntityIdFromChild(List<FilingHistoryResolution> associatedFilings) {
-        associatedFilings.stream()
+    private static void removeEntityIdFromChild(List<FilingHistoryResolution> resolutions) {
+        resolutions.stream()
                 .filter(child -> ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
                 .ifPresent(child -> child.entityId(null));
