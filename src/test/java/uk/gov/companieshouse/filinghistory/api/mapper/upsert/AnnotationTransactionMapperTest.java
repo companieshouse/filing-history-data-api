@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
@@ -90,6 +91,31 @@ class AnnotationTransactionMapperTest {
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
                         .annotations(annotationList));
+
+        // when
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+
+        // then
+        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verifyNoMoreInteractions(annotationChildMapper);
+    }
+
+    @Test
+    void shouldAddNewAnnotationToExistingAnnotationListWhenAChildIsMissingAnEntityId() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
+
+        List<FilingHistoryAnnotation> annotations = new ArrayList<>();
+        annotations.add(annotation);
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .annotations(annotations));
+
+        when(annotation.getEntityId()).thenReturn(null);
 
         // when
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
