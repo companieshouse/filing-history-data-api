@@ -100,31 +100,6 @@ class AssociatedFilingTransactionMapperTest {
     }
 
     @Test
-    void shouldAddNewAssociatedFilingToExistingAssociatedFilingListWhenAChildIsMissingAnEntityId() {
-        // given
-        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID))
-                .externalData(new ExternalData()
-                        .paperFiled(true));
-
-        List<FilingHistoryAssociatedFiling> associatedFilings = new ArrayList<>();
-        associatedFilings.add(associatedFiling);
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .data(new FilingHistoryData()
-                        .associatedFilings(associatedFilings));
-
-        when(associatedFiling.getEntityId()).thenReturn(null);
-
-        // when
-        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
-
-        // then
-        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
-        verifyNoMoreInteractions(associatedFilingChildMapper);
-    }
-
-    @Test
     void shouldUpdateAssociatedFilingInExistingAssociatedFilingList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
@@ -276,5 +251,30 @@ class AssociatedFilingTransactionMapperTest {
 
         // then
         assertDoesNotThrow(executable);
+    }
+
+        @Test
+    void shouldAddNewAssociatedFilingToExistingAssociatedFilingListWhenAChildIsMissingAnEntityId() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
+
+        List<FilingHistoryAssociatedFiling> associatedFilings = new ArrayList<>();
+        associatedFilings.add(associatedFiling);
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .associatedFilings(associatedFilings));
+
+        when(associatedFiling.getEntityId()).thenReturn(null);
+
+        // when
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+
+        // then
+        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 }

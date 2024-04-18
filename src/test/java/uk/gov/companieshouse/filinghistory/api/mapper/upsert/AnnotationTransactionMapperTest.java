@@ -101,31 +101,6 @@ class AnnotationTransactionMapperTest {
     }
 
     @Test
-    void shouldAddNewAnnotationToExistingAnnotationListWhenAChildIsMissingAnEntityId() {
-        // given
-        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID))
-                .externalData(new ExternalData()
-                        .paperFiled(true));
-
-        List<FilingHistoryAnnotation> annotations = new ArrayList<>();
-        annotations.add(annotation);
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .data(new FilingHistoryData()
-                        .annotations(annotations));
-
-        when(annotation.getEntityId()).thenReturn(null);
-
-        // when
-        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
-
-        // then
-        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
-        verifyNoMoreInteractions(annotationChildMapper);
-    }
-
-    @Test
     void shouldUpdateAnnotationInExistingAnnotationList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
@@ -277,5 +252,30 @@ class AnnotationTransactionMapperTest {
 
         // then
         assertDoesNotThrow(executable);
+    }
+
+        @Test
+    void shouldAddNewAnnotationToExistingAnnotationListWhenAChildIsMissingAnEntityId() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
+
+        List<FilingHistoryAnnotation> annotations = new ArrayList<>();
+        annotations.add(annotation);
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .annotations(annotations));
+
+        when(annotation.getEntityId()).thenReturn(null);
+
+        // when
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+
+        // then
+        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verifyNoMoreInteractions(annotationChildMapper);
     }
 }

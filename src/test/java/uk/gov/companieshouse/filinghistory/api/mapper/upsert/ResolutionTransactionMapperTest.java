@@ -104,31 +104,6 @@ class ResolutionTransactionMapperTest {
     }
 
     @Test
-    void shouldAddNewResolutionToExistingResolutionListWhenAChildIsMissingAnEntityId() {
-        // given
-        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID))
-                .externalData(new ExternalData()
-                        .paperFiled(true));
-
-        List<FilingHistoryResolution> resolutions = new ArrayList<>();
-        resolutions.add(resolution);
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .data(new FilingHistoryData()
-                        .resolutions(resolutions));
-
-        when(resolution.getEntityId()).thenReturn(null);
-
-        // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
-
-        // then
-        verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
-        verifyNoMoreInteractions(resolutionChildMapper);
-    }
-
-    @Test
     void shouldUpdateResolutionInExistingResolutionList() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
@@ -283,5 +258,29 @@ class ResolutionTransactionMapperTest {
         assertDoesNotThrow(executable);
     }
 
+    @Test
+    void shouldAddNewResolutionToExistingResolutionListWhenAChildIsMissingAnEntityId() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
+
+        List<FilingHistoryResolution> resolutions = new ArrayList<>();
+        resolutions.add(resolution);
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .resolutions(resolutions));
+
+        when(resolution.getEntityId()).thenReturn(null);
+
+        // when
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+
+        // then
+        verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
+        verifyNoMoreInteractions(resolutionChildMapper);
+    }
 
 }
