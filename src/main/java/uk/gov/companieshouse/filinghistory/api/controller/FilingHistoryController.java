@@ -85,7 +85,8 @@ public class FilingHistoryController {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
                 .transactionId(transactionId);
-        LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
+        LOGGER.info("Processing transaction upsert, entity_id: [%s]"
+                .formatted(requestBody.getInternalData().getEntityId()), DataMapHolder.getLogMap());
 
         serviceUpsertProcessor.processFilingHistory(transactionId, companyNumber, requestBody);
 

@@ -146,7 +146,6 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -214,7 +213,6 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -332,7 +330,6 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -398,7 +395,6 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -465,7 +461,6 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -511,7 +506,6 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
 
         // Assert existing doc is unchanged
         assertEquals(existingDocument, actualDocument);
