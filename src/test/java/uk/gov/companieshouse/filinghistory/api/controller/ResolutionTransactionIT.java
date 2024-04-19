@@ -109,7 +109,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
@@ -516,6 +516,55 @@ class ResolutionTransactionIT {
         assertEquals(existingDocument, actualDocument);
 
         verifyNoMoreInteractions(instantSupplier);
+    }
+
+    @Test
+    void shouldMapFirstResolutionWithNoBarcode() throws Exception {
+        // given
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/expected_resolution_doc_no_barcode.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/resolutions/put_request_body_resolution_no_barcode.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+
     }
 
     @Test
