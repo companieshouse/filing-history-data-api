@@ -1,0 +1,33 @@
+{
+  "external_data" : {
+    "transaction_id" : "<transaction_id>",
+    "date" : "1993-04-26T11:58:23.000Z",
+    "category" : "resolution",
+    "type" : "RESOLUTIONS",
+    "resolutions" : [
+      {
+        "category" : "resolution",
+        "delta_at" : "<delta_at>",
+        "description" : "elective-resolution",
+        "subcategory" : "resolution",
+        "type" : "ELRES"
+      }
+    ],
+    "description" : "resolution",
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "internal_data": {
+    "company_number" : "<company_number>",
+    "entity_id" : "<entity_id>",
+    "original_description" : "Resolutions",
+    "delta_at" : "<delta_at>",
+    "transaction_kind": "resolution",
+    "updated_by": "context_id"
+  }
+}
