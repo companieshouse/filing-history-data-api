@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,6 +43,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
+import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -52,6 +58,8 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 class AnnotationTransactionIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
+    private static final String GET_SINGLE_TRANSACTION_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
+    private static final String GET_FILING_HISTORY_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
@@ -528,11 +536,9 @@ class AnnotationTransactionIT {
                 .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
-        existingDocument.getData().getAnnotations()
-                .stream()
-                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
-                .findFirst()
-                .ifPresent(child -> child.deltaAt(null));
+
+        removeDeltaAtFromChild(existingDocument.getData().getAnnotations());
+
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
@@ -657,11 +663,142 @@ class AnnotationTransactionIT {
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
+    @Test
+    void shouldSuccessfullyHandleSingleGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
+        removeDeltaAtFromChild(annotations);
+        removeEntityIdFromChild(annotations);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        ExternalData expectedResponse = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .barcode(BARCODE)
+                .type("TM01")
+                .date("2014-09-15")
+                .category(ExternalData.CategoryEnum.OFFICERS)
+                .description("termination-director-company-with-name-termination-date")
+                .subcategory("termination")
+                .descriptionValues(new DescriptionValues()
+                        .officerName("John Test Tester")
+                        .terminationDate("2014-09-15"))
+                .actionDate("2014-09-15")
+                .links(new Links()
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                .annotations(List.of(
+                        new Annotation()
+                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .category("annotation")
+                                .date("2011-11-26")
+                                .description("annotation")
+                                .descriptionValues(new DescriptionValues()
+                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                .type("ANNOTATION")
+                ));
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldSuccessfullyHandleListGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
+        removeDeltaAtFromChild(annotations);
+        removeEntityIdFromChild(annotations);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryList expectedObject = new FilingHistoryList()
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .barcode(BARCODE)
+                        .type("TM01")
+                        .date("2014-09-15")
+                        .category(ExternalData.CategoryEnum.OFFICERS)
+                        .description("termination-director-company-with-name-termination-date")
+                        .subcategory("termination")
+                        .descriptionValues(new DescriptionValues()
+                                .officerName("John Test Tester")
+                                .terminationDate("2014-09-15"))
+                        .actionDate("2014-09-15")
+                        .links(new Links()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                        .annotations(List.of(
+                                new Annotation()
+                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .category("annotation")
+                                        .date("2011-11-26")
+                                        .description("annotation")
+                                        .descriptionValues(new DescriptionValues()
+                                                .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .type("ANNOTATION")
+                        ))))
+                .itemsPerPage(25)
+                .totalCount(1)
+                .filingHistoryStatus(FilingHistoryList.FilingHistoryStatusEnum.AVAILABLE)
+                .startIndex(0);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        final String actualResponse = result.andReturn().getResponse().getContentAsString();
+        final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
     private static void removeEntityIdFromChild(List<FilingHistoryAnnotation> annotations) {
         annotations.stream()
                 .filter(child -> EXISTING_CHILD_ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
                 .ifPresent(child -> child.entityId(null));
+    }
+
+    private static void removeDeltaAtFromChild(List<FilingHistoryAnnotation> annotations) {
+        annotations.stream()
+                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
+                .findFirst()
+                .ifPresent(child -> child.deltaAt(null));
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {
