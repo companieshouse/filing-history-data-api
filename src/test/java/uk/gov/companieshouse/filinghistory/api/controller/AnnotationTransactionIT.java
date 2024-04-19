@@ -7,6 +7,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
+import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -537,7 +539,12 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        removeDeltaAtFromChild(existingDocument.getData().getAnnotations());
+        // Remove delta_at from child
+        List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
+        annotations.stream()
+                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
+                .findFirst()
+                .ifPresent(child -> child.deltaAt(null));
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -583,7 +590,9 @@ class AnnotationTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        FilingHistoryAnnotation annotation = annotations.getFirst();
         assertNotNull(actualDocument);
+        assertTrue(StringUtils.isBlank(annotation.getDeltaAt()));
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -606,7 +615,7 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        removeEntityIdFromChild(existingDocument.getData().getAnnotations());
+        removeEntityIdFromFirstChild(existingDocument.getData().getAnnotations());
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -626,7 +635,7 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
-        removeEntityIdFromChild(expectedDocument.getData().getAnnotations());
+        removeEntityIdFromFirstChild(expectedDocument.getData().getAnnotations());
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
@@ -680,8 +689,7 @@ class AnnotationTransactionIT {
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
         List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
-        removeDeltaAtFromChild(annotations);
-        removeEntityIdFromChild(annotations);
+        removeDeltaAtAndEntityIdFromFirstChild(annotations);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -719,6 +727,9 @@ class AnnotationTransactionIT {
         // then
         ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
 
+        FilingHistoryAnnotation annotation = annotations.getFirst();
+        assertTrue(StringUtils.isBlank(annotation.getEntityId()));
+        assertTrue(StringUtils.isBlank(annotation.getDeltaAt()));
         assertEquals(expectedResponse, actualResponse);
     }
 
@@ -739,8 +750,7 @@ class AnnotationTransactionIT {
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
         List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
-        removeDeltaAtFromChild(annotations);
-        removeEntityIdFromChild(annotations);
+        removeDeltaAtAndEntityIdFromFirstChild(annotations);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -784,21 +794,25 @@ class AnnotationTransactionIT {
         final String actualResponse = result.andReturn().getResponse().getContentAsString();
         final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
 
+        FilingHistoryAnnotation annotation = annotations.getFirst();
+        assertTrue(StringUtils.isBlank(annotation.getEntityId()));
+        assertTrue(StringUtils.isBlank(annotation.getDeltaAt()));
         assertEquals(expectedResponse, actualResponse);
     }
 
-    private static void removeEntityIdFromChild(List<FilingHistoryAnnotation> annotations) {
+    private static void removeEntityIdFromFirstChild(List<FilingHistoryAnnotation> annotations) {
         annotations.stream()
-                .filter(child -> EXISTING_CHILD_ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
                 .ifPresent(child -> child.entityId(null));
     }
 
-    private static void removeDeltaAtFromChild(List<FilingHistoryAnnotation> annotations) {
+    private static void removeDeltaAtAndEntityIdFromFirstChild(List<FilingHistoryAnnotation> annotations) {
         annotations.stream()
-                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
-                .ifPresent(child -> child.deltaAt(null));
+                .ifPresent(child -> {
+                    child.deltaAt(null);
+                    child.entityId(null);
+                });
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {

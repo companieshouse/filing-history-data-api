@@ -7,6 +7,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -24,6 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
+import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +46,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
-import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -51,7 +53,6 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
 import uk.gov.companieshouse.api.filinghistory.Links;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -718,7 +719,7 @@ class AssociatedFilingTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        removeEntityIdFromChild(existingDocument.getData().getAssociatedFilings());
+        removeEntityIdFromFirstChild(existingDocument.getData().getAssociatedFilings());
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -738,7 +739,8 @@ class AssociatedFilingTransactionIT {
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
-        removeEntityIdFromChild(expectedDocument.getData().getAssociatedFilings());
+        List<FilingHistoryAssociatedFiling> associatedFilings = expectedDocument.getData().getAssociatedFilings();
+        removeEntityIdFromFirstChild(associatedFilings);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
@@ -768,7 +770,9 @@ class AssociatedFilingTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        FilingHistoryAssociatedFiling associatedFiling = associatedFilings.getFirst();
         assertNotNull(actualDocument);
+        assertTrue(StringUtils.isBlank(associatedFiling.getEntityId()));
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -786,14 +790,14 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
                 .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
+                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
         List<FilingHistoryAssociatedFiling> associatedFilings = existingDocument.getData().getAssociatedFilings();
-        removeDeltaAtFromChild(associatedFilings);
-        removeEntityIdFromChild(associatedFilings);
+        removeDeltaAtFromFirstChild(associatedFilings);
+        removeEntityIdFromFirstChild(associatedFilings);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -830,6 +834,9 @@ class AssociatedFilingTransactionIT {
         // then
         ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
 
+        FilingHistoryAssociatedFiling associatedFiling = associatedFilings.getFirst();
+        assertTrue(StringUtils.isBlank(associatedFiling.getEntityId()));
+        assertTrue(StringUtils.isBlank(associatedFiling.getDeltaAt()));
         assertEquals(expectedResponse, actualResponse);
     }
 
@@ -844,14 +851,14 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
                 .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
+                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
         List<FilingHistoryAssociatedFiling> associatedFilings = existingDocument.getData().getAssociatedFilings();
-        removeDeltaAtFromChild(associatedFilings);
-        removeEntityIdFromChild(associatedFilings);
+        removeDeltaAtFromFirstChild(associatedFilings);
+        removeEntityIdFromFirstChild(associatedFilings);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -877,7 +884,6 @@ class AssociatedFilingTransactionIT {
                                         .descriptionValues(new DescriptionValues()
                                                 .description("Secretary's particulars changed;director's particulars changed"))
                                         .type("363(288)")
-                                        .originalDescription("original description")
                         ))))
                 .itemsPerPage(25)
                 .totalCount(1)
@@ -894,19 +900,20 @@ class AssociatedFilingTransactionIT {
         final String actualResponse = result.andReturn().getResponse().getContentAsString();
         final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
 
+        FilingHistoryAssociatedFiling associatedFiling = associatedFilings.getFirst();
+        assertNull(associatedFiling.getEntityId());
+        assertNull(associatedFiling.getDeltaAt());
         assertEquals(expectedResponse, actualResponse);
     }
 
-    private static void removeEntityIdFromChild(List<FilingHistoryAssociatedFiling> associatedFilings) {
+    private static void removeEntityIdFromFirstChild(List<FilingHistoryAssociatedFiling> associatedFilings) {
         associatedFilings.stream()
-                .filter(child -> EXISTING_CHILD_ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
                 .ifPresent(child -> child.entityId(null));
     }
 
-    private static void removeDeltaAtFromChild(List<FilingHistoryAssociatedFiling> associatedFilings) {
+    private static void removeDeltaAtFromFirstChild(List<FilingHistoryAssociatedFiling> associatedFilings) {
         associatedFilings.stream()
-                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
                 .ifPresent(child -> child.deltaAt(null));
     }
