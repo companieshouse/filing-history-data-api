@@ -679,9 +679,9 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        List<FilingHistoryAnnotation> existingAnnotations = existingDocument.getData().getAnnotations();
-        existingAnnotations.getFirst().deltaAt(null);
-        existingAnnotations.getFirst().entityId(null);
+        FilingHistoryAnnotation firstAnnotation = existingDocument.getData().getAnnotations().getFirst();
+        firstAnnotation.deltaAt(null);
+        firstAnnotation.entityId(null);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -738,9 +738,9 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        List<FilingHistoryAnnotation> existingAnnotations = existingDocument.getData().getAnnotations();
-        existingAnnotations.getFirst().deltaAt(null);
-        existingAnnotations.getFirst().entityId(null);
+        FilingHistoryAnnotation firstAnnotation = existingDocument.getData().getAnnotations().getFirst();
+        firstAnnotation.deltaAt(null);
+        firstAnnotation.entityId(null);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 

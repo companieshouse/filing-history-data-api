@@ -791,9 +791,9 @@ class AssociatedFilingTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        List<FilingHistoryAssociatedFiling> associatedFilings = existingDocument.getData().getAssociatedFilings();
-        associatedFilings.getFirst().deltaAt(null);
-        associatedFilings.getFirst().entityId(null);
+        FilingHistoryAssociatedFiling firstAssociatedFiling = existingDocument.getData().getAssociatedFilings().getFirst();
+        firstAssociatedFiling.deltaAt(null);
+        firstAssociatedFiling.entityId(null);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -849,9 +849,9 @@ class AssociatedFilingTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        List<FilingHistoryAssociatedFiling> associatedFilings = existingDocument.getData().getAssociatedFilings();
-        associatedFilings.getFirst().deltaAt(null);
-        associatedFilings.getFirst().entityId(null);
+        FilingHistoryAssociatedFiling firstAssociatedFiling = existingDocument.getData().getAssociatedFilings().getFirst();
+        firstAssociatedFiling.deltaAt(null);
+        firstAssociatedFiling.entityId(null);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 

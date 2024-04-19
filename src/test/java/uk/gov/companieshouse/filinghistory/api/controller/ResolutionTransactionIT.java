@@ -532,7 +532,9 @@ class ResolutionTransactionIT {
                 .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
         existingDocument.getData().getResolutions().getFirst().deltaAt(null);
+
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
@@ -599,7 +601,7 @@ class ResolutionTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        removeEntityIdFromChild(existingDocument.getData().getResolutions());
+        existingDocument.getData().getResolutions().getFirst().entityId(null);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -617,7 +619,7 @@ class ResolutionTransactionIT {
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
-        removeEntityIdFromChild(expectedDocument.getData().getResolutions());
+        expectedDocument.getData().getResolutions().getFirst().entityId(null);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_second_resolution.json", StandardCharsets.UTF_8);
@@ -654,11 +656,136 @@ class ResolutionTransactionIT {
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
-    private static void removeEntityIdFromChild(List<FilingHistoryResolution> resolutions) {
-        resolutions.stream()
-                .filter(child -> ENTITY_ID.equals(child.getEntityId()))
-                .findFirst()
-                .ifPresent(child -> child.entityId(null));
+    @Test
+    void shouldSuccessfullyHandleSingleGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        final String existingDocumentJson = IOUtils.resourceToString(
+                        "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        FilingHistoryResolution firstResolution = existingDocument.getData().getResolutions().getFirst();
+        firstResolution.deltaAt(null);
+        firstResolution.entityId(null);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        ExternalData expectedResponse = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .type("RESOLUTIONS")
+                .date("2015-06-10")
+                .category(ExternalData.CategoryEnum.RESOLUTION)
+                .description("resolution")
+                .descriptionValues(new DescriptionValues()
+                        .description("Resolutions"))
+                .links(new Links()
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                        .documentMetadata("http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
+                .paperFiled(true)
+                .pages(1)
+                .resolutions(List.of(
+                        new Resolution()
+                                .category(CategoryEnum.LIQUIDATION)
+                                .subcategory(List.of("voluntary", "resolution"))
+                                .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                .descriptionValues(new DescriptionValues()
+                                        .caseStartDate("2015-05-12"))
+                                .type("LRESSP")
+                                .originalDescription("original description"),
+                        new Resolution()
+                                .category(CategoryEnum.LIQUIDATION)
+                                .subcategory(List.of("voluntary", "resolution"))
+                                .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                .descriptionValues(new DescriptionValues()
+                                        .caseStartDate("2015-05-12"))
+                                .type("LRESSP")
+                                .originalDescription("original description")
+                                .deltaAt(EXISTING_DELTA_AT)
+                ));
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldSuccessfullyHandleListGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        final String existingDocumentJson = IOUtils.resourceToString(
+                        "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        FilingHistoryResolution firstResolution = existingDocument.getData().getResolutions().getFirst();
+        firstResolution.deltaAt(null);
+        firstResolution.entityId(null);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryList expectedResponse = new FilingHistoryList()
+                .itemsPerPage(25)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(1)
+                .startIndex(0)
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .description("resolution")
+                        .type("RESOLUTIONS")
+                        .category(ExternalData.CategoryEnum.RESOLUTION)
+                        .links(new Links()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                                .documentMetadata("http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
+                        .paperFiled(true)
+                        .date("2015-06-10")
+                        .descriptionValues(new DescriptionValues()
+                                .description("Resolutions"))
+                        .pages(1)
+                        .resolutions(List.of(
+                                new Resolution()
+                                        .category(CategoryEnum.LIQUIDATION)
+                                        .subcategory(List.of("voluntary", "resolution"))
+                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .descriptionValues(new DescriptionValues()
+                                                .caseStartDate("2015-05-12"))
+                                        .type("LRESSP")
+                                        .originalDescription("original description"),
+                                new Resolution()
+                                        .category(CategoryEnum.LIQUIDATION)
+                                        .subcategory(List.of("voluntary", "resolution"))
+                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .descriptionValues(new DescriptionValues()
+                                                .caseStartDate("2015-05-12"))
+                                        .type("LRESSP")
+                                        .originalDescription("original description"))))
+                );
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {
