@@ -539,12 +539,8 @@ class AnnotationTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        // Remove delta_at from child
         List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
-        annotations.stream()
-                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
-                .findFirst()
-                .ifPresent(child -> child.deltaAt(null));
+        removeDeltaAtFromFirstChild(annotations);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -689,7 +685,8 @@ class AnnotationTransactionIT {
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
         List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
-        removeDeltaAtAndEntityIdFromFirstChild(annotations);
+        removeDeltaAtFromFirstChild(annotations);
+        removeEntityIdFromFirstChild(annotations);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -750,7 +747,8 @@ class AnnotationTransactionIT {
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
         List<FilingHistoryAnnotation> annotations = existingDocument.getData().getAnnotations();
-        removeDeltaAtAndEntityIdFromFirstChild(annotations);
+        removeDeltaAtFromFirstChild(annotations);
+        removeEntityIdFromFirstChild(annotations);
 
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
@@ -806,13 +804,10 @@ class AnnotationTransactionIT {
                 .ifPresent(child -> child.entityId(null));
     }
 
-    private static void removeDeltaAtAndEntityIdFromFirstChild(List<FilingHistoryAnnotation> annotations) {
+    private static void removeDeltaAtFromFirstChild(List<FilingHistoryAnnotation> annotations) {
         annotations.stream()
                 .findFirst()
-                .ifPresent(child -> {
-                    child.deltaAt(null);
-                    child.entityId(null);
-                });
+                .ifPresent(child -> child.deltaAt(null));
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {
