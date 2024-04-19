@@ -15,7 +15,6 @@
     "paper_filed" : true,
     "resolutions" : [
       {
-        "barcode" : "",
         "category" : "resolution",
         "description" : "elective-resolution",
         "subcategory" : "resolution",
