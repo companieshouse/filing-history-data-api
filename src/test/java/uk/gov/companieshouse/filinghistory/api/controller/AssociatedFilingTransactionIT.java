@@ -43,6 +43,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -50,6 +51,7 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
 import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -773,11 +775,140 @@ class AssociatedFilingTransactionIT {
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
+    @Test
+    void shouldSuccessfullyHandleSingleGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<barcode>", "")
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<existing_child_entity_id>", "3333333333")
+                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        List<FilingHistoryAssociatedFiling> associatedFilings = existingDocument.getData().getAssociatedFilings();
+        removeDeltaAtFromChild(associatedFilings);
+        removeEntityIdFromChild(associatedFilings);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        ExternalData expectedResponse = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .type("TM01")
+                .date("2014-09-15")
+                .category(CategoryEnum.OFFICERS)
+                .description("termination-director-company-with-name-termination-date")
+                .subcategory("termination")
+                .descriptionValues(new DescriptionValues()
+                        .officerName("John Test Tester")
+                        .terminationDate("2014-09-15"))
+                .actionDate("2014-09-15")
+                .links(new Links()
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                .associatedFilings(List.of(
+                        new AssociatedFiling()
+                                .category("annual-return")
+                                .date("2005-05-10")
+                                .description("legacy")
+                                .descriptionValues(new DescriptionValues()
+                                        .description("Secretary's particulars changed;director's particulars changed"))
+                                .type("363(288)")
+                                .originalDescription("original description")
+                ));
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldSuccessfullyHandleListGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<barcode>", "")
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<existing_child_entity_id>", "3333333333")
+                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        List<FilingHistoryAssociatedFiling> associatedFilings = existingDocument.getData().getAssociatedFilings();
+        removeDeltaAtFromChild(associatedFilings);
+        removeEntityIdFromChild(associatedFilings);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryList expectedObject = new FilingHistoryList()
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .type("TM01")
+                        .date("2014-09-15")
+                        .category(CategoryEnum.OFFICERS)
+                        .description("termination-director-company-with-name-termination-date")
+                        .subcategory("termination")
+                        .descriptionValues(new DescriptionValues()
+                                .officerName("John Test Tester")
+                                .terminationDate("2014-09-15"))
+                        .actionDate("2014-09-15")
+                        .links(new Links()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                        .associatedFilings(List.of(
+                                new AssociatedFiling()
+                                        .category("annual-return")
+                                        .date("2005-05-10")
+                                        .description("legacy")
+                                        .descriptionValues(new DescriptionValues()
+                                                .description("Secretary's particulars changed;director's particulars changed"))
+                                        .type("363(288)")
+                                        .originalDescription("original description")
+                        ))))
+                .itemsPerPage(25)
+                .totalCount(1)
+                .filingHistoryStatus(FilingHistoryList.FilingHistoryStatusEnum.AVAILABLE)
+                .startIndex(0);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        final String actualResponse = result.andReturn().getResponse().getContentAsString();
+        final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
     private static void removeEntityIdFromChild(List<FilingHistoryAssociatedFiling> associatedFilings) {
         associatedFilings.stream()
                 .filter(child -> EXISTING_CHILD_ENTITY_ID.equals(child.getEntityId()))
                 .findFirst()
                 .ifPresent(child -> child.entityId(null));
+    }
+
+    private static void removeDeltaAtFromChild(List<FilingHistoryAssociatedFiling> associatedFilings) {
+        associatedFilings.stream()
+                .filter(child -> CHILD_ENTITY_ID.equals(child.getEntityId()))
+                .findFirst()
+                .ifPresent(child -> child.deltaAt(null));
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {
