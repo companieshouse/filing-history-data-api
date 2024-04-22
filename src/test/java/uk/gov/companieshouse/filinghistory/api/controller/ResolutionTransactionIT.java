@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -50,6 +51,7 @@ import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.api.filinghistory.Resolution;
 import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
 @Testcontainers
 @AutoConfigureMockMvc
@@ -64,6 +66,7 @@ class ResolutionTransactionIT {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENTITY_ID = "1234567890";
+    private static final String SECOND_RESOLUTION_ENTITY_ID = "2234567890";
     private static final String CONTEXT_ID = "ABCD1234";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final String BARCODE = "AOPYXMJN";
@@ -166,7 +169,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
@@ -562,6 +565,276 @@ class ResolutionTransactionIT {
         verify(instantSupplier, times(2)).get();
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
 
+    }
+
+    @Test
+    void shouldUpdateExistingResolutionWhenChildHasNoDeltaAt() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
+                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        existingDocument.getData().getResolutions().getFirst().deltaAt(null);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/expected_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
+                .replaceAll("<first_resolution_entity_id>", SECOND_RESOLUTION_ENTITY_ID)
+                .replaceAll("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldAddChildToListWhenExistingListContainsChildWithNoEntityId() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
+                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        existingDocument.getData().getResolutions().getFirst().entityId(null);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/expected_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
+                .replaceAll("<second_resolution_entity_id>", SECOND_RESOLUTION_ENTITY_ID)
+                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        expectedDocument.getData().getResolutions().getFirst().entityId(null);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/resolutions/put_request_body_second_resolution.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<second_resolution_entity_id>", SECOND_RESOLUTION_ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldSuccessfullyHandleSingleGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        final String existingDocumentJson = IOUtils.resourceToString(
+                        "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        FilingHistoryResolution firstResolution = existingDocument.getData().getResolutions().getFirst();
+        firstResolution.deltaAt(null);
+        firstResolution.entityId(null);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        ExternalData expectedResponse = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .type("RESOLUTIONS")
+                .date("2015-06-10")
+                .category(ExternalData.CategoryEnum.RESOLUTION)
+                .description("resolution")
+                .descriptionValues(new DescriptionValues()
+                        .description("Resolutions"))
+                .links(new Links()
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                        .documentMetadata("http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
+                .paperFiled(true)
+                .pages(1)
+                .resolutions(List.of(
+                        new Resolution()
+                                .category(CategoryEnum.LIQUIDATION)
+                                .subcategory(List.of("voluntary", "resolution"))
+                                .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                .descriptionValues(new DescriptionValues()
+                                        .caseStartDate("2015-05-12"))
+                                .type("LRESSP")
+                                .originalDescription("original description"),
+                        new Resolution()
+                                .category(CategoryEnum.LIQUIDATION)
+                                .subcategory(List.of("voluntary", "resolution"))
+                                .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                .descriptionValues(new DescriptionValues()
+                                        .caseStartDate("2015-05-12"))
+                                .type("LRESSP")
+                                .originalDescription("original description")
+                                .deltaAt(EXISTING_DELTA_AT)
+                ));
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldSuccessfullyHandleListGetWhenDealingWithLegacyData() throws Exception {
+        // given
+        final String existingDocumentJson = IOUtils.resourceToString(
+                        "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+
+        FilingHistoryResolution firstResolution = existingDocument.getData().getResolutions().getFirst();
+        firstResolution.deltaAt(null);
+        firstResolution.entityId(null);
+
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryList expectedResponse = new FilingHistoryList()
+                .itemsPerPage(25)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(1)
+                .startIndex(0)
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .description("resolution")
+                        .type("RESOLUTIONS")
+                        .category(ExternalData.CategoryEnum.RESOLUTION)
+                        .links(new Links()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                                .documentMetadata("http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
+                        .paperFiled(true)
+                        .date("2015-06-10")
+                        .descriptionValues(new DescriptionValues()
+                                .description("Resolutions"))
+                        .pages(1)
+                        .resolutions(List.of(
+                                new Resolution()
+                                        .category(CategoryEnum.LIQUIDATION)
+                                        .subcategory(List.of("voluntary", "resolution"))
+                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .descriptionValues(new DescriptionValues()
+                                                .caseStartDate("2015-05-12"))
+                                        .type("LRESSP")
+                                        .originalDescription("original description"),
+                                new Resolution()
+                                        .category(CategoryEnum.LIQUIDATION)
+                                        .subcategory(List.of("voluntary", "resolution"))
+                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .descriptionValues(new DescriptionValues()
+                                                .caseStartDate("2015-05-12"))
+                                        .type("LRESSP")
+                                        .originalDescription("original description"))))
+                );
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {

@@ -204,9 +204,15 @@ class FilingHistoryControllerIT {
         final FilingHistoryDocument expectedDocument =
                 getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
                         List.of(new FilingHistoryAnnotation()
-                                .annotation("annotation")
+                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .category("annotation")
+                                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
+                                .description("annotation")
                                 .descriptionValues(new FilingHistoryDescriptionValues()
-                                        .description("description"))));
+                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                .type("ANNOTATION")
+                                .entityId("2234567890")
+                                .deltaAt("20140815230459600643")));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -257,9 +263,13 @@ class FilingHistoryControllerIT {
                                 .terminationDate("2014-08-29"))
                         .annotations(List.of(
                                 new Annotation()
-                                        .annotation("annotation")
+                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .category("annotation")
+                                        .date("2011-11-26")
+                                        .description("annotation")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("description"))))
+                                                .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .type("ANNOTATION")))
                         .links(new Links()
                                 .self(SELF_LINK)
                                 .documentMetadata(
@@ -362,9 +372,13 @@ class FilingHistoryControllerIT {
                                 .terminationDate("2014-08-29"))
                         .annotations(List.of(
                                 new Annotation()
-                                        .annotation("annotation")
+                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .category("annotation")
+                                        .date("2011-11-26")
+                                        .description("annotation")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("description"))))
+                                                .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .type("ANNOTATION")))
                         .links(new Links()
                                 .self(SELF_LINK)
                                 .documentMetadata(
@@ -412,9 +426,13 @@ class FilingHistoryControllerIT {
                         .terminationDate("2014-08-29"))
                 .annotations(List.of(
                         new Annotation()
-                                .annotation("annotation")
+                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .category("annotation")
+                                .date("2011-11-26")
+                                .description("annotation")
                                 .descriptionValues(new DescriptionValues()
-                                        .description("description"))))
+                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                .type("ANNOTATION")))
                 .links(new Links()
                         .self(SELF_LINK)
                         .documentMetadata("http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
@@ -772,6 +790,58 @@ class FilingHistoryControllerIT {
         result.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    void shouldUpdateDocumentAndReturn200OKWhenExistingDocumentHasNoDeltaAt() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        Document doc = Document.parse(jsonToInsert);
+        doc.remove("delta_at");
+        mongoTemplate.insert(doc, FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
+                        List.of(new FilingHistoryAnnotation()
+                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .category("annotation")
+                                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
+                                .description("annotation")
+                                .descriptionValues(new FilingHistoryDescriptionValues()
+                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                .type("ANNOTATION")
+                                .entityId("2234567890")
+                                .deltaAt("20140815230459600643")));
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .internalData(buildInternalData(deltaAt))
@@ -813,8 +883,8 @@ class FilingHistoryControllerIT {
     }
 
     private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
-            Integer pages,
-            List<FilingHistoryAnnotation> annotations) {
+                                                                          Integer pages,
+                                                                          List<FilingHistoryAnnotation> annotations) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
@@ -257,5 +258,29 @@ class ResolutionTransactionMapperTest {
         assertDoesNotThrow(executable);
     }
 
+    @Test
+    void shouldAddNewResolutionToExistingResolutionListWhenAChildIsMissingAnEntityId() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID))
+                .externalData(new ExternalData()
+                        .paperFiled(true));
+
+        List<FilingHistoryResolution> resolutions = new ArrayList<>();
+        resolutions.add(resolution);
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .resolutions(resolutions));
+
+        when(resolution.getEntityId()).thenReturn(null);
+
+        // when
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+
+        // then
+        verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
+        verifyNoMoreInteractions(resolutionChildMapper);
+    }
 
 }
