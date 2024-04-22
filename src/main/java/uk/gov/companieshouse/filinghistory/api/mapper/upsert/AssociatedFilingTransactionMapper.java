@@ -66,7 +66,7 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
                                             if (associatedFilingList.stream()
                                                     .anyMatch(associatedFiling ->
                                                             StringUtils.isBlank(associatedFiling.getEntityId()))) {
-                                                LOGGER.error(
+                                                LOGGER.info(
                                                         MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
                                                         DataMapHolder.getLogMap()
                                                 );

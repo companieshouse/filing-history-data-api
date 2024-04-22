@@ -69,7 +69,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                         () -> {
                                             if (resolutionList.stream()
                                                     .anyMatch(resolution -> StringUtils.isBlank(resolution.getEntityId()))) {
-                                                LOGGER.error(
+                                                LOGGER.info(
                                                         MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
                                                         DataMapHolder.getLogMap()
                                                 );
