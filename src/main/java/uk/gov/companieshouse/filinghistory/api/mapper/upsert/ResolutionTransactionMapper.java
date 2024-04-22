@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
 import java.time.Instant;
@@ -16,13 +15,10 @@ import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String MISSING_ENTITY_ID_ERROR_MSG =
             "Child found in MongoDB with no _entity_id; Possible duplicate being persisted with _entity_id: [%s]";
 
