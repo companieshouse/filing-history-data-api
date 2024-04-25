@@ -44,6 +44,8 @@ class AnnotationTransactionMapperTest {
     private AnnotationTransactionMapper annotationTransactionMapper;
 
     @Mock
+    private DataMapper dataMapper;
+    @Mock
     private AnnotationChildMapper annotationChildMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
@@ -61,7 +63,8 @@ class AnnotationTransactionMapperTest {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
-                        .entityId(ENTITY_ID))
+                        .entityId(ENTITY_ID)
+                        .parentEntityId(PARENT_ENTITY_ID))
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
@@ -181,13 +184,39 @@ class AnnotationTransactionMapperTest {
         final FilingHistoryData expected = new FilingHistoryData()
                 .annotations(List.of(annotation));
 
+        InternalData internalData = new InternalData()
+                .parentEntityId(PARENT_ENTITY_ID);
+        when(mockRequest.getInternalData()).thenReturn(internalData);
         when(annotationChildMapper.mapChild(any(), any())).thenReturn(annotation);
 
         // when
-        final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
+        final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest,
+                new FilingHistoryData());
 
         // then
         assertEquals(expected, actual);
+        verifyNoInteractions(dataMapper);
+    }
+
+    @Test
+    void shouldMapFilingHistoryDataWhenNewTopLevelAnnotation() {
+        // given
+        final FilingHistoryData expected = new FilingHistoryData()
+                .description("description")
+                .annotations(List.of(annotation));
+
+        when(mockRequest.getInternalData()).thenReturn(new InternalData());
+        when(mockRequest.getExternalData()).thenReturn(new ExternalData());
+        when(dataMapper.map(any(), any())).thenReturn(new FilingHistoryData().description("description"));
+        when(annotationChildMapper.mapChild(any(), any())).thenReturn(annotation);
+
+        // when
+        final FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(mockRequest,
+                new FilingHistoryData());
+
+        // then
+        assertEquals(expected, actual);
+        verify(dataMapper).map(new ExternalData(), new FilingHistoryData());
     }
 
     @Test
@@ -212,7 +241,8 @@ class AnnotationTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .annotations(list));
         // when
-        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request,
+                document);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -248,13 +278,14 @@ class AnnotationTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .annotations(list));
         // when
-        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request,
+                document);
 
         // then
         assertDoesNotThrow(executable);
     }
 
-        @Test
+    @Test
     void shouldAddNewAnnotationToExistingAnnotationListWhenAChildIsMissingAnEntityId() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()

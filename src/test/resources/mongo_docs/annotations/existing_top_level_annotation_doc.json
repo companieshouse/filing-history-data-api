@@ -1,0 +1,37 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<entity_id>",
+  "data" : {
+    "category" : "miscellaneous",
+    "date" : "2012-06-08T11:57:11Z",
+    "description" : "legacy",
+    "type" : "ANNOTATION",
+    "description_values" : {
+      "description" : "Clarification"
+    },
+    "annotations" : [
+      {
+        "annotation" : "Clarification",
+        "category" : "annotation",
+        "date" : "2012-06-08T11:57:11Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification"
+        },
+        "type" : "ANNOTATION",
+        "_entity_id": "<entity_id>",
+        "delta_at": "<delta_at>"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "original_description" : "Clarification",
+  "matched_default" : 1,
+  "updated_by": "context_id",
+  "updated_at": "2014-09-17T18:52:08.001Z",
+  "delta_at": "<delta_at>"
+}
