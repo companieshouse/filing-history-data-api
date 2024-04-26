@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Component
@@ -28,7 +29,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument) {
+                                                                               FilingHistoryDocument existingDocument,
+            Instant instant) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
                     request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
@@ -37,7 +39,7 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
         }
         existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
 
-        return mapTopLevelFields(request, existingDocument);
+        return mapTopLevelFields(request, existingDocument, instant);
     }
 
     @Override
@@ -47,7 +49,7 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-                                                      FilingHistoryDocument document) {
+                                                      FilingHistoryDocument document, Instant instant) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 
@@ -59,7 +61,6 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
                 .originalDescription(internalData.getOriginalDescription())
                 .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
                 .deltaAt(internalData.getDeltaAt())
-                .updatedAt(instantSupplier.get())
-                .updatedBy(internalData.getUpdatedBy());
+                .updated(new FilingHistoryDeltaTimestamp(instant, request.getInternalData().getUpdatedBy()));
     }
 }

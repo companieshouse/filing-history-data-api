@@ -90,7 +90,8 @@ class TopLevelTransactionMapperTest {
                 EXPECTED_DELTA_AT);
 
         // when
-        final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request);
+        final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request,
+                instant);
 
         // then
         assertEquals(expectedDocument, actualDocument);
@@ -120,7 +121,8 @@ class TopLevelTransactionMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument);
+        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+                instant);
 
         // then
         assertEquals(expectedDocument, actualDocument);
@@ -141,7 +143,8 @@ class TopLevelTransactionMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Executable executable = () -> topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument);
+        Executable executable = () -> topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+                instant);
 
         // then
         assertThrows(ConflictException.class, executable);

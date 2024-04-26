@@ -74,7 +74,7 @@ class ResolutionTransactionMapperTest {
         when(resolutionChildMapper.mapChild(any(), any())).thenReturn(resolution);
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
 
         // then
         verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
@@ -96,7 +96,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(resolutionList));
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
 
         // then
         verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
@@ -131,7 +131,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(list));
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
 
         // then
         verify(resolutionChildMapper).mapChild(resolutionWithEntityIdMatch, request);
@@ -172,7 +172,7 @@ class ResolutionTransactionMapperTest {
                 .deltaAt(NEWEST_REQUEST_DELTA_AT);
 
         // when
-        final FilingHistoryDocument actual = resolutionTransactionMapper.mapTopLevelFields(request, document);
+        final FilingHistoryDocument actual = resolutionTransactionMapper.mapTopLevelFields(request, document, instant);
 
         // then
         assertEquals(expected, actual);
@@ -216,7 +216,8 @@ class ResolutionTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .resolutions(list));
         // when
-        Executable executable = () -> resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        Executable executable = () -> resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document,
+                instant);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -252,7 +253,8 @@ class ResolutionTransactionMapperTest {
                 .data(new FilingHistoryData()
                         .resolutions(list));
         // when
-        Executable executable = () -> resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        Executable executable = () -> resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document,
+                instant);
 
         // then
         assertDoesNotThrow(executable);
@@ -276,7 +278,7 @@ class ResolutionTransactionMapperTest {
         when(resolution.getEntityId()).thenReturn(null);
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
 
         // then
         verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);

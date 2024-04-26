@@ -39,7 +39,8 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument) {
+            FilingHistoryDocument existingDocument,
+            Instant instant) {
 
         final String requestEntityId = request.getInternalData().getEntityId();
 
@@ -82,12 +83,12 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                             mapFilingHistoryData(request, existingDocument.getData());
                         }
                 );
-        return mapTopLevelFields(request, existingDocument);
+        return mapTopLevelFields(request, existingDocument, instant);
     }
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-            FilingHistoryDocument document) {
+            FilingHistoryDocument document, Instant instant) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());
