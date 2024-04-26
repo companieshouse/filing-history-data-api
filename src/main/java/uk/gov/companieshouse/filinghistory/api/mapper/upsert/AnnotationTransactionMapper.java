@@ -17,9 +17,6 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @Component
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
-    private static final String MISSING_ENTITY_ID_ERROR_MSG =
-            "Child found in MongoDB with no _entity_id; Possible duplicate being persisted with _entity_id: [%s]";
-
     private final DataMapper dataMapper;
     private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
     private final Supplier<Instant> instantSupplier;
@@ -55,8 +52,11 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                 .ifPresentOrElse(annotation -> {
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     annotation.getDeltaAt())) {
-                                                throw new ConflictException(
-                                                        "Delta at stale when updating annotation");
+                                                LOGGER.error(STALE_DELTA_ERROR_MESSAGE.formatted(
+                                                                request.getInternalData().getDeltaAt(),
+                                                                annotation.getDeltaAt()),
+                                                        DataMapHolder.getLogMap());
+                                                throw new ConflictException("Stale delta when updating annotation");
                                             }
                                             // Update already existing annotation from list
                                             annotationChildMapper.mapChild(annotation, request);

@@ -17,15 +17,12 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @Component
 public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper {
 
-    private static final String MISSING_ENTITY_ID_ERROR_MSG =
-            "Child found in MongoDB with no _entity_id; Possible duplicate being persisted with _entity_id: [%s]";
-
     private final ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public AssociatedFilingTransactionMapper(LinksMapper linksMapper,
-                                             ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper,
-                                             Supplier<Instant> instantSupplier) {
+            ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper,
+            Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.associatedFilingChildMapper = associatedFilingChildMapper;
         this.instantSupplier = instantSupplier;
@@ -39,7 +36,7 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument) {
+            FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingDocument.getData().getAssociatedFilings())
@@ -50,8 +47,12 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
                                 .ifPresentOrElse(associatedFiling -> {
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     associatedFiling.getDeltaAt())) {
+                                                LOGGER.error(STALE_DELTA_ERROR_MESSAGE.formatted(
+                                                                request.getInternalData().getDeltaAt(),
+                                                                associatedFiling.getDeltaAt()),
+                                                        DataMapHolder.getLogMap());
                                                 throw new ConflictException(
-                                                        "Delta at stale when updating associated filing");
+                                                        "Stale delta when updating associated filing");
                                             }
                                             // Update already existing associated filing from existing list
                                             associatedFilingChildMapper.mapChild(associatedFiling, request);
@@ -77,7 +78,8 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
     }
 
     @Override
-    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document) {
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
+            FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());
