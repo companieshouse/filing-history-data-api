@@ -46,7 +46,9 @@ import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -158,7 +160,8 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -225,7 +228,8 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -276,11 +280,12 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
-    void shouldUpdateNoParentDocumentWithParentFieldsAndNotChangeAnnotationAndReturn200OK() throws Exception {
+    void shouldInsertParentFieldsAndNotChangeAnnotationAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_annotation_doc_with_no_parent.json", StandardCharsets.UTF_8);
@@ -342,7 +347,8 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -407,7 +413,8 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -473,11 +480,13 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
-    void shouldThrowConflictExceptionWhenUpdatingChildAnnotationWithStaleDeltaAtAndReturn409Conflict() throws Exception {
+    void shouldThrowConflictExceptionWhenUpdatingChildAnnotationWithStaleDeltaAtAndReturn409Conflict()
+            throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
@@ -587,7 +596,8 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -660,7 +670,8 @@ class AnnotationTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -690,7 +701,7 @@ class AnnotationTransactionIT {
                 .barcode(BARCODE)
                 .type("TM01")
                 .date("2014-09-15")
-                .category(ExternalData.CategoryEnum.OFFICERS)
+                .category(CategoryEnum.OFFICERS)
                 .description("termination-director-company-with-name-termination-date")
                 .subcategory("termination")
                 .descriptionValues(new DescriptionValues()
@@ -701,12 +712,14 @@ class AnnotationTransactionIT {
                         .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
                 .annotations(List.of(
                         new Annotation()
-                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                 .category("annotation")
                                 .date("2011-11-26")
                                 .description("annotation")
                                 .descriptionValues(new DescriptionValues()
-                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                 .type("ANNOTATION")
                 ));
 
@@ -717,7 +730,8 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                ExternalData.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -750,7 +764,7 @@ class AnnotationTransactionIT {
                         .barcode(BARCODE)
                         .type("TM01")
                         .date("2014-09-15")
-                        .category(ExternalData.CategoryEnum.OFFICERS)
+                        .category(CategoryEnum.OFFICERS)
                         .description("termination-director-company-with-name-termination-date")
                         .subcategory("termination")
                         .descriptionValues(new DescriptionValues()
@@ -761,17 +775,319 @@ class AnnotationTransactionIT {
                                 .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
                         .annotations(List.of(
                                 new Annotation()
-                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .annotation(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                         .category("annotation")
                                         .date("2011-11-26")
                                         .description("annotation")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                                .description(
+                                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                         .type("ANNOTATION")
                         ))))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryList.FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .startIndex(0);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        final String actualResponse = result.andReturn().getResponse().getContentAsString();
+        final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldInsertTopLevelAnnotationDocumentAndReturn200OK() throws Exception {
+        // given
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/expected_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT);
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        expectedDocument.updatedAt(actualDocument.getUpdatedAt());
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldUpdateExistingTopLevelAnnotationDocumentAndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/expected_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT);
+        FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        expectedDocument.updatedAt(actualDocument.getUpdatedAt());
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldAddChildAnnotationToTopLevelAnnotationDocumentAndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/expected_top_level_annotation_doc_with_child_annotation.json",
+                StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldThrowConflictExceptionWhenUpdatingTopLevelAnnotationWithStaleDeltaAtAndReturn409Conflict()
+            throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", STALE_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID);
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isConflict());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+
+        // Assert existing doc is unchanged
+        assertEquals(existingDocument, actualDocument);
+
+        verifyNoMoreInteractions(instantSupplier);
+    }
+
+    @Test
+    void shouldSuccessfullyHandleSingleGetWhenDealingTopLevelAnnotation() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        ExternalData expectedResponse = new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .type("ANNOTATION")
+                .date("2012-06-08")
+                .category(CategoryEnum.MISCELLANEOUS)
+                .description("legacy")
+                .descriptionValues(new DescriptionValues()
+                        .description("Clarification"))
+                .links(new Links()
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                .paperFiled(true);
+
+        // when
+        ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID));
+
+        // then
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                ExternalData.class);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldSuccessfullyHandleListGetWhenDealingWithTopLevelAnnotation() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryList expectedObject = new FilingHistoryList()
+                .items(List.of(new ExternalData()
+                        .transactionId(TRANSACTION_ID)
+                        .type("ANNOTATION")
+                        .date("2012-06-08")
+                        .category(CategoryEnum.MISCELLANEOUS)
+                        .description("legacy")
+                        .descriptionValues(new DescriptionValues()
+                                .description("Clarification"))
+                        .links(new Links()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                        .paperFiled(true)))
+                .itemsPerPage(25)
+                .totalCount(1)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .startIndex(0);
 
         // when

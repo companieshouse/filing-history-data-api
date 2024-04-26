@@ -19,15 +19,12 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 @Component
 public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
-    private static final String MISSING_ENTITY_ID_ERROR_MSG =
-            "Child found in MongoDB with no _entity_id; Possible duplicate being persisted with _entity_id: [%s]";
-
     private final DataMapper dataMapper;
     private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public ResolutionTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
-                                       ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
+            ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.resolutionChildMapper = resolutionChildMapper;
@@ -42,7 +39,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument) {
+            FilingHistoryDocument existingDocument) {
 
         final String requestEntityId = request.getInternalData().getEntityId();
 
@@ -54,8 +51,11 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                 .ifPresentOrElse(resolution -> {
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     resolution.getDeltaAt())) {
-                                                throw new ConflictException(
-                                                        "Delta at stale when updating resolution");
+                                                LOGGER.error(STALE_DELTA_ERROR_MESSAGE.formatted(
+                                                                request.getInternalData().getDeltaAt(),
+                                                                resolution.getDeltaAt()),
+                                                        DataMapHolder.getLogMap());
+                                                throw new ConflictException("Stale delta when updating resolution");
                                             }
 
                                             // Update already existing resolution from list
@@ -64,7 +64,8 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                         // Add new resolution to existing resolutions list
                                         () -> {
                                             if (resolutionList.stream()
-                                                    .anyMatch(resolution -> StringUtils.isBlank(resolution.getEntityId()))) {
+                                                    .anyMatch(resolution -> StringUtils.isBlank(
+                                                            resolution.getEntityId()))) {
                                                 LOGGER.info(
                                                         MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
                                                         DataMapHolder.getLogMap()
@@ -86,7 +87,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-                                                      FilingHistoryDocument document) {
+            FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());

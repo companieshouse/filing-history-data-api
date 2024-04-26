@@ -1,0 +1,49 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<entity_id>",
+  "data" : {
+    "category" : "miscellaneous",
+    "date" : "2012-06-08T11:57:11Z",
+    "description" : "legacy",
+    "type" : "ANNOTATION",
+    "description_values" : {
+      "description" : "Clarification"
+    },
+    "annotations" : [
+      {
+        "annotation" : "Clarification",
+        "category" : "annotation",
+        "date" : "2012-06-08T11:57:11Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification"
+        },
+        "type" : "ANNOTATION",
+        "_entity_id": "<entity_id>",
+        "delta_at": "<delta_at>"
+      },
+      {
+        "category" : "annotation",
+        "annotation": "Clarification This document was second filed with the CH04 registered on 26/11/2011",
+        "type": "ANNOTATION",
+        "date" : "2011-11-26T11:27:55.000Z",
+        "description" : "annotation",
+        "description_values" : {
+          "description" : "Clarification This document was second filed with the CH04 registered on 26/11/2011"
+        },
+        "_entity_id": "<child_entity_id>",
+        "delta_at": "<child_delta_at>"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "original_description" : "Clarification",
+  "matched_default" : 1,
+  "updated_by": "context_id",
+  "updated_at": "<updated_at>",
+  "delta_at": "<delta_at>"
+}

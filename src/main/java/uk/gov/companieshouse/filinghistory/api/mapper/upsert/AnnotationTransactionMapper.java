@@ -17,28 +17,31 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @Component
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
-    private static final String MISSING_ENTITY_ID_ERROR_MSG =
-            "Child found in MongoDB with no _entity_id; Possible duplicate being persisted with _entity_id: [%s]";
-
+    private final DataMapper dataMapper;
     private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
-                                       ChildMapper<FilingHistoryAnnotation> annotationChildMapper,
-                                       Supplier<Instant> instantSupplier) {
+            DataMapper dataMapper,
+            ChildMapper<FilingHistoryAnnotation> annotationChildMapper,
+            Supplier<Instant> instantSupplier) {
         super(linksMapper);
+        this.dataMapper = dataMapper;
         this.annotationChildMapper = annotationChildMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
+            data = dataMapper.map(request.getExternalData(), data);
+        }
         return data.annotations(List.of(annotationChildMapper.mapChild(new FilingHistoryAnnotation(), request)));
     }
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument) {
+            FilingHistoryDocument existingDocument) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingDocument.getData().getAnnotations())
@@ -49,8 +52,11 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                 .ifPresentOrElse(annotation -> {
                                             if (isDeltaStale(request.getInternalData().getDeltaAt(),
                                                     annotation.getDeltaAt())) {
-                                                throw new ConflictException(
-                                                        "Delta at stale when updating annotation");
+                                                LOGGER.error(STALE_DELTA_ERROR_MESSAGE.formatted(
+                                                                request.getInternalData().getDeltaAt(),
+                                                                annotation.getDeltaAt()),
+                                                        DataMapHolder.getLogMap());
+                                                throw new ConflictException("Stale delta when updating annotation");
                                             }
                                             // Update already existing annotation from list
                                             annotationChildMapper.mapChild(annotation, request);
@@ -76,12 +82,25 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document) {
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
+            FilingHistoryDocument document) {
+        document.getData().paperFiled(request.getExternalData().getPaperFiled());
+
         final InternalData internalData = request.getInternalData();
 
-        document.getData().paperFiled(request.getExternalData().getPaperFiled());
+        if (StringUtils.isBlank(internalData.getParentEntityId())) {
+            document
+                    .entityId(internalData.getEntityId())
+                    .barcode(request.getExternalData().getBarcode())
+                    .documentId(internalData.getDocumentId())
+                    .deltaAt(internalData.getDeltaAt())
+                    .matchedDefault(internalData.getMatchedDefault())
+                    .originalDescription(internalData.getOriginalDescription());
+        } else {
+            document
+                    .entityId(internalData.getParentEntityId());
+        }
         return document
-                .entityId(internalData.getParentEntityId())
                 .companyNumber(internalData.getCompanyNumber())
                 .updatedAt(instantSupplier.get())
                 .updatedBy(internalData.getUpdatedBy());

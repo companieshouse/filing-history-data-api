@@ -41,6 +41,9 @@ public class FilingHistoryDocument {
     @Field("updated_by")
     @JsonProperty("updated_by")
     private String updatedBy;
+    @Field("matched_default")
+    @JsonProperty("matched_default")
+    private Integer matchedDefault;
 
     public String getTransactionId() {
         return transactionId;
@@ -141,6 +144,15 @@ public class FilingHistoryDocument {
         return this;
     }
 
+    public Integer getMatchedDefault() {
+        return matchedDefault;
+    }
+
+    public FilingHistoryDocument matchedDefault(Integer matchedDefault) {
+        this.matchedDefault = matchedDefault;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -150,18 +162,19 @@ public class FilingHistoryDocument {
             return false;
         }
         FilingHistoryDocument that = (FilingHistoryDocument) o;
-        return Objects.equals(transactionId, that.transactionId) && Objects.equals(entityId, that.entityId)
-                && Objects.equals(companyNumber, that.companyNumber) && Objects.equals(documentId, that.documentId)
-                && Objects.equals(barcode, that.barcode) && Objects.equals(data, that.data) && Objects.equals(
-                originalDescription, that.originalDescription) && Objects.equals(originalValues, that.originalValues)
-                && Objects.equals(deltaAt, that.deltaAt) && Objects.equals(updatedAt, that.updatedAt) && Objects.equals(
-                updatedBy, that.updatedBy);
+        return Objects.equals(transactionId, that.transactionId) && Objects.equals(entityId,
+                that.entityId) && Objects.equals(companyNumber, that.companyNumber) && Objects.equals(
+                documentId, that.documentId) && Objects.equals(barcode, that.barcode) && Objects.equals(
+                data, that.data) && Objects.equals(originalDescription, that.originalDescription)
+                && Objects.equals(originalValues, that.originalValues) && Objects.equals(deltaAt,
+                that.deltaAt) && Objects.equals(updatedAt, that.updatedAt) && Objects.equals(updatedBy,
+                that.updatedBy) && Objects.equals(matchedDefault, that.matchedDefault);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(transactionId, entityId, companyNumber, documentId, barcode, data, originalDescription,
-                originalValues, deltaAt, updatedAt, updatedBy);
+                originalValues, deltaAt, updatedAt, updatedBy, matchedDefault);
     }
 
     @Override
@@ -178,6 +191,7 @@ public class FilingHistoryDocument {
                 ", deltaAt='" + deltaAt + '\'' +
                 ", updatedAt=" + updatedAt +
                 ", updatedBy='" + updatedBy + '\'' +
+                ", matchedDefault='" + matchedDefault + '\'' +
                 '}';
     }
 }
