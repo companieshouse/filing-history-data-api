@@ -8,10 +8,6 @@ public class FilingHistoryDeltaTimestamp {
     private Instant at;
     private String by;
 
-    public FilingHistoryDeltaTimestamp(Instant at, String by) {
-        this.at = at;
-        this.by = by;
-    }
 
     public Instant getAt() {
         return at;

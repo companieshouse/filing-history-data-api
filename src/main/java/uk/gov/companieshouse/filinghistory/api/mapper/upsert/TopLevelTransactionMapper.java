@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
+
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
@@ -9,21 +11,18 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Component
 public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
-    private final Supplier<Instant> instantSupplier;
     private final OriginalValuesMapper originalValuesMapper;
 
-    public TopLevelTransactionMapper(DataMapper dataMapper, Supplier<Instant> instantSupplier,
+    public TopLevelTransactionMapper(DataMapper dataMapper,
             OriginalValuesMapper originalValuesMapper, LinksMapper linksMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
-        this.instantSupplier = instantSupplier;
         this.originalValuesMapper = originalValuesMapper;
     }
 
@@ -61,6 +60,6 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
                 .originalDescription(internalData.getOriginalDescription())
                 .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
                 .deltaAt(internalData.getDeltaAt())
-                .updated(new FilingHistoryDeltaTimestamp(instant, request.getInternalData().getUpdatedBy()));
+                .updated(makeNewTimeStampObject(instant, internalData.getUpdatedBy()));
     }
 }

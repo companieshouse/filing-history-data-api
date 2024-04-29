@@ -276,7 +276,7 @@ class AnnotationTransactionIT {
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
-        expectedDocument.updatedAt(actualDocument.getUpdatedAt());
+        expectedDocument.updated(actualDocument.getUpdated());
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();

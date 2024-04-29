@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
@@ -137,8 +138,9 @@ class ItemGetResponseMapperTest {
                         .barcode(BARCODE)
                         .deltaAt("20140815230459600643")
                         .entityId("1234567890")
-                        .updatedAt(Instant.now())
-                        .updatedBy("5419d856b6a59f32b7684d0e")
+                        .updated(new FilingHistoryDeltaTimestamp()
+                                .at(Instant.now())
+                                .by("5419d856b6a59f32b7684d0e"))
                         .originalValues(new FilingHistoryOriginalValues()
                                 .officerName("John Tester")
                                 .resignationDate("29/08/2014"))
@@ -238,8 +240,9 @@ class ItemGetResponseMapperTest {
                 .barcode(BARCODE)
                 .deltaAt("20140815230459600643")
                 .entityId("1234567890")
-                .updatedAt(Instant.now())
-                .updatedBy("5419d856b6a59f32b7684d0e")
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(Instant.now())
+                        .by("5419d856b6a59f32b7684d0e"))
                 .originalValues(new FilingHistoryOriginalValues()
                         .officerName("John Tester")
                         .resignationDate("29/08/2014"))
@@ -264,8 +267,9 @@ class ItemGetResponseMapperTest {
                 .barcode(BARCODE)
                 .deltaAt("20140815230459600643")
                 .entityId("1234567890")
-                .updatedAt(Instant.now())
-                .updatedBy("5419d856b6a59f32b7684d0e")
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(Instant.now())
+                        .by("5419d856b6a59f32b7684d0e"))
                 .originalValues(new FilingHistoryOriginalValues()
                         .officerName("John Tester")
                         .resignationDate("29/08/2014"))

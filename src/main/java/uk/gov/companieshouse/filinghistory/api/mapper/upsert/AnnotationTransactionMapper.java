@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +14,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Component
@@ -20,16 +21,13 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
     private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
-    private final Supplier<Instant> instantSupplier;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
             DataMapper dataMapper,
-            ChildMapper<FilingHistoryAnnotation> annotationChildMapper,
-            Supplier<Instant> instantSupplier) {
+            ChildMapper<FilingHistoryAnnotation> annotationChildMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.annotationChildMapper = annotationChildMapper;
-        this.instantSupplier = instantSupplier;
     }
 
     @Override
@@ -103,6 +101,6 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
         }
         return document
                 .companyNumber(internalData.getCompanyNumber())
-                .updated(new FilingHistoryDeltaTimestamp(instant, request.getInternalData().getUpdatedBy()));
+                .updated(makeNewTimeStampObject(instant, internalData.getUpdatedBy()));
     }
 }

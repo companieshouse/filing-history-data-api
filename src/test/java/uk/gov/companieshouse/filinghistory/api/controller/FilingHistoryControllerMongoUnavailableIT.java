@@ -144,7 +144,7 @@ class FilingHistoryControllerMongoUnavailableIT {
         // then
         result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
 
-        verify(instantSupplier, times(0)).get();
+        verify(instantSupplier, times(1)).get();
         WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 

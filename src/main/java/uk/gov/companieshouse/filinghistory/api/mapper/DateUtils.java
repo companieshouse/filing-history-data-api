@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 
 public final class DateUtils {
 
@@ -20,5 +21,9 @@ public final class DateUtils {
         return Optional.ofNullable(inputDate)
                 .map(date -> LocalDate.ofInstant(date, ZoneOffset.UTC).toString())
                 .orElse(null);
+    }
+
+    public static FilingHistoryDeltaTimestamp makeNewTimeStampObject(final Instant inputTimeStamp, final String contextId) {
+        return new FilingHistoryDeltaTimestamp().at(inputTimeStamp).by(contextId);
     }
 }

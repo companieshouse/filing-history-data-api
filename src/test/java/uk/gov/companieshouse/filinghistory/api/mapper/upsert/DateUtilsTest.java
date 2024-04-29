@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 
 class DateUtilsTest {
 
@@ -53,5 +54,18 @@ class DateUtilsTest {
 
         // then
         assertNull(actual);
+    }
+
+    @Test
+    void shouldReturnNewDeltaTimeStampObject() {
+        // given
+        FilingHistoryDeltaTimestamp expected = new FilingHistoryDeltaTimestamp()
+                .at(Instant.now()).by("context_id");
+
+        // when
+        FilingHistoryDeltaTimestamp actual = DateUtils.makeNewTimeStampObject(Instant.now(), "context_id");
+
+        //then
+        assertEquals(expected, actual);
     }
 }

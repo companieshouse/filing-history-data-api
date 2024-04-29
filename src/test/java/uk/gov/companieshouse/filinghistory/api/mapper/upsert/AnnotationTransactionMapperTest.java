@@ -27,6 +27,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +39,7 @@ class AnnotationTransactionMapperTest {
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final String STALE_REQUEST_DELTA_AT = "20131025185208001000";
+    private static final Instant INSTANT = Instant.now();
     private static final String UPDATED_BY = "84746291";
 
     @InjectMocks
@@ -74,7 +76,7 @@ class AnnotationTransactionMapperTest {
         when(annotationChildMapper.mapChild(any(), any())).thenReturn(annotation);
 
         // when
-        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
@@ -96,7 +98,7 @@ class AnnotationTransactionMapperTest {
                         .annotations(annotationList));
 
         // when
-        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
@@ -131,7 +133,7 @@ class AnnotationTransactionMapperTest {
                         .annotations(list));
 
         // when
-        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(annotationChildMapper).mapChild(annotationWithEntityIdMatch, request);
@@ -169,10 +171,12 @@ class AnnotationTransactionMapperTest {
                         .paperFiled(true))
                 .entityId(PARENT_ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
-                .updatedBy(UPDATED_BY);
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(INSTANT)
+                        .by(UPDATED_BY));
 
         // when
-        final FilingHistoryDocument actual = annotationTransactionMapper.mapTopLevelFields(request, document, instant);
+        final FilingHistoryDocument actual = annotationTransactionMapper.mapTopLevelFields(request, document, INSTANT);
 
         // then
         assertEquals(expected, actual);
@@ -243,7 +247,7 @@ class AnnotationTransactionMapperTest {
         // when
         Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request,
                 document,
-                instant);
+                INSTANT);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -281,7 +285,7 @@ class AnnotationTransactionMapperTest {
         // when
         Executable executable = () -> annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request,
                 document,
-                instant);
+                INSTANT);
 
         // then
         assertDoesNotThrow(executable);
@@ -305,7 +309,7 @@ class AnnotationTransactionMapperTest {
         when(annotation.getEntityId()).thenReturn(null);
 
         // when
-        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);

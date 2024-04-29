@@ -49,7 +49,6 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
             LOGGER.error("Request body missing required field", DataMapHolder.getLogMap());
             throw new BadRequestException("Required field missing");
         }
-
         Instant instant = instantSupplier.get();
 
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(transactionKind);

@@ -27,6 +27,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +39,7 @@ class AssociatedFilingTransactionMapperTest {
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final String STALE_REQUEST_DELTA_AT = "20131025185208001000";
+    private static final Instant INSTANT = Instant.now();
     private static final String UPDATED_BY = "84746291";
 
     @InjectMocks
@@ -70,7 +72,7 @@ class AssociatedFilingTransactionMapperTest {
         when(associatedFilingChildMapper.mapChild(any(), any())).thenReturn(associatedFiling);
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
@@ -92,7 +94,7 @@ class AssociatedFilingTransactionMapperTest {
                         .associatedFilings(associatedFilingList));
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
@@ -127,7 +129,7 @@ class AssociatedFilingTransactionMapperTest {
                         .associatedFilings(list));
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(associatedFilingChildMapper).mapChild(associatedFilingWithEntityIdMatch, request);
@@ -165,11 +167,13 @@ class AssociatedFilingTransactionMapperTest {
                         .paperFiled(true))
                 .entityId(PARENT_ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
-                .updatedBy(UPDATED_BY);
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(INSTANT)
+                        .by(UPDATED_BY));
 
         // when
         final FilingHistoryDocument actual = associatedFilingTransactionMapper.mapTopLevelFields(request, document,
-                instant);
+                INSTANT);
 
         // then
         assertEquals(expected, actual);
@@ -213,7 +217,7 @@ class AssociatedFilingTransactionMapperTest {
                         .associatedFilings(list));
         // when
         Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document,
-                instant);
+                INSTANT);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -250,7 +254,7 @@ class AssociatedFilingTransactionMapperTest {
                         .associatedFilings(list));
         // when
         Executable executable = () -> associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document,
-                instant);
+                INSTANT);
 
         // then
         assertDoesNotThrow(executable);
@@ -274,7 +278,7 @@ class AssociatedFilingTransactionMapperTest {
         when(associatedFiling.getEntityId()).thenReturn(null);
 
         // when
-        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);

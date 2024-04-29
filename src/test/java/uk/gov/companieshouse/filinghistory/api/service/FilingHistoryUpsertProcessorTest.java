@@ -8,7 +8,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -32,6 +34,7 @@ class FilingHistoryUpsertProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final Instant INSTANT = Instant.now();
 
     @InjectMocks
     private FilingHistoryUpsertProcessor filingHistoryProcessor;
@@ -50,7 +53,8 @@ class FilingHistoryUpsertProcessorTest {
     private Validator<InternalFilingHistoryApi> topLevelPutRequestValidator;
     @Mock
     private FilingHistoryDocumentCopier filingHistoryDocumentCopier;
-
+    @Mock
+    private Supplier<Instant> instantSupplier;
     @Mock
     private InternalFilingHistoryApi request;
     @Mock
@@ -67,12 +71,13 @@ class FilingHistoryUpsertProcessorTest {
     void shouldSuccessfullyCallSaveWhenInsert() {
         // given
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
+        when(instantSupplier.get()).thenReturn(INSTANT);
         when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
-        when(topLevelMapper.mapNewFilingHistory(anyString(), any(), instant)).thenReturn(documentToUpsert);
+        when(topLevelMapper.mapNewFilingHistory(anyString(), any(), any())).thenReturn(documentToUpsert);
 
         // when
         filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -81,7 +86,8 @@ class FilingHistoryUpsertProcessorTest {
         verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verifyNoInteractions(filingHistoryDocumentCopier);
-        verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request, instant);
+        verify(instantSupplier).get();
+        verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
         verify(filingHistoryService).insertFilingHistory(documentToUpsert);
     }
@@ -89,6 +95,7 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenUpdate() {
         // given
+        when(instantSupplier.get()).thenReturn(INSTANT);
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
         when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
@@ -97,7 +104,7 @@ class FilingHistoryUpsertProcessorTest {
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(filingHistoryDocumentCopier.deepCopy(any())).thenReturn(existingDocumentCopy);
         when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any(FilingHistoryDocument.class),
-                instant)).thenReturn(documentToUpsert);
+                any())).thenReturn(documentToUpsert);
 
         // when
         filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -105,7 +112,8 @@ class FilingHistoryUpsertProcessorTest {
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
-        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, instant);
+        verify(instantSupplier).get();
+        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
         verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocumentCopy);
     }
@@ -113,13 +121,14 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
         // given
+        when(instantSupplier.get()).thenReturn(INSTANT);
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
         when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
-        when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any(), instant)).thenThrow(ConflictException.class);
+        when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any(), any())).thenThrow(ConflictException.class);
 
         // when
         Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -128,7 +137,8 @@ class FilingHistoryUpsertProcessorTest {
         assertThrows(ConflictException.class, executable);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
-        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, instant);
+        verify(instantSupplier).get();
+        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
     }
@@ -136,6 +146,7 @@ class FilingHistoryUpsertProcessorTest {
     @Test
     void shouldThrowServiceUnavailableWhenFindingDocumentInDB() {
         // given
+        when(instantSupplier.get()).thenReturn(INSTANT);
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
         when(topLevelPutRequestValidator.isValid(any())).thenReturn(true);
         when(request.getInternalData()).thenReturn(internalData);

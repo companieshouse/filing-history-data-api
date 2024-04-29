@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -21,14 +21,12 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
     private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
-    private final Supplier<Instant> instantSupplier;
 
     public ResolutionTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
-            ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
+            ChildMapper<FilingHistoryResolution> resolutionChildMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.resolutionChildMapper = resolutionChildMapper;
-        this.instantSupplier = instantSupplier;
     }
 
     @Override
@@ -97,8 +95,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                 .companyNumber(internalData.getCompanyNumber())
                 .entityId(internalData.getEntityId())
                 .deltaAt(internalData.getDeltaAt())
-                .updatedAt(instantSupplier.get())
-                .updatedBy(internalData.getUpdatedBy())
+                .updated(makeNewTimeStampObject(instant, internalData.getUpdatedBy()))
                 .barcode(request.getExternalData().getBarcode())
                 .originalDescription(internalData.getOriginalDescription());
     }

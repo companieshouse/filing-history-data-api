@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
@@ -38,7 +39,7 @@ class TopLevelTransactionMapperTest {
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
-    private static final Instant UPDATED_AT = Instant.now();
+    private static final Instant INSTANT = Instant.now();
     private static final String UPDATED_BY = "84746291";
     private static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
 
@@ -76,7 +77,6 @@ class TopLevelTransactionMapperTest {
     void mapNewFilingHistoryShouldReturnNewFilingHistoryDocumentWithMappedFields() {
         // given
         when(dataMapper.map((any()), any())).thenReturn(expectedFilingHistoryData);
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(requestExternalData.getLinks()).thenReturn(requestLinks);
         when(linksMapper.map(any())).thenReturn(expectedFilingHistoryLinks);
         when(expectedFilingHistoryData.links(any())).thenReturn(expectedFilingHistoryData);
@@ -91,12 +91,11 @@ class TopLevelTransactionMapperTest {
 
         // when
         final FilingHistoryDocument actualDocument = topLevelMapper.mapNewFilingHistory(TRANSACTION_ID, request,
-                instant);
+                INSTANT);
 
         // then
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, new FilingHistoryData());
-        verify(instantSupplier).get();
         verify(originalValuesMapper).map(requestOriginalValues);
         verify(linksMapper).map(requestLinks);
     }
@@ -105,7 +104,6 @@ class TopLevelTransactionMapperTest {
     void mapFilingHistoryUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
         // given
         when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
@@ -122,12 +120,11 @@ class TopLevelTransactionMapperTest {
 
         // when
         FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
-                instant);
+                INSTANT);
 
         // then
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
-        verify(instantSupplier).get();
         verify(originalValuesMapper).map(requestOriginalValues);
     }
 
@@ -144,7 +141,7 @@ class TopLevelTransactionMapperTest {
 
         // when
         Executable executable = () -> topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
-                instant);
+                INSTANT);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -173,6 +170,8 @@ class TopLevelTransactionMapperTest {
 
     private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
                                                            FilingHistoryOriginalValues originalValues, String deltaAt) {
+        FilingHistoryDeltaTimestamp createdUpdatedObject = new FilingHistoryDeltaTimestamp()
+                .at(INSTANT).by(UPDATED_BY);
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .entityId(ENTITY_ID)
@@ -183,7 +182,7 @@ class TopLevelTransactionMapperTest {
                 .originalDescription(ORIGINAL_DESCRIPTION)
                 .originalValues(originalValues)
                 .deltaAt(deltaAt)
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY);
+                .updated(createdUpdatedObject)
+                .created(createdUpdatedObject);
     }
 }

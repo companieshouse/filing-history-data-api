@@ -56,6 +56,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
@@ -907,8 +908,9 @@ class FilingHistoryControllerIT {
                 .barcode(BARCODE)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY)
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(UPDATED_AT)
+                        .by(UPDATED_BY))
                 .originalValues(new FilingHistoryOriginalValues()
                         .officerName(OFFICER_NAME)
                         .resignationDate(RESIGNATION_DATE))

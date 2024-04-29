@@ -26,6 +26,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
@@ -37,6 +38,7 @@ class ResolutionTransactionMapperTest {
     private static final String EXISTING_DOCUMENT_DELTA_AT = "20140916230459600643";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final String STALE_REQUEST_DELTA_AT = "20131025185208001000";
+    private static final Instant INSTANT = Instant.now();
     private static final String UPDATED_BY = "84746291";
 
     @InjectMocks
@@ -74,7 +76,7 @@ class ResolutionTransactionMapperTest {
         when(resolutionChildMapper.mapChild(any(), any())).thenReturn(resolution);
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
@@ -96,7 +98,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(resolutionList));
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
@@ -131,7 +133,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(list));
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(resolutionChildMapper).mapChild(resolutionWithEntityIdMatch, request);
@@ -168,11 +170,13 @@ class ResolutionTransactionMapperTest {
                         .resolutions(list)
                         .paperFiled(true))
                 .companyNumber(COMPANY_NUMBER)
-                .updatedBy(UPDATED_BY)
-                .deltaAt(NEWEST_REQUEST_DELTA_AT);
+                .deltaAt(NEWEST_REQUEST_DELTA_AT)
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(INSTANT)
+                        .by(UPDATED_BY));
 
         // when
-        final FilingHistoryDocument actual = resolutionTransactionMapper.mapTopLevelFields(request, document, instant);
+        final FilingHistoryDocument actual = resolutionTransactionMapper.mapTopLevelFields(request, document, INSTANT);
 
         // then
         assertEquals(expected, actual);
@@ -217,7 +221,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(list));
         // when
         Executable executable = () -> resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document,
-                instant);
+                INSTANT);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -254,7 +258,7 @@ class ResolutionTransactionMapperTest {
                         .resolutions(list));
         // when
         Executable executable = () -> resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document,
-                instant);
+                INSTANT);
 
         // then
         assertDoesNotThrow(executable);
@@ -278,7 +282,7 @@ class ResolutionTransactionMapperTest {
         when(resolution.getEntityId()).thenReturn(null);
 
         // when
-        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, instant);
+        resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
         verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
