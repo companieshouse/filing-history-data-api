@@ -28,6 +28,6 @@
     "original_description" : "Resolutions",
     "delta_at" : "<delta_at>",
     "transaction_kind": "resolution",
-    "updated_by": "context_id"
+    "updated_by": "<updated_by>"
   }
 }

@@ -60,10 +60,10 @@ class DateUtilsTest {
     void shouldReturnNewDeltaTimeStampObject() {
         // given
         FilingHistoryDeltaTimestamp expected = new FilingHistoryDeltaTimestamp()
-                .at(Instant.now()).by("context_id");
+                .at(Instant.parse("2020-06-10T00:00:00.00Z")).by("context_id");
 
         // when
-        FilingHistoryDeltaTimestamp actual = DateUtils.makeNewTimeStampObject(Instant.now(), "context_id");
+        FilingHistoryDeltaTimestamp actual = DateUtils.makeNewTimeStampObject(Instant.parse("2020-06-10T00:00:00.00Z"), "context_id");
 
         //then
         assertEquals(expected, actual);

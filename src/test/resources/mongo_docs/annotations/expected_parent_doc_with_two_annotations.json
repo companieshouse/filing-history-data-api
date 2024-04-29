@@ -46,12 +46,18 @@
   "_barcode" : "<barcode>",
   "delta_at" : "<parent_delta_at>",
   "_entity_id" : "<parent_entity_id>",
-  "updated_at" : "<updated_at>",
-  "updated_by" : "context_id",
   "original_values" : {
     "officer_name" : "John Test Tester",
     "resignation_date" : "15/09/2014"
   },
   "original_description" : "Appointment Terminated, Director john tester",
-  "_document_id" : "000X3GI11F35672"
+  "_document_id" : "000X3GI11F35672",
+  "updated": {
+    "at": "<updated_at>",
+    "by": "<updated_by>"
+  },
+  "created": {
+    "at": "<created_at>",
+    "by": "<created_by>"
+  }
 }

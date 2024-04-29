@@ -32,6 +32,12 @@
   },
   "delta_at" : "<first_resolution_delta_at>",
   "original_description" : "Resolutions",
-  "updated_by": "context_id",
-  "updated_at": "2014-09-17T18:52:08.001Z"
+  "updated": {
+    "at": "<updated_at>",
+    "by": "<updated_by>"
+  },
+  "created": {
+    "at": "<created_at>",
+    "by": "<created_by>"
+  }
 }

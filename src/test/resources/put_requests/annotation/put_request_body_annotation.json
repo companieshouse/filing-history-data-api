@@ -25,6 +25,7 @@
     "delta_at": "<delta_at>",
     "transaction_kind": "annotation",
     "parent_entity_id": "<parent_entity_id>",
-    "updated_by": "context_id"
+    "updated_at" : "<updated_at>",
+    "updated_by": "<updated_by>"
   }
 }

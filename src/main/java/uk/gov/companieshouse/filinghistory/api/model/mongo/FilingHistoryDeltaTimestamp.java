@@ -43,4 +43,12 @@ public class FilingHistoryDeltaTimestamp {
     public int hashCode() {
         return Objects.hash(at, by);
     }
+
+    @Override
+    public String toString() {
+        return "FilingHistoryDeltaTimestamp{" +
+                "at=" + at +
+                ", by='" + by + '\'' +
+                '}';
+    }
 }

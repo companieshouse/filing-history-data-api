@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model.mongo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

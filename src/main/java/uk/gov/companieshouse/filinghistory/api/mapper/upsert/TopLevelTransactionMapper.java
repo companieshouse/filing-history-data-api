@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
 
 import java.time.Instant;
-import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;

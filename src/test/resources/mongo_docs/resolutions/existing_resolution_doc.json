@@ -47,6 +47,10 @@
     ],
     "pages" : 1
   },
+  "updated": {
+    "at": "<updated_at>",
+    "by": "<updated_by>"
+  },
   "original_description" : "Resolutions",
   "barcode" : "<barcode>"
 }

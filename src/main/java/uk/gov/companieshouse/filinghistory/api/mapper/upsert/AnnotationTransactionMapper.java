@@ -5,7 +5,6 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTi
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;

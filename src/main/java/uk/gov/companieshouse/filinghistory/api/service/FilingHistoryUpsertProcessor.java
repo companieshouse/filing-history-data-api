@@ -10,7 +10,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.serdes.ObjectCopier;
 import uk.gov.companieshouse.logging.Logger;
