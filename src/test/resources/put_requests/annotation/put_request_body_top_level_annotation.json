@@ -32,7 +32,8 @@
     "document_id": "document_id",
     "original_description" : "Clarification",
     "delta_at": "<delta_at>",
-    "updated_by": "context_id",
+    "updated_at" : "<updated_at>",
+    "updated_by": "<updated_by>",
     "transaction_kind": "annotation",
     "parent_entity_id": "",
     "matched_default": 1

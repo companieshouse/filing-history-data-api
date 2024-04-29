@@ -169,14 +169,7 @@ public class FilingHistoryDocument {
                 data, that.data) && Objects.equals(originalDescription, that.originalDescription)
                 && Objects.equals(originalValues, that.originalValues) && Objects.equals(deltaAt,
                 that.deltaAt) && Objects.equals(updated, that.updated) && Objects.equals(created,
-                that.created);
-        return Objects.equals(transactionId, that.transactionId) && Objects.equals(entityId,
-                that.entityId) && Objects.equals(companyNumber, that.companyNumber) && Objects.equals(
-                documentId, that.documentId) && Objects.equals(barcode, that.barcode) && Objects.equals(
-                data, that.data) && Objects.equals(originalDescription, that.originalDescription)
-                && Objects.equals(originalValues, that.originalValues) && Objects.equals(deltaAt,
-                that.deltaAt) && Objects.equals(updatedAt, that.updatedAt) && Objects.equals(updatedBy,
-                that.updatedBy) && Objects.equals(matchedDefault, that.matchedDefault);
+                that.created) && Objects.equals(matchedDefault, that.matchedDefault);
     }
 
     @Override
@@ -199,9 +192,7 @@ public class FilingHistoryDocument {
                 ", deltaAt='" + deltaAt + '\'' +
                 ", updated=" + updated +
                 ", created=" + created +
-                ", updatedAt=" + updatedAt +
-                ", updatedBy='" + updatedBy + '\'' +
-                ", matchedDefault='" + matchedDefault + '\'' +
+                ", matchedDefault=" + matchedDefault +
                 '}';
     }
 }
