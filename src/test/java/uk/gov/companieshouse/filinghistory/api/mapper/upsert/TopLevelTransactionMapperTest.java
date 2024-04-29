@@ -48,8 +48,6 @@ class TopLevelTransactionMapperTest {
     @Mock
     private DataMapper dataMapper;
     @Mock
-    private Supplier<Instant> instantSupplier;
-    @Mock
     private OriginalValuesMapper originalValuesMapper;
     @Mock
     private LinksMapper linksMapper;
@@ -147,7 +145,6 @@ class TopLevelTransactionMapperTest {
         assertThrows(ConflictException.class, executable);
         verifyNoInteractions(dataMapper);
         verifyNoInteractions(originalValuesMapper);
-        verifyNoInteractions(instantSupplier);
     }
 
     private InternalFilingHistoryApi buildPutRequestBody() {

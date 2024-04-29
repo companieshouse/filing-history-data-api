@@ -368,7 +368,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", CREATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -442,7 +442,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -461,7 +461,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -619,7 +619,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -715,7 +715,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 

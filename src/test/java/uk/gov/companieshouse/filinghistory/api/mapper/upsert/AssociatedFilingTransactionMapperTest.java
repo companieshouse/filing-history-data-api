@@ -48,9 +48,6 @@ class AssociatedFilingTransactionMapperTest {
     @Mock
     private AssociatedFilingChildMapper associatedFilingChildMapper;
     @Mock
-    private Supplier<Instant> instantSupplier;
-
-    @Mock
     private List<FilingHistoryAssociatedFiling> associatedFilingList;
     @Mock
     private FilingHistoryAssociatedFiling associatedFiling;

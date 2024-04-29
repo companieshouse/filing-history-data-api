@@ -50,9 +50,6 @@ class AnnotationTransactionMapperTest {
     @Mock
     private AnnotationChildMapper annotationChildMapper;
     @Mock
-    private Supplier<Instant> instantSupplier;
-
-    @Mock
     private List<FilingHistoryAnnotation> annotationList;
     @Mock
     private FilingHistoryAnnotation annotation;
