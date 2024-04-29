@@ -203,7 +203,7 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -257,7 +257,7 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<updated_by>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);;
+                .replaceAll("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
