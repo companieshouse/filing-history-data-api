@@ -1,0 +1,46 @@
+{
+  "_id": "<transaction_id>",
+  "data": {
+    "category": "incorporation",
+    "date": "2013-04-05T09:06:02.000Z",
+    "description": "incorporation-company",
+    "type": "NEWINC",
+    "associated_filings": [
+      {
+        "description": "capital-allotment-shares",
+        "action_date": "2013-04-05T00:00:00.000Z",
+        "original_description": "05/04/13 statement of capital;gbp 1",
+        "type": "SH01",
+        "category": "capital",
+        "date": "2013-04-05T09:06:02.000Z",
+        "description_values": {
+          "capital_currency": "GBP",
+          "date": "2013-04-05T00:00:00.000Z",
+          "capital_figure": "1"
+        },
+        "_entity_id": "<entity_id>",
+        "delta_at": "<delta_at>"
+      },
+      {
+        "category" : "incorporation",
+        "date" : "2014-08-19T09:55:10.000+0000",
+        "description" : "model-articles-adopted",
+        "type" : "MODEL ARTICLES",
+        "_entity_id": "<model_articles_entity_id>",
+        "delta_at": "<model_articles_delta_at>"
+      }
+    ],
+    "paper_filed": true,
+    "links": {
+      "self": "/company/<company_number>/filing-history/<transaction_id>"
+    }
+  },
+  "original_description": "Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association articles of association",
+  "company_number": "<company_number>",
+  "_entity_id": "<entity_id>",
+  "_barcode": "barcode",
+  "_document_id": "document_id",
+  "updated_by": "context_id",
+  "updated_at": "2014-09-17T18:52:08.001Z",
+  "delta_at": "<delta_at>"
+}
