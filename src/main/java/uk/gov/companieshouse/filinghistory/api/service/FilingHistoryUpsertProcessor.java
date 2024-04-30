@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
+import java.time.Instant;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -22,15 +24,18 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
     private final AbstractTransactionMapperFactory mapperFactory;
     private final ValidatorFactory validatorFactory;
     private final ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier;
+    private final Supplier<Instant> instantSupplier;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
                                         AbstractTransactionMapperFactory mapperFactory,
                                         ValidatorFactory validatorFactory,
-                                        ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier) {
+                                        ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier,
+            Supplier<Instant> instantSupplier) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
         this.validatorFactory = validatorFactory;
         this.filingHistoryDocumentCopier = filingHistoryDocumentCopier;
+        this.instantSupplier = instantSupplier;
     }
 
     @Override
@@ -43,6 +48,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
             LOGGER.error("Request body missing required field", DataMapHolder.getLogMap());
             throw new BadRequestException("Required field missing");
         }
+        Instant instant = instantSupplier.get();
 
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(transactionKind);
 
@@ -51,12 +57,12 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                         existingDoc -> {
                             FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
                             FilingHistoryDocument docToSave =
-                                    mapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDoc);
+                                    mapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDoc, instant);
 
                             filingHistoryService.updateFilingHistory(docToSave, existingDocCopy);
                         },
                         () -> {
-                            FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request);
+                            FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request, instant);
                             filingHistoryService.insertFilingHistory(newDocument);
                         });
     }

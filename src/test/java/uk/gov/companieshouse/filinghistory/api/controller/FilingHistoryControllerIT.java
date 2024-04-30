@@ -56,6 +56,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
@@ -127,7 +128,13 @@ class FilingHistoryControllerIT {
     void shouldInsertDocumentAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
         final FilingHistoryDocument expectedDocument =
-                getExpectedFilingHistoryDocument(null, null, null);
+                getExpectedFilingHistoryDocument(null, null, null,
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -160,7 +167,13 @@ class FilingHistoryControllerIT {
     void shouldInsertDocumentWithListSubcategoryAndReturn200OKWhenNoExistingDocumentInDB() throws Exception {
         // given
         final FilingHistoryDocument expectedDocument =
-                getExpectedFilingHistoryDocument(null, null, null);
+                getExpectedFilingHistoryDocument(null, null, null,
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY));
         expectedDocument.getData().subcategory(SUBCATEGORY_LIST);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
@@ -204,15 +217,24 @@ class FilingHistoryControllerIT {
         final FilingHistoryDocument expectedDocument =
                 getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
                         List.of(new FilingHistoryAnnotation()
-                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                 .category("annotation")
                                 .date(Instant.parse("2011-11-26T11:27:55.000Z"))
                                 .description("annotation")
                                 .descriptionValues(new FilingHistoryDescriptionValues()
-                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                 .type("ANNOTATION")
                                 .entityId("2234567890")
-                                .deltaAt("20140815230459600643")));
+                                .deltaAt("20140815230459600643")),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(Instant.parse("2014-09-14T18:52:08.001Z"))
+                                .by("5419d856b6a59f32b7684dE4"));
+
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -263,12 +285,14 @@ class FilingHistoryControllerIT {
                                 .terminationDate("2014-08-29"))
                         .annotations(List.of(
                                 new Annotation()
-                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .annotation(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                         .category("annotation")
                                         .date("2011-11-26")
                                         .description("annotation")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                                .description(
+                                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                         .type("ANNOTATION")))
                         .links(new Links()
                                 .self(SELF_LINK)
@@ -372,12 +396,14 @@ class FilingHistoryControllerIT {
                                 .terminationDate("2014-08-29"))
                         .annotations(List.of(
                                 new Annotation()
-                                        .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                        .annotation(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                         .category("annotation")
                                         .date("2011-11-26")
                                         .description("annotation")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                                .description(
+                                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                         .type("ANNOTATION")))
                         .links(new Links()
                                 .self(SELF_LINK)
@@ -426,12 +452,14 @@ class FilingHistoryControllerIT {
                         .terminationDate("2014-08-29"))
                 .annotations(List.of(
                         new Annotation()
-                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                 .category("annotation")
                                 .date("2011-11-26")
                                 .description("annotation")
                                 .descriptionValues(new DescriptionValues()
-                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                 .type("ANNOTATION")))
                 .links(new Links()
                         .self(SELF_LINK)
@@ -530,7 +558,7 @@ class FilingHistoryControllerIT {
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNull(actualDocument);
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
         WireMock.verify(requestMadeFor(
                 new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
@@ -767,7 +795,7 @@ class FilingHistoryControllerIT {
 
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
         WireMock.verify(
                 requestMadeFor(
                         new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
@@ -804,15 +832,23 @@ class FilingHistoryControllerIT {
         final FilingHistoryDocument expectedDocument =
                 getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
                         List.of(new FilingHistoryAnnotation()
-                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                 .category("annotation")
                                 .date(Instant.parse("2011-11-26T11:27:55.000Z"))
                                 .description("annotation")
                                 .descriptionValues(new FilingHistoryDescriptionValues()
-                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                 .type("ANNOTATION")
                                 .entityId("2234567890")
-                                .deltaAt("20140815230459600643")));
+                                .deltaAt("20140815230459600643")),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(Instant.parse("2014-09-14T18:52:08.001Z"))
+                                .by("5419d856b6a59f32b7684dE4"));
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -834,7 +870,6 @@ class FilingHistoryControllerIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -883,8 +918,8 @@ class FilingHistoryControllerIT {
     }
 
     private static FilingHistoryDocument getExpectedFilingHistoryDocument(final String documentMetadata,
-                                                                          Integer pages,
-                                                                          List<FilingHistoryAnnotation> annotations) {
+            Integer pages, List<FilingHistoryAnnotation> annotations,
+            FilingHistoryDeltaTimestamp updated, FilingHistoryDeltaTimestamp created) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
@@ -907,8 +942,8 @@ class FilingHistoryControllerIT {
                 .barcode(BARCODE)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .entityId(ENTITY_ID)
-                .updatedAt(UPDATED_AT)
-                .updatedBy(UPDATED_BY)
+                .updated(updated)
+                .created(created)
                 .originalValues(new FilingHistoryOriginalValues()
                         .officerName(OFFICER_NAME)
                         .resignationDate(RESIGNATION_DATE))
