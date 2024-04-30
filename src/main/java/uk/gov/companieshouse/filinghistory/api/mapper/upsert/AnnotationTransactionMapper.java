@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Supplier;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
@@ -15,24 +16,18 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
     private final ChildListMapper<FilingHistoryAnnotation> childListMapper;
+    private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
                                        DataMapper dataMapper, ChildListMapper<FilingHistoryAnnotation> childListMapper,
+                                       ChildMapper<FilingHistoryAnnotation> annotationChildMapper,
                                        Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.childListMapper = childListMapper;
+        this.annotationChildMapper = annotationChildMapper;
         this.instantSupplier = instantSupplier;
-    }
-
-    @Override
-    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
-            data = dataMapper.map(request.getExternalData(), data);
-        }
-        childListMapper.mapChildList(request, data.getAnnotations(), data::annotations);
-        return data;
     }
 
     @Override
@@ -44,6 +39,14 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                 existingDocument.getData()::annotations);
 
         return mapTopLevelFields(request, existingDocument);
+    }
+
+    @Override
+    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
+            data = dataMapper.map(request.getExternalData(), data);
+        }
+        return data.annotations(List.of(annotationChildMapper.mapChild(request)));
     }
 
     @Override

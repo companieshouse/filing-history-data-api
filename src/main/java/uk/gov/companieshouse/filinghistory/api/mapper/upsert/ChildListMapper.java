@@ -30,8 +30,8 @@ public class ChildListMapper<T extends FilingHistoryChild> {
     }
 
     void mapChildList(InternalFilingHistoryApi request,
-            List<T> existingChildList,
-            Consumer<List<T>> childListSetter) {
+                      List<T> existingChildList,
+                      Consumer<List<T>> childListSetter) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingChildList)

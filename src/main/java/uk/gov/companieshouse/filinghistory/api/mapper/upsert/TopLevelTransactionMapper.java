@@ -50,7 +50,9 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
         final FilingHistoryData mappedData = dataMapper.map(externalData, data);
 
         if (externalData.getAssociatedFilings() != null && !externalData.getAssociatedFilings().isEmpty()) {
-            childListMapper.mapChildList(request, mappedData.getAssociatedFilings(),
+            childListMapper.mapChildList(
+                    request,
+                    mappedData.getAssociatedFilings(),
                     mappedData::associatedFilings);
         }
         return mappedData;

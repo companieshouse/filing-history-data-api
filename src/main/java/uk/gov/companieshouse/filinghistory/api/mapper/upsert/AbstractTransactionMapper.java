@@ -38,12 +38,13 @@ public abstract class AbstractTransactionMapper {
         return mapTopLevelFields(request, newDocument);
     }
 
-    protected abstract FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request,
-            FilingHistoryData data);
-
     public abstract FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(
             InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument);
+
+    protected abstract FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request,
+            FilingHistoryData data);
+
 
     protected abstract FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
             FilingHistoryDocument document);

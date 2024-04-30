@@ -20,74 +20,43 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
-    private final ChildMapper resolutionChildMapper;
+    private final ChildListMapper<FilingHistoryResolution> childListMapper;
+    private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
-    public ResolutionTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
-            ChildMapper resolutionChildMapper, Supplier<Instant> instantSupplier) {
+    public ResolutionTransactionMapper(LinksMapper linksMapper,
+                                       DataMapper dataMapper,
+                                       ChildListMapper<FilingHistoryResolution> childListMapper,
+                                       ChildMapper<FilingHistoryResolution> resolutionChildMapper,
+                                       Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
+        this.childListMapper = childListMapper;
         this.resolutionChildMapper = resolutionChildMapper;
         this.instantSupplier = instantSupplier;
     }
 
     @Override
-    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        return dataMapper.map(request.getExternalData(), data)
-                .resolutions(List.of(resolutionChildMapper.mapChild(request, new FilingHistoryResolution())));
-    }
-
-    @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument) {
+                                                                               FilingHistoryDocument existingDocument) {
 
-        final String requestEntityId = request.getInternalData().getEntityId();
+        childListMapper.mapChildList(
+                request,
+                existingDocument.getData().getResolutions(),
+                existingDocument.getData()::resolutions);
 
-        Optional.ofNullable(existingDocument.getData().getResolutions())
-                .ifPresentOrElse(
-                        resolutionList -> resolutionList.stream()
-                                .filter(resolution -> requestEntityId.equals(resolution.getEntityId()))
-                                .findFirst()
-                                .ifPresentOrElse(resolution -> {
-                                            if (isDeltaStale(request.getInternalData().getDeltaAt(),
-                                                    resolution.getDeltaAt())) {
-                                                LOGGER.error(STALE_DELTA_ERROR_MESSAGE.formatted(
-                                                                request.getInternalData().getDeltaAt(),
-                                                                resolution.getDeltaAt()),
-                                                        DataMapHolder.getLogMap());
-                                                throw new ConflictException("Stale delta when updating resolution");
-                                            }
-
-                                            // Update already existing resolution from list
-                                            resolutionChildMapper.mapChild(request, resolution);
-                                        },
-                                        // Add new resolution to existing resolutions list
-                                        () -> {
-                                            if (resolutionList.stream()
-                                                    .anyMatch(resolution -> StringUtils.isBlank(
-                                                            resolution.getEntityId()))) {
-                                                LOGGER.info(
-                                                        MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
-                                                        DataMapHolder.getLogMap()
-                                                );
-                                            }
-                                            resolutionList
-                                                    .add(resolutionChildMapper
-                                                            .mapChild(request, new FilingHistoryResolution()));
-                                        }),
-                        // Add new resolution to a new resolutions list
-                        () -> {
-                            LOGGER.error("Unexpected resolution data structure, adding new resolutions array",
-                                    DataMapHolder.getLogMap());
-                            mapFilingHistoryData(request, existingDocument.getData());
-                        }
-                );
         return mapTopLevelFields(request, existingDocument);
     }
 
     @Override
+    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        return dataMapper.map(request.getExternalData(), data)
+                .resolutions(List.of(resolutionChildMapper.mapChild(request)));
+    }
+
+    @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-            FilingHistoryDocument document) {
+                                                      FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());

@@ -28,16 +28,16 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
     }
 
     @Override
-    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        return data.associatedFilings(List.of(associatedFilingChildMapper.mapChild(request)));
-    }
-
-    @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            final FilingHistoryDocument existingDocument) {
+                                                                               final FilingHistoryDocument existingDocument) {
         childListMapper.mapChildList(request, existingDocument.getData().getAssociatedFilings(),
                 existingDocument.getData()::associatedFilings);
         return mapTopLevelFields(request, existingDocument);
+    }
+
+    @Override
+    protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
+        return data.associatedFilings(List.of(associatedFilingChildMapper.mapChild(request)));
     }
 
     @Override
