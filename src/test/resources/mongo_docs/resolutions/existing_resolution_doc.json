@@ -49,7 +49,7 @@
   },
   "updated": {
     "at": "<updated_at>",
-    "by": "<updated_by>"
+    "by": "context_id"
   },
   "original_description" : "Resolutions",
   "barcode" : "<barcode>"

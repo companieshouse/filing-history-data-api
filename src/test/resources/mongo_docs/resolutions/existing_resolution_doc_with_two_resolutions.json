@@ -44,10 +44,10 @@
   "original_description" : "Resolutions",
   "updated": {
     "at": "<updated_at>",
-    "by": "<updated_by>"
+    "by": "context_id"
   },
   "created": {
     "at": "<created_at>",
-    "by": "<created_by>"
+    "by": "context_id"
   }
 }
