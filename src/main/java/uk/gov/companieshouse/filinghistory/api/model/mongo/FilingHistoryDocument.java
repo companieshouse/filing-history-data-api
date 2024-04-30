@@ -34,11 +34,7 @@ public class FilingHistoryDocument {
     @Field("delta_at")
     @JsonProperty("delta_at")
     private String deltaAt;
-    @Field("updated")
-    @JsonProperty("updated")
     private FilingHistoryDeltaTimestamp updated;
-    @Field("created")
-    @JsonProperty("created")
     private FilingHistoryDeltaTimestamp created;
     @Field("matched_default")
     @JsonProperty("matched_default")

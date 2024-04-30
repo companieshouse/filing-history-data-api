@@ -558,7 +558,7 @@ class FilingHistoryControllerIT {
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNull(actualDocument);
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
         WireMock.verify(requestMadeFor(
                 new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
@@ -795,7 +795,7 @@ class FilingHistoryControllerIT {
 
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
         WireMock.verify(
                 requestMadeFor(
                         new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));

@@ -299,7 +299,6 @@ class AnnotationTransactionIT {
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
-        expectedDocument.updated(actualDocument.getUpdated());
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -585,7 +584,7 @@ class AnnotationTransactionIT {
         // Assert existing doc is unchanged
         assertEquals(existingDocument, actualDocument);
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
     }
 
     @Test
@@ -933,7 +932,6 @@ class AnnotationTransactionIT {
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
-        expectedDocument.updated(actualDocument.getUpdated());
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -1003,7 +1001,6 @@ class AnnotationTransactionIT {
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
-        expectedDocument.updated(actualDocument.getUpdated());
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -1126,7 +1123,7 @@ class AnnotationTransactionIT {
         // Assert existing doc is unchanged
         assertEquals(existingDocument, actualDocument);
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
     }
 
     @Test

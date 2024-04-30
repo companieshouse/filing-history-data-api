@@ -548,7 +548,7 @@ class ResolutionTransactionIT {
 
         // Assert existing doc is unchanged
         assertEquals(existingDocument, actualDocument);
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
     }
 
     @Test

@@ -290,7 +290,6 @@ class AssociatedFilingTransactionIT {
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(actualDocument);
-        expectedDocument.updated(actualDocument.getUpdated());
         assertEquals(expectedDocument.getData().getAssociatedFilings().getFirst(), actualDocument.getData().getAssociatedFilings().getFirst());
 
         verify(instantSupplier, times(2)).get();
@@ -567,7 +566,7 @@ class AssociatedFilingTransactionIT {
         // Assert existing doc is unchanged
         assertEquals(existingDocument, actualDocument);
 
-        verify(instantSupplier, times(1)).get();
+        verify(instantSupplier).get();
     }
 
     @Test
