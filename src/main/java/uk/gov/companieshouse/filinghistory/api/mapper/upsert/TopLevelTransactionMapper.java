@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
-
 import java.time.Instant;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -10,6 +8,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Component
@@ -27,7 +26,7 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument,
+            FilingHistoryDocument existingDocument,
             Instant instant) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
@@ -47,7 +46,7 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-                                                      FilingHistoryDocument document, Instant instant) {
+            FilingHistoryDocument document, Instant instant) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 
@@ -59,6 +58,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
                 .originalDescription(internalData.getOriginalDescription())
                 .originalValues(originalValuesMapper.map(internalData.getOriginalValues()))
                 .deltaAt(internalData.getDeltaAt())
-                .updated(makeNewTimeStampObject(instant, internalData.getUpdatedBy()));
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(instant)
+                        .by(internalData.getUpdatedBy()));
     }
 }

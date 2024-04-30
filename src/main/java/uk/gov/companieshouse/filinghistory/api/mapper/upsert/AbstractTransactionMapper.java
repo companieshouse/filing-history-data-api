@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -10,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -35,7 +35,9 @@ public abstract class AbstractTransactionMapper {
             Instant instant) {
         FilingHistoryDocument newDocument = new FilingHistoryDocument()
                 .transactionId(id)
-                .created(makeNewTimeStampObject(instant, request.getInternalData().getUpdatedBy()))
+                .created(new FilingHistoryDeltaTimestamp()
+                        .at(instant)
+                        .by(request.getInternalData().getUpdatedBy()))
                 .data(mapFilingHistoryData(request, new FilingHistoryData())
                         .links(linksMapper.map(request.getExternalData().getLinks())));
 

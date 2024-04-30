@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.makeNewTimeStampObject;
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
 
 import java.time.Instant;
@@ -13,6 +12,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
@@ -95,7 +95,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                 .companyNumber(internalData.getCompanyNumber())
                 .entityId(internalData.getEntityId())
                 .deltaAt(internalData.getDeltaAt())
-                .updated(makeNewTimeStampObject(instant, internalData.getUpdatedBy()))
+                .updated(new FilingHistoryDeltaTimestamp().at(instant).by(internalData.getUpdatedBy()))
                 .barcode(request.getExternalData().getBarcode())
                 .originalDescription(internalData.getOriginalDescription());
     }
