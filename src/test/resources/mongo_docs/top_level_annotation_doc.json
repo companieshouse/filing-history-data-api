@@ -28,5 +28,13 @@
   },
   "company_number" : "<company_number>",
   "original_description" : "Clarification",
-  "matched_default" : 1
+  "matched_default" : 1,
+  "updated": {
+    "at": ISODate("2014-09-17T18:52:08.001Z"),
+    "by": "5419d856b6a59f32b7684d0e"
+  },
+  "created": {
+    "at": ISODate("2014-09-14T18:52:08.001Z"),
+    "by": "5419d856b6a59f32b7684dE4"
+  }
 }
