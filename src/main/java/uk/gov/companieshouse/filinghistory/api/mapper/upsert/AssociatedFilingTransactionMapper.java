@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -12,20 +11,18 @@ import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @Component
 public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper {
 
     private final ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper;
-    private final Supplier<Instant> instantSupplier;
 
     public AssociatedFilingTransactionMapper(LinksMapper linksMapper,
-            ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper,
-            Supplier<Instant> instantSupplier) {
+            ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper) {
         super(linksMapper);
         this.associatedFilingChildMapper = associatedFilingChildMapper;
-        this.instantSupplier = instantSupplier;
     }
 
     @Override
@@ -36,7 +33,8 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument) {
+            FilingHistoryDocument existingDocument,
+            Instant instant) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingDocument.getData().getAssociatedFilings())
@@ -74,19 +72,21 @@ public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper
                         // Add new associated filing to a new associated filing list
                         () -> mapFilingHistoryData(request, existingDocument.getData())
                 );
-        return mapTopLevelFields(request, existingDocument);
+        return mapTopLevelFields(request, existingDocument, instant);
     }
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-            FilingHistoryDocument document) {
+            FilingHistoryDocument document,
+            Instant instant) {
         final InternalData internalData = request.getInternalData();
 
         document.getData().paperFiled(request.getExternalData().getPaperFiled());
         return document
                 .entityId(internalData.getParentEntityId())
                 .companyNumber(internalData.getCompanyNumber())
-                .updatedAt(instantSupplier.get())
-                .updatedBy(internalData.getUpdatedBy());
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(instant)
+                        .by(internalData.getUpdatedBy()));
     }
 }

@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -144,7 +143,7 @@ class FilingHistoryControllerMongoUnavailableIT {
         // then
         result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
 
-        verify(instantSupplier, times(0)).get();
+        verify(instantSupplier).get();
         WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 

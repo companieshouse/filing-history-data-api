@@ -24,6 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
@@ -323,8 +324,12 @@ class RepositoryIT {
                 .barcode("X4BI89B6")
                 .deltaAt("20140815230459600643")
                 .entityId("1234567890")
-                .updatedAt(Instant.parse("2014-09-17T18:52:08.001Z"))
-                .updatedBy("5419d856b6a59f32b7684d0e")
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(Instant.parse("2014-09-17T18:52:08.001Z"))
+                        .by("5419d856b6a59f32b7684d0e"))
+                .created(new FilingHistoryDeltaTimestamp()
+                        .at(Instant.parse("2014-09-14T18:52:08.001Z"))
+                        .by("5419d856b6a59f32b7684dE4"))
                 .originalValues(new FilingHistoryOriginalValues()
                         .officerName("John Tester")
                         .resignationDate("29/08/2014"))
