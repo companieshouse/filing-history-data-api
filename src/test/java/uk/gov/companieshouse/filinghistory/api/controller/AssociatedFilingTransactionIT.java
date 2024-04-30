@@ -277,8 +277,7 @@ class AssociatedFilingTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
-        assertEquals(expectedDocument.getData().getAssociatedFilings().getFirst(), actualDocument.getData().getAssociatedFilings().getFirst());
+        assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
         WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
