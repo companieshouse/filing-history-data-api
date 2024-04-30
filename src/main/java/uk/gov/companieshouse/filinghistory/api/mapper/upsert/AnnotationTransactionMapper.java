@@ -19,8 +19,8 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
-                                       DataMapper dataMapper, ChildListMapper<FilingHistoryAnnotation> childListMapper,
-                                       ChildMapper<FilingHistoryAnnotation> annotationChildMapper) {
+            DataMapper dataMapper, ChildListMapper<FilingHistoryAnnotation> childListMapper,
+            ChildMapper<FilingHistoryAnnotation> annotationChildMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.childListMapper = childListMapper;
@@ -29,13 +29,10 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument,
-                                                                               Instant instant) {
-        childListMapper.mapChildList(
-                request,
-                existingDocument.getData().getAnnotations(),
-                existingDocument.getData()::annotations);
-
+            FilingHistoryDocument existingDocument,
+            Instant instant) {
+        FilingHistoryData existingData = existingDocument.getData();
+        childListMapper.mapChildList(request, existingData.getAnnotations(), existingData::annotations);
         return mapTopLevelFields(request, existingDocument, instant);
     }
 
@@ -49,8 +46,8 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-                                                      FilingHistoryDocument document,
-                                                      Instant instant) {
+            FilingHistoryDocument document,
+            Instant instant) {
         document.getData().paperFiled(request.getExternalData().getPaperFiled());
 
         final InternalData internalData = request.getInternalData();

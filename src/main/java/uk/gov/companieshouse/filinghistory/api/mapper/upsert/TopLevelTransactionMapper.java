@@ -20,8 +20,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     private final OriginalValuesMapper originalValuesMapper;
 
     public TopLevelTransactionMapper(DataMapper dataMapper,
-                                     OriginalValuesMapper originalValuesMapper, LinksMapper linksMapper,
-                                     ChildListMapper<FilingHistoryAssociatedFiling> childListMapper) {
+            OriginalValuesMapper originalValuesMapper, LinksMapper linksMapper,
+            ChildListMapper<FilingHistoryAssociatedFiling> childListMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.originalValuesMapper = originalValuesMapper;
@@ -30,8 +30,8 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument,
-                                                                               Instant instant) {
+            FilingHistoryDocument existingDocument,
+            Instant instant) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
                     request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
@@ -49,17 +49,14 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
         final FilingHistoryData mappedData = dataMapper.map(externalData, data);
 
         if (externalData.getAssociatedFilings() != null && !externalData.getAssociatedFilings().isEmpty()) {
-            childListMapper.mapChildList(
-                    request,
-                    mappedData.getAssociatedFilings(),
-                    mappedData::associatedFilings);
+            childListMapper.mapChildList(request, mappedData.getAssociatedFilings(), mappedData::associatedFilings);
         }
         return mappedData;
     }
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-                                                      FilingHistoryDocument document, Instant instant) {
+            FilingHistoryDocument document, Instant instant) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 
