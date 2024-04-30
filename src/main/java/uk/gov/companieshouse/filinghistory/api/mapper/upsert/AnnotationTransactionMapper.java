@@ -18,12 +18,12 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
-    private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
+    private final ChildMapper annotationChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
             DataMapper dataMapper,
-            ChildMapper<FilingHistoryAnnotation> annotationChildMapper,
+            ChildMapper annotationChildMapper,
             Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
@@ -36,7 +36,7 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
         if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
             data = dataMapper.map(request.getExternalData(), data);
         }
-        return data.annotations(List.of(annotationChildMapper.mapChild(new FilingHistoryAnnotation(), request)));
+        return data.annotations(List.of(annotationChildMapper.mapChild(request, new FilingHistoryAnnotation())));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                                 throw new ConflictException("Stale delta when updating annotation");
                                             }
                                             // Update already existing annotation from list
-                                            annotationChildMapper.mapChild(annotation, request);
+                                            annotationChildMapper.mapChild(request, annotation);
                                         },
                                         // Add new annotation to existing annotations list
                                         () -> {
@@ -73,7 +73,7 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
                                             }
                                             annotationList
                                                     .add(annotationChildMapper
-                                                            .mapChild(new FilingHistoryAnnotation(), request));
+                                                            .mapChild(request, new FilingHistoryAnnotation()));
                                         }),
                         // Add new annotation to a new annotations list
                         () -> mapFilingHistoryData(request, existingDocument.getData())

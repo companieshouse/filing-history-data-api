@@ -77,7 +77,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verify(annotationChildMapper).mapChild(request, new FilingHistoryAnnotation());
         verifyNoMoreInteractions(annotationChildMapper);
     }
 
@@ -99,7 +99,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verify(annotationChildMapper).mapChild(request, new FilingHistoryAnnotation());
         verifyNoMoreInteractions(annotationChildMapper);
     }
 
@@ -134,7 +134,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationChildMapper).mapChild(annotationWithEntityIdMatch, request);
+        verify(annotationChildMapper).mapChild(request, annotationWithEntityIdMatch);
         verifyNoMoreInteractions(annotationChildMapper);
     }
 
@@ -306,7 +306,7 @@ class AnnotationTransactionMapperTest {
         annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(annotationChildMapper).mapChild(new FilingHistoryAnnotation(), request);
+        verify(annotationChildMapper).mapChild(request, new FilingHistoryAnnotation());
         verifyNoMoreInteractions(annotationChildMapper);
     }
 }

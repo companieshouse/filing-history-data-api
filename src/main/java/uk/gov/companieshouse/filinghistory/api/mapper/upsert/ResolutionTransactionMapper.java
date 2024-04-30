@@ -20,11 +20,11 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
-    private final ChildMapper<FilingHistoryResolution> resolutionChildMapper;
+    private final ChildMapper resolutionChildMapper;
     private final Supplier<Instant> instantSupplier;
 
     public ResolutionTransactionMapper(LinksMapper linksMapper, DataMapper dataMapper,
-            ChildMapper<FilingHistoryResolution> resolutionChildMapper, Supplier<Instant> instantSupplier) {
+            ChildMapper resolutionChildMapper, Supplier<Instant> instantSupplier) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.resolutionChildMapper = resolutionChildMapper;
@@ -34,7 +34,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
         return dataMapper.map(request.getExternalData(), data)
-                .resolutions(List.of(resolutionChildMapper.mapChild(new FilingHistoryResolution(), request)));
+                .resolutions(List.of(resolutionChildMapper.mapChild(request, new FilingHistoryResolution())));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                             }
 
                                             // Update already existing resolution from list
-                                            resolutionChildMapper.mapChild(resolution, request);
+                                            resolutionChildMapper.mapChild(request, resolution);
                                         },
                                         // Add new resolution to existing resolutions list
                                         () -> {
@@ -73,7 +73,7 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
                                             }
                                             resolutionList
                                                     .add(resolutionChildMapper
-                                                            .mapChild(new FilingHistoryResolution(), request));
+                                                            .mapChild(request, new FilingHistoryResolution()));
                                         }),
                         // Add new resolution to a new resolutions list
                         () -> {

@@ -73,7 +73,7 @@ class AssociatedFilingTransactionMapperTest {
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verify(associatedFilingChildMapper).mapChild(request, new FilingHistoryAssociatedFiling());
         verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 
@@ -95,7 +95,7 @@ class AssociatedFilingTransactionMapperTest {
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verify(associatedFilingChildMapper).mapChild(request, new FilingHistoryAssociatedFiling());
         verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 
@@ -130,7 +130,7 @@ class AssociatedFilingTransactionMapperTest {
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingChildMapper).mapChild(associatedFilingWithEntityIdMatch, request);
+        verify(associatedFilingChildMapper).mapChild(request, associatedFilingWithEntityIdMatch);
         verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 
@@ -274,7 +274,7 @@ class AssociatedFilingTransactionMapperTest {
         associatedFilingTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(associatedFilingChildMapper).mapChild(new FilingHistoryAssociatedFiling(), request);
+        verify(associatedFilingChildMapper).mapChild(request, new FilingHistoryAssociatedFiling());
         verifyNoMoreInteractions(associatedFilingChildMapper);
     }
 }

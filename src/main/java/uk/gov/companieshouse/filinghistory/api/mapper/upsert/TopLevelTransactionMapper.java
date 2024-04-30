@@ -1,10 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -19,23 +16,23 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
-    private final AssociatedFilingChildMapper associatedFilingChildMapper;
+    private final ChildListMapper<FilingHistoryAssociatedFiling> childListMapper;
     private final Supplier<Instant> instantSupplier;
     private final OriginalValuesMapper originalValuesMapper;
 
     public TopLevelTransactionMapper(DataMapper dataMapper, Supplier<Instant> instantSupplier,
-                                     OriginalValuesMapper originalValuesMapper, LinksMapper linksMapper,
-                                     AssociatedFilingChildMapper associatedFilingChildMapper) {
+            OriginalValuesMapper originalValuesMapper, LinksMapper linksMapper,
+            ChildListMapper<FilingHistoryAssociatedFiling> childListMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.instantSupplier = instantSupplier;
         this.originalValuesMapper = originalValuesMapper;
-        this.associatedFilingChildMapper = associatedFilingChildMapper;
+        this.childListMapper = childListMapper;
     }
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-                                                                               FilingHistoryDocument existingDocument) {
+            FilingHistoryDocument existingDocument) {
         if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
                     request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
@@ -50,54 +47,18 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
         ExternalData externalData = request.getExternalData();
-        final String requestEntityId = request.getInternalData().getEntityId();
         final FilingHistoryData mappedData = dataMapper.map(externalData, data);
 
         if (externalData.getAssociatedFilings() != null && !externalData.getAssociatedFilings().isEmpty()) {
-
-            Optional.ofNullable(mappedData.getAssociatedFilings())
-                    .ifPresentOrElse(
-                            associatedFilingList -> associatedFilingList.stream()
-                                    .filter(associatedFiling -> requestEntityId.equals(associatedFiling.getEntityId()))
-                                    .findFirst()
-                                    .ifPresentOrElse(associatedFiling -> {
-                                                if (isDeltaStale(request.getInternalData().getDeltaAt(),
-                                                        associatedFiling.getDeltaAt())) {
-                                                    LOGGER.error(STALE_DELTA_ERROR_MESSAGE.formatted(
-                                                                    request.getInternalData().getDeltaAt(),
-                                                                    associatedFiling.getDeltaAt()),
-                                                            DataMapHolder.getLogMap());
-                                                    throw new ConflictException(
-                                                            "Stale delta when updating associated filing");
-                                                }
-                                                // Update already existing associated filing from existing list
-                                                associatedFilingChildMapper.mapChild(associatedFiling, request);
-                                            },
-                                            // Add new associated filing to existing list
-                                            () -> {
-                                                if (associatedFilingList.stream()
-                                                        .anyMatch(associatedFiling ->
-                                                                StringUtils.isBlank(associatedFiling.getEntityId()))) {
-                                                    LOGGER.info(
-                                                            MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
-                                                            DataMapHolder.getLogMap()
-                                                    );
-                                                }
-                                                associatedFilingList
-                                                        .add(associatedFilingChildMapper
-                                                                .mapChild(new FilingHistoryAssociatedFiling(), request));
-                                            }),
-                            // Add new associated filing to a new associated filing list
-                            () -> mappedData.associatedFilings(List.of(
-                                    associatedFilingChildMapper.mapChild(new FilingHistoryAssociatedFiling(), request)))
-                    );
+            childListMapper.mapChildList(request, mappedData.getAssociatedFilings(),
+                    mappedData::associatedFilings);
         }
         return mappedData;
     }
 
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-                                                      FilingHistoryDocument document) {
+            FilingHistoryDocument document) {
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
 

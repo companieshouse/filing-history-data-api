@@ -68,7 +68,7 @@ class AnnotationChildMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        FilingHistoryAnnotation actual = annotationChildMapper.mapChild(new FilingHistoryAnnotation(), request);
+        FilingHistoryAnnotation actual = annotationChildMapper.mapChild(request, new FilingHistoryAnnotation());
 
         // then
         assertEquals(expected, actual);
@@ -109,7 +109,7 @@ class AnnotationChildMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        annotationChildMapper.mapChild(existingAnnotation, request);
+        annotationChildMapper.mapChild(request, existingAnnotation);
 
         // then
         assertEquals(expectedAnnotation, existingAnnotation);

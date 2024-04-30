@@ -18,11 +18,12 @@ public class ResolutionChildMapper implements ChildMapper<FilingHistoryResolutio
     }
 
     @Override
-    public FilingHistoryResolution mapChild(FilingHistoryResolution resolution, InternalFilingHistoryApi request) {
+    public FilingHistoryResolution mapChild(InternalFilingHistoryApi request,
+            FilingHistoryResolution existingResolution) {
         InternalData internalData = request.getInternalData();
         Resolution requestResolution = request.getExternalData().getResolutions().getFirst();
 
-        return resolution
+        return existingResolution
                 .barcode(requestResolution.getBarcode())
                 .category(requestResolution.getCategory().getValue())
                 .description(requestResolution.getDescription())
@@ -33,5 +34,10 @@ public class ResolutionChildMapper implements ChildMapper<FilingHistoryResolutio
                 .descriptionValues(descriptionValuesMapper.map(requestResolution.getDescriptionValues()))
                 .originalDescription(requestResolution.getOriginalDescription())
                 .deltaAt(internalData.getDeltaAt());
+    }
+
+    @Override
+    public FilingHistoryResolution newInstance() {
+        return new FilingHistoryResolution();
     }
 }

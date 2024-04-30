@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-public class FilingHistoryAssociatedFiling {
+public class FilingHistoryAssociatedFiling extends FilingHistoryChild {
 
     private String category;
     private String description;
@@ -14,15 +14,21 @@ public class FilingHistoryAssociatedFiling {
     @Field("description_values")
     @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
-    @Field("_entity_id")
-    @JsonProperty("_entity_id")
-    private String entityId;
-    @Field("delta_at")
-    @JsonProperty("delta_at")
-    private String deltaAt;
     @Field("original_description")
     @JsonProperty("original_description")
     private String originalDescription;
+
+    @Override
+    public FilingHistoryAssociatedFiling entityId(String entityId) {
+        this.entityId = entityId;
+        return this;
+    }
+
+    @Override
+    public FilingHistoryAssociatedFiling deltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+        return this;
+    }
 
     public String getCategory() {
         return category;
@@ -69,24 +75,6 @@ public class FilingHistoryAssociatedFiling {
         return this;
     }
 
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public FilingHistoryAssociatedFiling entityId(String entityId) {
-        this.entityId = entityId;
-        return this;
-    }
-
-    public String getDeltaAt() {
-        return deltaAt;
-    }
-
-    public FilingHistoryAssociatedFiling deltaAt(String deltaAt) {
-        this.deltaAt = deltaAt;
-        return this;
-    }
-
     public String getOriginalDescription() {
         return originalDescription;
     }
@@ -104,13 +92,20 @@ public class FilingHistoryAssociatedFiling {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+        if (!super.equals(o)) {
+            return false;
+        }
         FilingHistoryAssociatedFiling that = (FilingHistoryAssociatedFiling) o;
-        return Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(type, that.type) && Objects.equals(date, that.date) && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(entityId, that.entityId) && Objects.equals(deltaAt, that.deltaAt) && Objects.equals(originalDescription, that.originalDescription);
+        return Objects.equals(category, that.category) && Objects.equals(description, that.description)
+                && Objects.equals(type, that.type) && Objects.equals(date, that.date)
+                && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(
+                originalDescription, that.originalDescription);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, description, type, date, descriptionValues, entityId, deltaAt, originalDescription);
+        return Objects.hash(super.hashCode(), category, description, type, date, descriptionValues,
+                originalDescription);
     }
 
     @Override
@@ -121,9 +116,7 @@ public class FilingHistoryAssociatedFiling {
                 ", type='" + type + '\'' +
                 ", date=" + date +
                 ", descriptionValues=" + descriptionValues +
-                ", entityId='" + entityId + '\'' +
-                ", deltaAt='" + deltaAt + '\'' +
                 ", originalDescription='" + originalDescription + '\'' +
-                '}';
+                "} " + super.toString();
     }
 }

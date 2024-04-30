@@ -77,7 +77,7 @@ class ResolutionTransactionMapperTest {
         resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
+        verify(resolutionChildMapper).mapChild(request, new FilingHistoryResolution());
         verifyNoMoreInteractions(resolutionChildMapper);
     }
 
@@ -99,7 +99,7 @@ class ResolutionTransactionMapperTest {
         resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
+        verify(resolutionChildMapper).mapChild(request, new FilingHistoryResolution());
         verifyNoMoreInteractions(resolutionChildMapper);
     }
 
@@ -134,7 +134,7 @@ class ResolutionTransactionMapperTest {
         resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(resolutionChildMapper).mapChild(resolutionWithEntityIdMatch, request);
+        verify(resolutionChildMapper).mapChild(request, resolutionWithEntityIdMatch);
         verifyNoMoreInteractions(resolutionChildMapper);
     }
 
@@ -279,7 +279,7 @@ class ResolutionTransactionMapperTest {
         resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document);
 
         // then
-        verify(resolutionChildMapper).mapChild(new FilingHistoryResolution(), request);
+        verify(resolutionChildMapper).mapChild(request, new FilingHistoryResolution());
         verifyNoMoreInteractions(resolutionChildMapper);
     }
 
