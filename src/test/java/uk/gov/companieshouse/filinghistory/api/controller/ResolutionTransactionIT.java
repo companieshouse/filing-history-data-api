@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -644,7 +643,6 @@ class ResolutionTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
@@ -716,7 +714,6 @@ class ResolutionTransactionIT {
         result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(actualDocument);
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();

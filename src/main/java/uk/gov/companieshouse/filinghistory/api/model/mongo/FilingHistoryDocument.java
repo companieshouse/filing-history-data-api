@@ -125,8 +125,7 @@ public class FilingHistoryDocument {
         return updated;
     }
 
-    public FilingHistoryDocument updated(
-            FilingHistoryDeltaTimestamp updated) {
+    public FilingHistoryDocument updated(FilingHistoryDeltaTimestamp updated) {
         this.updated = updated;
         return this;
     }
@@ -135,8 +134,7 @@ public class FilingHistoryDocument {
         return created;
     }
 
-    public FilingHistoryDocument created(
-            FilingHistoryDeltaTimestamp created) {
+    public FilingHistoryDocument created(FilingHistoryDeltaTimestamp created) {
         this.created = created;
         return this;
     }
