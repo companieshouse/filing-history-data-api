@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -48,6 +50,9 @@ class ResolutionTransactionMapperTest {
     @Mock
     private DataMapper dataMapper;
     @Mock
+    private ChildListMapper<FilingHistoryResolution> childListMapper;
+
+    @Mock
     private List<FilingHistoryResolution> resolutionList;
     @Mock
     private FilingHistoryResolution resolution;
@@ -66,18 +71,21 @@ class ResolutionTransactionMapperTest {
                 .externalData(new ExternalData()
                         .paperFiled(true));
 
+        List<FilingHistoryResolution> resolutionList = List.of(new FilingHistoryResolution());
         FilingHistoryDocument document = new FilingHistoryDocument()
-                .data(new FilingHistoryData());
+                .data(new FilingHistoryData()
+                        .resolutions(resolutionList));
 
-        when(dataMapper.map(any(), any())).thenReturn(filingHistoryData);
-        when(resolutionChildMapper.mapChild(any(), any())).thenReturn(resolution);
+//        when(dataMapper.map(any(), any())).thenReturn(filingHistoryData);
+//        when(resolutionChildMapper.mapChild(any(), any())).thenReturn(resolution);
 
         // when
         resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
 
         // then
-        verify(resolutionChildMapper).mapChild(request, new FilingHistoryResolution());
-        verifyNoMoreInteractions(resolutionChildMapper);
+        verify(childListMapper).mapChildList(request, resolutionList, document.getData()::resolutions);
+//        verify(resolutionChildMapper).mapChild(request, new FilingHistoryResolution());
+//        verifyNoMoreInteractions(resolutionChildMapper);
     }
 
     @Test
