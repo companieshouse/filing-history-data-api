@@ -115,4 +115,9 @@ class AnnotationChildMapperTest {
         assertEquals(expectedAnnotation, existingAnnotation);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
+
+    @Test
+    void shouldReturnNewInstance() {
+        assertEquals(new FilingHistoryAnnotation(), annotationChildMapper.newInstance());
+    }
 }
