@@ -126,4 +126,8 @@ class ResolutionChildMapperTest {
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
 
+    @Test
+    void shouldReturnNewInstance() {
+        assertEquals(new FilingHistoryResolution(), resolutionChildMapper.newInstance());
+    }
 }
