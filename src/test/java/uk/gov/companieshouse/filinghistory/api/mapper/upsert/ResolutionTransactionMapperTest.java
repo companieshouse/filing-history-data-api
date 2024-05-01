@@ -91,7 +91,7 @@ class ResolutionTransactionMapperTest {
     }
 
     @Test
-    void shouldMapFilingHistoryDataWhenNewResolutionWithNoParent() {
+    void shouldMapFilingHistoryData() {
         // given
         final FilingHistoryData expected = new FilingHistoryData()
                 .resolutions(List.of(resolution));
