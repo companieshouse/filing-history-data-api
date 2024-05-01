@@ -1,0 +1,32 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_entity_id" : "<parent_entity_id>",
+  "data" : {
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true,
+    "resolutions" : [
+      {
+        "category" : "change-of-name",
+        "delta_at" : "<child_delta_at>",
+        "_entity_id" : "<child_entity_id>",
+        "description" : "resolution-change-of-name",
+        "description_values" : {
+          "resolution_date" : "2024-03-09T00:00:00.000Z"
+        },
+        "subcategory" : "resolution",
+        "type" : "RES15"
+      }
+    ]
+  },
+  "updated": {
+    "at": "<updated_at>",
+    "by": "context_id"
+  },
+  "created": {
+    "at": "<created_at>",
+    "by": "context_id"
+  }
+}
