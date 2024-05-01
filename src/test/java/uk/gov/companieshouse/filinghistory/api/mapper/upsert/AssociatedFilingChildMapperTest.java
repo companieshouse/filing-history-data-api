@@ -113,4 +113,9 @@ class AssociatedFilingChildMapperTest {
         assertEquals(expectedAssociatedFiling, existingAssociatedFiling);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
+
+    @Test
+    void shouldReturnNewInstance() {
+        assertEquals(new FilingHistoryAssociatedFiling(), associatedFilingChildMapper.newInstance());
+    }
 }
