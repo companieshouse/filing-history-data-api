@@ -63,7 +63,7 @@ class ResolutionTransactionMapperTest {
                         .barcode("barcode")
                         .paperFiled(true));
 
-        FilingHistoryDocument document = new FilingHistoryDocument()
+        FilingHistoryDocument existingDocument = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
                         .resolutions(resolutionList));
 
@@ -83,7 +83,7 @@ class ResolutionTransactionMapperTest {
 
         // when
         FilingHistoryDocument actual =
-                resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, document, INSTANT);
+                resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, INSTANT);
 
         // then
         assertEquals(expected, actual);
