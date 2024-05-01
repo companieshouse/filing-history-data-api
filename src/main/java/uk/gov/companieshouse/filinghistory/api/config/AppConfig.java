@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
-import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AnnotationChildMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ChildListMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ChildMapper;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
