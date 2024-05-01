@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
-import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -16,23 +15,19 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
 
     private final DataMapper dataMapper;
     private final ChildListMapper<FilingHistoryAnnotation> childListMapper;
-    private final ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
 
     public AnnotationTransactionMapper(LinksMapper linksMapper,
-            DataMapper dataMapper, ChildListMapper<FilingHistoryAnnotation> childListMapper,
-            ChildMapper<FilingHistoryAnnotation> annotationChildMapper) {
+            DataMapper dataMapper, ChildListMapper<FilingHistoryAnnotation> childListMapper) {
         super(linksMapper);
         this.dataMapper = dataMapper;
         this.childListMapper = childListMapper;
-        this.annotationChildMapper = annotationChildMapper;
     }
 
     @Override
     public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument,
             Instant instant) {
-        FilingHistoryData existingData = existingDocument.getData();
-        childListMapper.mapChildList(request, existingData.getAnnotations(), existingData::annotations);
+        existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
         return mapTopLevelFields(request, existingDocument, instant);
     }
 
@@ -41,7 +36,8 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
         if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
             data = dataMapper.map(request.getExternalData(), data);
         }
-        return data.annotations(List.of(annotationChildMapper.mapChild(request)));
+        childListMapper.mapChildList(request, data.getAnnotations(), data::annotations);
+        return data;
     }
 
     @Override
