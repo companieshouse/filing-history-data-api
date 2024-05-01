@@ -54,8 +54,8 @@ public class ChildListMapper<T extends FilingHistoryChild> {
                                         // Add new child to existing list
                                         () -> {
                                             if (childList.stream()
-                                                    .anyMatch(associatedFiling ->
-                                                            StringUtils.isBlank(associatedFiling.getEntityId()))) {
+                                                    .anyMatch(child ->
+                                                            StringUtils.isBlank(child.getEntityId()))) {
                                                 LOGGER.info(
                                                         MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
                                                         DataMapHolder.getLogMap()
