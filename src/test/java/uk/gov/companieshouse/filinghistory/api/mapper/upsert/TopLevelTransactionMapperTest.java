@@ -78,12 +78,14 @@ class TopLevelTransactionMapperTest {
 
 
     @Test
-    void mapNewFilingHistoryShouldReturnNewFilingHistoryDocumentWithMappedFields() {
+    void mapNewFilingHistoryShouldReturnNewFilingHistoryDocument() {
         // given
         when(dataMapper.map((any()), any())).thenReturn(expectedFilingHistoryData);
         when(requestExternalData.getLinks()).thenReturn(requestLinks);
         when(linksMapper.map(any())).thenReturn(expectedFilingHistoryLinks);
         when(expectedFilingHistoryData.links(any())).thenReturn(expectedFilingHistoryData);
+        when(requestExternalData.getPaperFiled()).thenReturn(true);
+        when(expectedFilingHistoryData.paperFiled(any())).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
@@ -99,15 +101,19 @@ class TopLevelTransactionMapperTest {
 
         // then
         assertEquals(expectedDocument, actualDocument);
+        verifyNoInteractions(childListMapper);
+        verify(expectedFilingHistoryData).paperFiled(true);
         verify(dataMapper).map(requestExternalData, new FilingHistoryData());
         verify(originalValuesMapper).map(requestOriginalValues);
         verify(linksMapper).map(requestLinks);
     }
 
     @Test
-    void shouldUpdateExistingDocumentWhenRequestDeltaAtIsNewerThanDocumentDeltaAt() {
+    void mapExistingFilingHistoryShouldReturnUpdatedFilingHistoryDocument() {
         // given
         when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(requestExternalData.getPaperFiled()).thenReturn(true);
+        when(expectedFilingHistoryData.paperFiled(any())).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
         when(requestExternalData.getAssociatedFilings()).thenReturn(null);
@@ -124,11 +130,13 @@ class TopLevelTransactionMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+        FilingHistoryDocument actualDocument = topLevelMapper.mapExistingFilingHistory(request, existingDocument,
                 INSTANT);
 
         // then
         assertEquals(expectedDocument, actualDocument);
+        verifyNoInteractions(childListMapper);
+        verify(expectedFilingHistoryData).paperFiled(true);
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
         verifyNoInteractions(childListMapper);
         verify(originalValuesMapper).map(requestOriginalValues);
@@ -158,7 +166,7 @@ class TopLevelTransactionMapperTest {
         when(requestExternalData.getAssociatedFilings()).thenReturn(requestAssociatedFilingList);
 
         // when
-        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+        FilingHistoryDocument actualDocument = topLevelMapper.mapExistingFilingHistory(request, existingDocument,
                 INSTANT);
 
         // then
@@ -192,7 +200,7 @@ class TopLevelTransactionMapperTest {
         when(requestExternalData.getAssociatedFilings()).thenReturn(requestAssociatedFilingList);
 
         // when
-        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+        FilingHistoryDocument actualDocument = topLevelMapper.mapExistingFilingHistory(request, existingDocument,
                 INSTANT);
 
         // then
@@ -214,7 +222,7 @@ class TopLevelTransactionMapperTest {
                 EXISTING_DOCUMENT_DELTA_AT);
 
         // when
-        Executable executable = () -> topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+        Executable executable = () -> topLevelMapper.mapExistingFilingHistory(request, existingDocument,
                 INSTANT);
 
         // then
@@ -243,8 +251,9 @@ class TopLevelTransactionMapperTest {
 
     private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
                                                            FilingHistoryOriginalValues originalValues, String deltaAt) {
-        FilingHistoryDeltaTimestamp createdUpdatedObject = new FilingHistoryDeltaTimestamp()
-                .at(INSTANT).by(UPDATED_BY);
+        FilingHistoryDeltaTimestamp timestamp = new FilingHistoryDeltaTimestamp()
+                .at(INSTANT)
+                .by(UPDATED_BY);
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .entityId(ENTITY_ID)
@@ -255,7 +264,7 @@ class TopLevelTransactionMapperTest {
                 .originalDescription(ORIGINAL_DESCRIPTION)
                 .originalValues(originalValues)
                 .deltaAt(deltaAt)
-                .updated(createdUpdatedObject)
-                .created(createdUpdatedObject);
+                .updated(timestamp)
+                .created(timestamp);
     }
 }

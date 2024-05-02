@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.isDeltaStale;
+
 import java.time.Instant;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -11,10 +14,13 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociat
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final DataMapper dataMapper;
     private final ChildListMapper<FilingHistoryAssociatedFiling> childListMapper;
     private final OriginalValuesMapper originalValuesMapper;
@@ -29,21 +35,6 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument,
-            Instant instant) {
-        if (isDeltaStale(request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt())) {
-            LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
-                    request.getInternalData().getDeltaAt(), existingDocument.getDeltaAt()), DataMapHolder.getLogMap());
-
-            throw new ConflictException("Stale delta for upsert");
-        }
-        existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
-
-        return mapTopLevelFields(request, existingDocument, instant);
-    }
-
-    @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
         ExternalData externalData = request.getExternalData();
         final FilingHistoryData mappedData = dataMapper.map(externalData, data);
@@ -55,11 +46,16 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-            FilingHistoryDocument document, Instant instant) {
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document,
+            Instant instant) {
+        if (isDeltaStale(request.getInternalData().getDeltaAt(), document.getDeltaAt())) {
+            LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
+                    request.getInternalData().getDeltaAt(), document.getDeltaAt()), DataMapHolder.getLogMap());
+            throw new ConflictException("Stale delta for upsert");
+        }
+
         final InternalData internalData = request.getInternalData();
         final ExternalData externalData = request.getExternalData();
-
         return document
                 .entityId(internalData.getEntityId())
                 .companyNumber(internalData.getCompanyNumber())

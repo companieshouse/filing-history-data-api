@@ -103,7 +103,7 @@ class FilingHistoryUpsertProcessorTest {
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(filingHistoryDocumentCopier.deepCopy(any())).thenReturn(existingDocumentCopy);
-        when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any(FilingHistoryDocument.class),
+        when(topLevelMapper.mapExistingFilingHistory(any(), any(FilingHistoryDocument.class),
                 any())).thenReturn(documentToUpsert);
 
         // when
@@ -113,7 +113,7 @@ class FilingHistoryUpsertProcessorTest {
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
         verify(instantSupplier).get();
-        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, INSTANT);
+        verify(topLevelMapper).mapExistingFilingHistory(request, existingDocument, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
         verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocumentCopy);
     }
@@ -128,7 +128,7 @@ class FilingHistoryUpsertProcessorTest {
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
-        when(topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(any(), any(), any())).thenThrow(ConflictException.class);
+        when(topLevelMapper.mapExistingFilingHistory(any(), any(), any())).thenThrow(ConflictException.class);
 
         // when
         Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
@@ -138,7 +138,7 @@ class FilingHistoryUpsertProcessorTest {
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
         verify(instantSupplier).get();
-        verify(topLevelMapper).mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, INSTANT);
+        verify(topLevelMapper).mapExistingFilingHistory(request, existingDocument, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
     }
