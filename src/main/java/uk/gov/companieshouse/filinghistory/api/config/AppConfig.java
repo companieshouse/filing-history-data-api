@@ -15,6 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ChildListMapper;
+import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ChildMapper;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 import uk.gov.companieshouse.filinghistory.api.serdes.EmptyFieldDeserializer;
 
 @Configuration
@@ -48,5 +53,23 @@ public class AppConfig {
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
+
+    @Bean
+    public ChildListMapper<FilingHistoryAnnotation> annotationChildListMapper(
+            ChildMapper<FilingHistoryAnnotation> childMapper) {
+        return new ChildListMapper<>(childMapper);
+    }
+
+    @Bean
+    public ChildListMapper<FilingHistoryAssociatedFiling> associatedFilingChildListMapper(
+            ChildMapper<FilingHistoryAssociatedFiling> childMapper) {
+        return new ChildListMapper<>(childMapper);
+    }
+
+    @Bean
+    public ChildListMapper<FilingHistoryResolution> resolutionChildListMapper(
+            ChildMapper<FilingHistoryResolution> childMapper) {
+        return new ChildListMapper<>(childMapper);
     }
 }

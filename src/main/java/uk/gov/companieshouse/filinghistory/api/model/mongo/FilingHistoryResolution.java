@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-public class FilingHistoryResolution {
+public class FilingHistoryResolution extends FilingHistoryChild {
 
     private String barcode;
     private String category;
@@ -16,15 +16,21 @@ public class FilingHistoryResolution {
     @Field("original_description")
     @JsonProperty("original_description")
     private String originalDescription;
-    @Field("_entity_id")
-    @JsonProperty("_entity_id")
-    private String entityId;
     @Field("description_values")
     @JsonProperty("description_values")
     private FilingHistoryDescriptionValues descriptionValues;
-    @Field("delta_at")
-    @JsonProperty("delta_at")
-    private String deltaAt;
+
+    @Override
+    public FilingHistoryResolution entityId(String entityId) {
+        this.entityId = entityId;
+        return this;
+    }
+
+    @Override
+    public FilingHistoryResolution deltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+        return this;
+    }
 
     public String getBarcode() {
         return barcode;
@@ -89,15 +95,6 @@ public class FilingHistoryResolution {
         return this;
     }
 
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public FilingHistoryResolution entityId(String entityId) {
-        this.entityId = entityId;
-        return this;
-    }
-
     public FilingHistoryDescriptionValues getDescriptionValues() {
         return descriptionValues;
     }
@@ -105,15 +102,6 @@ public class FilingHistoryResolution {
     public FilingHistoryResolution descriptionValues(
             FilingHistoryDescriptionValues descriptionValues) {
         this.descriptionValues = descriptionValues;
-        return this;
-    }
-
-    public String getDeltaAt() {
-        return deltaAt;
-    }
-
-    public FilingHistoryResolution deltaAt(String deltaAt) {
-        this.deltaAt = deltaAt;
         return this;
     }
 
@@ -125,19 +113,22 @@ public class FilingHistoryResolution {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+        if (!super.equals(o)) {
+            return false;
+        }
         FilingHistoryResolution that = (FilingHistoryResolution) o;
         return Objects.equals(barcode, that.barcode) && Objects.equals(category, that.category)
                 && Objects.equals(description, that.description) && Objects.equals(type, that.type)
                 && Objects.equals(subcategory, that.subcategory) && Objects.equals(date, that.date)
                 && Objects.equals(originalDescription, that.originalDescription) && Objects.equals(
-                entityId, that.entityId) && Objects.equals(descriptionValues, that.descriptionValues)
-                && Objects.equals(deltaAt, that.deltaAt);
+                descriptionValues, that.descriptionValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(barcode, category, description, type, subcategory, date, originalDescription, entityId,
-                descriptionValues, deltaAt);
+        return Objects.hash(super.hashCode(), barcode, category, description, type, subcategory, date,
+                originalDescription,
+                descriptionValues);
     }
 
     @Override
@@ -150,9 +141,7 @@ public class FilingHistoryResolution {
                 ", subcategory=" + subcategory +
                 ", date=" + date +
                 ", originalDescription='" + originalDescription + '\'' +
-                ", entityId='" + entityId + '\'' +
                 ", descriptionValues=" + descriptionValues +
-                ", deltaAt='" + deltaAt + '\'' +
-                '}';
+                "} " + super.toString();
     }
 }

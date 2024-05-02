@@ -68,7 +68,7 @@ class AssociatedFilingChildMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        FilingHistoryAssociatedFiling actual = associatedFilingChildMapper.mapChild(new FilingHistoryAssociatedFiling(), request);
+        FilingHistoryAssociatedFiling actual = associatedFilingChildMapper.mapChild(request);
 
         // then
         assertEquals(expected, actual);
@@ -106,7 +106,7 @@ class AssociatedFilingChildMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        associatedFilingChildMapper.mapChild(existingAssociatedFiling, request);
+        associatedFilingChildMapper.mapChild(request, existingAssociatedFiling);
 
         // then
         assertEquals(expectedAssociatedFiling, existingAssociatedFiling);

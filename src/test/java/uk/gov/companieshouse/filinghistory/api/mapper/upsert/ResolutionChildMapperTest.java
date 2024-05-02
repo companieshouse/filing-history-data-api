@@ -74,7 +74,7 @@ class ResolutionChildMapperTest {
         when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
 
         // when
-        FilingHistoryResolution actual = resolutionChildMapper.mapChild(new FilingHistoryResolution(), request);
+        FilingHistoryResolution actual = resolutionChildMapper.mapChild(request);
 
         // then
         assertEquals(expected, actual);
@@ -119,11 +119,10 @@ class ResolutionChildMapperTest {
 
 
         // when
-        resolutionChildMapper.mapChild(existingResolution, request);
+        resolutionChildMapper.mapChild(request, existingResolution);
 
         // then
         assertEquals(expected, existingResolution);
         verify(descriptionValuesMapper).map(requestDescriptionValues);
     }
-
 }

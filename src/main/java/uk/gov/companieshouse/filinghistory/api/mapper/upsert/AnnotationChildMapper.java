@@ -18,11 +18,12 @@ public class AnnotationChildMapper implements ChildMapper<FilingHistoryAnnotatio
     }
 
     @Override
-    public FilingHistoryAnnotation mapChild(FilingHistoryAnnotation annotation, InternalFilingHistoryApi request) {
+    public FilingHistoryAnnotation mapChild(InternalFilingHistoryApi request,
+            FilingHistoryAnnotation existingAnnotation) {
         InternalData internalData = request.getInternalData();
         Annotation requestAnnotation = request.getExternalData().getAnnotations().getFirst();
 
-        return annotation
+        return existingAnnotation
                 .entityId(internalData.getEntityId())
                 .deltaAt(internalData.getDeltaAt())
                 .annotation(requestAnnotation.getAnnotation())
@@ -31,5 +32,10 @@ public class AnnotationChildMapper implements ChildMapper<FilingHistoryAnnotatio
                 .description(requestAnnotation.getDescription())
                 .descriptionValues(descriptionValuesMapper.map(requestAnnotation.getDescriptionValues()))
                 .type(requestAnnotation.getType());
+    }
+
+    @Override
+    public FilingHistoryAnnotation newInstance() {
+        return new FilingHistoryAnnotation();
     }
 }

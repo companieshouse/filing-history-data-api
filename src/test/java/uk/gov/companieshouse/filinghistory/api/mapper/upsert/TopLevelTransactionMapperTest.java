@@ -3,23 +3,28 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -50,6 +55,8 @@ class TopLevelTransactionMapperTest {
     private OriginalValuesMapper originalValuesMapper;
     @Mock
     private LinksMapper linksMapper;
+    @Mock
+    private ChildListMapper<FilingHistoryAssociatedFiling> childListMapper;
 
     @Mock
     private FilingHistoryData expectedFilingHistoryData;
@@ -98,11 +105,12 @@ class TopLevelTransactionMapperTest {
     }
 
     @Test
-    void mapFilingHistoryUnlessStaleShouldReturnAnOptionalOfAnUpdatedExistingDocumentWhenDeltaIsNotStale() {
+    void shouldUpdateExistingDocumentWhenRequestDeltaAtIsNewerThanDocumentDeltaAt() {
         // given
         when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
+        when(requestExternalData.getAssociatedFilings()).thenReturn(null);
 
         final InternalFilingHistoryApi request = buildPutRequestBody();
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
@@ -122,11 +130,80 @@ class TopLevelTransactionMapperTest {
         // then
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
+        verifyNoInteractions(childListMapper);
         verify(originalValuesMapper).map(requestOriginalValues);
     }
 
     @Test
-    void mapFilingHistoryUnlessStaleShouldReturnAnEmptyOptionalWhenDeltaIsStale() {
+    void shouldUpdateExistingDocumentWhenExistingDocumentHasAssociatedFilings() {
+        // given
+        List<AssociatedFiling> requestAssociatedFilingList = List.of(new AssociatedFiling());
+        FilingHistoryData expectedFilingHistoryData = new FilingHistoryData()
+                .associatedFilings(List.of(new FilingHistoryAssociatedFiling()));
+
+        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
+                expectedFilingHistoryData,
+                expectedFilingHistoryOriginalValues,
+                EXPECTED_DELTA_AT);
+
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                existingFilingHistoryData,
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
+        when(requestExternalData.getBarcode()).thenReturn(BARCODE);
+        when(requestExternalData.getAssociatedFilings()).thenReturn(requestAssociatedFilingList);
+
+        // when
+        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+                INSTANT);
+
+        // then
+        assertEquals(expectedDocument, actualDocument);
+        verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
+        verify(childListMapper).mapChildList(eq(request), eq(expectedFilingHistoryData.getAssociatedFilings()), any());
+        verify(originalValuesMapper).map(requestOriginalValues);
+    }
+
+    @Test
+    void shouldUpdateExistingDocumentWhenExistingDocumentHasEmptyAssociatedFilings() {
+        // given
+        List<AssociatedFiling> requestAssociatedFilingList = Collections.emptyList();
+        FilingHistoryData expectedFilingHistoryData = new FilingHistoryData()
+                .associatedFilings(List.of(new FilingHistoryAssociatedFiling()));
+
+        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
+                expectedFilingHistoryData,
+                expectedFilingHistoryOriginalValues,
+                EXPECTED_DELTA_AT);
+
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                existingFilingHistoryData,
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
+        when(requestExternalData.getBarcode()).thenReturn(BARCODE);
+        when(requestExternalData.getAssociatedFilings()).thenReturn(requestAssociatedFilingList);
+
+        // when
+        FilingHistoryDocument actualDocument = topLevelMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+                INSTANT);
+
+        // then
+        assertEquals(expectedDocument, actualDocument);
+        verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
+        verifyNoInteractions(childListMapper);
+        verify(originalValuesMapper).map(requestOriginalValues);
+    }
+
+    @Test
+    void shouldThrowConflictExceptionWhenRequestDeltaAtIsStale() {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody();
         request.getInternalData().deltaAt(STALE_REQUEST_DELTA_AT);

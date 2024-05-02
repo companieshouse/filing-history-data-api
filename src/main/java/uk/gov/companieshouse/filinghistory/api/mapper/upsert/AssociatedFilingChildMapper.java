@@ -18,13 +18,13 @@ public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAss
     }
 
     @Override
-    public FilingHistoryAssociatedFiling mapChild(FilingHistoryAssociatedFiling associatedFiling,
-                                                  InternalFilingHistoryApi request) {
+    public FilingHistoryAssociatedFiling mapChild(InternalFilingHistoryApi request,
+            FilingHistoryAssociatedFiling existingAssociatedFiling) {
         InternalData internalData = request.getInternalData();
         AssociatedFiling requestAssociatedFilings =
                 request.getExternalData().getAssociatedFilings().getFirst();
 
-        return associatedFiling
+        return existingAssociatedFiling
                 .entityId(internalData.getEntityId())
                 .originalDescription(requestAssociatedFilings.getOriginalDescription())
                 .deltaAt(internalData.getDeltaAt())
@@ -33,5 +33,10 @@ public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAss
                 .description(requestAssociatedFilings.getDescription())
                 .descriptionValues(descriptionValuesMapper.map(requestAssociatedFilings.getDescriptionValues()))
                 .type(requestAssociatedFilings.getType());
+    }
+
+    @Override
+    public FilingHistoryAssociatedFiling newInstance() {
+        return new FilingHistoryAssociatedFiling();
     }
 }
