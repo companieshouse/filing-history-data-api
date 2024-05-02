@@ -6,7 +6,7 @@
   "_document_id" : "document_id",
   "data" : {
     "category" : "miscellaneous",
-    "date" : "2012-06-08T11:57:11Z",
+    "date" : "<parent_date>",
     "description" : "legacy",
     "type" : "ANNOTATION",
     "description_values" : {
@@ -16,7 +16,7 @@
       {
         "annotation" : "Clarification",
         "category" : "annotation",
-        "date" : "2012-06-08T11:57:11Z",
+        "date" : "<child_date>",
         "description" : "annotation",
         "description_values" : {
           "description" : "Clarification"

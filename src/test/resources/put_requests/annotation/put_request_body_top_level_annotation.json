@@ -6,7 +6,7 @@
       {
         "annotation" : "Clarification",
         "category" : "annotation",
-        "date" : "2012-06-08T11:57:11Z",
+        "date" : "<date>",
         "description" : "annotation",
         "description_values" : {
           "description" : "Clarification"
@@ -15,7 +15,7 @@
       }
     ],
     "category" : "miscellaneous",
-    "date" : "2012-06-08T11:57:11Z",
+    "date" : "<date>",
     "description" : "legacy",
     "type" : "ANNOTATION",
     "description_values" : {

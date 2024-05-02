@@ -42,8 +42,6 @@ class AnnotationTransactionMapperTest {
     private DataMapper dataMapper;
     @Mock
     private ChildListMapper<FilingHistoryAnnotation> childListMapper;
-    @Mock
-    private ChildMapper<FilingHistoryAnnotation> annotationChildMapper;
 
     @Mock
     private FilingHistoryAnnotation annotation;
@@ -51,6 +49,10 @@ class AnnotationTransactionMapperTest {
     @Test
     void shouldMapAnnotationsListAndAllTopLevelFieldsWhenTopLevelAnnotation() {
         // given
+        ExternalData externalData = new ExternalData()
+                .paperFiled(true)
+                .barcode(BARCODE);
+
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
@@ -60,13 +62,12 @@ class AnnotationTransactionMapperTest {
                         .originalDescription(ORIGINAL_DESCRIPTION)
                         .companyNumber(COMPANY_NUMBER)
                         .updatedBy(UPDATED_BY))
-                .externalData(new ExternalData()
-                        .paperFiled(true)
-                        .barcode(BARCODE));
+                .externalData(externalData);
 
+        FilingHistoryData existingData = new FilingHistoryData()
+                .annotations(List.of(annotation));
         FilingHistoryDocument existingDocument = new FilingHistoryDocument()
-                .data(new FilingHistoryData()
-                        .annotations(List.of(annotation)));
+                .data(existingData);
 
         FilingHistoryDocument expected = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
@@ -80,8 +81,14 @@ class AnnotationTransactionMapperTest {
                         .at(INSTANT))
                 .barcode(BARCODE)
                 .data(new FilingHistoryData()
+                        .category("annotation")
                         .paperFiled(true)
                         .annotations(List.of(annotation)));
+
+        when(dataMapper.map(any(), any())).thenReturn(new FilingHistoryData()
+                .category("annotation")
+                .paperFiled(true)
+                .annotations(List.of(annotation)));
 
         // when
         FilingHistoryDocument actual = annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(
@@ -89,6 +96,7 @@ class AnnotationTransactionMapperTest {
 
         // then
         assertEquals(expected, actual);
+        verify(dataMapper).map(externalData, existingData);
         verify(childListMapper).mapChildList(eq(request), eq(List.of(annotation)), any());
     }
 
@@ -129,52 +137,7 @@ class AnnotationTransactionMapperTest {
 
         // then
         assertEquals(expected, actual);
-        verify(childListMapper).mapChildList(eq(request), eq(List.of(annotation)), any());
-    }
-
-    @Test
-    void shouldMapDataAndAnnotationsListWhenTopLevelAnnotation() {
-        // given
-        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID))
-                .externalData(new ExternalData());
-
-        FilingHistoryData expected = new FilingHistoryData()
-                .category("annotation")
-                .annotations(List.of(annotation));
-
-        when(dataMapper.map(any(), any())).thenReturn(new FilingHistoryData().category("annotation"));
-        when(annotationChildMapper.mapChild(any())).thenReturn(annotation);
-
-        // when
-        FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(request, new FilingHistoryData());
-
-        // then
-        assertEquals(expected, actual);
-        verify(dataMapper).map(new ExternalData(), new FilingHistoryData());
-        verify(annotationChildMapper).mapChild(request);
-    }
-
-    @Test
-    void shouldAnnotationsListOnlyWhenChildAnnotation() {
-        // given
-        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
-                .internalData(new InternalData()
-                        .entityId(ENTITY_ID)
-                        .parentEntityId(PARENT_ENTITY_ID));
-
-        FilingHistoryData expected = new FilingHistoryData()
-                .annotations(List.of(annotation));
-
-        when(annotationChildMapper.mapChild(any())).thenReturn(annotation);
-
-        // when
-        FilingHistoryData actual = annotationTransactionMapper.mapFilingHistoryData(request, new FilingHistoryData());
-
-        // then
-        assertEquals(expected, actual);
         verifyNoInteractions(dataMapper);
-        verify(annotationChildMapper).mapChild(request);
+        verify(childListMapper).mapChildList(eq(request), eq(List.of(annotation)), any());
     }
 }

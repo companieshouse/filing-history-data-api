@@ -74,6 +74,8 @@ class AnnotationTransactionIT {
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     private static final String CONTEXT_ID = "ABCD1234";
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
+    private static final String EXISTING_DATE = "2012-06-08T11:57:11Z";
+    private static final String NEW_DATE = "2013-07-09T12:58:12Z";
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
@@ -847,7 +849,9 @@ class AnnotationTransactionIT {
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<created_at>", UPDATED_AT.toString())
+                .replaceAll("<parent_date>", NEW_DATE)
+                .replaceAll("<child_date>", NEW_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -857,7 +861,8 @@ class AnnotationTransactionIT {
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<date>", NEW_DATE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -895,8 +900,9 @@ class AnnotationTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<updated_at>", EXISTING_DATE)
+                .replaceAll("<created_at>", EXISTING_DATE)
+                .replaceAll("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -910,7 +916,9 @@ class AnnotationTransactionIT {
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<created_at>", EXISTING_DATE)
+                .replaceAll("<parent_date>", NEW_DATE)
+                .replaceAll("<child_date>", NEW_DATE);
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -920,7 +928,8 @@ class AnnotationTransactionIT {
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<date>", NEW_DATE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -958,8 +967,9 @@ class AnnotationTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<updated_at>", EXISTING_DATE)
+                .replaceAll("<created_at>", EXISTING_DATE)
+                .replaceAll("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -975,7 +985,9 @@ class AnnotationTransactionIT {
                 .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<created_at>", EXISTING_DATE)
+                .replaceAll("<parent_date>", EXISTING_DATE)
+                .replaceAll("<child_date>", NEW_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -1026,7 +1038,8 @@ class AnnotationTransactionIT {
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<created_at>", UPDATED_AT.toString())
+                .replaceAll("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1037,7 +1050,8 @@ class AnnotationTransactionIT {
                 .replaceAll("<delta_at>", STALE_REQUEST_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<date>", EXISTING_DATE);
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -1070,7 +1084,8 @@ class AnnotationTransactionIT {
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<created_at>", UPDATED_AT.toString())
+                .replaceAll("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1111,7 +1126,8 @@ class AnnotationTransactionIT {
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replaceAll("<created_at>", UPDATED_AT.toString())
+                .replaceAll("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
