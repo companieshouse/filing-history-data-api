@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -25,6 +26,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 class ResolutionTransactionMapperTest {
 
     private static final String ENTITY_ID = "1234567890";
+    private static final String PARENT_ENTITY_ID = "0987654321";
     private static final String COMPANY_NUMBER = "123456789";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
     private static final Instant INSTANT = Instant.now();
@@ -32,9 +34,6 @@ class ResolutionTransactionMapperTest {
 
     @InjectMocks
     private ResolutionTransactionMapper resolutionTransactionMapper;
-
-    @Mock
-    private ResolutionChildMapper resolutionChildMapper;
     @Mock
     private DataMapper dataMapper;
     @Mock
@@ -42,18 +41,63 @@ class ResolutionTransactionMapperTest {
 
     @Mock
     private List<FilingHistoryResolution> resolutionList;
-    @Mock
-    private FilingHistoryResolution resolution;
-    @Mock
-    private InternalFilingHistoryApi mockRequest;
-
 
     @Test
-    void shouldMapFilingHistoryRequestTopLevelFieldsToMongoDocument() {
+    void shouldMapResolutionsListAndAllTopLevelFieldsWhenTopLevelOrCompositeResolution() {
+        // given
+        ExternalData externalData = new ExternalData()
+                .date("2011-11-26T11:27:55.000Z")
+                .barcode("barcode")
+                .paperFiled(true);
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID)
+                        .companyNumber(COMPANY_NUMBER)
+                        .deltaAt(NEWEST_REQUEST_DELTA_AT)
+                        .updatedBy(UPDATED_BY)
+                        .originalDescription("original description"))
+                .externalData(externalData);
+
+        FilingHistoryData existingData = new FilingHistoryData()
+                .resolutions(resolutionList);
+        FilingHistoryDocument existingDocument = new FilingHistoryDocument()
+                .data(existingData);
+
+        FilingHistoryData expectedData = new FilingHistoryData()
+                .paperFiled(true)
+                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
+                .resolutions(resolutionList);
+        FilingHistoryDocument expected = new FilingHistoryDocument()
+                .data(expectedData)
+                .entityId(ENTITY_ID)
+                .companyNumber(COMPANY_NUMBER)
+                .deltaAt(NEWEST_REQUEST_DELTA_AT)
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(INSTANT)
+                        .by(UPDATED_BY))
+                .barcode("barcode")
+                .originalDescription("original description");
+
+        when(dataMapper.map(any(), any())).thenReturn(expectedData);
+
+        // when
+        FilingHistoryDocument actual =
+                resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+                        INSTANT);
+
+        // then
+        assertEquals(expected, actual);
+        verify(dataMapper).map(externalData, existingData);
+        verify(childListMapper).mapChildList(eq(request), eq(resolutionList), any());
+    }
+
+    @Test
+    void shouldMapResolutionsListAndSomeTopLevelFieldsWhenChildResolution() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
                         .entityId(ENTITY_ID)
+                        .parentEntityId(PARENT_ENTITY_ID)
                         .companyNumber(COMPANY_NUMBER)
                         .deltaAt(NEWEST_REQUEST_DELTA_AT)
                         .updatedBy(UPDATED_BY)
@@ -70,41 +114,21 @@ class ResolutionTransactionMapperTest {
         FilingHistoryDocument expected = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
                         .paperFiled(true)
-                        .date(Instant.parse("2011-11-26T11:27:55.000Z"))
                         .resolutions(resolutionList))
-                .entityId(ENTITY_ID)
+                .entityId(PARENT_ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
-                .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .updated(new FilingHistoryDeltaTimestamp()
                         .at(INSTANT)
-                        .by(UPDATED_BY))
-                .barcode("barcode")
-                .originalDescription("original description");
+                        .by(UPDATED_BY));
 
         // when
         FilingHistoryDocument actual =
-                resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument, INSTANT);
+                resolutionTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(request, existingDocument,
+                        INSTANT);
 
         // then
         assertEquals(expected, actual);
+        verifyNoInteractions(dataMapper);
         verify(childListMapper).mapChildList(eq(request), eq(resolutionList), any());
-    }
-
-    @Test
-    void shouldMapFilingHistoryData() {
-        // given
-        final FilingHistoryData expected = new FilingHistoryData()
-                .resolutions(List.of(resolution));
-
-        when(dataMapper.map(any(), any())).thenReturn(new FilingHistoryData());
-        when(resolutionChildMapper.mapChild(any())).thenReturn(resolution);
-
-        // when
-        final FilingHistoryData actual = resolutionTransactionMapper.mapFilingHistoryData(mockRequest, new FilingHistoryData());
-
-        // then
-        assertEquals(expected, actual);
-        verify(dataMapper).map(mockRequest.getExternalData(), new FilingHistoryData());
-        verify(resolutionChildMapper).mapChild(mockRequest);
     }
 }

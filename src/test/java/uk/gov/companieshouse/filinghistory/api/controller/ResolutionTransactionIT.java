@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,6 +66,7 @@ class ResolutionTransactionIT {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENTITY_ID = "1234567890";
+    private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String SECOND_RESOLUTION_ENTITY_ID = "2234567890";
     private static final String CONTEXT_ID = "ABCD1234";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
@@ -75,6 +78,7 @@ class ResolutionTransactionIT {
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     private static final Instant CREATED_AT = Instant.parse("2014-09-15T23:21:18.000Z");
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
+    private static final String EXISTING_DATE = "2012-06-08T11:57:11Z";
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
@@ -156,7 +160,8 @@ class ResolutionTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                ExternalData.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -188,7 +193,8 @@ class ResolutionTransactionIT {
                         .category(ExternalData.CategoryEnum.RESOLUTION)
                         .links(new Links()
                                 .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
-                                .documentMetadata("http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
+                                .documentMetadata(
+                                        "http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
                         .paperFiled(true)
                         .date("2015-06-10")
                         .descriptionValues(new DescriptionValues()
@@ -198,7 +204,8 @@ class ResolutionTransactionIT {
                                 new Resolution()
                                         .category(CategoryEnum.LIQUIDATION)
                                         .subcategory(List.of("voluntary", "resolution"))
-                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .description(
+                                                "liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
                                         .descriptionValues(new DescriptionValues()
                                                 .caseStartDate("2015-05-12"))
                                         .type("LRESSP")
@@ -206,7 +213,8 @@ class ResolutionTransactionIT {
                                 new Resolution()
                                         .category(CategoryEnum.LIQUIDATION)
                                         .subcategory(List.of("voluntary", "resolution"))
-                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .description(
+                                                "liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
                                         .descriptionValues(new DescriptionValues()
                                                 .caseStartDate("2015-05-12"))
                                         .type("LRESSP")
@@ -220,7 +228,8 @@ class ResolutionTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class);
+        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                FilingHistoryList.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -240,7 +249,6 @@ class ResolutionTransactionIT {
                 .replaceAll("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -273,7 +281,8 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
 
     }
 
@@ -341,7 +350,8 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
 
@@ -386,7 +396,6 @@ class ResolutionTransactionIT {
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<entity_id>", ENTITY_ID);
 
-
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
@@ -409,7 +418,8 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -479,11 +489,13 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
-    void shouldThrowConflictExceptionWhenUpdatingChildAnnotationWithStaleDeltaAtAndReturn409Conflict() throws Exception {
+    void shouldThrowConflictExceptionWhenUpdatingChildAnnotationWithStaleDeltaAtAndReturn409Conflict()
+            throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
@@ -508,7 +520,6 @@ class ResolutionTransactionIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<entity_id>", ENTITY_ID);
-
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -544,7 +555,6 @@ class ResolutionTransactionIT {
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
-
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution_no_barcode.json", StandardCharsets.UTF_8);
         requestBody = requestBody
@@ -575,7 +585,8 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
 
     }
 
@@ -646,7 +657,8 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -717,7 +729,8 @@ class ResolutionTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -781,7 +794,8 @@ class ResolutionTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                ExternalData.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -818,7 +832,8 @@ class ResolutionTransactionIT {
                         .category(ExternalData.CategoryEnum.RESOLUTION)
                         .links(new Links()
                                 .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
-                                .documentMetadata("http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
+                                .documentMetadata(
+                                        "http://localhost:8080/document/oGimUKFCtvKUJRbkuupRh-0arENh56Stcn-SZlUSwqI"))
                         .paperFiled(true)
                         .date("2015-06-10")
                         .descriptionValues(new DescriptionValues()
@@ -828,7 +843,8 @@ class ResolutionTransactionIT {
                                 new Resolution()
                                         .category(CategoryEnum.LIQUIDATION)
                                         .subcategory(List.of("voluntary", "resolution"))
-                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .description(
+                                                "liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
                                         .descriptionValues(new DescriptionValues()
                                                 .caseStartDate("2015-05-12"))
                                         .type("LRESSP")
@@ -836,7 +852,8 @@ class ResolutionTransactionIT {
                                 new Resolution()
                                         .category(CategoryEnum.LIQUIDATION)
                                         .subcategory(List.of("voluntary", "resolution"))
-                                        .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
+                                        .description(
+                                                "liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
                                         .descriptionValues(new DescriptionValues()
                                                 .caseStartDate("2015-05-12"))
                                         .type("LRESSP")
@@ -850,9 +867,207 @@ class ResolutionTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class);
+        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                FilingHistoryList.class);
 
         assertEquals(expectedResponse, actualResponse);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "existing_certnm_doc, expected_certnm_doc_with_res15",
+            "existing_certnm_doc_with_legacy_res15, expected_certnm_doc_with_two_res15s",
+            "existing_certnm_doc_with_nm01, expected_certnm_doc_with_nm01_and_res15",
+            "existing_certnm_doc_with_res15, expected_certnm_doc_with_res15",
+    })
+    void shouldUpsertResolutionToParentDocumentAndReturn200OK(String existingDoc, String expectedDoc) throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/%s.json".formatted(existingDoc), StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<updated_at>", EXISTING_DATE)
+                .replaceAll("<created_at>", EXISTING_DATE)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/%s.json".formatted(expectedDoc), StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<created_at>", EXISTING_DATE);
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/resolutions/put_request_body_res15.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_entity_id>", ENTITY_ID);
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldInsertResolutionBeforeParentDocumentAndReturn200OK() throws Exception {
+        // given
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/expected_res15_doc_with_no_parent.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<created_at>", UPDATED_AT.toString());
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/resolutions/put_request_body_res15.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_entity_id>", ENTITY_ID);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldInsertParentFieldsAndNotChangeRES15AndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/existing_res15_doc_with_no_parent.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", EXISTING_DATE)
+                .replaceAll("<created_at>", EXISTING_DATE);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        String expectedDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/expected_certnm_doc_with_res15.json", StandardCharsets.UTF_8);
+        expectedDocumentJson = expectedDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<created_at>", EXISTING_DATE);
+        final FilingHistoryDocument expectedDocument =
+                objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+
+        String requestBody = IOUtils.resourceToString(
+                "/put_requests/certnms/put_request_body_certnm.json", StandardCharsets.UTF_8);
+        requestBody = requestBody
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<parent_entity_id>", "")
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<updated_at>", UPDATED_AT.toString());
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     private String getExpectedChangedResource() throws JsonProcessingException {

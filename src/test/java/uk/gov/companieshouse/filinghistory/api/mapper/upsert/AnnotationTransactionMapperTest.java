@@ -69,6 +69,10 @@ class AnnotationTransactionMapperTest {
         FilingHistoryDocument existingDocument = new FilingHistoryDocument()
                 .data(existingData);
 
+        FilingHistoryData expectedData = new FilingHistoryData()
+                .category("annotation")
+                .paperFiled(true)
+                .annotations(List.of(annotation));
         FilingHistoryDocument expected = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
                 .documentId(DOCUMENT_ID)
@@ -80,15 +84,9 @@ class AnnotationTransactionMapperTest {
                         .by(UPDATED_BY)
                         .at(INSTANT))
                 .barcode(BARCODE)
-                .data(new FilingHistoryData()
-                        .category("annotation")
-                        .paperFiled(true)
-                        .annotations(List.of(annotation)));
+                .data(expectedData);
 
-        when(dataMapper.map(any(), any())).thenReturn(new FilingHistoryData()
-                .category("annotation")
-                .paperFiled(true)
-                .annotations(List.of(annotation)));
+        when(dataMapper.map(any(), any())).thenReturn(expectedData);
 
         // when
         FilingHistoryDocument actual = annotationTransactionMapper.mapFilingHistoryToExistingDocumentUnlessStale(

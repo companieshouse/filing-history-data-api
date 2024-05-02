@@ -1,0 +1,27 @@
+{
+  "external_data" : {
+    "transaction_id" : "<transaction_id>",
+    "barcode" : "<barcode>",
+    "category" : "change-of-name",
+    "date" : "2024-04-22T11:32:05.000Z",
+    "description" : "certificate-change-of-name-company",
+    "description_values" : {
+      "description" : "Company name changed ACME LLP\\certificate issued on 22/04/24"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true,
+    "subcategory" : "certificate",
+    "type" : "CERTNM"
+  },
+  "internal_data" : {
+    "original_description" : "Company name changed ACME LLP\\certificate issued on 22/04/24",
+    "document_id" : "document_id",
+    "company_number" : "<company_number>",
+    "entity_id" : "<entity_id>",
+    "updated_by": "context_id",
+    "delta_at": "<delta_at>",
+    "transaction_kind": "top-level"
+  }
+}

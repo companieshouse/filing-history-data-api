@@ -1,0 +1,38 @@
+{
+  "_id" : "<transaction_id>",
+  "company_number" : "<company_number>",
+  "_barcode" : "<barcode>",
+  "_entity_id" : "<parent_entity_id>",
+  "data" : {
+    "category" : "change-of-name",
+    "date" : "2024-04-22T11:32:05.000Z",
+    "description" : "certificate-change-of-name-company",
+    "description_values" : {
+      "description" : "Company name changed ACME LLP\\certificate issued on 22/04/24"
+    },
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "subcategory" : "certificate",
+    "type" : "CERTNM",
+    "associated_filings" : [
+      {
+        "category" : "change-of-name",
+        "date" : "2024-04-30T11:11:29.000Z",
+        "description" : "change-of-name-by-resolution",
+        "type" : "NM01"
+      }
+    ]
+  },
+  "original_description" : "Company name changed ACME LLP\\certificate issued on 22/04/24",
+  "_document_id" : "document_id",
+  "updated": {
+    "at": "<updated_at>",
+    "by": "context_id"
+  },
+  "created": {
+    "at": "<created_at>",
+    "by": "context_id"
+  },
+  "delta_at": "<delta_at>"
+}
