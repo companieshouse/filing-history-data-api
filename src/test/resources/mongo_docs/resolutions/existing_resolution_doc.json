@@ -17,6 +17,7 @@
     },
     "resolutions" : [
       {
+        "barcode" : "<barcode>",
         "category" : "liquidation",
         "delta_at" : "<delta_at>",
         "description" : "liquidation-voluntary-special-resolution-to-wind-up-case-start-date",

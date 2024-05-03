@@ -24,6 +24,7 @@ public class ResolutionsGetResponseMapper {
                         .stream()
                         .map(resolution ->
                                 new Resolution()
+                                        .barcode(resolution.getBarcode())
                                         .category(CategoryEnum.fromValue(resolution.getCategory()))
                                         .subcategory(resolution.getSubcategory())
                                         .description(resolution.getDescription())
