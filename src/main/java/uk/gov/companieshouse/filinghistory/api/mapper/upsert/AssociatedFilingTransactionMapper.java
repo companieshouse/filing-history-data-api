@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import java.time.Instant;
-import java.util.List;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
@@ -14,37 +13,24 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 public class AssociatedFilingTransactionMapper extends AbstractTransactionMapper {
 
     private final ChildListMapper<FilingHistoryAssociatedFiling> childListMapper;
-    private final ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper;
 
     public AssociatedFilingTransactionMapper(LinksMapper linksMapper,
-            ChildListMapper<FilingHistoryAssociatedFiling> childListMapper,
-            ChildMapper<FilingHistoryAssociatedFiling> associatedFilingChildMapper) {
+            ChildListMapper<FilingHistoryAssociatedFiling> childListMapper) {
         super(linksMapper);
         this.childListMapper = childListMapper;
-        this.associatedFilingChildMapper = associatedFilingChildMapper;
-    }
-
-    @Override
-    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument,
-            Instant instant) {
-        FilingHistoryData existingData = existingDocument.getData();
-        childListMapper.mapChildList(request, existingData.getAssociatedFilings(), existingData::associatedFilings);
-        return mapTopLevelFields(request, existingDocument, instant);
     }
 
     @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
-        return data.associatedFilings(List.of(associatedFilingChildMapper.mapChild(request)));
+        childListMapper.mapChildList(request, data.getAssociatedFilings(), data::associatedFilings);
+        return data;
     }
 
     @Override
-    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-            FilingHistoryDocument document,
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document,
             Instant instant) {
         final InternalData internalData = request.getInternalData();
 
-        document.getData().paperFiled(request.getExternalData().getPaperFiled());
         return document
                 .entityId(internalData.getParentEntityId())
                 .companyNumber(internalData.getCompanyNumber())

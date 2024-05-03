@@ -27,17 +27,10 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument,
-            Instant instant) {
-        existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
-        return mapTopLevelFields(request, existingDocument, instant);
-    }
-
-    @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
         if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
-            data = dataMapper.map(request.getExternalData(), data);
+            data = dataMapper.map(request.getExternalData(), data)
+                    .date(stringToInstant(request.getExternalData().getDate()));
         }
         childListMapper.mapChildList(request, data.getResolutions(), data::resolutions);
         return data;
@@ -46,13 +39,9 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
     @Override
     protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
             FilingHistoryDocument document, Instant instant) {
-        document.getData().paperFiled(request.getExternalData().getPaperFiled());
-
         final InternalData internalData = request.getInternalData();
 
         if (StringUtils.isBlank(internalData.getParentEntityId())) {
-            document.getData().date(stringToInstant(request.getExternalData().getDate()));
-
             document
                     .entityId(internalData.getEntityId())
                     .barcode(request.getExternalData().getBarcode())

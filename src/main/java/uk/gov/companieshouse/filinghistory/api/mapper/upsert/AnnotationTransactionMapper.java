@@ -24,14 +24,6 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    public FilingHistoryDocument mapFilingHistoryToExistingDocumentUnlessStale(InternalFilingHistoryApi request,
-            FilingHistoryDocument existingDocument,
-            Instant instant) {
-        existingDocument.data(mapFilingHistoryData(request, existingDocument.getData()));
-        return mapTopLevelFields(request, existingDocument, instant);
-    }
-
-    @Override
     protected FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data) {
         if (StringUtils.isBlank(request.getInternalData().getParentEntityId())) {
             data = dataMapper.map(request.getExternalData(), data);
@@ -41,13 +33,10 @@ public class AnnotationTransactionMapper extends AbstractTransactionMapper {
     }
 
     @Override
-    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request,
-            FilingHistoryDocument document,
+    protected FilingHistoryDocument mapTopLevelFields(InternalFilingHistoryApi request, FilingHistoryDocument document,
             Instant instant) {
-        document.getData().paperFiled(request.getExternalData().getPaperFiled());
 
         final InternalData internalData = request.getInternalData();
-
         if (StringUtils.isBlank(internalData.getParentEntityId())) {
             document
                     .entityId(internalData.getEntityId())

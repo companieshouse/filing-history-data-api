@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
-import static uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper.isDeltaStale;
+import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.isDeltaStale;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +29,7 @@ public class ChildListMapper<T extends FilingHistoryChild> {
         this.childMapper = childMapper;
     }
 
-    void mapChildList(InternalFilingHistoryApi request,
-                      List<T> existingChildList,
-                      Consumer<List<T>> childListSetter) {
+    void mapChildList(InternalFilingHistoryApi request, List<T> existingChildList, Consumer<List<T>> childListSetter) {
         final String requestEntityId = request.getInternalData().getEntityId();
 
         Optional.ofNullable(existingChildList)
