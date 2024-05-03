@@ -25,6 +25,7 @@ public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAss
                 request.getExternalData().getAssociatedFilings().getFirst();
 
         return existingAssociatedFiling
+                .actionDate(stringToInstant(requestAssociatedFilings.getActionDate()))
                 .entityId(internalData.getEntityId())
                 .originalDescription(requestAssociatedFilings.getOriginalDescription())
                 .deltaAt(internalData.getDeltaAt())

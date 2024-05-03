@@ -23,6 +23,7 @@ public class AssociatedFilingsGetResponseMapper {
                         .stream()
                         .map(associatedFiling ->
                                 new AssociatedFiling()
+                                        .actionDate(instantToString(associatedFiling.getActionDate()))
                                         .originalDescription(associatedFiling.getOriginalDescription())
                                         .category(associatedFiling.getCategory())
                                         .type(associatedFiling.getType())

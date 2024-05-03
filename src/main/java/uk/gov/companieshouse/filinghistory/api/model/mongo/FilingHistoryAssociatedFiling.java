@@ -17,6 +17,9 @@ public class FilingHistoryAssociatedFiling extends FilingHistoryChild {
     @Field("original_description")
     @JsonProperty("original_description")
     private String originalDescription;
+    @Field("action_date")
+    @JsonProperty("action_date")
+    private Instant actionDate;
 
     @Override
     public FilingHistoryAssociatedFiling entityId(String entityId) {
@@ -84,6 +87,15 @@ public class FilingHistoryAssociatedFiling extends FilingHistoryChild {
         return this;
     }
 
+    public Instant getActionDate() {
+        return actionDate;
+    }
+
+    public FilingHistoryAssociatedFiling actionDate(Instant actionDate) {
+        this.actionDate = actionDate;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -96,16 +108,19 @@ public class FilingHistoryAssociatedFiling extends FilingHistoryChild {
             return false;
         }
         FilingHistoryAssociatedFiling that = (FilingHistoryAssociatedFiling) o;
-        return Objects.equals(category, that.category) && Objects.equals(description, that.description)
-                && Objects.equals(type, that.type) && Objects.equals(date, that.date)
-                && Objects.equals(descriptionValues, that.descriptionValues) && Objects.equals(
-                originalDescription, that.originalDescription);
+        return Objects.equals(category, that.category)
+                && Objects.equals(description, that.description)
+                && Objects.equals(type, that.type)
+                && Objects.equals(date, that.date)
+                && Objects.equals(descriptionValues, that.descriptionValues)
+                && Objects.equals(originalDescription, that.originalDescription)
+                && Objects.equals(actionDate, that.actionDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), category, description, type, date, descriptionValues,
-                originalDescription);
+        return Objects.hash(
+                super.hashCode(), category, description, type, date, descriptionValues, originalDescription, actionDate);
     }
 
     @Override
@@ -117,6 +132,7 @@ public class FilingHistoryAssociatedFiling extends FilingHistoryChild {
                 ", date=" + date +
                 ", descriptionValues=" + descriptionValues +
                 ", originalDescription='" + originalDescription + '\'' +
-                "} " + super.toString();
+                ", actionDate='" + actionDate + '\'' +
+                '}' + super.toString();
     }
 }
