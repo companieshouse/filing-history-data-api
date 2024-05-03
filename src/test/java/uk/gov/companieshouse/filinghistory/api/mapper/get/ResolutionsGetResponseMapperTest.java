@@ -7,6 +7,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,11 @@ class ResolutionsGetResponseMapperTest {
     private static final String CATEGORY = "resolution";
     private static final String TYPE = "type";
     private static final String DESCRIPTION = "description";
+    private static final String BARCODE = "barcode";
+    private static final Object SUBCATEGORY = "subcategory";
+    private static final Instant INSTANT_NOW = Instant.now();
+    private static final String DATE = LocalDate.ofInstant(INSTANT_NOW, ZoneOffset.UTC).toString();
+    private static final String ORIGINAL_DESCRIPTION = "original description";
 
     @InjectMocks
     private ResolutionsGetResponseMapper resolutionsGetResponseMapper;
@@ -39,9 +47,13 @@ class ResolutionsGetResponseMapperTest {
         // given
         final List<Resolution> expected = List.of(
                 new Resolution()
+                        .barcode(BARCODE)
                         .category(CategoryEnum.RESOLUTION)
+                        .subcategory(SUBCATEGORY)
+                        .date(DATE)
                         .type(TYPE)
                         .description(DESCRIPTION)
+                        .originalDescription(ORIGINAL_DESCRIPTION)
                         .descriptionValues(DescriptionValues));
 
         when(descriptionValuesGetResponseMapper.map(any())).thenReturn(DescriptionValues);
@@ -92,9 +104,13 @@ class ResolutionsGetResponseMapperTest {
     private static List<FilingHistoryResolution> buildDocumentResolutionsList() {
         return List.of(
                 new FilingHistoryResolution()
+                        .barcode(BARCODE)
                         .category(CATEGORY)
-                        .type(TYPE)
                         .description(DESCRIPTION)
+                        .type(TYPE)
+                        .subcategory(SUBCATEGORY)
+                        .date(INSTANT_NOW)
+                        .originalDescription(ORIGINAL_DESCRIPTION)
                         .descriptionValues(new FilingHistoryDescriptionValues()));
     }
 }

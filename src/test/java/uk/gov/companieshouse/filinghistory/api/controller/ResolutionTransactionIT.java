@@ -134,6 +134,7 @@ class ResolutionTransactionIT {
                 .pages(1)
                 .resolutions(List.of(
                         new Resolution()
+                                .barcode(BARCODE)
                                 .category(CategoryEnum.LIQUIDATION)
                                 .subcategory(List.of("voluntary", "resolution"))
                                 .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
@@ -202,6 +203,7 @@ class ResolutionTransactionIT {
                         .pages(1)
                         .resolutions(List.of(
                                 new Resolution()
+                                        .barcode(BARCODE)
                                         .category(CategoryEnum.LIQUIDATION)
                                         .subcategory(List.of("voluntary", "resolution"))
                                         .description(
@@ -769,6 +771,7 @@ class ResolutionTransactionIT {
                 .pages(1)
                 .resolutions(List.of(
                         new Resolution()
+                                .barcode(BARCODE)
                                 .category(CategoryEnum.LIQUIDATION)
                                 .subcategory(List.of("voluntary", "resolution"))
                                 .description("liquidation-voluntary-special-resolution-to-wind-up-case-start-date")
@@ -841,6 +844,7 @@ class ResolutionTransactionIT {
                         .pages(1)
                         .resolutions(List.of(
                                 new Resolution()
+                                        .barcode(BARCODE)
                                         .category(CategoryEnum.LIQUIDATION)
                                         .subcategory(List.of("voluntary", "resolution"))
                                         .description(
