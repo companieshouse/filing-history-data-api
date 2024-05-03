@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ class AssociatedFilingsGetResponseMapperTest {
     private static final String TYPE = "type";
     private static final String DESCRIPTION = "description";
     private static final String ORIGINAL_DESCRIPTION = "original description";
+    private static final String ACTION_DATE = "2015-10-05";
 
     @InjectMocks
     private AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper;
@@ -39,6 +41,7 @@ class AssociatedFilingsGetResponseMapperTest {
         // given
         final List<AssociatedFiling> expected = List.of(
                 new AssociatedFiling()
+                        .actionDate(ACTION_DATE)
                         .category(CATEGORY)
                         .type(TYPE)
                         .originalDescription(ORIGINAL_DESCRIPTION)
@@ -91,6 +94,7 @@ class AssociatedFilingsGetResponseMapperTest {
     private static List<FilingHistoryAssociatedFiling> buildDocumentAssociatedFilingsList() {
         return List.of(
                 new FilingHistoryAssociatedFiling()
+                        .actionDate(Instant.parse("2015-10-05T00:00:00Z"))
                         .category(CATEGORY)
                         .type(TYPE)
                         .originalDescription(ORIGINAL_DESCRIPTION)

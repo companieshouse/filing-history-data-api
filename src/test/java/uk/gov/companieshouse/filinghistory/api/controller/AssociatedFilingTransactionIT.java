@@ -539,10 +539,10 @@ class AssociatedFilingTransactionIT {
     }
 
     @Test
-    void shouldReturnSingleGetResponseWithOriginalDescriptionFieldOnChildObject() throws Exception {
+    void shouldSuccessfullyReturnSingleGetResponse() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_action_date_and_document_metadata.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<barcode>", "")
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -569,9 +569,11 @@ class AssociatedFilingTransactionIT {
                         .terminationDate("2014-09-15"))
                 .actionDate("2014-09-15")
                 .links(new Links()
-                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID)))
+                        .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                        .documentMetadata("http://localhost:8080/document/document_metadata_id"))
                 .associatedFilings(List.of(
                         new AssociatedFiling()
+                                .actionDate("2015-10-05")
                                 .category("annual-return")
                                 .date("2005-05-10")
                                 .description("legacy")

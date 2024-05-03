@@ -25,6 +25,8 @@ class AssociatedFilingChildMapperTest {
 
     private static final String ENTITY_ID = "1234567890";
     private static final String NEWEST_REQUEST_DELTA_AT = "20151025185208001000";
+    private static final String ACTION_DATE = "2015-10-05T00:00:00Z";
+    private static final Instant INSTANT_ACTION_DATE = Instant.parse("2015-10-05T00:00:00Z");
 
     @InjectMocks
     private AssociatedFilingChildMapper associatedFilingChildMapper;
@@ -47,6 +49,7 @@ class AssociatedFilingChildMapperTest {
                 .externalData(new ExternalData()
                         .associatedFilings(List.of(
                                 new AssociatedFiling()
+                                        .actionDate(ACTION_DATE)
                                         .category("annual-return")
                                         .originalDescription("original description")
                                         .description("legacy")
@@ -56,6 +59,7 @@ class AssociatedFilingChildMapperTest {
                         )));
 
         FilingHistoryAssociatedFiling expected = new FilingHistoryAssociatedFiling()
+                .actionDate(INSTANT_ACTION_DATE)
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .category("annual-return")
