@@ -531,40 +531,6 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldDeleteDocumentAndReturn200OKWhenExistingDocumentInDB() throws Exception {
-        // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
-                        StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
-        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
-
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
-                .willReturn(aResponse()
-                        .withStatus(200)));
-
-        // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app")
-                .header("X-Request-Id", "ABCD1234")
-                .contentType(MediaType.APPLICATION_JSON));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isOk());
-
-        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNull(actualDocument);
-
-        verify(instantSupplier).get();
-        WireMock.verify(requestMadeFor(
-                new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
-    }
-
-    @Test
     void shouldReturn400BadRequestWhenInvalidFieldsSentInRequestBody() throws Exception {
         // given
         InternalFilingHistoryApi requestBody = new InternalFilingHistoryApi()
@@ -762,6 +728,40 @@ class FilingHistoryControllerIT {
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldDeleteDocumentAndReturn200OKWhenExistingDocumentInDB() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNull(actualDocument);
+
+        verify(instantSupplier).get();
+        WireMock.verify(requestMadeFor(
+                new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
     }
 
     @Test
@@ -1055,6 +1055,80 @@ class FilingHistoryControllerIT {
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldDeleteNewIncWithEmbeddedChildDocumentAndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/newinc/existing_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", DATE)
+                .replaceAll("<created_at>", DATE);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNull(actualDocument);
+    }
+
+    @Test
+    void shouldDeleteNewIncWithEmbeddedChildDocumentAndModelArticlesAndReturn200OK() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/newinc/existing_new_inc_with_SH01_and_MODEL_ARTICLES_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", DATE)
+                .replaceAll("<created_at>", DATE);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNull(actualDocument);
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
