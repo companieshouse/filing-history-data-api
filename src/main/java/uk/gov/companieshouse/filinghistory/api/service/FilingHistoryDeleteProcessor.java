@@ -18,9 +18,19 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
     }
 
     @Override
-    public void processFilingHistoryDelete(String transactionId) {
-        filingHistoryService.findExistingFilingHistoryById(transactionId)
+    public void processFilingHistoryDelete(String entityId) {
+        filingHistoryService.findFilingHistoryByEntityId(entityId)
                 .ifPresentOrElse(
+                        // check whether delete whole document or just child.
+
+                        // if remove of a child - get delete mapper
+
+                        // map document
+
+                        // update document in repository using existing service method
+
+                        // if delete whole document just call delete.
+
                         filingHistoryService::deleteExistingFilingHistory,
                         () -> {
                             LOGGER.error("Record to delete could not be found in MongoDB", DataMapHolder.getLogMap());

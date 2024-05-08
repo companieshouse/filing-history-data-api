@@ -154,7 +154,7 @@ class RepositoryTest {
         Query query = new Query(criteria);
 
         // when
-        Executable executable = () -> repository.findById(TRANSACTION_ID);
+        Executable executable = () -> repository.findByEntityId(TRANSACTION_ID);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);

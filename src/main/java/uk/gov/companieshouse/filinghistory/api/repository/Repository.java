@@ -80,8 +80,9 @@ public class Repository {
         }
     }
 
-    public Optional<FilingHistoryDocument> findById(final String id) {
-        return findByIdAndCompanyNumber(id, null);
+    public Optional<FilingHistoryDocument> findByEntityId(final String entityId) {
+        //change this method to do find query and project out the field that has been matched in the $OR and the filingHistoryDocument.
+        return null;
     }
 
     public void save(final FilingHistoryDocument document) {

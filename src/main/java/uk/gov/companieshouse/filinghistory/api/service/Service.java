@@ -12,7 +12,7 @@ public interface Service {
 
     Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId, final String companyNumber);
 
-    Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId);
+    Optional<FilingHistoryDocument> findFilingHistoryByEntityId(String entityId);
 
     void insertFilingHistory(final FilingHistoryDocument documentToSave);
 

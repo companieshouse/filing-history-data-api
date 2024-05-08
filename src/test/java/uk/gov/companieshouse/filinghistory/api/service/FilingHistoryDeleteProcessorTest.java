@@ -34,33 +34,33 @@ class FilingHistoryDeleteProcessorTest {
     @Test
     void shouldSuccessfullyCallDeleteWhenRequestReceived() {
         // given
-        when(filingHistoryService.findExistingFilingHistoryById(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(existingDocument));
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(TRANSACTION_ID);
 
         // then
         verify(filingHistoryService).deleteExistingFilingHistory(existingDocument);
-        verify(filingHistoryService).findExistingFilingHistoryById(TRANSACTION_ID);
+        verify(filingHistoryService).findFilingHistoryByEntityId(TRANSACTION_ID);
     }
 
     @Test
     void shouldThrowNotFoundExceptionWhenCannotFindDocumentInDB(){
         // given
-        when(filingHistoryService.findExistingFilingHistoryById(any())).thenReturn(Optional.empty());
+        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.empty());
 
         // when
         Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(TRANSACTION_ID);
 
         // then
         assertThrows(NotFoundException.class, executable);
-        verify(filingHistoryService).findExistingFilingHistoryById(TRANSACTION_ID);
+        verify(filingHistoryService).findFilingHistoryByEntityId(TRANSACTION_ID);
     }
 
     @Test
     void shouldThrowServiceUnavailableWhenMongoDBUnavailable() {
         // given
-        when(filingHistoryService.findExistingFilingHistoryById(any())).thenThrow(
+        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenThrow(
                 ServiceUnavailableException.class);
 
         // when
@@ -68,7 +68,7 @@ class FilingHistoryDeleteProcessorTest {
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
-        verify(filingHistoryService).findExistingFilingHistoryById(TRANSACTION_ID);
+        verify(filingHistoryService).findFilingHistoryByEntityId(TRANSACTION_ID);
         verifyNoMoreInteractions(filingHistoryService);
     }
 

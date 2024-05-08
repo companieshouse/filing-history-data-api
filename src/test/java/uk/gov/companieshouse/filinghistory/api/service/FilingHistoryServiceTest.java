@@ -254,27 +254,27 @@ class FilingHistoryServiceTest {
     @Test
     void findExistingFilingHistoryDocumentByIdShouldReturnDocument() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.of(document));
+        when(repository.findByEntityId(any())).thenReturn(Optional.of(document));
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+        final Optional<FilingHistoryDocument> actualDocument = service.findFilingHistoryByEntityId(TRANSACTION_ID);
 
         // then
         assertTrue(actualDocument.isPresent());
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByEntityId(TRANSACTION_ID);
     }
 
     @Test
     void findExistingFilingHistoryDocumentByIdShouldReturnEmptyWhenNoDocumentExists() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.empty());
+        when(repository.findByEntityId(any())).thenReturn(Optional.empty());
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+        final Optional<FilingHistoryDocument> actualDocument = service.findFilingHistoryByEntityId(TRANSACTION_ID);
 
         // then
         assertTrue(actualDocument.isEmpty());
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByEntityId(TRANSACTION_ID);
     }
 
     private static Stream<Object> categoriesListCases() {

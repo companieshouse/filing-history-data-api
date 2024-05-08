@@ -57,8 +57,8 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
-        return repository.findById(transactionId);
+    public Optional<FilingHistoryDocument> findFilingHistoryByEntityId(String entityId) {
+        return repository.findByEntityId(entityId);
     }
 
     @Override
