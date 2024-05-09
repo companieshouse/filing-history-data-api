@@ -13,18 +13,18 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
     private final Service filingHistoryService;
-    private final DeleteMapperDelegator mapperFactory;
+    private final DeleteMapperDelegator deleteMapperDelegator;
 
-    public FilingHistoryDeleteProcessor(Service filingHistoryService, DeleteMapperDelegator mapperFactory) {
+    public FilingHistoryDeleteProcessor(Service filingHistoryService, DeleteMapperDelegator deleteMapperDelegator) {
         this.filingHistoryService = filingHistoryService;
-        this.mapperFactory = mapperFactory;
+        this.deleteMapperDelegator = deleteMapperDelegator;
     }
 
     @Override
     public void processFilingHistoryDelete(String entityId) {
         filingHistoryService.findFilingHistoryByEntityId(entityId)
                 .ifPresentOrElse(
-                        document -> mapperFactory.delegateDelete(entityId, document)
+                        document -> deleteMapperDelegator.delegateDelete(entityId, document)
                                 .ifPresentOrElse(
                                         updatedDocument -> {
                                             LOGGER.info("Removing child with _entity_id: [%s]".formatted(entityId),

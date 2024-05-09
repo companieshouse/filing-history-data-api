@@ -28,7 +28,7 @@ class FilingHistoryDeleteProcessorTest {
     @Mock
     private FilingHistoryService filingHistoryService;
     @Mock
-    private DeleteMapperDelegator mapperFactory;
+    private DeleteMapperDelegator deleteMapperDelegator;
 
     @Mock
     private FilingHistoryDocument existingDocument;
@@ -39,14 +39,14 @@ class FilingHistoryDeleteProcessorTest {
     void shouldCallDeleteWhenParentDocumentRemoved() {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(existingDocument));
-        when(mapperFactory.delegateDelete(any(), any())).thenReturn(Optional.empty());
+        when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.empty());
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(ENTITY_ID);
 
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(mapperFactory).delegateDelete(ENTITY_ID, existingDocument);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument);
         verify(filingHistoryService).deleteExistingFilingHistory(existingDocument);
     }
 
@@ -54,14 +54,14 @@ class FilingHistoryDeleteProcessorTest {
     void shouldCallUpdateWhenResolutionRemovedFromComposite() {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(existingDocument));
-        when(mapperFactory.delegateDelete(any(), any())).thenReturn(Optional.of(updatedDocument));
+        when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.of(updatedDocument));
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(ENTITY_ID);
 
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(mapperFactory).delegateDelete(ENTITY_ID, existingDocument);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument);
         verify(filingHistoryService).updateFilingHistory(updatedDocument, existingDocument);
     }
 
@@ -76,6 +76,6 @@ class FilingHistoryDeleteProcessorTest {
         // then
         assertThrows(NotFoundException.class, executable);
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verifyNoInteractions(mapperFactory);
+        verifyNoInteractions(deleteMapperDelegator);
     }
 }

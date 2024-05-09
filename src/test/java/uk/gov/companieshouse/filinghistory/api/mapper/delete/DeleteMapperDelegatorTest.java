@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +29,7 @@ class DeleteMapperDelegatorTest {
     private static final String PARENT_TYPE = "CERTNM";
 
     @InjectMocks
-    private DeleteMapperDelegator mapperFactory;
+    private DeleteMapperDelegator deleteMapperDelegator;
     @Mock
     private CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
 
@@ -51,7 +50,7 @@ class DeleteMapperDelegatorTest {
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = mapperFactory.delegateDelete(ENTITY_ID, document);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document);
 
         // then
         assertTrue(actual.isPresent());
@@ -69,7 +68,7 @@ class DeleteMapperDelegatorTest {
                                 .entityId(CHILD_ENTITY_ID))));
 
         // when
-        Executable actual = () -> mapperFactory.delegateDelete(CHILD_ENTITY_ID, document);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document);
 
         // then
         assertThrows(InternalServerErrorException.class, actual);
@@ -84,7 +83,7 @@ class DeleteMapperDelegatorTest {
                         .resolutions(List.of()));
 
         // when
-        Executable actual = () -> mapperFactory.delegateDelete(CHILD_ENTITY_ID, document);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document);
 
         // then
         assertThrows(InternalServerErrorException.class, actual);
@@ -99,7 +98,7 @@ class DeleteMapperDelegatorTest {
                         .resolutions(List.of(new FilingHistoryResolution())));
 
         // when
-        Executable actual = () -> mapperFactory.delegateDelete(CHILD_ENTITY_ID, document);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document);
 
         // then
         assertThrows(InternalServerErrorException.class, actual);
@@ -113,7 +112,7 @@ class DeleteMapperDelegatorTest {
                 .data(new FilingHistoryData());
 
         // when
-        Optional<FilingHistoryDocument> actual = mapperFactory.delegateDelete(ENTITY_ID, document);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document);
 
         // then
         assertTrue(actual.isEmpty());
