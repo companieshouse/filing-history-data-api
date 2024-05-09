@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -12,29 +13,32 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
     private final Service filingHistoryService;
+    private final DeleteMapperDelegator mapperFactory;
 
-    public FilingHistoryDeleteProcessor(Service filingHistoryService) {
+    public FilingHistoryDeleteProcessor(Service filingHistoryService, DeleteMapperDelegator mapperFactory) {
         this.filingHistoryService = filingHistoryService;
+        this.mapperFactory = mapperFactory;
     }
 
     @Override
     public void processFilingHistoryDelete(String entityId) {
         filingHistoryService.findFilingHistoryByEntityId(entityId)
                 .ifPresentOrElse(
-                        // check whether delete whole document or just child.
-
-                        // if remove of a child - get delete mapper
-
-                        // map document
-
-                        // update document in repository using existing service method
-
-                        // if delete whole document just call delete.
-
-                        filingHistoryService::deleteExistingFilingHistory,
+                        document -> mapperFactory.delegateDelete(entityId, document)
+                                .ifPresentOrElse(
+                                        updatedDocument -> {
+                                            LOGGER.info("Removing child with _entity_id: [%s]".formatted(entityId),
+                                                    DataMapHolder.getLogMap());
+                                            filingHistoryService.updateFilingHistory(updatedDocument, document);
+                                        },
+                                        () -> {
+                                            LOGGER.info("Deleting parent with _entity_id: [%s]".formatted(entityId),
+                                                    DataMapHolder.getLogMap());
+                                            filingHistoryService.deleteExistingFilingHistory(document);
+                                        }),
                         () -> {
-                            LOGGER.error("Record to delete could not be found in MongoDB", DataMapHolder.getLogMap());
-                            throw new NotFoundException("Record to delete could not be found in MongoDB");
+                            LOGGER.error("Document to delete not found", DataMapHolder.getLogMap());
+                            throw new NotFoundException("Document to delete not found");
                         }
                 );
     }
