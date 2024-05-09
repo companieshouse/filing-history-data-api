@@ -28,6 +28,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggr
 class RepositoryTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final int START_INDEX = 0;
     private static final int ITEMS_PER_PAGE = 25;
@@ -80,8 +81,8 @@ class RepositoryTest {
         // given
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
-        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID);
-        criteria.and("company_number").is(COMPANY_NUMBER);
+        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID)
+                .and("company_number").is(COMPANY_NUMBER);
         Query query = new Query(criteria);
 
         // when
@@ -146,15 +147,17 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindById() {
+    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindByEntityId() {
         // given
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
-        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID);
+        Criteria criteria = new Criteria()
+                .orOperator(Criteria.where("_entity_id").is(ENTITY_ID),
+                        Criteria.where("data.resolutions._entity_id").is(ENTITY_ID));
         Query query = new Query(criteria);
 
         // when
-        Executable executable = () -> repository.findByEntityId(TRANSACTION_ID);
+        Executable executable = () -> repository.findByEntityId(ENTITY_ID);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
@@ -165,7 +168,8 @@ class RepositoryTest {
     void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindCompanyFilingHistory() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class)))
-                .thenThrow(new DataAccessException("...") {});
+                .thenThrow(new DataAccessException("...") {
+                });
 
         // when
         Executable executable = () -> repository.findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX,

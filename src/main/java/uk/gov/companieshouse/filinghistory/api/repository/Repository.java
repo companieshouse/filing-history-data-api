@@ -58,31 +58,42 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
                     .getUniqueMappedResult();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when trying to retrieve filing history list.: %s".formatted(
+            LOGGER.error("MongoDB unavailable when finding filing history list.: %s".formatted(
                     ex.getMessage()), DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when trying to retrieve filing history list.");
+            throw new ServiceUnavailableException("MongoDB unavailable when finding filing history list.");
         }
     }
 
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {
         try {
-            Criteria criteria = Criteria.where("_id").is(id);
-            if (companyNumber != null) {
-                criteria.and("company_number").is(companyNumber);
-            }
+            Criteria criteria = Criteria.where("_id").is(id)
+                    .and("company_number").is(companyNumber);
+
             Query query = new Query(criteria);
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when finding the document");
+            throw new ServiceUnavailableException("MongoDB unavailable when finding document");
         }
     }
 
     public Optional<FilingHistoryDocument> findByEntityId(final String entityId) {
-        //change this method to do find query and project out the field that has been matched in the $OR and the filingHistoryDocument.
-        return null;
+        try {
+            Criteria criteria = new Criteria()
+                    .orOperator(
+                            Criteria.where("_entity_id").is(entityId),
+                            Criteria.where("data.resolutions._entity_id").is(entityId));
+
+            Query query = new Query(criteria);
+
+            return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
+                    DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("MongoDB unavailable when finding document");
+        }
     }
 
     public void save(final FilingHistoryDocument document) {
@@ -91,7 +102,7 @@ public class Repository {
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB unavailable when saving the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when saving the document");
+            throw new ServiceUnavailableException("MongoDB unavailable when saving document");
         }
     }
 

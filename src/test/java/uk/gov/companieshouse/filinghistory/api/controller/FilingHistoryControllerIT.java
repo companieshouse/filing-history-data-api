@@ -69,7 +69,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginal
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
-    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{transaction_id}/internal";
+    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{entity_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String LIST_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
@@ -546,7 +546,7 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -784,7 +784,7 @@ class FilingHistoryControllerIT {
                         .withStatus(503)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -807,7 +807,7 @@ class FilingHistoryControllerIT {
         // given
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
