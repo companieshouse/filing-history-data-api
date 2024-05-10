@@ -22,6 +22,7 @@ public class DeleteMapperDelegator {
         this.compositeResolutionDeleteMapper = compositeResolutionDeleteMapper;
     }
 
+    @DeleteChildTransactions
     public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDocument document) {
         FilingHistoryData data = document.getData();
 
