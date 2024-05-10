@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
@@ -24,11 +23,10 @@ public class DeleteMapperDelegator {
     @DeleteChildTransactions
     public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDeleteAggregate aggregate) {
         FilingHistoryDocument document = aggregate.getDocument();
-        FilingHistoryData data = document.getData();
 
         final int resIndex = aggregate.getResolutionIndex();
         if (resIndex >= 0) {
-            if ("RESOLUTIONS".equals(data.getType())) {
+            if ("RESOLUTIONS".equals(document.getData().getType())) {
                 LOGGER.debug("Matched composite resolution _entity_id: [%s]".formatted(entityId),
                         DataMapHolder.getLogMap());
                 return compositeResolutionDeleteMapper.removeTransaction(resIndex, document);

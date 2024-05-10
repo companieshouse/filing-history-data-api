@@ -38,6 +38,7 @@ class RepositoryIT {
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String TRANSACTION_ID_TWO = "transactionIdTwo";
+    private static final String ENTITY_ID = "1234567890";
     private static final String COMPANY_NUMBER = "12345678";
     private static final int START_INDEX = 0;
     private static final int DEFAULT_ITEMS_PER_PAGE = 25;
@@ -69,6 +70,7 @@ class RepositoryIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -90,11 +92,13 @@ class RepositoryIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID_TWO)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -116,11 +120,13 @@ class RepositoryIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID_TWO)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", "incorporation");
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);

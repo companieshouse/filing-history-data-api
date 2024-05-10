@@ -34,7 +34,7 @@
   },
   "_barcode" : "X4BI89B6",
   "delta_at" : "20140815230459600643",
-  "_entity_id" : "1234567890",
+  "_entity_id" : "<entity_id>",
   "updated": {
     "at": ISODate("2014-09-17T18:52:08.001Z"),
     "by": "5419d856b6a59f32b7684d0e"

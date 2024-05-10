@@ -153,7 +153,8 @@ class RepositoryTest {
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDeleteAggregate.class))).thenThrow(new DataAccessException("...") {
         });
         Criteria criteria = new Criteria()
-                .orOperator(Criteria.where("_entity_id").is(ENTITY_ID),
+                .orOperator(
+                        Criteria.where("_entity_id").is(ENTITY_ID),
                         Criteria.where("data.resolutions._entity_id").is(ENTITY_ID));
         Query query = new Query(criteria);
 
