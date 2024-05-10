@@ -21,17 +21,17 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class ResourceChangedRequestMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private static final String SERDES_ERROR_MSG = "Serialisation/deserialisation failed when mapping changed resource";
+    private static final String SERDES_ERROR_MSG = "Serialisation/deserialisation failed when mapping deleted data";
 
     private final ItemGetResponseMapper itemGetResponseMapper;
     private final Supplier<Instant> instantSupplier;
-    private final ObjectMapper nullCleaningObjectMapper;
+    private final ObjectMapper objectMapper;
 
     public ResourceChangedRequestMapper(ItemGetResponseMapper itemGetResponseMapper,
-                                        Supplier<Instant> instantSupplier, ObjectMapper nullCleaningObjectMapper) {
+                                        Supplier<Instant> instantSupplier, ObjectMapper objectMapper) {
         this.itemGetResponseMapper = itemGetResponseMapper;
         this.instantSupplier = instantSupplier;
-        this.nullCleaningObjectMapper = nullCleaningObjectMapper;
+        this.objectMapper = objectMapper;
     }
 
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
@@ -48,8 +48,8 @@ public class ResourceChangedRequestMapper {
             event.setType("deleted");
             try {
                 final String serialisedDeletedData =
-                        nullCleaningObjectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
-                changedResource.setDeletedData(nullCleaningObjectMapper.readValue(serialisedDeletedData, Object.class));
+                        objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
+                changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));
             } catch (JsonProcessingException ex) {
                 LOGGER.error(SERDES_ERROR_MSG, ex, DataMapHolder.getLogMap());
                 throw new InternalServerErrorException(SERDES_ERROR_MSG);
