@@ -1,13 +1,12 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryChild;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -23,10 +22,11 @@ public class DeleteMapperDelegator {
     }
 
     @DeleteChildTransactions
-    public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDocument document) {
+    public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDeleteAggregate aggregate) {
+        FilingHistoryDocument document = aggregate.getDocument();
         FilingHistoryData data = document.getData();
 
-        final int resIndex = getMatchedIndex(entityId, data.getResolutions());
+        final int resIndex = aggregate.getResolutionIndex();
         if (resIndex >= 0) {
             if ("RESOLUTIONS".equals(data.getType())) {
                 LOGGER.debug("Matched composite resolution _entity_id: [%s]".formatted(entityId),
@@ -46,17 +46,5 @@ public class DeleteMapperDelegator {
             LOGGER.debug("No match for _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
             throw new InternalServerErrorException("No match for _entity_id: [%s]".formatted(entityId));
         }
-    }
-
-    private static <T extends FilingHistoryChild> int getMatchedIndex(String entityId, List<T> transactionList) {
-        if (transactionList != null) {
-            long matchedIndex = transactionList.stream()
-                    .takeWhile(res -> !entityId.equals(res.getEntityId()))
-                    .count();
-            if (matchedIndex < transactionList.size()) {
-                return Math.toIntExact(matchedIndex);
-            }
-        }
-        return -1;
     }
 }

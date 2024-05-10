@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
@@ -36,39 +37,43 @@ class DeleteMapperDelegatorTest {
     @Test
     void shouldCallCompositeResolutionMapperWhenCompositeResTypeAndResEntityIdMatches() {
         // given
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .entityId(ENTITY_ID)
-                .data(new FilingHistoryData()
-                        .type(COMPOSITE_RES_TYPE)
-                        .resolutions(List.of(
-                                new FilingHistoryResolution()
-                                        .entityId("first ID"),
-                                new FilingHistoryResolution()
-                                        .entityId(ENTITY_ID))));
+        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
+                .resolutionIndex(1)
+                .document(new FilingHistoryDocument()
+                        .entityId(ENTITY_ID)
+                        .data(new FilingHistoryData()
+                                .type(COMPOSITE_RES_TYPE)
+                                .resolutions(List.of(
+                                        new FilingHistoryResolution()
+                                                .entityId("first ID"),
+                                        new FilingHistoryResolution()
+                                                .entityId(ENTITY_ID)))));
 
         when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate);
 
         // then
         assertTrue(actual.isPresent());
-        verify(compositeResolutionDeleteMapper).removeTransaction(1, document);
+        verify(compositeResolutionDeleteMapper).removeTransaction(1, aggregate.getDocument());
     }
 
     @Test
     void shouldThrowInternalServerErrorExceptionWhenChildResolutionAndResEntityIdMatches() {
         // given
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .entityId(ENTITY_ID)
-                .data(new FilingHistoryData()
-                        .type(PARENT_TYPE)
-                        .resolutions(List.of(new FilingHistoryResolution()
-                                .entityId(CHILD_ENTITY_ID))));
+        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
+                .resolutionIndex(1)
+                .document(new FilingHistoryDocument()
+                        .entityId(ENTITY_ID)
+                        .data(new FilingHistoryData()
+                                .type(PARENT_TYPE)
+                                .resolutions(List.of(new FilingHistoryResolution()
+                                        .entityId(CHILD_ENTITY_ID)))));
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
         assertThrows(InternalServerErrorException.class, actual);
@@ -77,13 +82,14 @@ class DeleteMapperDelegatorTest {
     @Test
     void shouldThrowInternalServerErrorExceptionWhenNoEntityIdMatchesAndEmptyResolutionsList() {
         // given
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .entityId(ENTITY_ID)
-                .data(new FilingHistoryData()
-                        .resolutions(List.of()));
+        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
+                .document(new FilingHistoryDocument()
+                        .entityId(ENTITY_ID)
+                        .data(new FilingHistoryData()
+                                .resolutions(List.of())));
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
         assertThrows(InternalServerErrorException.class, actual);
@@ -92,13 +98,14 @@ class DeleteMapperDelegatorTest {
     @Test
     void shouldThrowInternalServerErrorExceptionWhenNoEntityIdMatchesAndHasResolution() {
         // given
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .entityId(ENTITY_ID)
-                .data(new FilingHistoryData()
-                        .resolutions(List.of(new FilingHistoryResolution())));
+        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
+                .document(new FilingHistoryDocument()
+                        .entityId(ENTITY_ID)
+                        .data(new FilingHistoryData()
+                                .resolutions(List.of(new FilingHistoryResolution()))));
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
         assertThrows(InternalServerErrorException.class, actual);
@@ -107,12 +114,13 @@ class DeleteMapperDelegatorTest {
     @Test
     void shouldReturnTopLevelMapperWhenTopLevelEntityIdMatches() {
         // given
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .entityId(ENTITY_ID)
-                .data(new FilingHistoryData());
+        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
+                .document(new FilingHistoryDocument()
+                        .entityId(ENTITY_ID)
+                        .data(new FilingHistoryData()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate);
 
         // then
         assertTrue(actual.isEmpty());

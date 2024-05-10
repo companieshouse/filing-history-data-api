@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
@@ -29,24 +30,26 @@ class DeleteMapperDelegatorAspectFeatureEnabledIT {
 
     @Test
     void shouldDeleteChildTransactionsWhenFeatureEnabled() {
-        FilingHistoryDocument document = new FilingHistoryDocument()
-                .entityId(ENTITY_ID)
-                .data(new FilingHistoryData()
-                        .type(COMPOSITE_RES_TYPE)
-                        .resolutions(List.of(
-                                new FilingHistoryResolution()
-                                        .entityId("first ID"),
-                                new FilingHistoryResolution()
-                                        .entityId(ENTITY_ID))));
+        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
+                .resolutionIndex(1)
+                .document(new FilingHistoryDocument()
+                        .entityId(ENTITY_ID)
+                        .data(new FilingHistoryData()
+                                .type(COMPOSITE_RES_TYPE)
+                                .resolutions(List.of(
+                                        new FilingHistoryResolution()
+                                                .entityId("first ID"),
+                                        new FilingHistoryResolution()
+                                                .entityId(ENTITY_ID)))));
 
         when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate);
 
         // then
         assertTrue(actual.isPresent());
-        verify(compositeResolutionDeleteMapper).removeTransaction(1, document);
+        verify(compositeResolutionDeleteMapper).removeTransaction(1, aggregate.getDocument());
     }
 }

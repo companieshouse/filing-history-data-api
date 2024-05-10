@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.logging.Logger;
@@ -79,7 +80,7 @@ public class Repository {
         }
     }
 
-    public Optional<FilingHistoryDocument> findByEntityId(final String entityId) {
+    public Optional<FilingHistoryDeleteAggregate> findByEntityId(final String entityId) {
         try {
             Criteria criteria = new Criteria()
                     .orOperator(
@@ -88,7 +89,7 @@ public class Repository {
 
             Query query = new Query(criteria);
 
-            return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
+            return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDeleteAggregate.class));
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());

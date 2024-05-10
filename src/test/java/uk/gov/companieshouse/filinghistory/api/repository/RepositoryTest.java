@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 
@@ -149,7 +150,7 @@ class RepositoryTest {
     @Test
     void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindByEntityId() {
         // given
-        when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
+        when(mongoTemplate.findOne(any(), eq(FilingHistoryDeleteAggregate.class))).thenThrow(new DataAccessException("...") {
         });
         Criteria criteria = new Criteria()
                 .orOperator(Criteria.where("_entity_id").is(ENTITY_ID),
@@ -161,7 +162,7 @@ class RepositoryTest {
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
-        verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
+        verify(mongoTemplate).findOne(query, FilingHistoryDeleteAggregate.class);
     }
 
     @Test

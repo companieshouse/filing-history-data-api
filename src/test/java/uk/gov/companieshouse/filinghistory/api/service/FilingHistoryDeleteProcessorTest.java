@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +32,8 @@ class FilingHistoryDeleteProcessorTest {
     private DeleteMapperDelegator deleteMapperDelegator;
 
     @Mock
+    private FilingHistoryDeleteAggregate deleteAggregate;
+    @Mock
     private FilingHistoryDocument existingDocument;
     @Mock
     private FilingHistoryDocument updatedDocument;
@@ -38,30 +41,32 @@ class FilingHistoryDeleteProcessorTest {
     @Test
     void shouldCallDeleteWhenParentDocumentRemoved() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
         when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.empty());
+        when(deleteAggregate.getDocument()).thenReturn(existingDocument);
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(ENTITY_ID);
 
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate);
         verify(filingHistoryService).deleteExistingFilingHistory(existingDocument);
     }
 
     @Test
     void shouldCallUpdateWhenResolutionRemovedFromComposite() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
         when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.of(updatedDocument));
+        when(deleteAggregate.getDocument()).thenReturn(existingDocument);
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(ENTITY_ID);
 
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate);
         verify(filingHistoryService).updateFilingHistory(updatedDocument, existingDocument);
     }
 

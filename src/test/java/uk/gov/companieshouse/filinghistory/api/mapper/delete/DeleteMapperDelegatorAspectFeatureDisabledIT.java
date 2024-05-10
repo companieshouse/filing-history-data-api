@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @SpringBootTest
@@ -32,7 +33,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
 
         // when
         Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID,
-                new FilingHistoryDocument());
+                new FilingHistoryDeleteAggregate());
 
         // then
         assertTrue(actual.isEmpty());
