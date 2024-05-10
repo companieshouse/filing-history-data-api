@@ -1,0 +1,49 @@
+db.getCollection("company_filing_history").aggregate([
+  {
+    $match: {
+      $or: [
+        { "_entity_id": "3049030381" },
+        { "data.resolutions._entity_id": "3049030381" },
+        { "data.annotations._entity_id": "3049030381" },
+        { "data.associated_filings._entity_id": "3049030381" }
+      ]
+    }
+  },
+  {
+    "$addFields": {
+      "resolutionIndex": {
+        "$ifNull": [{
+          "$indexOfArray": [
+            "$data.resolutions._entity_id",
+            "3049030381"
+          ]
+        }, NumberInt(-1)]
+      },
+      "annotationIndex": {
+        "$ifNull": [{
+          "$indexOfArray": [
+            "$data.annotations._entity_id",
+            "3049030381"
+          ]
+        }, NumberInt(-1)]
+      },
+      "associatedFilingIndex": {
+        "$ifNull": [{
+          "$indexOfArray": [
+            "$data.associated_filings._entity_id",
+            "3049030381"
+          ]
+        }, NumberInt(-1)]
+      }
+    }
+  },
+  {
+    $project: {
+      "_id": 0,
+      "resolution_index": "$resolutionIndex",
+      "annotation_index": "$annotationIndex",
+      "associated_filing_index": "$associatedFilingIndex",
+      "document": "$$ROOT"
+    }
+  }
+])
