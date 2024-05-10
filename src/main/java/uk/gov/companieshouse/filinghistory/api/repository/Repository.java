@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.repository;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.addFields;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.count;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.facet;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
@@ -16,6 +17,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators.IndexOfArray;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators.IfNull;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -81,19 +84,45 @@ public class Repository {
     }
 
     public Optional<FilingHistoryDeleteAggregate> findByEntityId(final String entityId) {
+        //change this method to do find query and project out the field that has been matched in the $OR and the filingHistoryDocument.
+
         try {
-            Criteria criteria = new Criteria()
+            Criteria criteria = Criteria.where("_entity_id").is(entityId)
                     .orOperator(
-                            Criteria.where("_entity_id").is(entityId),
-                            Criteria.where("data.resolutions._entity_id").is(entityId));
+                            Criteria.where("data.resolutions._entity_id").is(entityId),
+                            Criteria.where("data.annotations._entity_id").is(entityId),
+                            Criteria.where("data.associated_filings._entity_id").is(entityId));
 
-            Query query = new Query(criteria);
+            IfNull resolutionIfNullIndexOfArray = ifNull(
+                    IndexOfArray.arrayOf("$data.resolutions._entity_id").indexOf(entityId)).then(-1);
+            IfNull annotationIfNullIndexOfArray = ifNull(
+                    IndexOfArray.arrayOf("$data.annotations._entity_id").indexOf(entityId)).then(-1);
+            IfNull associatedFilingsIfNullIndexOfArray = ifNull(
+                    IndexOfArray.arrayOf("$data.associated_filings._entity_id").indexOf(entityId)).then(-1);
 
-            return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDeleteAggregate.class));
+            Aggregation aggregation = newAggregation(
+                    match(criteria),
+                    addFields().build()
+                            .addField("resolutionIndex", resolutionIfNullIndexOfArray)
+                            .addField("annotationIndex", annotationIfNullIndexOfArray)
+                            .addField("associatedFilingIndex", associatedFilingsIfNullIndexOfArray),
+                    project()
+                            .andExclude("_id")
+                            .andExpression("$resolutionIndex").as("resolution_index")
+                            .andExpression("$annotationIndex").as("annotation_index")
+                            .andExpression("$associatedFilingIndex").as("associated_filing_index")
+                            .andExpression("$$ROOT").as("document")
+
+            );
+
+            return Optional.ofNullable(
+                    mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
+                            FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
-                    DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when finding document");
+            LOGGER.error("MongoDB unavailable when trying to retrieve filing history delete document.: %s".formatted(
+                    ex.getMessage()), DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException(
+                    "MongoDB unavailable when trying to retrieve filing history delete document.");
         }
     }
 
