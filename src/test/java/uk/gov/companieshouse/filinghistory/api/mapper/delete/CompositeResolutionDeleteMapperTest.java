@@ -11,11 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -30,6 +32,11 @@ class CompositeResolutionDeleteMapperTest {
     private CompositeResolutionDeleteMapper deleteMapper;
     @Mock
     private Supplier<Instant> instantSupplier;
+
+    @BeforeEach
+    void setUp() {
+        DataMapHolder.clear();
+    }
 
     @Test
     void shouldRemoveResolutionAtIndexAndReturnUpdatedDocument() {
