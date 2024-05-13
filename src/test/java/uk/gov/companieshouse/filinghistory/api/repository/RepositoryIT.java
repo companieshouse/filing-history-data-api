@@ -346,6 +346,7 @@ class RepositoryIT {
                 .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<second_resolution_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<second_resolution_delta_at>", EXISTING_DELTA_AT_TWO)
+                .replaceAll("<resolution_date>", UPDATED_AT)
                 .replaceAll("<barcode>", "AOPYXMJN")
                 .replaceAll("<updated_at>", UPDATED_AT)
                 .replaceAll("<created_at>", UPDATED_AT);

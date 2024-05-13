@@ -77,7 +77,7 @@ class FilingHistoryControllerIT {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final String ENTITY_ID = "1234567890";
-    private static final String MODEL_ARTICLES_ENTITY_ID = "2234567890";
+    private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
     private static final String NEWEST_REQUEST_DELTA_AT = "20140916230459600643";
@@ -766,7 +766,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseOnDeleteAndDocumentShouldBeRolledBackToPreviousState()
+    void shouldReturn503GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
@@ -805,7 +805,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn404NotFoundWheDocumentCannotBeFoundOnDelete() throws Exception {
+    void shouldReturn404NotFoundWhenDocumentNotFound() throws Exception {
         // given
 
         // when
@@ -1001,7 +1001,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", DATE)
@@ -1017,7 +1017,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -1104,7 +1104,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", DATE)

@@ -27,9 +27,9 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
     private final Supplier<Instant> instantSupplier;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
-                                        AbstractTransactionMapperFactory mapperFactory,
-                                        ValidatorFactory validatorFactory,
-                                        ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier,
+            AbstractTransactionMapperFactory mapperFactory,
+            ValidatorFactory validatorFactory,
+            ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier,
             Supplier<Instant> instantSupplier) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
@@ -40,8 +40,8 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
     @Override
     public void processFilingHistory(final String transactionId,
-                                     final String companyNumber,
-                                     final InternalFilingHistoryApi request) {
+            final String companyNumber,
+            final InternalFilingHistoryApi request) {
         final TransactionKindEnum transactionKind = request.getInternalData().getTransactionKind();
 
         if (!validatorFactory.getPutRequestValidator(transactionKind).isValid(request)) {
@@ -62,7 +62,8 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                             filingHistoryService.updateFilingHistory(docToSave, existingDocCopy);
                         },
                         () -> {
-                            FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request, instant);
+                            FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request,
+                                    instant);
                             filingHistoryService.insertFilingHistory(newDocument);
                         });
     }

@@ -5,7 +5,7 @@
   "_barcode" : "<barcode>",
   "data" : {
     "category" : "resolution",
-    "date" : "1999-12-29T11:59:36.000Z",
+    "date" : "<resolution_date>",
     "description" : "resolution",
     "description_values" : {
       "description" : "Resolutions"
@@ -34,10 +34,10 @@
   "original_description" : "Resolutions",
   "updated": {
     "at": "<updated_at>",
-    "by": "context_id"
+    "by": "<updated_by>"
   },
   "created": {
     "at": "<created_at>",
-    "by": "context_id"
+    "by": "<created_by>"
   }
 }

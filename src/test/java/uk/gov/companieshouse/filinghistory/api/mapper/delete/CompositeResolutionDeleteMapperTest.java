@@ -2,18 +2,34 @@ package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
+@ExtendWith(MockitoExtension.class)
 class CompositeResolutionDeleteMapperTest {
 
-    private final CompositeResolutionDeleteMapper deleteMapper = new CompositeResolutionDeleteMapper();
+    private static final Instant INSTANT = Instant.now();
+
+    @InjectMocks
+    private CompositeResolutionDeleteMapper deleteMapper;
+    @Mock
+    private Supplier<Instant> instantSupplier;
 
     @Test
     void shouldRemoveResolutionAtIndexAndReturnUpdatedDocument() {
@@ -28,7 +44,12 @@ class CompositeResolutionDeleteMapperTest {
 
         FilingHistoryDocument expected = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
-                        .resolutions(List.of(new FilingHistoryResolution())));
+                        .resolutions(List.of(new FilingHistoryResolution())))
+                .updated(new FilingHistoryDeltaTimestamp()
+                        .at(INSTANT)
+                        .by("uninitialised"));
+
+        when(instantSupplier.get()).thenReturn(INSTANT);
 
         // when
         Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(0, document);
@@ -36,6 +57,7 @@ class CompositeResolutionDeleteMapperTest {
         // then
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
+        verify(instantSupplier).get();
     }
 
     @Test
@@ -51,5 +73,6 @@ class CompositeResolutionDeleteMapperTest {
 
         // then
         assertTrue(actual.isEmpty());
+        verifyNoInteractions(instantSupplier);
     }
 }
