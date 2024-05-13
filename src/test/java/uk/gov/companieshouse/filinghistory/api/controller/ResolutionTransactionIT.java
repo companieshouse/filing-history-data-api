@@ -908,6 +908,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
                 .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<res_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<barcode>", BARCODE)

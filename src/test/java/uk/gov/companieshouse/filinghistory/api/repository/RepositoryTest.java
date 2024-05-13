@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -46,6 +48,10 @@ class RepositoryTest {
     private AggregationResults<FilingHistoryListAggregate> aggregationResults;
     @Mock
     private FilingHistoryListAggregate listAggregate;
+    @Mock
+    private AggregationResults<FilingHistoryDeleteAggregate> deleteAggregationResults;
+    @Mock
+    private FilingHistoryDeleteAggregate deleteAggregate;
 
     @Test
     void shouldCallMongoTemplateWithCompanyNumberCriteriaOnly() {
@@ -148,22 +154,33 @@ class RepositoryTest {
     }
 
     @Test
+    void shouldCallMongoTemplateWithEntityIdCriteria() {
+        // given
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
+                eq(FilingHistoryDeleteAggregate.class))).thenReturn(deleteAggregationResults);
+        when(deleteAggregationResults.getUniqueMappedResult()).thenReturn(deleteAggregate);
+
+        // when
+        Optional<FilingHistoryDeleteAggregate> actual = repository.findByEntityId(ENTITY_ID);
+
+        // then
+        assertTrue(actual.isPresent());
+        assertEquals(deleteAggregate, actual.get());
+    }
+
+    @Test
     void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindByEntityId() {
         // given
-        when(mongoTemplate.findOne(any(), eq(FilingHistoryDeleteAggregate.class))).thenThrow(new DataAccessException("...") {
-        });
-        Criteria criteria = new Criteria()
-                .orOperator(
-                        Criteria.where("_entity_id").is(ENTITY_ID),
-                        Criteria.where("data.resolutions._entity_id").is(ENTITY_ID));
-        Query query = new Query(criteria);
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class)))
+                .thenThrow(new DataAccessException("...") {
+                });
 
         // when
         Executable executable = () -> repository.findByEntityId(ENTITY_ID);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
-        verify(mongoTemplate).findOne(query, FilingHistoryDeleteAggregate.class);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class));
     }
 
     @Test

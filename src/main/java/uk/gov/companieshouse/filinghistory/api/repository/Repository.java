@@ -8,18 +8,16 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
+import static org.springframework.data.mongodb.core.aggregation.ArrayOperators.IndexOfArray.arrayOf;
 import static org.springframework.data.mongodb.core.aggregation.ConditionalOperators.ifNull;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import java.util.List;
 import java.util.Optional;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators.IndexOfArray;
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators.IfNull;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -85,36 +83,35 @@ public class Repository {
     }
 
     public Optional<FilingHistoryDeleteAggregate> findByEntityId(final String entityId) {
-        //change this method to do find query and project out the field that has been matched in the $OR and the filingHistoryDocument.
 
         try {
-            Criteria criteria = new Criteria()
-                    .orOperator(
-                            Criteria.where("_entity_id").is(entityId),
-                            Criteria.where("data.resolutions._entity_id").is(entityId),
-                            Criteria.where("data.annotations._entity_id").is(entityId),
-                            Criteria.where("data.associated_filings._entity_id").is(entityId));
-
-            IfNull resolutionIfNullIndexOfArray = ifNull(
-                    IndexOfArray.arrayOf("$data.resolutions._entity_id").indexOf(entityId)).then(-1);
-            IfNull annotationIfNullIndexOfArray = ifNull(
-                    IndexOfArray.arrayOf("$data.annotations._entity_id").indexOf(entityId)).then(-1);
-            IfNull associatedFilingsIfNullIndexOfArray = ifNull(
-                    IndexOfArray.arrayOf("$data.associated_filings._entity_id").indexOf(entityId)).then(-1);
-
             Aggregation aggregation = newAggregation(
-                    match(criteria),
+                    match(new Criteria()
+                            .orOperator(
+                                    Criteria.where("_entity_id").is(entityId),
+                                    Criteria.where("data.resolutions._entity_id").is(entityId),
+                                    Criteria.where("data.annotations._entity_id").is(entityId),
+                                    Criteria.where("data.associated_filings._entity_id").is(entityId)
+                            )),
                     addFields().build()
-                            .addField("resolutionIndex", resolutionIfNullIndexOfArray)
-                            .addField("annotationIndex", annotationIfNullIndexOfArray)
-                            .addField("associatedFilingIndex", associatedFilingsIfNullIndexOfArray),
+                            .addField("resolutionIndex",
+                                    ifNull(arrayOf("$data.resolutions._entity_id")
+                                            .indexOf(entityId))
+                                            .then(-1))
+                            .addField("annotationIndex",
+                                    ifNull(arrayOf("$data.annotations._entity_id")
+                                            .indexOf(entityId))
+                                            .then(-1))
+                            .addField("associatedFilingIndex",
+                                    ifNull(arrayOf("$data.associated_filings._entity_id")
+                                            .indexOf(entityId))
+                                            .then(-1)),
                     project()
                             .andExclude("_id")
                             .andExpression("$resolutionIndex").as("resolution_index")
                             .andExpression("$annotationIndex").as("annotation_index")
                             .andExpression("$associatedFilingIndex").as("associated_filing_index")
                             .andExpression("$$ROOT").as("document")
-
             );
 
             return Optional.ofNullable(
