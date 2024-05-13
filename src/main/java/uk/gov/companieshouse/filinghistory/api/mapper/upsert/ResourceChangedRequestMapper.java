@@ -1,25 +1,37 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class ResourceChangedRequestMapper {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final String SERDES_ERROR_MSG = "Serialisation/deserialisation failed when mapping deleted data";
+
     private final ItemGetResponseMapper itemGetResponseMapper;
     private final Supplier<Instant> instantSupplier;
+    private final ObjectMapper objectMapper;
 
     public ResourceChangedRequestMapper(ItemGetResponseMapper itemGetResponseMapper,
-            Supplier<Instant> instantSupplier) {
+                                        Supplier<Instant> instantSupplier, ObjectMapper objectMapper) {
         this.itemGetResponseMapper = itemGetResponseMapper;
         this.instantSupplier = instantSupplier;
+        this.objectMapper = objectMapper;
     }
 
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
@@ -34,7 +46,14 @@ public class ResourceChangedRequestMapper {
 
         if (request.isDelete()) {
             event.setType("deleted");
-            changedResource.setDeletedData(itemGetResponseMapper.mapFilingHistoryItem(document));
+            try {
+                final String serialisedDeletedData =
+                        objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
+                changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));
+            } catch (JsonProcessingException ex) {
+                LOGGER.error(SERDES_ERROR_MSG, ex, DataMapHolder.getLogMap());
+                throw new InternalServerErrorException(SERDES_ERROR_MSG);
+            }
         } else {
             event.setType("changed");
         }

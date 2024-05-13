@@ -40,14 +40,18 @@ The service is implemented in Java 21 using Spring Boot 3.2
 
 ## Building the docker image
 
-    mvn compile jib:dockerBuild
+```bash
+mvn compile jib:dockerBuild
+```
 
 ## To make local changes
 
 Development mode is available for this service
 in [Docker CHS Development](https://github.com/companieshouse/docker-chs-development).
 
-    ./bin/chs-dev development enable filing-history-data-api
+```bash
+./bin/chs-dev development enable filing-history-data-api
+```
 
 This will clone the `filing-history-data-api` into the `./repositories` folder. Any changes to the
 code, or resources will automatically trigger a rebuild and relaunch.
