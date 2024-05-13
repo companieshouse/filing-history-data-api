@@ -14,6 +14,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class DeleteMapperDelegator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
+    private static final String COMPOSITE_RES_TYPE = "RESOLUTIONS";
     private final CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
 
     public DeleteMapperDelegator(CompositeResolutionDeleteMapper compositeResolutionDeleteMapper) {
@@ -26,7 +27,7 @@ public class DeleteMapperDelegator {
 
         final int resIndex = aggregate.getResolutionIndex();
         if (resIndex >= 0) {
-            if ("RESOLUTIONS".equals(document.getData().getType())) {
+            if (COMPOSITE_RES_TYPE.equals(document.getData().getType())) {
                 LOGGER.debug("Matched composite resolution _entity_id: [%s]".formatted(entityId),
                         DataMapHolder.getLogMap());
                 return compositeResolutionDeleteMapper.removeTransaction(resIndex, document);

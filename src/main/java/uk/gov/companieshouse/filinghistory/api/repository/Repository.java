@@ -83,7 +83,6 @@ public class Repository {
     }
 
     public Optional<FilingHistoryDeleteAggregate> findByEntityId(final String entityId) {
-
         try {
             Aggregation aggregation = newAggregation(
                     match(new Criteria()
@@ -91,8 +90,7 @@ public class Repository {
                                     Criteria.where("_entity_id").is(entityId),
                                     Criteria.where("data.resolutions._entity_id").is(entityId),
                                     Criteria.where("data.annotations._entity_id").is(entityId),
-                                    Criteria.where("data.associated_filings._entity_id").is(entityId)
-                            )),
+                                    Criteria.where("data.associated_filings._entity_id").is(entityId))),
                     addFields().build()
                             .addField("resolutionIndex",
                                     ifNull(arrayOf("$data.resolutions._entity_id")
@@ -111,8 +109,7 @@ public class Repository {
                             .andExpression("$resolutionIndex").as("resolution_index")
                             .andExpression("$annotationIndex").as("annotation_index")
                             .andExpression("$associatedFilingIndex").as("associated_filing_index")
-                            .andExpression("$$ROOT").as("document")
-            );
+                            .andExpression("$$ROOT").as("document"));
 
             return Optional.ofNullable(
                     mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
