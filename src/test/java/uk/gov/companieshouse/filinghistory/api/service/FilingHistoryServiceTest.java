@@ -255,7 +255,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void findExistingFilingHistoryDocumentByIdShouldReturnDocument() {
+    void findFilingHistoryByEntityIdShouldReturnDocument() {
         // given
         when(repository.findByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
 
@@ -268,7 +268,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void findExistingFilingHistoryDocumentByIdShouldReturnEmptyWhenNoDocumentExists() {
+    void findFilingHistoryByEntityIdShouldReturnEmptyWhenNoDocumentExists() {
         // given
         when(repository.findByEntityId(any())).thenReturn(Optional.empty());
 

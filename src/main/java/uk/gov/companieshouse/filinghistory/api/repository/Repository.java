@@ -85,7 +85,6 @@ public class Repository {
     }
 
     public Optional<FilingHistoryDeleteAggregate> findByEntityId(final String entityId) {
-        //change this method to do find query and project out the field that has been matched in the $OR and the filingHistoryDocument.
 
         try {
             Criteria criteria = new Criteria()
@@ -93,7 +92,8 @@ public class Repository {
                             Criteria.where("_entity_id").is(entityId),
                             Criteria.where("data.resolutions._entity_id").is(entityId),
                             Criteria.where("data.annotations._entity_id").is(entityId),
-                            Criteria.where("data.associated_filings._entity_id").is(entityId));
+                            Criteria.where("data.associated_filings._entity_id").is(entityId)
+                    );
 
             IfNull resolutionIfNullIndexOfArray = ifNull(
                     IndexOfArray.arrayOf("$data.resolutions._entity_id").indexOf(entityId)).then(-1);
@@ -114,7 +114,6 @@ public class Repository {
                             .andExpression("$annotationIndex").as("annotation_index")
                             .andExpression("$associatedFilingIndex").as("associated_filing_index")
                             .andExpression("$$ROOT").as("document")
-
             );
 
             return Optional.ofNullable(
