@@ -154,7 +154,7 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCallMongoTemplateWithEntityIdCriteriaOnly() {
+    void shouldCallMongoTemplateWithEntityIdCriteria() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
                 eq(FilingHistoryDeleteAggregate.class))).thenReturn(deleteAggregationResults);
@@ -174,11 +174,6 @@ class RepositoryTest {
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class)))
                 .thenThrow(new DataAccessException("...") {
                 });
-        Criteria criteria = new Criteria()
-                .orOperator(
-                        Criteria.where("_entity_id").is(ENTITY_ID),
-                        Criteria.where("data.resolutions._entity_id").is(ENTITY_ID));
-        Query query = new Query(criteria);
 
         // when
         Executable executable = () -> repository.findByEntityId(ENTITY_ID);

@@ -47,6 +47,7 @@ class RepositoryIT {
     private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String EXISTING_DELTA_AT = "20140815230459600643";
     private static final String EXISTING_DELTA_AT_TWO = "20140816230459600643";
+    private static final String UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS).toString();
     private static final int START_INDEX = 0;
     private static final int DEFAULT_ITEMS_PER_PAGE = 25;
     private static final String OFFICERS_CATEGORY = "officers";
@@ -295,6 +296,7 @@ class RepositoryIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", TOP_LEVEL_ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -345,8 +347,8 @@ class RepositoryIT {
                 .replaceAll("<second_resolution_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<second_resolution_delta_at>", EXISTING_DELTA_AT_TWO)
                 .replaceAll("<barcode>", "AOPYXMJN")
-                .replaceAll("<updated_at>", Instant.now().truncatedTo(ChronoUnit.MILLIS).toString())
-                .replaceAll("<created_at>", Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
+                .replaceAll("<updated_at>", UPDATED_AT)
+                .replaceAll("<created_at>", UPDATED_AT);
         mongoTemplate.insert(Document.parse(existingDocumentJson), FILING_HISTORY_COLLECTION);
 
         // when
@@ -358,8 +360,33 @@ class RepositoryIT {
         assertEquals(1, actual.get().getResolutionIndex());
         assertEquals(-1, actual.get().getAssociatedFilingIndex());
         assertNotNull(actual.get().getDocument());
-
     }
+
+    @Test
+    void shouldReturnDeleteAggregationWhenAssociatedFilingIdMatched()
+            throws IOException {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/resolutions/expected_certnm_doc_with_nm01_and_res15.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<res_entity_id>", "3333333333")
+                .replaceAll("<af_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<updated_at>", UPDATED_AT)
+                .replaceAll("<created_at>", UPDATED_AT);
+        mongoTemplate.insert(Document.parse(existingDocumentJson), FILING_HISTORY_COLLECTION);
+
+        // when
+        final Optional<FilingHistoryDeleteAggregate> actual = repository.findByEntityId(CHILD_ENTITY_ID);
+
+        // then
+        assertTrue(actual.isPresent());
+        assertEquals(-1, actual.get().getAnnotationIndex());
+        assertEquals(-1, actual.get().getResolutionIndex());
+        assertEquals(0, actual.get().getAssociatedFilingIndex());
+        assertNotNull(actual.get().getDocument());
+    }
+
 
     @Test
     void testDeleteAggregationWithNoDocumentsInDatabase() {

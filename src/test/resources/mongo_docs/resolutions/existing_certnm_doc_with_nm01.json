@@ -19,6 +19,7 @@
       {
         "category" : "change-of-name",
         "date" : "2024-04-30T11:11:29.000Z",
+        "_entity_id" : "<af_entity_id>",
         "description" : "change-of-name-by-resolution",
         "type" : "NM01"
       }

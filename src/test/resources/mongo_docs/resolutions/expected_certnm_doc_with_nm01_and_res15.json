@@ -20,6 +20,7 @@
       {
         "category" : "change-of-name",
         "date" : "2024-04-30T11:11:29.000Z",
+        "_entity_id" : "<af_entity_id>",
         "description" : "change-of-name-by-resolution",
         "type" : "NM01"
       }
@@ -28,7 +29,7 @@
       {
         "category" : "change-of-name",
         "delta_at" : "<child_delta_at>",
-        "_entity_id" : "<child_entity_id>",
+        "_entity_id" : "<res_entity_id>",
         "description" : "resolution-change-of-name",
         "description_values" : {
           "resolution_date" : "2024-03-09T00:00:00.000Z"
