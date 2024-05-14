@@ -43,7 +43,6 @@ public class ResolutionTransactionMapper extends AbstractTransactionMapper {
 
         if (StringUtils.isBlank(internalData.getParentEntityId())) {
             document
-                    .entityId(internalData.getEntityId())
                     .barcode(request.getExternalData().getBarcode())
                     .documentId(internalData.getDocumentId())
                     .deltaAt(internalData.getDeltaAt())

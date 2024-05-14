@@ -9,7 +9,6 @@ import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.filinghistory.ExternalData;
 
 public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
 
@@ -44,13 +43,11 @@ public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
         try {
             ChangedResource actual = mapper.readValue(actualBody, ChangedResource.class);
             actual.deletedData(
-                    mapper.readValue(mapper.writeValueAsString(actual.getDeletedData()),
-                    ExternalData.class));
+                    mapper.readValue(mapper.writeValueAsString(actual.getDeletedData()), Object.class));
 
             ChangedResource expected = mapper.readValue(expectedBody, ChangedResource.class);
             expected.deletedData(
-                    mapper.readValue(mapper.writeValueAsString(expected.getDeletedData()),
-                            ExternalData.class));
+                    mapper.readValue(mapper.writeValueAsString(expected.getDeletedData()), Object.class));
 
             MatchResult result = MatchResult.of(expected.equals(actual));
             if (!result.isExactMatch()) {

@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
@@ -52,6 +53,8 @@ class FilingHistoryServiceTest {
     private FilingHistoryDocument existingDocument;
     @Mock
     private ApiResponse<Void> response;
+    @Mock
+    private FilingHistoryDeleteAggregate deleteAggregate;
 
 
     @Test
@@ -252,29 +255,29 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void findExistingFilingHistoryDocumentByIdShouldReturnDocument() {
+    void findFilingHistoryByEntityIdShouldReturnDocument() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.of(document));
+        when(repository.findByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+        final Optional<FilingHistoryDeleteAggregate> actualDocument = service.findFilingHistoryByEntityId(TRANSACTION_ID);
 
         // then
         assertTrue(actualDocument.isPresent());
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByEntityId(TRANSACTION_ID);
     }
 
     @Test
-    void findExistingFilingHistoryDocumentByIdShouldReturnEmptyWhenNoDocumentExists() {
+    void findFilingHistoryByEntityIdShouldReturnEmptyWhenNoDocumentExists() {
         // given
-        when(repository.findById(any())).thenReturn(Optional.empty());
+        when(repository.findByEntityId(any())).thenReturn(Optional.empty());
 
         // when
-        final Optional<FilingHistoryDocument> actualDocument = service.findExistingFilingHistoryById(TRANSACTION_ID);
+        final Optional<FilingHistoryDeleteAggregate> actualDocument = service.findFilingHistoryByEntityId(TRANSACTION_ID);
 
         // then
         assertTrue(actualDocument.isEmpty());
-        verify(repository).findById(TRANSACTION_ID);
+        verify(repository).findByEntityId(TRANSACTION_ID);
     }
 
     private static Stream<Object> categoriesListCases() {

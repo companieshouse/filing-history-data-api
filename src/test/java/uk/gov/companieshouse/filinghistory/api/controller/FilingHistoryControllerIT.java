@@ -69,7 +69,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginal
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
-    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{transaction_id}/internal";
+    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{entity_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
     private static final String LIST_GET_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
@@ -77,7 +77,7 @@ class FilingHistoryControllerIT {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final String ENTITY_ID = "1234567890";
-    private static final String MODEL_ARTICLES_ENTITY_ID = "2234567890";
+    private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
     private static final String NEWEST_REQUEST_DELTA_AT = "20140916230459600643";
@@ -736,6 +736,7 @@ class FilingHistoryControllerIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -746,7 +747,7 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -765,12 +766,13 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseOnDeleteAndDocumentShouldBeRolledBackToPreviousState()
+    void shouldReturn503GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -784,7 +786,7 @@ class FilingHistoryControllerIT {
                         .withStatus(503)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -803,11 +805,11 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn404NotFoundWheDocumentCannotBeFoundOnDelete() throws Exception {
+    void shouldReturn404NotFoundWhenDocumentNotFound() throws Exception {
         // given
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -999,7 +1001,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", DATE)
@@ -1015,7 +1017,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -1079,7 +1081,7 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -1102,7 +1104,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", MODEL_ARTICLES_ENTITY_ID)
+                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
                 .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", DATE)
@@ -1117,7 +1119,7 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, TRANSACTION_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
@@ -1211,7 +1213,7 @@ class FilingHistoryControllerIT {
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
-        return IOUtils.resourceToString("/resource_changed/expected-delete-resource-changed.json",
+        return IOUtils.resourceToString("/resource_changed/expected-resource-deleted.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", UPDATED_AT.toString());
     }

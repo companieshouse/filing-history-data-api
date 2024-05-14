@@ -13,6 +13,7 @@ import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
@@ -57,8 +58,8 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public Optional<FilingHistoryDocument> findExistingFilingHistoryById(String transactionId) {
-        return repository.findById(transactionId);
+    public Optional<FilingHistoryDeleteAggregate> findFilingHistoryByEntityId(String entityId) {
+        return repository.findByEntityId(entityId);
     }
 
     @Override

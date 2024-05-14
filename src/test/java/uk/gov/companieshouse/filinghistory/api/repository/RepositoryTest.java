@@ -2,6 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -21,6 +23,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 
@@ -28,6 +31,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggr
 class RepositoryTest {
 
     private static final String TRANSACTION_ID = "transactionId";
+    private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final int START_INDEX = 0;
     private static final int ITEMS_PER_PAGE = 25;
@@ -44,6 +48,10 @@ class RepositoryTest {
     private AggregationResults<FilingHistoryListAggregate> aggregationResults;
     @Mock
     private FilingHistoryListAggregate listAggregate;
+    @Mock
+    private AggregationResults<FilingHistoryDeleteAggregate> deleteAggregationResults;
+    @Mock
+    private FilingHistoryDeleteAggregate deleteAggregate;
 
     @Test
     void shouldCallMongoTemplateWithCompanyNumberCriteriaOnly() {
@@ -80,8 +88,8 @@ class RepositoryTest {
         // given
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
-        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID);
-        criteria.and("company_number").is(COMPANY_NUMBER);
+        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID)
+                .and("company_number").is(COMPANY_NUMBER);
         Query query = new Query(criteria);
 
         // when
@@ -146,26 +154,41 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindById() {
+    void shouldCallMongoTemplateWithEntityIdCriteria() {
         // given
-        when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
-        });
-        Criteria criteria = Criteria.where("_id").is(TRANSACTION_ID);
-        Query query = new Query(criteria);
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
+                eq(FilingHistoryDeleteAggregate.class))).thenReturn(deleteAggregationResults);
+        when(deleteAggregationResults.getUniqueMappedResult()).thenReturn(deleteAggregate);
 
         // when
-        Executable executable = () -> repository.findById(TRANSACTION_ID);
+        Optional<FilingHistoryDeleteAggregate> actual = repository.findByEntityId(ENTITY_ID);
+
+        // then
+        assertTrue(actual.isPresent());
+        assertEquals(deleteAggregate, actual.get());
+    }
+
+    @Test
+    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindByEntityId() {
+        // given
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class)))
+                .thenThrow(new DataAccessException("...") {
+                });
+
+        // when
+        Executable executable = () -> repository.findByEntityId(ENTITY_ID);
 
         // then
         assertThrows(ServiceUnavailableException.class, executable);
-        verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class));
     }
 
     @Test
     void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindCompanyFilingHistory() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class)))
-                .thenThrow(new DataAccessException("...") {});
+                .thenThrow(new DataAccessException("...") {
+                });
 
         // when
         Executable executable = () -> repository.findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX,
