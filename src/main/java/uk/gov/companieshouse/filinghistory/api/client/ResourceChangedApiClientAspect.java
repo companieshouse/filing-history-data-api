@@ -13,7 +13,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Aspect
 @Component
-@ConditionalOnProperty(prefix = "feature", name = "resource_changed_call.disabled")
+@ConditionalOnProperty(prefix = "feature", name = "resource_changed_call.disabled", havingValue = "true")
 public class ResourceChangedApiClientAspect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);

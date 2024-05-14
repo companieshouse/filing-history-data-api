@@ -13,7 +13,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Aspect
 @Component
-@ConditionalOnProperty(prefix = "feature", name = "delete_child_transactions.disabled")
+@ConditionalOnProperty(prefix = "feature", name = "delete_child_transactions.disabled", havingValue = "true")
 public class DeleteMapperDelegatorAspect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
