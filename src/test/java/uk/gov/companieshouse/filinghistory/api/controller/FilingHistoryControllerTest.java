@@ -231,11 +231,11 @@ class FilingHistoryControllerTest {
                 .build();
 
         // when
-        final ResponseEntity<Void> actualResponse = controller.deleteFilingHistoryTransaction(TRANSACTION_ID);
+        final ResponseEntity<Void> actualResponse = controller.deleteFilingHistoryTransaction(ENTITY_ID);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(deleteProcessor).processFilingHistoryDelete(TRANSACTION_ID);
+        verify(deleteProcessor).processFilingHistoryDelete(ENTITY_ID);
     }
 
     @Test
@@ -245,10 +245,10 @@ class FilingHistoryControllerTest {
                 .when(deleteProcessor).processFilingHistoryDelete(anyString());
 
         // when
-        Executable executable = () -> controller.deleteFilingHistoryTransaction(TRANSACTION_ID);
+        Executable executable = () -> controller.deleteFilingHistoryTransaction(ENTITY_ID);
 
         // then
         assertThrows(NotFoundException.class, executable);
-        verify(deleteProcessor).processFilingHistoryDelete(TRANSACTION_ID);
+        verify(deleteProcessor).processFilingHistoryDelete(ENTITY_ID);
     }
 }
