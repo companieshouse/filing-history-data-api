@@ -82,7 +82,6 @@ class ResolutionTransactionMapperTest {
         FilingHistoryDocument expected = new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .data(expectedData)
-                .entityId(ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .deltaAt(DELTA_AT)
                 .updated(expectedTimestamp)
@@ -182,7 +181,6 @@ class ResolutionTransactionMapperTest {
                 .resolutions(resolutionList);
         FilingHistoryDocument expected = new FilingHistoryDocument()
                 .data(expectedData)
-                .entityId(ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .deltaAt(DELTA_AT)
                 .updated(new FilingHistoryDeltaTimestamp()

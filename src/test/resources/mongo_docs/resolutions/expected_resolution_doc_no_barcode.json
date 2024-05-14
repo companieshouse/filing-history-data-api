@@ -1,7 +1,6 @@
 {
   "_id" : "<transaction_id>",
   "company_number" : "<company_number>",
-  "_entity_id" : "<entity_id>",
   "data" : {
     "category" : "resolution",
     "date" : "1993-04-26T11:58:23.000Z",
