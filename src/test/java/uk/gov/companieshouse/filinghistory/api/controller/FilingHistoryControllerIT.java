@@ -1213,7 +1213,7 @@ class FilingHistoryControllerIT {
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
-        return IOUtils.resourceToString("/resource_changed/expected-delete-resource-changed.json",
+        return IOUtils.resourceToString("/resource_changed/expected-resource-deleted.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", UPDATED_AT.toString());
     }

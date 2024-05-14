@@ -20,15 +20,17 @@ public class CompositeResolutionDeleteMapper implements DeleteMapper {
     }
 
     @Override
-    public Optional<FilingHistoryDocument> removeTransaction(int index, FilingHistoryDocument existingDocument) {
-        List<FilingHistoryResolution> resolutions = existingDocument.getData().getResolutions();
+    public Optional<FilingHistoryDocument> removeTransaction(int index, FilingHistoryDocument documentCopy) {
+        List<FilingHistoryResolution> resolutions = documentCopy.getData().getResolutions();
         resolutions.remove(index);
+
         if (resolutions.isEmpty()) {
             return Optional.empty();
+        } else {
+            documentCopy.updated(new FilingHistoryDeltaTimestamp()
+                    .at(instantSupplier.get())
+                    .by(DataMapHolder.getRequestId()));
+            return Optional.of(documentCopy);
         }
-        existingDocument.updated(new FilingHistoryDeltaTimestamp()
-                .at(instantSupplier.get())
-                .by(DataMapHolder.getRequestId()));
-        return Optional.of(existingDocument);
     }
 }

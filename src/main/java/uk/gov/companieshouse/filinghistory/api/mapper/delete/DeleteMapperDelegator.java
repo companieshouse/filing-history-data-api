@@ -7,6 +7,7 @@ import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorExce
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -16,14 +17,17 @@ public class DeleteMapperDelegator {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
     private static final String COMPOSITE_RES_TYPE = "RESOLUTIONS";
     private final CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
+    private final FilingHistoryDocumentCopier documentCopier;
 
-    public DeleteMapperDelegator(CompositeResolutionDeleteMapper compositeResolutionDeleteMapper) {
+    public DeleteMapperDelegator(CompositeResolutionDeleteMapper compositeResolutionDeleteMapper,
+            FilingHistoryDocumentCopier documentCopier) {
         this.compositeResolutionDeleteMapper = compositeResolutionDeleteMapper;
+        this.documentCopier = documentCopier;
     }
 
     @DeleteChildTransactions
     public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDeleteAggregate aggregate) {
-        FilingHistoryDocument document = aggregate.getDocument();
+        FilingHistoryDocument document = documentCopier.deepCopy(aggregate.getDocument());
 
         final int resIndex = aggregate.getResolutionIndex();
         if (resIndex >= 0) {

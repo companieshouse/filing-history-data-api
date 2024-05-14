@@ -70,16 +70,19 @@ class CompositeResolutionDeleteMapperTest {
     @Test
     void shouldRemoveLastResolutionAtIndexAndReturnEmpty() {
         // given
-
         FilingHistoryDocument document = new FilingHistoryDocument()
                 .data(new FilingHistoryData()
                         .resolutions(new ArrayList<>(List.of(new FilingHistoryResolution()))));
 
+        FilingHistoryDocument expected = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .resolutions(List.of()));
         // when
         Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(0, document);
 
         // then
         assertTrue(actual.isEmpty());
+        assertEquals(expected, document);
         verifyNoInteractions(instantSupplier);
     }
 }
