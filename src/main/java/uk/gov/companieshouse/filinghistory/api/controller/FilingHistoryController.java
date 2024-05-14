@@ -96,14 +96,13 @@ public class FilingHistoryController {
                 .build();
     }
 
-    @DeleteMapping("/filing-history-data-api/filing-history/{transaction_id}/internal")
-    public ResponseEntity<Void> deleteFilingHistoryTransaction(
-            @PathVariable("transaction_id") final String transactionId) {
+    @DeleteMapping("/filing-history-data-api/filing-history/{entity_id}/internal")
+    public ResponseEntity<Void> deleteFilingHistoryTransaction(@PathVariable("entity_id") final String entityId) {
 
-        DataMapHolder.get().transactionId(transactionId);
+        DataMapHolder.get().transactionId(entityId);
         LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
 
-        serviceDeleteProcessor.processFilingHistoryDelete(transactionId);
+        serviceDeleteProcessor.processFilingHistoryDelete(entityId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
