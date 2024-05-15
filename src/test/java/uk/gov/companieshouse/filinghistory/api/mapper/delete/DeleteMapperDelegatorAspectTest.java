@@ -12,6 +12,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -26,7 +27,9 @@ class DeleteMapperDelegatorAspectTest {
     @Test
     void shouldReturnEmptyWhenNoChildMatches() {
         // given
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"entity id", new FilingHistoryDeleteAggregate()});
+        when(joinPoint.getArgs()).thenReturn(new Object[]{"entity id", new FilingHistoryDeleteAggregate()
+                .document(new FilingHistoryDocument()
+                    .data(new FilingHistoryData()))});
 
         // when
         Optional<FilingHistoryDocument> actual = aspect.deleteChildTransactionsDisabled(joinPoint);
@@ -66,6 +69,22 @@ class DeleteMapperDelegatorAspectTest {
         // given
         when(joinPoint.getArgs()).thenReturn(
                 new Object[]{"entity id", new FilingHistoryDeleteAggregate().associatedFilingIndex(0)});
+
+        // when
+        Executable actual = () -> aspect.deleteChildTransactionsDisabled(joinPoint);
+
+        // then
+        assertThrows(BadRequestException.class, actual);
+    }
+
+    @Test
+    void shouldThrowBadRequestExceptionWhenCompositeResolutionMatch() {
+        // given
+        when(joinPoint.getArgs()).thenReturn(
+                new Object[]{"entity id", new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                        .data(new FilingHistoryData()
+                                .type("RESOLUTIONS")))});
 
         // when
         Executable actual = () -> aspect.deleteChildTransactionsDisabled(joinPoint);

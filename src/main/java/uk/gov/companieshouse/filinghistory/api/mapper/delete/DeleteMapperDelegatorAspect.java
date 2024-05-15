@@ -28,14 +28,16 @@ public class DeleteMapperDelegatorAspect {
         String entityId = (String) args[0];
         FilingHistoryDeleteAggregate aggregate = (FilingHistoryDeleteAggregate) args[1];
 
-        if (aggregate.getResolutionIndex() >= 0 || aggregate.getAnnotationIndex() >= 0
-                || aggregate.getAssociatedFilingIndex() >= 0) {
-            LOGGER.error("Cannot delete child while child deletion disabled, entity_id: [%s]"
+        if (aggregate.getResolutionIndex() >= 0
+                || aggregate.getAnnotationIndex() >= 0
+                || aggregate.getAssociatedFilingIndex() >= 0
+                || "RESOLUTIONS".equals(aggregate.getDocument().getData().getType())) {
+            LOGGER.error("Cannot delete child while child deletion disabled, _entity_id: [%s]"
                     .formatted(entityId), DataMapHolder.getLogMap());
-            throw new BadRequestException("Cannot delete child while child deletion disabled, entity_id: [%s]"
+            throw new BadRequestException("Cannot delete child while child deletion disabled, _entity_id: [%s]"
                     .formatted(entityId));
         } else {
-            LOGGER.debug("Matched parent entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
+            LOGGER.debug("Matched parent _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
             return Optional.empty();
         }
     }

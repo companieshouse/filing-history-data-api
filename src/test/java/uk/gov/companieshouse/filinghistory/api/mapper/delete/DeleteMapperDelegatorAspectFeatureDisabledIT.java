@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -36,7 +37,9 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
 
         // when
         Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID,
-                new FilingHistoryDeleteAggregate());
+                new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                                .data(new FilingHistoryData())));
 
         // then
         assertTrue(actual.isEmpty());
@@ -76,6 +79,21 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
         // when
         Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID,
                 new FilingHistoryDeleteAggregate().associatedFilingIndex(0));
+
+        // then
+        assertThrows(BadRequestException.class, actual);
+        verifyNoInteractions(compositeResolutionDeleteMapper);
+    }
+
+    @Test
+    void shouldThrowBadRequestExceptionWhenCompositeResolutionMatch() {
+        // given
+
+        // when
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID, new FilingHistoryDeleteAggregate()
+                .document(new FilingHistoryDocument()
+                        .data(new FilingHistoryData()
+                                .type("RESOLUTIONS"))));
 
         // then
         assertThrows(BadRequestException.class, actual);
