@@ -5,5 +5,5 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 
 public interface DeleteMapper {
 
-    Optional<FilingHistoryDocument> removeTransaction(int index, FilingHistoryDocument existingDocument);
+    Optional<FilingHistoryDocument> removeTransaction(int index, FilingHistoryDocument documentCopy);
 }

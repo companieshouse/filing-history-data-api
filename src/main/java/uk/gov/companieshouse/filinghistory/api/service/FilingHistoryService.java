@@ -91,7 +91,7 @@ public class FilingHistoryService implements Service {
                 LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
             } else {
                 repository.save(originalDocumentCopy);
-                LOGGER.info("Reverting previously inserted document", DataMapHolder.getLogMap());
+                LOGGER.info("Reverting previously changed document", DataMapHolder.getLogMap());
             }
             throwServiceUnavailable();
         }

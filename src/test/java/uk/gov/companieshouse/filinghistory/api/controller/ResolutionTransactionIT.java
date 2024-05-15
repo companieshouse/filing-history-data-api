@@ -1311,7 +1311,6 @@ class ResolutionTransactionIT {
                 .replaceAll("<published_at>", UPDATED_AT.toString())
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
                 .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<resolution_date>", EXISTING_DATE)
                 .replaceAll("<barcode>", BARCODE)

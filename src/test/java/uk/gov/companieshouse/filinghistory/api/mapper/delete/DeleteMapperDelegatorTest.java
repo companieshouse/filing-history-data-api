@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,9 +34,11 @@ class DeleteMapperDelegatorTest {
     @InjectMocks
     private DeleteMapperDelegator deleteMapperDelegator;
     @Mock
+    private FilingHistoryDocumentCopier documentCopier;
+    @Mock
     private CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
     @Mock
-    private FilingHistoryDocumentCopier documentCopier;
+    private ChildDeleteMapper childDeleteMapper;
 
     @Mock
     private FilingHistoryDocument document;
@@ -48,10 +51,10 @@ class DeleteMapperDelegatorTest {
                 .data(new FilingHistoryData()
                         .type(COMPOSITE_RES_TYPE)
                         .resolutions(List.of(
-                                        new FilingHistoryResolution()
-                                                .entityId("first ID"),
-                                        new FilingHistoryResolution()
-                                                .entityId(ENTITY_ID))));
+                                new FilingHistoryResolution()
+                                        .entityId("first ID"),
+                                new FilingHistoryResolution()
+                                        .entityId(ENTITY_ID))));
         FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
                 .resolutionIndex(1)
                 .document(document);
@@ -70,7 +73,7 @@ class DeleteMapperDelegatorTest {
     }
 
     @Test
-    void shouldThrowBadRequestExceptionWhenChildResolutionAndResEntityIdMatches() {
+    void shouldCallChildDeleteMapperWhenChildResolutionAndResEntityIdMatches() {
         // given
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
@@ -80,17 +83,20 @@ class DeleteMapperDelegatorTest {
                                 new FilingHistoryResolution()
                                         .entityId(CHILD_ENTITY_ID))));
         FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .resolutionIndex(1)
+                .resolutionIndex(0)
                 .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
+        when(childDeleteMapper.removeTransaction(any(), anyInt(), any(), any(), any())).thenReturn(
+                Optional.of(new FilingHistoryDocument()));
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
-        assertThrows(BadRequestException.class, actual);
+        assertTrue(actual.isPresent());
         verify(documentCopier).deepCopy(document);
+        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(0), eq(documentCopy), any(), any());
     }
 
     @Test

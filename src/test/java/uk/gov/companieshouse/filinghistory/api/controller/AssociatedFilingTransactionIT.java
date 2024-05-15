@@ -312,6 +312,7 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<context_id>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -325,6 +326,7 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<parent_entity_id>", "")
+                .replaceAll("<context_id>", CONTEXT_ID)
                 .replaceAll("<barcode>", BARCODE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -450,6 +452,7 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
+                .replaceAll("<context_id>", CONTEXT_ID)
                 .replaceAll("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -462,6 +465,7 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<context_id>", CONTEXT_ID)
                 .replaceAll("<parent_entity_id>", "")
                 .replaceAll("<barcode>", BARCODE);
 

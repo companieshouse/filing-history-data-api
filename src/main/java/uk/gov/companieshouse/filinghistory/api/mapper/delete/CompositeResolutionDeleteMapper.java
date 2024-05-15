@@ -11,7 +11,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
 @Component
-public class CompositeResolutionDeleteMapper implements DeleteMapper {
+public class CompositeResolutionDeleteMapper {
 
     private final Supplier<Instant> instantSupplier;
 
@@ -19,14 +19,13 @@ public class CompositeResolutionDeleteMapper implements DeleteMapper {
         this.instantSupplier = instantSupplier;
     }
 
-    @Override
     public Optional<FilingHistoryDocument> removeTransaction(int index, FilingHistoryDocument documentCopy) {
         List<FilingHistoryResolution> resolutions = documentCopy.getData().getResolutions();
-        resolutions.remove(index);
 
-        if (resolutions.isEmpty()) {
+        if (resolutions.size() == 1) {
             return Optional.empty();
         } else {
+            resolutions.remove(index);
             documentCopy.updated(new FilingHistoryDeltaTimestamp()
                     .at(instantSupplier.get())
                     .by(DataMapHolder.getRequestId()));

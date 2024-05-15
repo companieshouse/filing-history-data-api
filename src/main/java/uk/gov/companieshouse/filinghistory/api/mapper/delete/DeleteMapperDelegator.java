@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
@@ -16,30 +17,51 @@ public class DeleteMapperDelegator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
     private static final String COMPOSITE_RES_TYPE = "RESOLUTIONS";
-    private final CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
     private final FilingHistoryDocumentCopier documentCopier;
+    private final CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
+    private final ChildDeleteMapper childDeleteMapper;
 
-    public DeleteMapperDelegator(CompositeResolutionDeleteMapper compositeResolutionDeleteMapper,
-            FilingHistoryDocumentCopier documentCopier) {
-        this.compositeResolutionDeleteMapper = compositeResolutionDeleteMapper;
+    public DeleteMapperDelegator(FilingHistoryDocumentCopier documentCopier,
+            CompositeResolutionDeleteMapper compositeResolutionDeleteMapper, ChildDeleteMapper childDeleteMapper) {
         this.documentCopier = documentCopier;
+        this.compositeResolutionDeleteMapper = compositeResolutionDeleteMapper;
+        this.childDeleteMapper = childDeleteMapper;
     }
 
     @DeleteChildTransactions
     public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDeleteAggregate aggregate) {
         FilingHistoryDocument document = documentCopier.deepCopy(aggregate.getDocument());
+        FilingHistoryData data = document.getData();
 
         final int resIndex = aggregate.getResolutionIndex();
         if (resIndex >= 0) {
-            if (COMPOSITE_RES_TYPE.equals(document.getData().getType())) {
+            if (COMPOSITE_RES_TYPE.equals(data.getType())) {
                 LOGGER.debug("Matched composite resolution _entity_id: [%s]".formatted(entityId),
                         DataMapHolder.getLogMap());
                 return compositeResolutionDeleteMapper.removeTransaction(resIndex, document);
             } else {
-                LOGGER.debug("Matched child resolution _entity_id: [%s]".formatted(entityId),
+                LOGGER.debug("Matched resolution _entity_id: [%s]".formatted(entityId),
                         DataMapHolder.getLogMap());
-                throw new BadRequestException("No mapper for child resolutions");
+                return childDeleteMapper.removeTransaction(entityId, resIndex, document, data::getResolutions,
+                        data::resolutions);
             }
+        }
+
+        final int annotationIndex = aggregate.getAnnotationIndex();
+        if (annotationIndex >= 0) {
+            LOGGER.debug("Matched annotation _entity_id: [%s]".formatted(entityId),
+                    DataMapHolder.getLogMap());
+            return childDeleteMapper.removeTransaction(entityId, annotationIndex, document, data::getAnnotations,
+                    data::annotations);
+        }
+
+        final int associatedFilingIndex = aggregate.getAssociatedFilingIndex();
+        if (associatedFilingIndex >= 0) {
+            LOGGER.debug("Matched associated filing _entity_id: [%s]".formatted(entityId),
+                    DataMapHolder.getLogMap());
+            return childDeleteMapper.removeTransaction(entityId, associatedFilingIndex, document,
+                    data::getAssociatedFilings,
+                    data::associatedFilings);
         }
 
         if (entityId.equals(document.getEntityId())) {
