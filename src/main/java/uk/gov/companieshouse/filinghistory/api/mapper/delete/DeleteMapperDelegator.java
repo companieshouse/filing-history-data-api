@@ -3,7 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
-import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -38,7 +38,7 @@ public class DeleteMapperDelegator {
             } else {
                 LOGGER.debug("Matched child resolution _entity_id: [%s]".formatted(entityId),
                         DataMapHolder.getLogMap());
-                throw new InternalServerErrorException("No mapper for child resolutions");
+                throw new BadRequestException("No mapper for child resolutions");
             }
         }
 
@@ -47,7 +47,7 @@ public class DeleteMapperDelegator {
             return Optional.empty();
         } else {
             LOGGER.debug("No match for _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
-            throw new InternalServerErrorException("No match for _entity_id: [%s]".formatted(entityId));
+            throw new BadRequestException("No match for _entity_id: [%s]".formatted(entityId));
         }
     }
 }

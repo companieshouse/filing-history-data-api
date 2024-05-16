@@ -15,7 +15,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -70,7 +70,7 @@ class DeleteMapperDelegatorTest {
     }
 
     @Test
-    void shouldThrowInternalServerErrorExceptionWhenChildResolutionAndResEntityIdMatches() {
+    void shouldThrowBadRequestExceptionWhenChildResolutionAndResEntityIdMatches() {
         // given
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
@@ -89,12 +89,12 @@ class DeleteMapperDelegatorTest {
         Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
-        assertThrows(InternalServerErrorException.class, actual);
+        assertThrows(BadRequestException.class, actual);
         verify(documentCopier).deepCopy(document);
     }
 
     @Test
-    void shouldThrowInternalServerErrorExceptionWhenNoEntityIdMatchesAndEmptyResolutionsList() {
+    void shouldThrowBadRequestExceptionWhenNoEntityIdMatchesAndEmptyResolutionsList() {
         // given
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
@@ -109,12 +109,12 @@ class DeleteMapperDelegatorTest {
         Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
-        assertThrows(InternalServerErrorException.class, actual);
+        assertThrows(BadRequestException.class, actual);
         verify(documentCopier).deepCopy(document);
     }
 
     @Test
-    void shouldThrowInternalServerErrorExceptionWhenNoEntityIdMatchesAndHasResolution() {
+    void shouldThrowBadRequestExceptionWhenNoEntityIdMatchesAndHasResolution() {
         // given
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
@@ -129,7 +129,7 @@ class DeleteMapperDelegatorTest {
         Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
 
         // then
-        assertThrows(InternalServerErrorException.class, actual);
+        assertThrows(BadRequestException.class, actual);
         verify(documentCopier).deepCopy(document);
     }
 
