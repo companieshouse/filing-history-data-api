@@ -163,7 +163,6 @@ class ItemGetResponseMapperTest {
                 .actionDate("2014-09-15")
                 .type(TM01_TYPE)
                 .description(DESCRIPTION)
-                .category(OFFICERS)
                 .date("2014-09-15")
                 .descriptionValues(itemDescriptionValues)
                 .annotations(itemAnnotations)
@@ -178,7 +177,7 @@ class ItemGetResponseMapperTest {
 
         // when
         final ExternalData actual = itemGetResponseMapper.mapFilingHistoryItem(
-                buildFilingHistoryDocumentWithNullSubcategories());
+                buildFilingHistoryDocumentWithNullCategories());
 
         // then
         assertEquals(expected, actual);
@@ -250,7 +249,7 @@ class ItemGetResponseMapperTest {
                 .documentId("000X4BI89B65846");
     }
 
-    private FilingHistoryDocument buildFilingHistoryDocumentWithNullSubcategories() {
+    private FilingHistoryDocument buildFilingHistoryDocumentWithNullCategories() {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
                 .companyNumber(COMPANY_NUMBER)
@@ -259,7 +258,6 @@ class ItemGetResponseMapperTest {
                         .type(TM01_TYPE)
                         .description(DESCRIPTION)
                         .date(Instant.parse("2014-09-15T23:21:18.000Z"))
-                        .category(OFFICERS.getValue())
                         .descriptionValues(documentDescriptionValues)
                         .annotations(documentAnnotations)
                         .links(documentLinks)

@@ -3,12 +3,13 @@ package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryChild;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -22,7 +23,8 @@ public class ChildDeleteMapper {
     }
 
     public <T extends FilingHistoryChild> Optional<FilingHistoryDocument> removeTransaction(String entityId, int index,
-            FilingHistoryDocument documentCopy, Supplier<List<T>> childListGetter, Consumer<List<T>> childListSetter) {
+            FilingHistoryDocument documentCopy, Supplier<List<T>> childListGetter,
+            Function<List<T>, FilingHistoryData> childListSetter) {
 
         if (entityId.equals(documentCopy.getEntityId())) {
             // deleting top level: annotation, resolution (RES15) or associated filing (NEWINC)
@@ -37,7 +39,7 @@ public class ChildDeleteMapper {
                 return Optional.empty();
             } else {
                 // deleting child array as last child and has present parent
-                childListSetter.accept(null);
+                childListSetter.apply(null);
             }
         } else {
             // removing child from array with other child/children
