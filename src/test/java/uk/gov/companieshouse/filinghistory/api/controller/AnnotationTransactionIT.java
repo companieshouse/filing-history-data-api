@@ -77,7 +77,6 @@ class AnnotationTransactionIT {
     private static final String EXISTING_DELTA_AT = "20140815230459600643";
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     private static final String CONTEXT_ID = "ABCD1234";
-    private static final String EXISTING_CONTEXT_ID = "context_id";
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
     private static final String EXISTING_DATE = "2012-06-08T11:57:11Z";
     private static final String NEW_DATE = "2013-07-09T12:58:12Z";

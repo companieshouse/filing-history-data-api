@@ -1,0 +1,28 @@
+{
+  "resource_kind": "filing-history",
+  "resource_uri": "/company/<company_number>/filing-history/<transaction_id>",
+  "context_id": "<context_id>",
+  "deleted_data": {
+    "transaction_id" : "<transaction_id>",
+    "associated_filings" : [
+      {
+        "type" : "363(288)",
+        "description" : "legacy",
+        "category" : "annual-return",
+        "description_values" : {
+          "description" : "Secretary's particulars changed;director's particulars changed"
+        },
+        "date" : "2005-05-10",
+        "original_description": "original description"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "event": {
+    "published_at": "<published_at>",
+    "type": "deleted"
+  }
+}
