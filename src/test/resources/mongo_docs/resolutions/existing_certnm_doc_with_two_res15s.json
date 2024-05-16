@@ -18,6 +18,8 @@
     "type" : "CERTNM",
     "resolutions" : [
       {
+        "delta_at" : "<existing_child_delta_at>",
+        "_entity_id" : "<existing_child_entity_id>",
         "category" : "change-of-name",
         "description" : "resolution-change-of-name",
         "description_values" : {

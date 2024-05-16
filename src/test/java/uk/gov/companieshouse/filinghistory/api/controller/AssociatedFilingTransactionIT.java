@@ -980,7 +980,6 @@ class AssociatedFilingTransactionIT {
                 .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<updated_at>", CONTEXT_ID)
                 .replaceAll("<created_at>", EXISTING_DATE)
                 .replaceAll("<context_id>", CONTEXT_ID);
 

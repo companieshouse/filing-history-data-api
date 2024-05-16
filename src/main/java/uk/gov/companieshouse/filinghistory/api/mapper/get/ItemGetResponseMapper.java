@@ -20,10 +20,10 @@ public class ItemGetResponseMapper {
     private final LinksGetResponseMapper linksGetResponseMapper;
 
     public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper,
-                                 ResolutionsGetResponseMapper resolutionsGetResponseMapper,
-                                 AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
-                                 DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
-                                 LinksGetResponseMapper linksGetResponseMapper) {
+            ResolutionsGetResponseMapper resolutionsGetResponseMapper,
+            AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
+            DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
+            LinksGetResponseMapper linksGetResponseMapper) {
         this.annotationsGetResponseMapper = annotationsGetResponseMapper;
         this.resolutionsGetResponseMapper = resolutionsGetResponseMapper;
         this.associatedFilingsGetResponseMapper = associatedFilingsGetResponseMapper;

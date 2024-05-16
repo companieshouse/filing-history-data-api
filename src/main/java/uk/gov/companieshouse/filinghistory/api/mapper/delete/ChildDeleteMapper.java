@@ -27,7 +27,6 @@ public class ChildDeleteMapper {
             Function<List<T>, FilingHistoryData> childListSetter) {
 
         if (entityId.equals(documentCopy.getEntityId())) {
-            // deleting top level: annotation, resolution (RES15) or associated filing (NEWINC)
             return Optional.empty();
         }
 
@@ -35,14 +34,11 @@ public class ChildDeleteMapper {
 
         if (childList.size() == 1) {
             if (StringUtils.isBlank(documentCopy.getData().getType())) {
-                // deleting document as last child and has missing parent
                 return Optional.empty();
             } else {
-                // deleting child array as last child and has present parent
                 childListSetter.apply(null);
             }
         } else {
-            // removing child from array with other child/children
             childList.remove(index);
         }
 
