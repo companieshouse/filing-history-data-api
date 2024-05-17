@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.function.Supplier;
@@ -31,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
@@ -75,7 +77,8 @@ class FilingHistoryControllerMongoUnavailableIT {
     private static final String CATEGORY = "officers";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.15");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.15")
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)));
 
     @Autowired
     private MongoTemplate mongoTemplate;
