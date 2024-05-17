@@ -84,7 +84,7 @@ class AnnotationTransactionIT {
     private static final String NEW_DATE = "2013-07-09T12:58:12Z";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.15")
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.5")
             .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)));
 
     @Autowired
