@@ -27,7 +27,7 @@
     <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
     <maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <test-containers.version>1.19.7</test-containers.version>
+    <test-containers.version>1.19.8</test-containers.version>
     <wiremock.version>3.5.2</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
@@ -153,6 +153,7 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mongodb</artifactId>
+      <version>${test-containers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
