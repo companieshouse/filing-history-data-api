@@ -1,0 +1,36 @@
+{
+  "resource_kind": "filing-history",
+  "resource_uri": "/company/<company_number>/filing-history/<transaction_id>",
+  "context_id": "<context_id>",
+  "deleted_data": {
+    "transaction_id": "<transaction_id>",
+    "barcode" : "<barcode>",
+    "type" : "RESOLUTIONS",
+    "date" : "2011-02-04",
+    "category" : "resolution",
+    "description" : "resolution",
+    "description_values" : {
+      "description" : "Resolutions"
+    },
+    "resolutions" : [
+      {
+        "category" : "change-of-name",
+        "description" : "resolution-change-of-name",
+        "type" : "RES15",
+        "subcategory" : "resolution",
+        "description_values" : {
+          "resolution_date" : "2011-01-31"
+        },
+        "delta_at" : "<first_resolution_delta_at>"
+      }
+    ],
+    "paper_filed": true,
+    "links": {
+      "self": "/company/<company_number>/filing-history/<transaction_id>"
+    }
+  },
+  "event": {
+    "published_at": "<published_at>",
+    "type": "deleted"
+  }
+}

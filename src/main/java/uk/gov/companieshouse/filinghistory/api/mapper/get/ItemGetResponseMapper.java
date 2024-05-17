@@ -20,10 +20,10 @@ public class ItemGetResponseMapper {
     private final LinksGetResponseMapper linksGetResponseMapper;
 
     public ItemGetResponseMapper(AnnotationsGetResponseMapper annotationsGetResponseMapper,
-                                 ResolutionsGetResponseMapper resolutionsGetResponseMapper,
-                                 AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
-                                 DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
-                                 LinksGetResponseMapper linksGetResponseMapper) {
+            ResolutionsGetResponseMapper resolutionsGetResponseMapper,
+            AssociatedFilingsGetResponseMapper associatedFilingsGetResponseMapper,
+            DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper,
+            LinksGetResponseMapper linksGetResponseMapper) {
         this.annotationsGetResponseMapper = annotationsGetResponseMapper;
         this.resolutionsGetResponseMapper = resolutionsGetResponseMapper;
         this.associatedFilingsGetResponseMapper = associatedFilingsGetResponseMapper;
@@ -38,7 +38,7 @@ public class ItemGetResponseMapper {
                 .barcode(document.getBarcode())
                 .type(data.getType())
                 .date(instantToString(data.getDate()))
-                .category(CategoryEnum.fromValue(data.getCategory()))
+                .category(data.getCategory() == null ? null : CategoryEnum.fromValue(data.getCategory()))
                 .subcategory(data.getSubcategory())
                 .annotations(TOP_LEVEL_ANNOTATION_TYPE.equals(data.getType()) ?
                         null : annotationsGetResponseMapper.map(data.getAnnotations()))

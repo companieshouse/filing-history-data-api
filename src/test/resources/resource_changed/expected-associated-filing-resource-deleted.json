@@ -1,8 +1,9 @@
 {
-  "_id" : "<transaction_id>",
-  "company_number" : "<company_number>",
-  "_entity_id" : "<parent_entity_id>",
-  "data" : {
+  "resource_kind": "filing-history",
+  "resource_uri": "/company/<company_number>/filing-history/<transaction_id>",
+  "context_id": "<context_id>",
+  "deleted_data": {
+    "transaction_id" : "<transaction_id>",
     "associated_filings" : [
       {
         "type" : "363(288)",
@@ -11,9 +12,7 @@
         "description_values" : {
           "description" : "Secretary's particulars changed;director's particulars changed"
         },
-        "date" : "2005-05-10T12:00:00.000Z",
-        "_entity_id": "<child_entity_id>",
-        "delta_at": "<child_delta_at>",
+        "date" : "2005-05-10",
         "original_description": "original description"
       }
     ],
@@ -22,12 +21,8 @@
     },
     "paper_filed" : true
   },
-  "updated": {
-    "at": "<updated_at>",
-    "by": "<context_id>"
-  },
-  "created": {
-    "at": "<created_at>",
-    "by": "<context_id>"
+  "event": {
+    "published_at": "<published_at>",
+    "type": "deleted"
   }
 }

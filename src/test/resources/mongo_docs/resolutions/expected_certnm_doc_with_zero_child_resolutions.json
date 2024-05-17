@@ -15,29 +15,7 @@
     },
     "paper_filed" : true,
     "subcategory" : "certificate",
-    "type" : "CERTNM",
-    "resolutions" : [
-      {
-        "category" : "change-of-name",
-        "description" : "resolution-change-of-name",
-        "description_values" : {
-          "resolution_date" : "2024-03-09T00:00:00.000Z"
-        },
-        "subcategory" : "resolution",
-        "type" : "RES15"
-      },
-      {
-        "category" : "change-of-name",
-        "delta_at" : "<child_delta_at>",
-        "_entity_id" : "<child_entity_id>",
-        "description" : "resolution-change-of-name",
-        "description_values" : {
-          "resolution_date" : "2024-03-09T00:00:00.000Z"
-        },
-        "subcategory" : "resolution",
-        "type" : "RES15"
-      }
-    ]
+    "type" : "CERTNM"
   },
   "original_description" : "Company name changed ACME LLP\\certificate issued on 22/04/24",
   "_document_id" : "document_id",
@@ -49,5 +27,5 @@
     "at": "<created_at>",
     "by": "context_id"
   },
-  "delta_at": "<parent_delta_at>"
+  "delta_at": "<delta_at>"
 }

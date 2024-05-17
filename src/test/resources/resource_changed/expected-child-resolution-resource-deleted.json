@@ -1,0 +1,28 @@
+{
+  "resource_kind": "filing-history",
+  "resource_uri": "/company/<company_number>/filing-history/<transaction_id>",
+  "context_id": "<context_id>",
+  "deleted_data": {
+    "transaction_id" : "<transaction_id>",
+    "resolutions" : [
+      {
+        "category" : "change-of-name",
+        "delta_at" : "<first_resolution_delta_at>",
+        "description" : "resolution-change-of-name",
+        "description_values" : {
+          "resolution_date" : "2024-03-09"
+        },
+        "subcategory" : "resolution",
+        "type" : "RES15"
+      }
+    ],
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    },
+    "paper_filed" : true
+  },
+  "event": {
+    "published_at": "<published_at>",
+    "type": "deleted"
+  }
+}
