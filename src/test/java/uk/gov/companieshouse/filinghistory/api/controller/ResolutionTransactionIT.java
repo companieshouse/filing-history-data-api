@@ -88,7 +88,7 @@ class ResolutionTransactionIT {
     private static final String SECOND_RES_DATE = "2007-03-27T00:00:00.000Z";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.15");
 
     @Autowired
     private MongoTemplate mongoTemplate;
