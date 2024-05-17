@@ -81,7 +81,7 @@ class AssociatedFilingTransactionIT {
     private static final String EXISTING_DATE = "2012-06-08T11:57:11Z";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.15");
 
     @Autowired
     private MongoTemplate mongoTemplate;
