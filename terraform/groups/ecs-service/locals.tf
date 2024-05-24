@@ -9,8 +9,9 @@ locals {
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority   = 41
-  lb_listener_paths           = ["/filing-history-data-api/company/*/filing-history*", "/filing-history-data-api/healthcheck",
-    "/filing-history-data-api/filing-history/*/internal"]
+  lb_listener_paths           = [
+    "/filing-history-data-api/healthcheck", "/company/*/filing-history*", "/filing-history/*/internal"
+  ]
   healthcheck_path            = "/filing-history-data-api/healthcheck" #healthcheck path for filing-history-data-api
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
@@ -36,7 +37,7 @@ locals {
     trimprefix(sec.name, "/${local.global_prefix}/") => sec.arn
   }
 
-  global_secret_list = flatten([for key, value in local.global_secrets_arn_map : 
+  global_secret_list = flatten([for key, value in local.global_secrets_arn_map :
     { name = upper(key), valueFrom = value }
   ])
 
@@ -51,7 +52,7 @@ locals {
       trimprefix(sec.name, "/${local.service_name}-${var.environment}/") => sec.arn
   }
 
-  service_secret_list = flatten([for key, value in local.service_secrets_arn_map : 
+  service_secret_list = flatten([for key, value in local.service_secrets_arn_map :
     { name = upper(key), valueFrom = value }
   ])
 
