@@ -163,7 +163,6 @@ class AnnotationTransactionMapperTest {
     void shouldMapAnnotationToExistingDocumentWhenTopLevelAnnotation() {
         // given
         ExternalData externalData = new ExternalData()
-                .paperFiled(true)
                 .barcode(BARCODE);
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -184,11 +183,17 @@ class AnnotationTransactionMapperTest {
                 .documentMetadata("metadata");
         FilingHistoryData existingData = new FilingHistoryData()
                 .links(existingLinks)
+                .paperFiled(true)
                 .annotations(annotationList);
         FilingHistoryDocument existingDocument = new FilingHistoryDocument()
                 .data(existingData)
                 .created(existingTimestamp)
                 .updated(existingTimestamp);
+
+        FilingHistoryData mappedData = new FilingHistoryData()
+                .category("annotation")
+                .paperFiled(true)
+                .annotations(annotationList);
 
         FilingHistoryData expectedData = new FilingHistoryData()
                 .category("annotation")
@@ -208,7 +213,7 @@ class AnnotationTransactionMapperTest {
                 .barcode(BARCODE)
                 .data(expectedData);
 
-        when(dataMapper.map(any(), any())).thenReturn(expectedData);
+        when(dataMapper.map(any(), any())).thenReturn(mappedData);
 
         // when
         FilingHistoryDocument actual = annotationTransactionMapper.mapExistingFilingHistory(

@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
+import static java.lang.Boolean.TRUE;
+
 import java.time.Instant;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
@@ -29,9 +31,15 @@ public abstract class AbstractTransactionMapper {
 
     public FilingHistoryDocument mapExistingFilingHistory(InternalFilingHistoryApi request,
             FilingHistoryDocument existingDocument, Instant instant) {
+        FilingHistoryData existingData = existingDocument.getData();
+
+        Boolean paperFiled = existingData.getPaperFiled();
+        if (!TRUE.equals(paperFiled)) {
+            paperFiled = request.getExternalData().getPaperFiled();
+        }
         return mapTopLevelFields(request, existingDocument, instant)
-                .data(mapFilingHistoryData(request, existingDocument.getData())
-                        .paperFiled(request.getExternalData().getPaperFiled()));
+                .data(mapFilingHistoryData(request, existingData)
+                        .paperFiled(paperFiled));
     }
 
     protected abstract FilingHistoryData mapFilingHistoryData(InternalFilingHistoryApi request, FilingHistoryData data);
