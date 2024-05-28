@@ -1,0 +1,32 @@
+{
+  "external_data": {
+    "transaction_id": "<transaction_id>",
+    "barcode": "<barcode>",
+    "subcategory": "create",
+    "type": "MR01",
+    "date": "2014-10-02T00:00:00Z",
+    "description_values": {
+      "charge_creation_date": "2014-09-29T00:00:00Z",
+      "charge_number": "1234567890"
+    },
+    "description": "mortgage-create-with-deed-with-charge-number-charge-creation-date",
+    "action_date": "2014-09-29T00:00:00Z",
+    "category": "mortgage",
+    "links": {
+      "self": "/company/<company_number>/filing-history/<transaction_id>"
+    }
+  },
+  "internal_data": {
+    "company_number": "<company_number>",
+    "delta_at": "<delta_at>",
+    "entity_id": "<entity_id>",
+    "updated_at": "<updated_at>",
+    "updated_by": "<context_id>",
+    "document_id": "document_id",
+    "transaction_kind": "top-level",
+    "original_values": {
+      "charge_creation_date": "29/09/2014"
+    },
+    "original_description": "Registration of a charge / charge code 1234567890"
+  }
+}

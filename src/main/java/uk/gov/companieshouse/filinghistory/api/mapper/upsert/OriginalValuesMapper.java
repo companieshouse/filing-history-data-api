@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.stringToInstant;
-
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
@@ -15,8 +13,8 @@ public class OriginalValuesMapper {
                 .map(values -> new FilingHistoryOriginalValues()
                         .officerName(values.getOfficerName())
                         .resignationDate(values.getResignationDate())
-                        .chargeCreationDate(stringToInstant(values.getChargeCreationDate()))
-                        .propertyAcquiredDate(stringToInstant(values.getPropertyAcquiredDate()))
+                        .chargeCreationDate(values.getChargeCreationDate())
+                        .propertyAcquiredDate(values.getPropertyAcquiredDate())
                         .appointmentDate(values.getAppointmentDate())
                         .caseStartDate(values.getCaseStartDate())
                         .caseEndDate(values.getCaseEndDate())
