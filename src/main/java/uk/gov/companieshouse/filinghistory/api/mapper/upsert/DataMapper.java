@@ -41,7 +41,6 @@ public class DataMapper {
                 .category(data.getCategory().toString())
                 .description(data.getDescription())
                 .descriptionValues(descriptionValuesMapper.map(data.getDescriptionValues()))
-                .actionDate(stringToInstant(data.getActionDate()))
-                .paperFiled(data.getPaperFiled());
+                .actionDate(stringToInstant(data.getActionDate()));
     }
 }
