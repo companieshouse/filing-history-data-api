@@ -61,8 +61,7 @@ class DataMapperTest {
                 .subcategory((String) null)
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
-                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
-                .paperFiled(true);
+                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT);
 
         // when
         final FilingHistoryData actualData = dataMapper.map(buildRequestExternalData(), new FilingHistoryData());
@@ -86,8 +85,7 @@ class DataMapperTest {
                 .subcategory(SUBCATEGORY)
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
-                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
-                .paperFiled(true);
+                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT);
 
         // when
         final FilingHistoryData actualData = dataMapper.map(externalData, new FilingHistoryData());
@@ -111,8 +109,7 @@ class DataMapperTest {
                 .subcategory(List.of("voluntary", "certificate"))
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
-                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
-                .paperFiled(true);
+                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT);
 
         // when
         final FilingHistoryData actualData = dataMapper.map(externalData, new FilingHistoryData());
@@ -151,8 +148,7 @@ class DataMapperTest {
                 .description("description")
                 .descriptionValues(expectedDescriptionValues)
                 .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")))
-                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)
-                .paperFiled(true);
+                .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT);
 
         final FilingHistoryData existingData = new FilingHistoryData()
                 .annotations(List.of(new FilingHistoryAnnotation().annotation("annotation")));
@@ -177,7 +173,6 @@ class DataMapperTest {
                 .descriptionValues(requestDescriptionValues)
                 .pages(1) // should not be mapped, persisted by document store sub delta
                 .actionDate(ACTION_AND_TERMINATION_DATE_AS_LOCAL_DATE)
-                .paperFiled(true)
                 .links(requestLinks);
     }
 }

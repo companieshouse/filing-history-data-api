@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
@@ -13,9 +12,7 @@ class OriginalValuesMapperTest {
     private static final String OFFICER_NAME = "John Tester";
     private static final String RESIGNATION_DATE = "06/08/2011";
     private static final String CHARGE_CREATION_DATE = "2011-06-01T00:00:00.00Z";
-    private static final Instant CHARGE_CREATION_DATE_INSTANT = Instant.parse(CHARGE_CREATION_DATE);
     private static final String PROPERTY_ACQUIRED_DATE = "2011-06-02T00:00:00.00Z";
-    private static final Instant PROPERTY_ACQUIRED_DATE_INSTANT = Instant.parse(PROPERTY_ACQUIRED_DATE);
     private static final String APPOINTMENT_DATE = "03/06/2011";
     private static final String CASE_START_DATE = "04/06/2011";
     private static final String CASE_END_DATE = "05/06/2011";
@@ -63,8 +60,8 @@ class OriginalValuesMapperTest {
 
         FilingHistoryOriginalValues expected = new FilingHistoryOriginalValues()
                 .resignationDate(RESIGNATION_DATE)
-                .chargeCreationDate(CHARGE_CREATION_DATE_INSTANT)
-                .propertyAcquiredDate(PROPERTY_ACQUIRED_DATE_INSTANT)
+                .chargeCreationDate(CHARGE_CREATION_DATE)
+                .propertyAcquiredDate(PROPERTY_ACQUIRED_DATE)
                 .appointmentDate(APPOINTMENT_DATE)
                 .caseStartDate(CASE_START_DATE)
                 .caseEndDate(CASE_END_DATE)

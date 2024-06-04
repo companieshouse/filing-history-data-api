@@ -14,8 +14,7 @@
     },
     "links": {
       "self": "/company/<company_number>/filing-history/<transaction_id>"
-    },
-    "paper_filed" : true
+    }
   },
   "internal_data": {
     "company_number": "<company_number>",
@@ -29,6 +28,9 @@
       "officer_name" : "John Test Tester",
       "resignation_date" : "15/09/2014"
     },
-    "original_description" : "Appointment Terminated, Director john tester"
+    "original_description" : "Appointment Terminated, Director john tester",
+    "links" : {
+      "self" : "/company/<company_number>/filing-history/<transaction_id>"
+    }
   }
 }

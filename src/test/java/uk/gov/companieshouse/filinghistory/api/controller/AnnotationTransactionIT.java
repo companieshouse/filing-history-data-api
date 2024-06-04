@@ -303,7 +303,7 @@ class AnnotationTransactionIT {
     }
 
     @Test
-    void shouldInsertParentFieldsAndNotChangeAnnotationAndReturn200OK() throws Exception {
+    void shouldInsertParentFieldsWithoutChangingAnnotationOrTruePaperFiledAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_annotation_doc_with_no_parent.json", StandardCharsets.UTF_8);
@@ -337,7 +337,7 @@ class AnnotationTransactionIT {
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
-                "/put_requests/tm01s/put_request_TM01.json", StandardCharsets.UTF_8);
+                "/put_requests/tm01s/put_request_TM01_electronic.json", StandardCharsets.UTF_8);
         requestBody = requestBody
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)

@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.model.mongo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.Instant;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -17,11 +16,11 @@ public class FilingHistoryOriginalValues {
 
     @Field("charge_creation_date")
     @JsonProperty("charge_creation_date")
-    private Instant chargeCreationDate;
+    private Object chargeCreationDate;
 
     @Field("property_acquired_date")
     @JsonProperty("property_acquired_date")
-    private Instant propertyAcquiredDate;
+    private Object propertyAcquiredDate;
 
     @Field("appointment_date")
     @JsonProperty("appointment_date")
@@ -109,20 +108,20 @@ public class FilingHistoryOriginalValues {
         return this;
     }
 
-    public Instant getChargeCreationDate() {
+    public Object getChargeCreationDate() {
         return chargeCreationDate;
     }
 
-    public FilingHistoryOriginalValues chargeCreationDate(Instant chargeCreationDate) {
+    public FilingHistoryOriginalValues chargeCreationDate(String chargeCreationDate) {
         this.chargeCreationDate = chargeCreationDate;
         return this;
     }
 
-    public Instant getPropertyAcquiredDate() {
+    public Object getPropertyAcquiredDate() {
         return propertyAcquiredDate;
     }
 
-    public FilingHistoryOriginalValues propertyAcquiredDate(Instant propertyAcquiredDate) {
+    public FilingHistoryOriginalValues propertyAcquiredDate(String propertyAcquiredDate) {
         this.propertyAcquiredDate = propertyAcquiredDate;
         return this;
     }
