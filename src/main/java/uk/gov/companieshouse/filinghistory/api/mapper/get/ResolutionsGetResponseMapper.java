@@ -25,7 +25,8 @@ public class ResolutionsGetResponseMapper {
                         .map(resolution ->
                                 new Resolution()
                                         .barcode(resolution.getBarcode())
-                                        .category(CategoryEnum.fromValue(resolution.getCategory()))
+                                        .category(resolution.getCategory() == null ?
+                                                null : CategoryEnum.fromValue(resolution.getCategory()))
                                         .subcategory(resolution.getSubcategory())
                                         .description(resolution.getDescription())
                                         .type(resolution.getType())

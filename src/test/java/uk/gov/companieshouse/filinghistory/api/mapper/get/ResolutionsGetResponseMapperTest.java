@@ -67,11 +67,10 @@ class ResolutionsGetResponseMapperTest {
     }
 
     @Test
-    void shouldSuccessfullyMapResolutionsWithNullDescriptionValues() {
+    void shouldSuccessfullyMapResolutionsWithNullValues() {
         // given
         final List<Resolution> expected = List.of(
                 new Resolution()
-                        .category(CategoryEnum.RESOLUTION)
                         .type(TYPE)
                         .description(DESCRIPTION));
 
@@ -79,7 +78,6 @@ class ResolutionsGetResponseMapperTest {
         final List<Resolution> actual = resolutionsGetResponseMapper.map(
                 List.of(
                         new FilingHistoryResolution()
-                                .category(CATEGORY)
                                 .type(TYPE)
                                 .description(DESCRIPTION))
         );

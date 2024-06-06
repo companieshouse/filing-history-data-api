@@ -25,7 +25,8 @@ public class ResolutionChildMapper implements ChildMapper<FilingHistoryResolutio
 
         return existingResolution
                 .barcode(requestResolution.getBarcode())
-                .category(requestResolution.getCategory().getValue())
+                .category(requestResolution.getCategory() == null ? // NOSONAR
+                        null : requestResolution.getCategory().getValue())
                 .description(requestResolution.getDescription())
                 .type(requestResolution.getType())
                 .subcategory(requestResolution.getSubcategory())

@@ -40,7 +40,7 @@ class ResolutionChildMapperTest {
     private FilingHistoryDescriptionValues descriptionValues;
 
     @Test
-    void shouldAddNewResolutionWhenNewObjectPassedInArguements() {
+    void shouldAddNewResolution() {
         // given
         InternalFilingHistoryApi request = new InternalFilingHistoryApi()
                 .internalData(new InternalData()
@@ -63,6 +63,46 @@ class ResolutionChildMapperTest {
                 .entityId(ENTITY_ID)
                 .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .category(CategoryEnum.RESOLUTION.getValue())
+                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
+                .description("Resolution description")
+                .type("Resolution")
+                .subcategory(SUBCATEGORY_ARRAY)
+                .descriptionValues(descriptionValues)
+                .originalDescription("resolution original description")
+                .barcode("barcode");
+
+        when(descriptionValuesMapper.map(any())).thenReturn(descriptionValues);
+
+        // when
+        FilingHistoryResolution actual = resolutionChildMapper.mapChild(request);
+
+        // then
+        assertEquals(expected, actual);
+        verify(descriptionValuesMapper).map(requestDescriptionValues);
+    }
+
+    @Test
+    void shouldAddNewResolutionNullCategory() {
+        // given
+        InternalFilingHistoryApi request = new InternalFilingHistoryApi()
+                .internalData(new InternalData()
+                        .entityId(ENTITY_ID)
+                        .deltaAt(NEWEST_REQUEST_DELTA_AT))
+                .externalData(new ExternalData()
+                        .resolutions(List.of(
+                                new Resolution()
+                                        .date("2011-11-26T11:27:55.000Z")
+                                        .description("Resolution description")
+                                        .type("Resolution")
+                                        .subcategory(SUBCATEGORY_ARRAY)
+                                        .descriptionValues(requestDescriptionValues)
+                                        .originalDescription("resolution original description")
+                                        .barcode("barcode")
+                        )));
+
+        FilingHistoryResolution expected = new FilingHistoryResolution()
+                .entityId(ENTITY_ID)
+                .deltaAt(NEWEST_REQUEST_DELTA_AT)
                 .date(Instant.parse("2011-11-26T11:27:55.000Z"))
                 .description("Resolution description")
                 .type("Resolution")
