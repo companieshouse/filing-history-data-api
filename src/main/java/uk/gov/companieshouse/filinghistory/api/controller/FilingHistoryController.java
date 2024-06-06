@@ -39,7 +39,7 @@ public class FilingHistoryController {
         this.serviceDeleteProcessor = serviceDeleteProcessor;
     }
 
-    @GetMapping("/filing-history-data-api/company/{company_number}/filing-history")
+    @GetMapping("/company/{company_number}/filing-history")
     public ResponseEntity<FilingHistoryList> getCompanyFilingHistoryList(
             @PathVariable("company_number") final String companyNumber,
             @RequestParam(defaultValue = "0", name = "start_index") Integer startIndex,
@@ -61,7 +61,7 @@ public class FilingHistoryController {
                 .body(filingHistoryGetResponseProcessor.processGetCompanyFilingHistoryList(requestParams));
     }
 
-    @GetMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}")
+    @GetMapping("/company/{company_number}/filing-history/{transaction_id}")
     public ResponseEntity<ExternalData> getSingleFilingHistory(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId) {
@@ -76,7 +76,7 @@ public class FilingHistoryController {
                 .body(filingHistoryGetResponseProcessor.processGetSingleFilingHistory(transactionId, companyNumber));
     }
 
-    @PutMapping("/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal")
+    @PutMapping("/company/{company_number}/filing-history/{transaction_id}/internal")
     public ResponseEntity<Void> upsertFilingHistoryTransaction(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,
@@ -96,7 +96,7 @@ public class FilingHistoryController {
                 .build();
     }
 
-    @DeleteMapping("/filing-history-data-api/filing-history/{entity_id}/internal")
+    @DeleteMapping("/filing-history/{entity_id}/internal")
     public ResponseEntity<Void> deleteFilingHistoryTransaction(@PathVariable("entity_id") final String entityId) {
 
         DataMapHolder.get().transactionId(entityId);

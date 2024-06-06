@@ -62,10 +62,10 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 @WireMockTest(httpPort = 8889)
 class ResolutionTransactionIT {
 
-    private static final String PUT_REQUEST_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}/internal";
-    private static final String GET_SINGLE_TRANSACTION_URI = "/filing-history-data-api/company/{company_number}/filing-history/{transaction_id}";
-    private static final String GET_FILING_HISTORY_URI = "/filing-history-data-api/company/{company_number}/filing-history";
-    private static final String DELETE_REQUEST_URI = "/filing-history-data-api/filing-history/{entity_id}/internal";
+    private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
+    private static final String GET_SINGLE_TRANSACTION_URI = "/company/{company_number}/filing-history/{transaction_id}";
+    private static final String GET_FILING_HISTORY_URI = "/company/{company_number}/filing-history";
+    private static final String DELETE_REQUEST_URI = "/filing-history/{entity_id}/internal";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
