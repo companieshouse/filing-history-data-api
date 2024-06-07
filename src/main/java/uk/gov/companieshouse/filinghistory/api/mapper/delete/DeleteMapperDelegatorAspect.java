@@ -28,9 +28,7 @@ public class DeleteMapperDelegatorAspect {
         String entityId = (String) args[0];
         FilingHistoryDeleteAggregate aggregate = (FilingHistoryDeleteAggregate) args[1];
 
-        if (aggregate.getResolutionIndex() >= 0
-                || aggregate.getAnnotationIndex() >= 0
-                || aggregate.getAssociatedFilingIndex() >= 0
+        if (!entityId.equals(aggregate.getDocument().getEntityId())
                 || "RESOLUTIONS".equals(aggregate.getDocument().getData().getType())) {
             LOGGER.error("Cannot delete child while child deletion disabled, _entity_id: [%s]"
                     .formatted(entityId), DataMapHolder.getLogMap());
