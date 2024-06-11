@@ -41,7 +41,14 @@ public class TopLevelTransactionMapper extends AbstractTransactionMapper {
 
         if (externalData.getAssociatedFilings() != null && !externalData.getAssociatedFilings().isEmpty()) {
             childListMapper.mapChildList(request, mappedData.getAssociatedFilings(), mappedData::associatedFilings);
+
+            data.getAssociatedFilings().stream()
+                    .filter(af -> request.getInternalData().getEntityId().equals(af.getEntityId()))
+                    .findFirst()
+                    .ifPresent(af -> af.originalDescription(
+                            request.getExternalData().getAssociatedFilings().getFirst().getOriginalDescription()));
         }
+
         return mappedData;
     }
 

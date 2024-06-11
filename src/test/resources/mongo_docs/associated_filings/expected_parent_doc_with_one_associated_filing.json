@@ -25,8 +25,7 @@
         },
         "date" : "2005-05-10T12:00:00.000Z",
         "_entity_id": "<child_entity_id>",
-        "delta_at": "<child_delta_at>",
-        "original_description": "original description"
+        "delta_at": "<child_delta_at>"
       }
     ],
     "paper_filed" : true

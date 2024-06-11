@@ -598,7 +598,6 @@ class AssociatedFilingTransactionIT {
                                 .descriptionValues(new DescriptionValues()
                                         .description("Secretary's particulars changed;director's particulars changed"))
                                 .type("363(288)")
-                                .originalDescription("original description")
                 ));
 
         // when
@@ -868,7 +867,6 @@ class AssociatedFilingTransactionIT {
                                 .descriptionValues(new DescriptionValues()
                                         .description("Secretary's particulars changed;director's particulars changed"))
                                 .type("363(288)")
-                                .originalDescription("original description")
                 ));
 
         // when
