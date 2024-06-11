@@ -21,6 +21,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 class DeleteMapperDelegatorAspectFeatureDisabledIT {
 
     private static final String ENTITY_ID = "entity ID";
+    private static final String CHILD_ENTITY_ID = "child entity ID";
 
     @Autowired
     private DeleteMapperDelegator deleteMapperDelegator;
@@ -33,12 +34,13 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
     }
 
     @Test
-    void shouldDeleteChildTransactionsWhenFeatureDisabled() {
+    void shouldDeleteTopLevelTransactionsWhenFeatureDisabled() {
 
         // when
         Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID,
                 new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID)
                                 .data(new FilingHistoryData())));
 
         // then
@@ -51,8 +53,11 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
         // given
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID,
-                new FilingHistoryDeleteAggregate().resolutionIndex(0));
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
+                new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID))
+                        .resolutionIndex(0));
 
         // then
         assertThrows(BadRequestException.class, actual);
@@ -64,8 +69,11 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
         // given
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID,
-                new FilingHistoryDeleteAggregate().annotationIndex(0));
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
+                new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID))
+                        .annotationIndex(0));
 
         // then
         assertThrows(BadRequestException.class, actual);
@@ -77,8 +85,11 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
         // given
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID,
-                new FilingHistoryDeleteAggregate().associatedFilingIndex(0));
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
+                new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID))
+                        .associatedFilingIndex(0));
 
         // then
         assertThrows(BadRequestException.class, actual);
@@ -90,10 +101,12 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
         // given
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID, new FilingHistoryDeleteAggregate()
-                .document(new FilingHistoryDocument()
-                        .data(new FilingHistoryData()
-                                .type("RESOLUTIONS"))));
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(ENTITY_ID,
+                new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID)
+                                .data(new FilingHistoryData()
+                                        .type("RESOLUTIONS"))));
 
         // then
         assertThrows(BadRequestException.class, actual);

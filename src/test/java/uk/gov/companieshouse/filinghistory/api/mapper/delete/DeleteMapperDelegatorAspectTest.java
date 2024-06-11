@@ -19,17 +19,20 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @ExtendWith(MockitoExtension.class)
 class DeleteMapperDelegatorAspectTest {
 
+    private static final String ENTITY_ID = "entity ID";
+    private static final String CHILD_ENTITY_ID = "child entity ID";
     private final DeleteMapperDelegatorAspect aspect = new DeleteMapperDelegatorAspect();
 
     @Mock
     private JoinPoint joinPoint;
 
     @Test
-    void shouldReturnEmptyWhenNoChildMatches() {
+    void shouldReturnEmptyWhenTopLevelMatch() {
         // given
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"entity id", new FilingHistoryDeleteAggregate()
+        when(joinPoint.getArgs()).thenReturn(new Object[]{ENTITY_ID, new FilingHistoryDeleteAggregate()
                 .document(new FilingHistoryDocument()
-                    .data(new FilingHistoryData()))});
+                .entityId(ENTITY_ID)
+                .data(new FilingHistoryData()))});
 
         // when
         Optional<FilingHistoryDocument> actual = aspect.deleteChildTransactionsDisabled(joinPoint);
@@ -39,36 +42,12 @@ class DeleteMapperDelegatorAspectTest {
     }
 
     @Test
-    void shouldThrowBadRequestExceptionWhenResolutionChildMatch() {
+    void shouldThrowBadRequestExceptionWhenAnyChildMatch() {
         // given
         when(joinPoint.getArgs()).thenReturn(
-                new Object[]{"entity id", new FilingHistoryDeleteAggregate().resolutionIndex(0)});
-
-        // when
-        Executable actual = () -> aspect.deleteChildTransactionsDisabled(joinPoint);
-
-        // then
-        assertThrows(BadRequestException.class, actual);
-    }
-
-    @Test
-    void shouldThrowBadRequestExceptionWhenAnnotationChildMatch() {
-        // given
-        when(joinPoint.getArgs()).thenReturn(
-                new Object[]{"entity id", new FilingHistoryDeleteAggregate().annotationIndex(0)});
-
-        // when
-        Executable actual = () -> aspect.deleteChildTransactionsDisabled(joinPoint);
-
-        // then
-        assertThrows(BadRequestException.class, actual);
-    }
-
-    @Test
-    void shouldThrowBadRequestExceptionWhenAssociatedFilingChildMatch() {
-        // given
-        when(joinPoint.getArgs()).thenReturn(
-                new Object[]{"entity id", new FilingHistoryDeleteAggregate().associatedFilingIndex(0)});
+                new Object[]{CHILD_ENTITY_ID, new FilingHistoryDeleteAggregate()
+                        .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID))});
 
         // when
         Executable actual = () -> aspect.deleteChildTransactionsDisabled(joinPoint);
@@ -81,8 +60,9 @@ class DeleteMapperDelegatorAspectTest {
     void shouldThrowBadRequestExceptionWhenCompositeResolutionMatch() {
         // given
         when(joinPoint.getArgs()).thenReturn(
-                new Object[]{"entity id", new FilingHistoryDeleteAggregate()
+                new Object[]{ENTITY_ID, new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
+                                .entityId(ENTITY_ID)
                         .data(new FilingHistoryData()
                                 .type("RESOLUTIONS")))});
 
