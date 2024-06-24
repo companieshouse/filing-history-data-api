@@ -21,18 +21,19 @@ public class AssociatedFilingChildMapper implements ChildMapper<FilingHistoryAss
     public FilingHistoryAssociatedFiling mapChild(InternalFilingHistoryApi request,
             FilingHistoryAssociatedFiling existingAssociatedFiling) {
         InternalData internalData = request.getInternalData();
-        AssociatedFiling requestAssociatedFilings =
+        AssociatedFiling requestAssociatedFiling =
                 request.getExternalData().getAssociatedFilings().getFirst();
 
         return existingAssociatedFiling
-                .actionDate(stringToInstant(requestAssociatedFilings.getActionDate()))
+                .actionDate(stringToInstant(requestAssociatedFiling.getActionDate()))
                 .entityId(internalData.getEntityId())
                 .deltaAt(internalData.getDeltaAt())
-                .category(requestAssociatedFilings.getCategory())
-                .date(stringToInstant(requestAssociatedFilings.getDate()))
-                .description(requestAssociatedFilings.getDescription())
-                .descriptionValues(descriptionValuesMapper.map(requestAssociatedFilings.getDescriptionValues()))
-                .type(requestAssociatedFilings.getType());
+                .category(requestAssociatedFiling.getCategory())
+                .subcategory(requestAssociatedFiling.getSubcategory())
+                .date(stringToInstant(requestAssociatedFiling.getDate()))
+                .description(requestAssociatedFiling.getDescription())
+                .descriptionValues(descriptionValuesMapper.map(requestAssociatedFiling.getDescriptionValues()))
+                .type(requestAssociatedFiling.getType());
     }
 
     @Override

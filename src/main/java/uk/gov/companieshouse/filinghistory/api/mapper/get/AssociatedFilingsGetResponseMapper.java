@@ -26,6 +26,7 @@ public class AssociatedFilingsGetResponseMapper {
                                         .actionDate(instantToString(associatedFiling.getActionDate()))
                                         .originalDescription(associatedFiling.getOriginalDescription())
                                         .category(associatedFiling.getCategory())
+                                        .subcategory(associatedFiling.getSubcategory())
                                         .type(associatedFiling.getType())
                                         .description(associatedFiling.getDescription())
                                         .date(instantToString(associatedFiling.getDate()))

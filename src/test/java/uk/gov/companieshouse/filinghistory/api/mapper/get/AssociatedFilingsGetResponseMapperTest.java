@@ -23,6 +23,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescript
 class AssociatedFilingsGetResponseMapperTest {
 
     private static final String CATEGORY = "category";
+    private static final String SUBCATEGORY = "subcategory";
     private static final String TYPE = "type";
     private static final String DESCRIPTION = "description";
     private static final String ORIGINAL_DESCRIPTION = "original description";
@@ -43,6 +44,7 @@ class AssociatedFilingsGetResponseMapperTest {
                 new AssociatedFiling()
                         .actionDate(ACTION_DATE)
                         .category(CATEGORY)
+                        .subcategory(SUBCATEGORY)
                         .type(TYPE)
                         .originalDescription(ORIGINAL_DESCRIPTION)
                         .description(DESCRIPTION)
@@ -64,6 +66,7 @@ class AssociatedFilingsGetResponseMapperTest {
         final List<AssociatedFiling> expected = List.of(
                 new AssociatedFiling()
                         .category(CATEGORY)
+                        .subcategory(SUBCATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION));
 
@@ -71,6 +74,7 @@ class AssociatedFilingsGetResponseMapperTest {
         final List<AssociatedFiling> actual = associatedFilingsGetResponseMapper.map(List.of(
                 new FilingHistoryAssociatedFiling()
                         .category(CATEGORY)
+                        .subcategory(SUBCATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION)));
 
@@ -96,6 +100,7 @@ class AssociatedFilingsGetResponseMapperTest {
                 new FilingHistoryAssociatedFiling()
                         .actionDate(Instant.parse("2015-10-05T00:00:00Z"))
                         .category(CATEGORY)
+                        .subcategory(SUBCATEGORY)
                         .type(TYPE)
                         .originalDescription(ORIGINAL_DESCRIPTION)
                         .description(DESCRIPTION)
