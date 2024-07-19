@@ -12,7 +12,7 @@
   <name>filing-history-data-api</name>
 
   <artifactId>filing-history-data-api</artifactId>
-  <version>latest</version>
+  <version>unversioned</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -22,6 +22,7 @@
     <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
     <structured-logging.version>3.0.5</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
+    <api-security-java.version>2.0.5</api-security-java.version>
     <private-api-sdk-java.version>4.0.108</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
     <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
@@ -77,6 +78,16 @@
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
     <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-logging</artifactId>
       <exclusions>
@@ -121,6 +132,11 @@
           <artifactId>commons-collections</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+        <groupId>uk.gov.companieshouse</groupId>
+        <artifactId>api-security-java</artifactId>
+        <version>${api-security-java.version}</version>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
