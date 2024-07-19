@@ -724,7 +724,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB()
+    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseAndNoDocumentShouldBeInDB()
             throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
@@ -732,7 +732,7 @@ class FilingHistoryControllerIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -744,7 +744,7 @@ class FilingHistoryControllerIT {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
@@ -754,7 +754,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseOnUpsertAndDocumentShouldBeRolledBackToPreviousState()
+    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseOnUpsertAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
@@ -771,7 +771,7 @@ class FilingHistoryControllerIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -783,7 +783,7 @@ class FilingHistoryControllerIT {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
@@ -828,7 +828,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
+    void shouldReturn502GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
@@ -845,7 +845,7 @@ class FilingHistoryControllerIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
@@ -856,7 +856,7 @@ class FilingHistoryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 

@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ListGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
@@ -90,15 +90,15 @@ class FilingHistoryGetResponseProcessorTest {
     }
 
     @Test
-    void processGetSingleFilingHistoryShouldThrowServiceUnavailableException() {
+    void processGetSingleFilingHistoryShouldThrowBadGatewayException() {
         // given
-        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(ServiceUnavailableException.class);;
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(BadGatewayException.class);;
 
         // when
         Executable executable = () -> processor.processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verifyNoInteractions(itemGetResponseMapper);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
@@ -212,12 +212,12 @@ class FilingHistoryGetResponseProcessorTest {
     }
 
     @Test
-    void processGetCompanyFilingHistoryListShouldThrowServiceUnavailableException() {
+    void processGetCompanyFilingHistoryListShouldThrowBadGatewayException() {
         // given
         when(statusService.processStatus(any())).thenReturn(STATUS);
         when(listGetResponseMapper.mapBaseFilingHistoryList(anyInt(), anyInt(), any())).thenReturn(filingHistoryList);
         when(filingHistoryService.findCompanyFilingHistoryList(any(), anyInt(),
-                anyInt(), any())).thenThrow(ServiceUnavailableException.class);
+                anyInt(), any())).thenThrow(BadGatewayException.class);
 
         FilingHistoryListRequestParams requestParams = FilingHistoryListRequestParams.builder()
                 .companyNumber(COMPANY_NUMBER)
@@ -230,7 +230,7 @@ class FilingHistoryGetResponseProcessorTest {
         Executable executable = () -> processor.processGetCompanyFilingHistoryList(requestParams);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(statusService).processStatus(COMPANY_NUMBER);
         verify(listGetResponseMapper).mapBaseFilingHistoryList(START_INDEX, DEFAULT_ITEMS_PER_PAGE, STATUS);
         verify(filingHistoryService).findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
@@ -78,7 +78,7 @@ public class FilingHistoryService implements Service {
         repository.deleteById(existingDocument.getTransactionId());
         ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-            throwServiceUnavailable();
+            throwBadGateway();
         }
     }
 
@@ -93,12 +93,12 @@ public class FilingHistoryService implements Service {
                 repository.save(originalDocumentCopy);
                 LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
             }
-            throwServiceUnavailable();
+            throwBadGateway();
         }
     }
 
-    private void throwServiceUnavailable() {
-        LOGGER.error("Resource changed endpoint unavailable", DataMapHolder.getLogMap());
-        throw new ServiceUnavailableException("Resource changed endpoint unavailable");
+    private void throwBadGateway() {
+        LOGGER.error("Error calling resource changed endpoint", DataMapHolder.getLogMap());
+        throw new BadGatewayException("Error calling resource changed endpoint");
     }
 }

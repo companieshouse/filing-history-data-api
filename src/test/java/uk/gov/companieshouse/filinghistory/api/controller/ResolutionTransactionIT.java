@@ -1236,7 +1236,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
@@ -1247,7 +1247,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1280,7 +1280,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
@@ -1291,7 +1291,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1531,7 +1531,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, EXISTING_CHILD_ENTITY_ID)
@@ -1542,7 +1542,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1575,7 +1575,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
@@ -1586,7 +1586,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1619,7 +1619,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
@@ -1630,7 +1630,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);

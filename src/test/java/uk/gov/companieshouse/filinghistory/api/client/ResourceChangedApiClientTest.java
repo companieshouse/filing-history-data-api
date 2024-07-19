@@ -82,10 +82,10 @@ class ResourceChangedApiClientTest {
     }
 
     @Test
-    void shouldCallPostChangedResourceAndReturnServiceUnavailableWhenApiErrorResponse503()
+    void shouldCallPostChangedResourceAndReturnBadGatewayWhenApiErrorResponse502()
             throws ApiErrorResponseException {
         // given
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(503, "Service Unavailable",
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(502, "Service Unavailable",
                 new HttpHeaders());
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 
@@ -99,7 +99,7 @@ class ResourceChangedApiClientTest {
         ApiResponse<Void> result = resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         // then
-        assertEquals(503, result.getStatusCode());
+        assertEquals(502, result.getStatusCode());
         verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource("/private/resource-changed", changedResource);

@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
@@ -122,16 +122,16 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void findCompanyFilingHistoryThrowsServiceUnavailableException() {
+    void findCompanyFilingHistoryThrowsBadGatewayException() {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
                 DEFAULT_ITEMS_PER_PAGE, List.of());
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
@@ -167,13 +167,13 @@ class FilingHistoryServiceTest {
     void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(503);
+        when(response.getStatusCode()).thenReturn(502);
 
         // when
         Executable executable = () -> service.updateFilingHistory(document, existingDocument);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
         verify(repository).save(existingDocument);
@@ -183,43 +183,43 @@ class FilingHistoryServiceTest {
     void deleteInsertedFilingHistoryDocumentWhenResourceChangedCallReturnsNon200AndOriginalDocumentCopyIsNull() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(503);
+        when(response.getStatusCode()).thenReturn(502);
         when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.insertFilingHistory(document);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).save(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
         verify(repository).deleteById(TRANSACTION_ID);
     }
 
     @Test
-    void findExistingFilingHistoryDocumentShouldThrowServiceUnavailableExceptionWhenCatchingServiceUnavailableException() {
+    void findExistingFilingHistoryDocumentShouldThrowBadGatewayExceptionWhenCatchingBadGatewayException() {
         // given
-        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test
-    void upsertExistingFilingHistoryDocumentShouldReturnServiceUnavailableResultWhenCatchingServiceUnavailableException() {
+    void upsertExistingFilingHistoryDocumentShouldReturnBadGatewayResultWhenCatchingBadGatewayException() {
         // given
-        doThrow(ServiceUnavailableException.class)
+        doThrow(BadGatewayException.class)
                 .when(repository).save(any());
 
         // when
         Executable executable = () -> service.insertFilingHistory(document);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).save(document);
         verifyNoInteractions(resourceChangedApiClient);
     }
@@ -243,14 +243,14 @@ class FilingHistoryServiceTest {
     void deleteFilingHistoryDeletesDocumentButResourceChangedCallReturnsNon200() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(503);
+        when(response.getStatusCode()).thenReturn(502);
         when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.deleteExistingFilingHistory(existingDocument);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 

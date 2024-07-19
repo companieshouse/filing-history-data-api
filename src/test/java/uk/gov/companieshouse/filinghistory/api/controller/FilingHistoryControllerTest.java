@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryDeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
@@ -102,9 +102,9 @@ class FilingHistoryControllerTest {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenGetCompanyFilingHistoryList() {
+    void shouldReturn502BadGatewayWhenGetCompanyFilingHistoryList() {
         // given
-        when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenThrow(ServiceUnavailableException.class);
+        when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenThrow(BadGatewayException.class);
 
         final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
                 .companyNumber(COMPANY_NUMBER)
@@ -118,7 +118,7 @@ class FilingHistoryControllerTest {
                         DEFAULT_ITEMS_PER_PAGE, null);
 
         // when
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
     }
 
@@ -154,16 +154,16 @@ class FilingHistoryControllerTest {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenGetSingleTransaction() {
+    void shouldReturn502BadGatewayWhenGetSingleTransaction() {
         // given
         when(getResponseProcessor.processGetSingleFilingHistory(any(), any()))
-                .thenThrow(ServiceUnavailableException.class);
+                .thenThrow(BadGatewayException.class);
 
         // then
         Executable executable = () -> controller.getSingleFilingHistory(COMPANY_NUMBER, TRANSACTION_ID);
 
         // when
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(getResponseProcessor).processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
@@ -206,12 +206,12 @@ class FilingHistoryControllerTest {
     }
 
     @Test
-    void shouldReturn503ErrorCodeWhenPutRequestAndServiceUnavailable() {
+    void shouldReturn502ErrorCodeWhenPutRequestAndBadGateway() {
         // given
         when(requestBody.getInternalData()).thenReturn(internalData);
         when(internalData.getEntityId()).thenReturn(ENTITY_ID);
 
-        doThrow(ServiceUnavailableException.class)
+        doThrow(BadGatewayException.class)
                 .when(upsertProcessor).processFilingHistory(anyString(), anyString(), any());
 
         // when
@@ -219,7 +219,7 @@ class FilingHistoryControllerTest {
                 controller.upsertFilingHistoryTransaction(COMPANY_NUMBER, TRANSACTION_ID, requestBody);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, requestBody);
     }
 

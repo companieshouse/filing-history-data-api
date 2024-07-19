@@ -22,7 +22,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AnnotationTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
@@ -144,7 +144,7 @@ class FilingHistoryUpsertProcessorTest {
     }
 
     @Test
-    void shouldThrowServiceUnavailableWhenFindingDocumentInDB() {
+    void shouldThrowBadGatewayWhenFindingDocumentInDB() {
         // given
         when(instantSupplier.get()).thenReturn(INSTANT);
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
@@ -152,13 +152,13 @@ class FilingHistoryUpsertProcessorTest {
         when(request.getInternalData()).thenReturn(internalData);
         when(internalData.getTransactionKind()).thenReturn(TransactionKindEnum.TOP_LEVEL);
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
-        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(ServiceUnavailableException.class);
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> filingHistoryProcessor.processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, request);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verifyNoInteractions(filingHistoryDocumentCopier);

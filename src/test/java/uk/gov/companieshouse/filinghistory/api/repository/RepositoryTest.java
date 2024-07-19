@@ -22,7 +22,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
@@ -84,7 +84,7 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionWhenFindingDocumentByIdAndThrowServiceUnavailableException() {
+    void shouldCatchDataAccessExceptionWhenFindingDocumentByIdAndThrowBadGatewayException() {
         // given
         when(mongoTemplate.findOne(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
@@ -96,12 +96,12 @@ class RepositoryTest {
         Executable executable = () -> repository.findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(mongoTemplate).findOne(query, FilingHistoryDocument.class);
     }
 
     @Test
-    void shouldCatchDataAccessExceptionWhenSavingDocumentAndThrowServiceUnavailableException() {
+    void shouldCatchDataAccessExceptionWhenSavingDocumentAndThrowBadGatewayException() {
         // given
         when(mongoTemplate.save(document)).thenThrow(new DataAccessException("...") {
         });
@@ -110,7 +110,7 @@ class RepositoryTest {
         Executable executable = () -> repository.save(document);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
     }
 
     @Test
@@ -125,7 +125,7 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenDocumentIsNotNull() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenDocumentIsNotNull() {
         // given
         when(mongoTemplate.save(any())).thenThrow(new DataAccessException("...") {
         });
@@ -134,13 +134,13 @@ class RepositoryTest {
         Executable executable = () -> repository.save(new FilingHistoryDocument());
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(mongoTemplate).save(new FilingHistoryDocument());
         verifyNoMoreInteractions(mongoTemplate);
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenDeleteById() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenDeleteById() {
         // given
         when(mongoTemplate.remove(any(), eq(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
@@ -149,7 +149,7 @@ class RepositoryTest {
         Executable executable = () -> repository.deleteById(TRANSACTION_ID);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verifyNoMoreInteractions(mongoTemplate);
     }
 
@@ -169,7 +169,7 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindByEntityId() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindByEntityId() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class)))
                 .thenThrow(new DataAccessException("...") {
@@ -179,12 +179,12 @@ class RepositoryTest {
         Executable executable = () -> repository.findByEntityId(ENTITY_ID);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class));
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowServiceUnavailableWhenFindCompanyFilingHistory() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindCompanyFilingHistory() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class)))
                 .thenThrow(new DataAccessException("...") {
@@ -195,7 +195,7 @@ class RepositoryTest {
                 ITEMS_PER_PAGE, List.of(CATEGORY));
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class));
     }
 }
