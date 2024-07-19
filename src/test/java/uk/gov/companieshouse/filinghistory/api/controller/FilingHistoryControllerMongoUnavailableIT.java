@@ -16,6 +16,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @Testcontainers
@@ -101,12 +103,11 @@ class FilingHistoryControllerMongoUnavailableIT {
     }
 
     @Test
-    void shouldReturn502WhenRepositoryThrowsBadGatewayDuringSave() throws Exception {
+    void shouldReturn502WhenRepositoryThrowsBadGatewayDuringInsert() throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody();
 
-        doThrow(BadGatewayException.class)
-                .when(repository).save(any());
+        doThrow(BadGatewayException.class).when(repository).insert(any());
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)

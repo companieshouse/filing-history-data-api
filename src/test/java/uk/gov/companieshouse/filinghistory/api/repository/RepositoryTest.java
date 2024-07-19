@@ -101,16 +101,28 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionWhenSavingDocumentAndThrowBadGatewayException() {
+    void shouldCallInsertWithFilingHistoryDocument() {
         // given
-        when(mongoTemplate.save(document)).thenThrow(new DataAccessException("...") {
+
+        // when
+        repository.insert(new FilingHistoryDocument());
+
+        // then
+        verify(mongoTemplate).insert(new FilingHistoryDocument());
+    }
+
+    @Test
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenInserting() {
+        // given
+        when(mongoTemplate.insert(any(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
 
         // when
-        Executable executable = () -> repository.save(document);
+        Executable executable = () -> repository.insert(new FilingHistoryDocument());
 
         // then
         assertThrows(BadGatewayException.class, executable);
+        verify(mongoTemplate).insert(new FilingHistoryDocument());
     }
 
     @Test
@@ -118,25 +130,24 @@ class RepositoryTest {
         // given
 
         // when
-        repository.save(new FilingHistoryDocument());
+        repository.update(new FilingHistoryDocument());
 
         // then
         verify(mongoTemplate).save(new FilingHistoryDocument());
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenDocumentIsNotNull() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenUpdating() {
         // given
-        when(mongoTemplate.save(any())).thenThrow(new DataAccessException("...") {
+        when(mongoTemplate.save(any(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
 
         // when
-        Executable executable = () -> repository.save(new FilingHistoryDocument());
+        Executable executable = () -> repository.update(new FilingHistoryDocument());
 
         // then
         assertThrows(BadGatewayException.class, executable);
         verify(mongoTemplate).save(new FilingHistoryDocument());
-        verifyNoMoreInteractions(mongoTemplate);
     }
 
     @Test

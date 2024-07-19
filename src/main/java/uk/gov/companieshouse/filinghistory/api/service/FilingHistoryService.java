@@ -63,13 +63,25 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void insertFilingHistory(final FilingHistoryDocument documentToSave) {
-        handleTransaction(documentToSave, null);
+    public void insertFilingHistory(final FilingHistoryDocument docToInsert) {
+        repository.insert(docToInsert);
+        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(docToInsert, false));
+        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
+            repository.deleteById(docToInsert.getTransactionId());
+            LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
+            throwBadGatewayException();
+        }
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
-        handleTransaction(documentToSave, originalDocumentCopy);
+    public void updateFilingHistory(FilingHistoryDocument docToUpdate, FilingHistoryDocument originalDocumentCopy) {
+        repository.update(docToUpdate);
+        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false));
+        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
+            repository.update(originalDocumentCopy);
+            LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
+            throwBadGatewayException();
+        }
     }
 
     @Transactional
@@ -78,26 +90,11 @@ public class FilingHistoryService implements Service {
         repository.deleteById(existingDocument.getTransactionId());
         ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-            throwBadGateway();
+            throwBadGatewayException();
         }
     }
 
-    private void handleTransaction(FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy) {
-        repository.save(documentToSave);
-        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(documentToSave, false));
-        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            if (originalDocumentCopy == null) {
-                repository.deleteById(documentToSave.getTransactionId());
-                LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
-            } else {
-                repository.save(originalDocumentCopy);
-                LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
-            }
-            throwBadGateway();
-        }
-    }
-
-    private void throwBadGateway() {
+    private void throwBadGatewayException() {
         LOGGER.error("Error calling resource changed endpoint", DataMapHolder.getLogMap());
         throw new BadGatewayException("Error calling resource changed endpoint");
     }

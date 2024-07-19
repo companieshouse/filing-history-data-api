@@ -68,7 +68,7 @@ class FilingHistoryUpsertProcessorTest {
     private FilingHistoryDocument existingDocumentCopy;
 
     @Test
-    void shouldSuccessfullyCallSaveWhenInsert() {
+    void shouldSuccessfullyCallInsert() {
         // given
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
         when(instantSupplier.get()).thenReturn(INSTANT);
@@ -93,7 +93,7 @@ class FilingHistoryUpsertProcessorTest {
     }
 
     @Test
-    void shouldSuccessfullyCallSaveWhenUpdate() {
+    void shouldSuccessfullyCallUpdate() {
         // given
         when(instantSupplier.get()).thenReturn(INSTANT);
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);
@@ -119,7 +119,7 @@ class FilingHistoryUpsertProcessorTest {
     }
 
     @Test
-    void shouldSuccessfullyCallSaveWhenUpdateButStaleDeltaAt() {
+    void shouldThrowConflictExceptionWhenUpdateButStaleDeltaAt() {
         // given
         when(instantSupplier.get()).thenReturn(INSTANT);
         when(validatorFactory.getPutRequestValidator(any())).thenReturn(topLevelPutRequestValidator);

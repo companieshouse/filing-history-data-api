@@ -15,9 +15,9 @@ public interface Service {
 
     Optional<FilingHistoryDeleteAggregate> findFilingHistoryByEntityId(String entityId);
 
-    void insertFilingHistory(final FilingHistoryDocument documentToSave);
+    void insertFilingHistory(final FilingHistoryDocument docToInsert);
 
-    void updateFilingHistory(final FilingHistoryDocument documentToSave, FilingHistoryDocument originalDocumentCopy);
+    void updateFilingHistory(final FilingHistoryDocument docToUpdate, FilingHistoryDocument originalDocumentCopy);
 
     void deleteExistingFilingHistory(FilingHistoryDocument existingDocument);
 }

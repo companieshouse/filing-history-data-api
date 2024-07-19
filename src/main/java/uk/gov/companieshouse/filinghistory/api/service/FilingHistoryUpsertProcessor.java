@@ -56,10 +56,10 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                 .ifPresentOrElse(
                         existingDoc -> {
                             FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
-                            FilingHistoryDocument docToSave =
+                            FilingHistoryDocument docToUpdate =
                                     mapper.mapExistingFilingHistory(request, existingDoc, instant);
 
-                            filingHistoryService.updateFilingHistory(docToSave, existingDocCopy);
+                            filingHistoryService.updateFilingHistory(docToUpdate, existingDocCopy);
                         },
                         () -> {
                             FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request,

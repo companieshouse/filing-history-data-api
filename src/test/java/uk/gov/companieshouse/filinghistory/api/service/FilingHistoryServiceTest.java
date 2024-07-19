@@ -136,7 +136,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+    void insertFilingHistoryInsertsDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -145,12 +145,12 @@ class FilingHistoryServiceTest {
         service.insertFilingHistory(document);
 
         // then
-        verify(repository).save(document);
+        verify(repository).insert(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
     @Test
-    void updateFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+    void updateFilingHistoryUpdatesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -159,12 +159,12 @@ class FilingHistoryServiceTest {
         service.updateFilingHistory(document, existingDocument);
 
         // then
-        verify(repository).save(document);
+        verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
     @Test
-    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() {
+    void updateFilingHistoryUpdatesDocumentButResourceChangedCallReturnsNon200() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(502);
@@ -174,9 +174,9 @@ class FilingHistoryServiceTest {
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(repository).save(document);
+        verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
-        verify(repository).save(existingDocument);
+        verify(repository).update(existingDocument);
     }
 
     @Test
@@ -191,7 +191,7 @@ class FilingHistoryServiceTest {
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(repository).save(document);
+        verify(repository).insert(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
         verify(repository).deleteById(TRANSACTION_ID);
     }
@@ -213,14 +213,14 @@ class FilingHistoryServiceTest {
     void upsertExistingFilingHistoryDocumentShouldReturnBadGatewayResultWhenCatchingBadGatewayException() {
         // given
         doThrow(BadGatewayException.class)
-                .when(repository).save(any());
+                .when(repository).insert(any());
 
         // when
         Executable executable = () -> service.insertFilingHistory(document);
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(repository).save(document);
+        verify(repository).insert(document);
         verifyNoInteractions(resourceChangedApiClient);
     }
 

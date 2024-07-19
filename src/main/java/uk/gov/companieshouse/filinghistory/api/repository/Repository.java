@@ -122,13 +122,23 @@ public class Repository {
         }
     }
 
-    public void save(final FilingHistoryDocument document) {
+    public void insert(final FilingHistoryDocument document) {
+        try {
+            mongoTemplate.insert(document);
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB error when inserting document: %s".formatted(ex.getMessage()),
+                    DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when inserting document", ex);
+        }
+    }
+
+    public void update(final FilingHistoryDocument document) {
         try {
             mongoTemplate.save(document);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when saving the document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when updating document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB unavailable when saving document", ex);
+            throw new BadGatewayException("MongoDB error when updating document", ex);
         }
     }
 

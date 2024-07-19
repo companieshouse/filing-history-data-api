@@ -265,7 +265,7 @@ class RepositoryIT {
         final FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
-        repository.save(document);
+        repository.update(document);
 
         // then
         FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
