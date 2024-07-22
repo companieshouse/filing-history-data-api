@@ -35,3 +35,8 @@ hs_err_pid*
 
 # Maven
 .mvn/
+
+# Vim files
+*.vim
+.*.sw?
+
