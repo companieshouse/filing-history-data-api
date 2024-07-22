@@ -12,7 +12,7 @@
   <name>filing-history-data-api</name>
 
   <artifactId>filing-history-data-api</artifactId>
-  <version>unversioned</version>
+  <version>latest</version>
   <packaging>jar</packaging>
 
   <properties>
