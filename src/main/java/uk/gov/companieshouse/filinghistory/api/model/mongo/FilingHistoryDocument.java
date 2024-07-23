@@ -14,7 +14,7 @@ public class FilingHistoryDocument {
     @JsonProperty("_id")
     private String transactionId;
     @Version
-    private long version;
+    private Long version = 0L;
     @Field("_entity_id")
     @JsonProperty("_entity_id")
     private String entityId;
@@ -169,7 +169,7 @@ public class FilingHistoryDocument {
             return false;
         }
         FilingHistoryDocument that = (FilingHistoryDocument) o;
-        return version == that.version && Objects.equals(transactionId, that.transactionId)
+        return Objects.equals(version, that.version) && Objects.equals(transactionId, that.transactionId)
                 && Objects.equals(entityId, that.entityId) && Objects.equals(companyNumber,
                 that.companyNumber) && Objects.equals(documentId, that.documentId) && Objects.equals(
                 barcode, that.barcode) && Objects.equals(data, that.data) && Objects.equals(

@@ -934,7 +934,7 @@ class AnnotationTransactionIT {
                 .replaceAll("<child_date>", NEW_DATE);
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(2);
+        expectedDocument.version(expectedDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
@@ -1403,7 +1403,9 @@ class AnnotationTransactionIT {
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-        expectedDocument.version(3);
+
+        // Version bump: One for update plus one for original document restore
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
