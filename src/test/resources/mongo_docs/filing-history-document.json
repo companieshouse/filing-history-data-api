@@ -1,5 +1,6 @@
 {
   "_id" : "<id>",
+  "version": 0,
   "company_number" : "<company_number>",
   "data" : {
     "action_date" : ISODate("2014-08-29T00:00:00.000Z"),

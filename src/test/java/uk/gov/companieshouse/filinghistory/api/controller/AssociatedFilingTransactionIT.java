@@ -1130,7 +1130,7 @@ class AssociatedFilingTransactionIT {
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-        expectedDocument.version(3);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))

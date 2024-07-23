@@ -235,6 +235,7 @@ class FilingHistoryControllerIT {
                         new FilingHistoryDeltaTimestamp()
                                 .at(Instant.parse("2014-09-14T18:52:08.001Z"))
                                 .by("5419d856b6a59f32b7684dE4"));
+        expectedDocument.version(1);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -765,6 +766,7 @@ class FilingHistoryControllerIT {
 
         final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
                 FilingHistoryDocument.class);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -785,7 +787,8 @@ class FilingHistoryControllerIT {
         // then
         result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
-        assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actual);
 
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
@@ -913,6 +916,8 @@ class FilingHistoryControllerIT {
                         new FilingHistoryDeltaTimestamp()
                                 .at(Instant.parse("2014-09-14T18:52:08.001Z"))
                                 .by("5419d856b6a59f32b7684dE4"));
+        expectedDocument.version(1);
+
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -1020,7 +1025,7 @@ class FilingHistoryControllerIT {
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-        expectedDocument.version(2);
+        expectedDocument.version(1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);
@@ -1242,7 +1247,6 @@ class FilingHistoryControllerIT {
             FilingHistoryDeltaTimestamp updated, FilingHistoryDeltaTimestamp created) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
-                .version(1)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
                         .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)

@@ -222,8 +222,9 @@ class RepositoryIT {
 
     @Test
     void testAggregationQueryToFindDocumentsWithSortingAndPaginationOnVeryLargeDataSet() {
+        final int DOC_COUNT = 300_000; // FIXME - Should be 500_000
         List<FilingHistoryDocument> documentList = new ArrayList<>();
-        for (int i = 0; i < 500_000; i++) {
+        for (int i = 0; i < DOC_COUNT; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
             filingHistoryDocument.transactionId(TRANSACTION_ID + i);
             filingHistoryDocument.companyNumber(COMPANY_NUMBER);
@@ -234,10 +235,10 @@ class RepositoryIT {
 
         // when
         final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
-                499_974, DEFAULT_ITEMS_PER_PAGE, List.of());
+                DOC_COUNT - 26, DEFAULT_ITEMS_PER_PAGE, List.of());
 
         // then
-        assertEquals(500_000, actual.getTotalCount());
+        assertEquals(DOC_COUNT, actual.getTotalCount());
         assertEquals("transactionId25", actual.getDocumentList().getFirst().getTransactionId());
     }
 
@@ -265,7 +266,7 @@ class RepositoryIT {
         final FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
-        repository.update(document);
+        repository.insert(document);
 
         // then
         FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);

@@ -404,7 +404,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(2);
+        expectedDocument.version(1); // This is a shared doc between insert and update operations
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -654,7 +654,8 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(2);
+        expectedDocument.version(1); // This is a shared doc between insert and update operations
+
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -1146,7 +1147,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(2);
+        expectedDocument.version(existingDocument.getVersion() + 1);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1237,7 +1238,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-        expectedDocument.version(3);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1534,7 +1535,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-        expectedDocument.version(3);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
