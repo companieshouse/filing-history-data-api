@@ -1017,8 +1017,10 @@ class FilingHistoryControllerIT {
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<created_at>", DATE);
-        final FilingHistoryDocument expectedDocument =
+        FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+        assertNotNull(expectedDocument);
+        expectedDocument.version(2);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);
@@ -1240,6 +1242,7 @@ class FilingHistoryControllerIT {
             FilingHistoryDeltaTimestamp updated, FilingHistoryDeltaTimestamp created) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
+                .version(1)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
                         .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)

@@ -1,5 +1,6 @@
 {
   "_id": "<transaction_id>",
+  "version": 2,
   "data": {
     "category": "incorporation",
     "date": "2013-04-05T09:06:02.000Z",

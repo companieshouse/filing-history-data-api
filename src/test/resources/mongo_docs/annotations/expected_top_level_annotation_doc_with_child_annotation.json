@@ -1,5 +1,6 @@
 {
   "_id" : "<transaction_id>",
+  "version": 2,
   "company_number" : "<company_number>",
   "_entity_id" : "<entity_id>",
   "data" : {

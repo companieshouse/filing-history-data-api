@@ -1,5 +1,6 @@
 {
   "_id" : "<transaction_id>",
+  "version": 1,
   "company_number" : "<company_number>",
   "_entity_id" : "<entity_id>",
   "_barcode" : "barcode",

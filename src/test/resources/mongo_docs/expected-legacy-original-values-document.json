@@ -1,5 +1,6 @@
 {
   "_id" : "<transaction_id>",
+  "version": 2,
   "company_number" : "<company_number>",
   "original_values" : {
     "charge_creation_date" : "29/09/2014"

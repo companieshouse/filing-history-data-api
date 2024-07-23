@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.model.mongo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -12,6 +13,8 @@ public class FilingHistoryDocument {
     @Id
     @JsonProperty("_id")
     private String transactionId;
+    @Version
+    private long version;
     @Field("_entity_id")
     @JsonProperty("_entity_id")
     private String entityId;
@@ -46,6 +49,15 @@ public class FilingHistoryDocument {
 
     public FilingHistoryDocument transactionId(String transactionId) {
         this.transactionId = transactionId;
+        return this;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public FilingHistoryDocument version(long version) {
+        this.version = version;
         return this;
     }
 
@@ -157,18 +169,20 @@ public class FilingHistoryDocument {
             return false;
         }
         FilingHistoryDocument that = (FilingHistoryDocument) o;
-        return Objects.equals(transactionId, that.transactionId) && Objects.equals(entityId,
-                that.entityId) && Objects.equals(companyNumber, that.companyNumber) && Objects.equals(
-                documentId, that.documentId) && Objects.equals(barcode, that.barcode) && Objects.equals(
-                data, that.data) && Objects.equals(originalDescription, that.originalDescription)
-                && Objects.equals(originalValues, that.originalValues) && Objects.equals(deltaAt,
-                that.deltaAt) && Objects.equals(updated, that.updated) && Objects.equals(created,
-                that.created) && Objects.equals(matchedDefault, that.matchedDefault);
+        return version == that.version && Objects.equals(transactionId, that.transactionId)
+                && Objects.equals(entityId, that.entityId) && Objects.equals(companyNumber,
+                that.companyNumber) && Objects.equals(documentId, that.documentId) && Objects.equals(
+                barcode, that.barcode) && Objects.equals(data, that.data) && Objects.equals(
+                originalDescription, that.originalDescription) && Objects.equals(originalValues,
+                that.originalValues) && Objects.equals(deltaAt, that.deltaAt) && Objects.equals(updated,
+                that.updated) && Objects.equals(created, that.created) && Objects.equals(matchedDefault,
+                that.matchedDefault);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(transactionId, entityId, companyNumber, documentId, barcode, data, originalDescription,
+        return Objects.hash(transactionId, version, entityId, companyNumber, documentId, barcode, data,
+                originalDescription,
                 originalValues, deltaAt, updated, created, matchedDefault);
     }
 
@@ -176,6 +190,7 @@ public class FilingHistoryDocument {
     public String toString() {
         return "FilingHistoryDocument{" +
                 "transactionId='" + transactionId + '\'' +
+                ", version=" + version +
                 ", entityId='" + entityId + '\'' +
                 ", companyNumber='" + companyNumber + '\'' +
                 ", documentId='" + documentId + '\'' +

@@ -32,7 +32,6 @@ public class FilingHistoryService implements Service {
         this.repository = repository;
     }
 
-
     @Override
     public Optional<FilingHistoryListAggregate> findCompanyFilingHistoryList(String companyNumber,
             int startIndex,
@@ -78,6 +77,7 @@ public class FilingHistoryService implements Service {
         repository.update(docToUpdate);
         ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
+            originalDocumentCopy.version(originalDocumentCopy.getVersion() + 1);
             repository.update(originalDocumentCopy);
             LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
             throwBadGatewayException();
