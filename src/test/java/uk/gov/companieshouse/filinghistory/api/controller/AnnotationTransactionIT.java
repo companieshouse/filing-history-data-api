@@ -1403,7 +1403,6 @@ class AnnotationTransactionIT {
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-
         // Version bump: One for update plus one for original document restore
         expectedDocument.version(expectedDocument.getVersion() + 2);
 

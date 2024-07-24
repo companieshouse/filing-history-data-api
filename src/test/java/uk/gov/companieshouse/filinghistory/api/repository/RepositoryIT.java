@@ -222,7 +222,7 @@ class RepositoryIT {
 
     @Test
     void testAggregationQueryToFindDocumentsWithSortingAndPaginationOnVeryLargeDataSet() {
-        final int DOC_COUNT = 300_000; // FIXME - Should be 500_000
+        final int DOC_COUNT = 300_000; // Reduced to 300_000 as versioning increased memory usage
         List<FilingHistoryDocument> documentList = new ArrayList<>();
         for (int i = 0; i < DOC_COUNT; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
@@ -261,9 +261,9 @@ class RepositoryIT {
     }
 
     @Test
-    void shouldSuccessfullyInsertDocumentById() {
+    void shouldSuccessfullyInsertDocument() {
         // given
-        final FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
+        FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
 
         // when
         repository.insert(document);
@@ -271,6 +271,23 @@ class RepositoryIT {
         // then
         FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(document, actual);
+    }
+
+    @Test
+    void shouldSuccessfullyUpdateDocumentAndIncrementVersion() {
+        // given
+        FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
+        mongoTemplate.insert(document);
+
+        FilingHistoryDocument expected = getFilingHistoryDocument(TRANSACTION_ID)
+                .version(1);
+
+        // when
+        repository.update(document);
+
+        // then
+        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -433,12 +450,14 @@ class RepositoryIT {
                                 .terminationDate(Instant.parse("2014-08-29T00:00:00.000Z"))
                                 .officerName("John Tester"))
                         .annotations(List.of(new FilingHistoryAnnotation()
-                                .annotation("Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
                                 .category("annotation")
                                 .date(Instant.parse("2011-11-26T11:27:55.000Z"))
                                 .description("annotation")
                                 .descriptionValues(new FilingHistoryDescriptionValues()
-                                        .description("Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
                                 .type("ANNOTATION")
                                 .entityId("2234567890")
                                 .deltaAt("20140815230459600643")))

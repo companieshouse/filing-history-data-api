@@ -404,7 +404,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(1); // This is a shared doc between insert and update operations
+        expectedDocument.version(existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -654,8 +654,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(1); // This is a shared doc between insert and update operations
-
+        expectedDocument.version(existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);

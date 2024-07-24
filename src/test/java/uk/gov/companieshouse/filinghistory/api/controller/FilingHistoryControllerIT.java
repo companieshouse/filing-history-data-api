@@ -764,8 +764,8 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
-                FilingHistoryDocument.class);
+        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(expectedDocument);
         expectedDocument.version(expectedDocument.getVersion() + 2);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
@@ -1025,7 +1025,7 @@ class FilingHistoryControllerIT {
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
-        expectedDocument.version(1);
+        expectedDocument.version(expectedDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);

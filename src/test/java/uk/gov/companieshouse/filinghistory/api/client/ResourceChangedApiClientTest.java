@@ -85,7 +85,7 @@ class ResourceChangedApiClientTest {
     void shouldCallPostChangedResourceAndReturnBadGatewayWhenApiErrorResponse502()
             throws ApiErrorResponseException {
         // given
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(502, "Service Unavailable",
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(502, "Bad Gateway",
                 new HttpHeaders());
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 

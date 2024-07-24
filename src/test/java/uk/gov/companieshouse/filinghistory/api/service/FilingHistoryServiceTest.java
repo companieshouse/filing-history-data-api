@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -284,13 +283,18 @@ class FilingHistoryServiceTest {
         return Stream.of(
                 Arguments.of(null, List.of()),
                 Arguments.of(List.of(), List.of()),
-                Arguments.of(Stream.of("confirmation-statement").collect(Collectors.toList()),
+                Arguments.of(
+                        Stream.of("confirmation-statement").toList(),
                         List.of("confirmation-statement", "annual-return")),
-                Arguments.of(Stream.of("incorporation").collect(Collectors.toList()),
+                Arguments.of(
+                        Stream.of("incorporation").toList(),
                         List.of("incorporation", "change-of-constitution", "change-of-name", "court-order",
                                 "gazette", "reregistration", "resolution", "restoration")),
-                Arguments.of(Stream.of("gibberish").collect(Collectors.toList()), List.of("gibberish")),
-                Arguments.of(Stream.of("confirmation-statement", "incorporation").collect(Collectors.toList()),
+                Arguments.of(
+                        Stream.of("gibberish").toList(),
+                        List.of("gibberish")),
+                Arguments.of(
+                        Stream.of("confirmation-statement", "incorporation").toList(),
                         List.of("confirmation-statement", "incorporation", "annual-return", "change-of-constitution",
                                 "change-of-name", "court-order", "gazette", "reregistration", "resolution",
                                 "restoration"))

@@ -169,14 +169,14 @@ public class FilingHistoryDocument {
             return false;
         }
         FilingHistoryDocument that = (FilingHistoryDocument) o;
-        return Objects.equals(version, that.version) && Objects.equals(transactionId, that.transactionId)
-                && Objects.equals(entityId, that.entityId) && Objects.equals(companyNumber,
-                that.companyNumber) && Objects.equals(documentId, that.documentId) && Objects.equals(
-                barcode, that.barcode) && Objects.equals(data, that.data) && Objects.equals(
-                originalDescription, that.originalDescription) && Objects.equals(originalValues,
-                that.originalValues) && Objects.equals(deltaAt, that.deltaAt) && Objects.equals(updated,
-                that.updated) && Objects.equals(created, that.created) && Objects.equals(matchedDefault,
-                that.matchedDefault);
+        return Objects.equals(transactionId, that.transactionId) && Objects.equals(version,
+                that.version) && Objects.equals(entityId, that.entityId) && Objects.equals(
+                companyNumber, that.companyNumber) && Objects.equals(documentId, that.documentId)
+                && Objects.equals(barcode, that.barcode) && Objects.equals(data, that.data)
+                && Objects.equals(originalDescription, that.originalDescription) && Objects.equals(
+                originalValues, that.originalValues) && Objects.equals(deltaAt, that.deltaAt)
+                && Objects.equals(updated, that.updated) && Objects.equals(created, that.created)
+                && Objects.equals(matchedDefault, that.matchedDefault);
     }
 
     @Override
