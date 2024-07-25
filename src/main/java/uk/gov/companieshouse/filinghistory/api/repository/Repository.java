@@ -21,7 +21,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -61,9 +61,9 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
                     .getUniqueMappedResult();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when finding filing history list: %s".formatted(
+            LOGGER.error("MongoDB error when finding filing history list: %s".formatted(
                     ex.getMessage()), DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when finding filing history list");
+            throw new BadGatewayException("MongoDB error when finding filing history list", ex);
         }
     }
 
@@ -76,9 +76,9 @@ public class Repository {
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when finding the document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when finding the document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when finding document");
+            throw new BadGatewayException("MongoDB error when finding document", ex);
         }
     }
 
@@ -115,20 +115,30 @@ public class Repository {
                     mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
                             FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when trying to retrieve filing history delete document: %s".formatted(
+            LOGGER.error("MongoDB error when trying to retrieve filing history delete document: %s".formatted(
                     ex.getMessage()), DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException(
-                    "MongoDB unavailable when trying to retrieve filing history delete document");
+            throw new BadGatewayException(
+                    "MongoDB error when trying to retrieve filing history delete document", ex);
         }
     }
 
-    public void save(final FilingHistoryDocument document) {
+    public void insert(final FilingHistoryDocument document) {
+        try {
+            mongoTemplate.insert(document);
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB error when inserting document: %s".formatted(ex.getMessage()),
+                    DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when inserting document", ex);
+        }
+    }
+
+    public void update(final FilingHistoryDocument document) {
         try {
             mongoTemplate.save(document);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when saving the document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when updating document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when saving document");
+            throw new BadGatewayException("MongoDB error when updating document", ex);
         }
     }
 
@@ -136,9 +146,9 @@ public class Repository {
         try {
             mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB unavailable when deleting document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when deleting document: %s".formatted(ex.getMessage()),
                     DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("MongoDB unavailable when deleting document");
+            throw new BadGatewayException("MongoDB error when deleting document", ex);
         }
     }
 }

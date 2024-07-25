@@ -235,6 +235,7 @@ class FilingHistoryControllerIT {
                         new FilingHistoryDeltaTimestamp()
                                 .at(Instant.parse("2014-09-14T18:52:08.001Z"))
                                 .by("5419d856b6a59f32b7684dE4"));
+        expectedDocument.version(1);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -724,7 +725,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseAndNoDocumentShouldBeInDB()
+    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseAndNoDocumentShouldBeInDB()
             throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
@@ -732,7 +733,7 @@ class FilingHistoryControllerIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -744,7 +745,7 @@ class FilingHistoryControllerIT {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
@@ -754,7 +755,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503ServiceUnavailableWhenChsKafkaApiReturnsA503ResponseOnUpsertAndDocumentShouldBeRolledBackToPreviousState()
+    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseOnUpsertAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
@@ -763,15 +764,16 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
-        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
-                FilingHistoryDocument.class);
+        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(expectedDocument);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -783,9 +785,10 @@ class FilingHistoryControllerIT {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
-        assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actual);
 
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
@@ -828,7 +831,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn503GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
+    void shouldReturn502GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
             throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
@@ -845,7 +848,7 @@ class FilingHistoryControllerIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
@@ -856,7 +859,7 @@ class FilingHistoryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
 
@@ -913,6 +916,8 @@ class FilingHistoryControllerIT {
                         new FilingHistoryDeltaTimestamp()
                                 .at(Instant.parse("2014-09-14T18:52:08.001Z"))
                                 .by("5419d856b6a59f32b7684dE4"));
+        expectedDocument.version(1);
+
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -1017,8 +1022,10 @@ class FilingHistoryControllerIT {
                 .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<created_at>", DATE);
-        final FilingHistoryDocument expectedDocument =
+        FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+        assertNotNull(expectedDocument);
+        expectedDocument.version(expectedDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);

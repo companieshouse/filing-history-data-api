@@ -39,7 +39,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
 @Testcontainers
@@ -101,12 +101,11 @@ class FilingHistoryControllerMongoUnavailableIT {
     }
 
     @Test
-    void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringSave() throws Exception {
+    void shouldReturn502WhenRepositoryThrowsBadGatewayDuringInsert() throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody();
 
-        doThrow(ServiceUnavailableException.class)
-                .when(repository).save(any());
+        doThrow(BadGatewayException.class).when(repository).insert(any());
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -118,18 +117,18 @@ class FilingHistoryControllerMongoUnavailableIT {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         verify(instantSupplier).get();
         WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 
     @Test
-    void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringFind() throws Exception {
+    void shouldReturn502WhenRepositoryThrowsBadGatewayDuringFind() throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody();
 
-        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(BadGatewayException.class);
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -141,16 +140,16 @@ class FilingHistoryControllerMongoUnavailableIT {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         verify(instantSupplier).get();
         WireMock.verify(exactly(0), postRequestedFor(urlEqualTo(RESOURCE_CHANGED_URI)));
     }
 
     @Test
-    void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringGetSingleFilingHistory() throws Exception {
+    void shouldReturn502WhenRepositoryThrowsBadGatewayDuringGetSingleFilingHistory() throws Exception {
         // given
-        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(BadGatewayException.class);
 
         // when
         ResultActions result = mockMvc.perform(get(GET_SINGLE_TRANSACTION_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -159,13 +158,13 @@ class FilingHistoryControllerMongoUnavailableIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
     }
 
     @Test
-    void shouldReturn503WhenRepositoryThrowsServiceUnavailableDuringFindFilingHistory() throws Exception {
+    void shouldReturn502WhenRepositoryThrowsBadGatewayDuringFindFilingHistory() throws Exception {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
 
         // when
         ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER,
@@ -175,7 +174,7 @@ class FilingHistoryControllerMongoUnavailableIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody() {

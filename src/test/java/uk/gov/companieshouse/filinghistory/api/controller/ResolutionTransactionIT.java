@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -401,8 +402,9 @@ class ResolutionTransactionIT {
                 .replaceAll("<created_at>", CREATED_AT.toString())
                 .replaceAll("<created_by>", EXISTING_CONTEXT_ID);
 
-        final FilingHistoryDocument expectedDocument =
+        FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+        expectedDocument.version(existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -650,8 +652,9 @@ class ResolutionTransactionIT {
                 .replaceAll("<created_at>", UPDATED_AT.toString())
                 .replaceAll("<created_by>", EXISTING_CONTEXT_ID);
 
-        final FilingHistoryDocument expectedDocument =
+        FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+        expectedDocument.version(existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -1141,8 +1144,9 @@ class ResolutionTransactionIT {
                 .replaceAll("<created_at>", EXISTING_DATE)
                 .replaceAll("<created_by>", EXISTING_CONTEXT_ID);
 
-        final FilingHistoryDocument expectedDocument =
+        FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
+        expectedDocument.version(existingDocument.getVersion() + 1);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1232,11 +1236,13 @@ class ResolutionTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(expectedDocument);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
@@ -1247,7 +1253,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1280,7 +1286,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
@@ -1291,7 +1297,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1527,11 +1533,13 @@ class ResolutionTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(expectedDocument);
+        expectedDocument.version(expectedDocument.getVersion() + 2);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, EXISTING_CHILD_ENTITY_ID)
@@ -1542,7 +1550,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1575,7 +1583,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
@@ -1586,7 +1594,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);
@@ -1619,7 +1627,7 @@ class ResolutionTransactionIT {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(503)));
+                        .withStatus(502)));
 
         // when
         ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
@@ -1630,7 +1638,7 @@ class ResolutionTransactionIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
+        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expectedDocument, actualDocument);

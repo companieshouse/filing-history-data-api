@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
-import uk.gov.companieshouse.filinghistory.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
@@ -122,21 +121,21 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void findCompanyFilingHistoryThrowsServiceUnavailableException() {
+    void findCompanyFilingHistoryThrowsBadGatewayException() {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
                 DEFAULT_ITEMS_PER_PAGE, List.of());
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
     @Test
-    void insertFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+    void insertFilingHistoryInsertsDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -145,12 +144,12 @@ class FilingHistoryServiceTest {
         service.insertFilingHistory(document);
 
         // then
-        verify(repository).save(document);
+        verify(repository).insert(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
     @Test
-    void updateFilingHistorySavesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+    void updateFilingHistoryUpdatesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
         when(response.getStatusCode()).thenReturn(200);
@@ -159,68 +158,68 @@ class FilingHistoryServiceTest {
         service.updateFilingHistory(document, existingDocument);
 
         // then
-        verify(repository).save(document);
+        verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
     @Test
-    void updateFilingHistorySavesDocumentButResourceChangedCallReturnsNon200() {
+    void updateFilingHistoryUpdatesDocumentButResourceChangedCallReturnsNon200() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(503);
+        when(response.getStatusCode()).thenReturn(502);
 
         // when
         Executable executable = () -> service.updateFilingHistory(document, existingDocument);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
-        verify(repository).save(document);
+        assertThrows(BadGatewayException.class, executable);
+        verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
-        verify(repository).save(existingDocument);
+        verify(repository).update(existingDocument);
     }
 
     @Test
     void deleteInsertedFilingHistoryDocumentWhenResourceChangedCallReturnsNon200AndOriginalDocumentCopyIsNull() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(503);
+        when(response.getStatusCode()).thenReturn(502);
         when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.insertFilingHistory(document);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
-        verify(repository).save(document);
+        assertThrows(BadGatewayException.class, executable);
+        verify(repository).insert(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
         verify(repository).deleteById(TRANSACTION_ID);
     }
 
     @Test
-    void findExistingFilingHistoryDocumentShouldThrowServiceUnavailableExceptionWhenCatchingServiceUnavailableException() {
+    void findExistingFilingHistoryDocumentShouldThrowBadGatewayExceptionWhenCatchingBadGatewayException() {
         // given
-        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(ServiceUnavailableException.class);
+        when(repository.findByIdAndCompanyNumber(any(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(repository).findByIdAndCompanyNumber(TRANSACTION_ID, COMPANY_NUMBER);
     }
 
     @Test
-    void upsertExistingFilingHistoryDocumentShouldReturnServiceUnavailableResultWhenCatchingServiceUnavailableException() {
+    void upsertExistingFilingHistoryDocumentShouldReturnBadGatewayResultWhenCatchingBadGatewayException() {
         // given
-        doThrow(ServiceUnavailableException.class)
-                .when(repository).save(any());
+        doThrow(BadGatewayException.class)
+                .when(repository).insert(any());
 
         // when
         Executable executable = () -> service.insertFilingHistory(document);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
-        verify(repository).save(document);
+        assertThrows(BadGatewayException.class, executable);
+        verify(repository).insert(document);
         verifyNoInteractions(resourceChangedApiClient);
     }
 
@@ -243,14 +242,14 @@ class FilingHistoryServiceTest {
     void deleteFilingHistoryDeletesDocumentButResourceChangedCallReturnsNon200() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(503);
+        when(response.getStatusCode()).thenReturn(502);
         when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         Executable executable = () -> service.deleteExistingFilingHistory(existingDocument);
 
         // then
-        assertThrows(ServiceUnavailableException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
@@ -284,13 +283,18 @@ class FilingHistoryServiceTest {
         return Stream.of(
                 Arguments.of(null, List.of()),
                 Arguments.of(List.of(), List.of()),
-                Arguments.of(Stream.of("confirmation-statement").collect(Collectors.toList()),
+                Arguments.of(
+                        Stream.of("confirmation-statement").toList(),
                         List.of("confirmation-statement", "annual-return")),
-                Arguments.of(Stream.of("incorporation").collect(Collectors.toList()),
+                Arguments.of(
+                        Stream.of("incorporation").toList(),
                         List.of("incorporation", "change-of-constitution", "change-of-name", "court-order",
                                 "gazette", "reregistration", "resolution", "restoration")),
-                Arguments.of(Stream.of("gibberish").collect(Collectors.toList()), List.of("gibberish")),
-                Arguments.of(Stream.of("confirmation-statement", "incorporation").collect(Collectors.toList()),
+                Arguments.of(
+                        Stream.of("gibberish").toList(),
+                        List.of("gibberish")),
+                Arguments.of(
+                        Stream.of("confirmation-statement", "incorporation").toList(),
                         List.of("confirmation-statement", "incorporation", "annual-return", "change-of-constitution",
                                 "change-of-name", "court-order", "gazette", "reregistration", "resolution",
                                 "restoration"))

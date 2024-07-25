@@ -146,12 +146,12 @@ class TopLevelTransactionMapperTest {
     void shouldUpdateExistingDocumentWhenExistingDocumentHasAssociatedFilings() {
         // given
         List<AssociatedFiling> requestAssociatedFilingList = List.of(new AssociatedFiling());
-        FilingHistoryData expectedFilingHistoryData = new FilingHistoryData()
+        FilingHistoryData expectedData = new FilingHistoryData()
                 .associatedFilings(List.of(new FilingHistoryAssociatedFiling()));
 
         final InternalFilingHistoryApi request = buildPutRequestBody();
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
-                expectedFilingHistoryData,
+                expectedData,
                 expectedFilingHistoryOriginalValues,
                 EXPECTED_DELTA_AT);
 
@@ -160,7 +160,7 @@ class TopLevelTransactionMapperTest {
                 existingFilingHistoryOriginalValues,
                 EXISTING_DOCUMENT_DELTA_AT);
 
-        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(dataMapper.map(any(), any())).thenReturn(expectedData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
         when(requestExternalData.getAssociatedFilings()).thenReturn(requestAssociatedFilingList);
@@ -172,7 +172,7 @@ class TopLevelTransactionMapperTest {
         // then
         assertEquals(expectedDocument, actualDocument);
         verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
-        verify(childListMapper).mapChildList(eq(request), eq(expectedFilingHistoryData.getAssociatedFilings()), any());
+        verify(childListMapper).mapChildList(eq(request), eq(expectedData.getAssociatedFilings()), any());
         verify(originalValuesMapper).map(requestOriginalValues);
     }
 
@@ -180,12 +180,12 @@ class TopLevelTransactionMapperTest {
     void shouldUpdateExistingDocumentWhenExistingDocumentHasEmptyAssociatedFilings() {
         // given
         List<AssociatedFiling> requestAssociatedFilingList = Collections.emptyList();
-        FilingHistoryData expectedFilingHistoryData = new FilingHistoryData()
+        FilingHistoryData expectedData = new FilingHistoryData()
                 .associatedFilings(List.of(new FilingHistoryAssociatedFiling()));
 
         final InternalFilingHistoryApi request = buildPutRequestBody();
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
-                expectedFilingHistoryData,
+                expectedData,
                 expectedFilingHistoryOriginalValues,
                 EXPECTED_DELTA_AT);
 
@@ -194,7 +194,7 @@ class TopLevelTransactionMapperTest {
                 existingFilingHistoryOriginalValues,
                 EXISTING_DOCUMENT_DELTA_AT);
 
-        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(dataMapper.map(any(), any())).thenReturn(expectedData);
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
         when(requestExternalData.getAssociatedFilings()).thenReturn(requestAssociatedFilingList);
