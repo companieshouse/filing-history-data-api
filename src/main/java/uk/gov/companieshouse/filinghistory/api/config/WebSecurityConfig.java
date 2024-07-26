@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.filinghistory.api.config;
 
-import java.util.Arrays;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +24,8 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .cors(AbstractHttpConfigurer::disable)
-            .addFilterBefore(new CustomCorsFilter(externalMethods()), CsrfFilter.class);
+                .cors(AbstractHttpConfigurer::disable)
+                .addFilterBefore(new CustomCorsFilter(externalMethods()), CsrfFilter.class);
         return http.build();
     }
 
@@ -40,6 +39,6 @@ public class WebSecurityConfig {
 
     @Bean
     public List<String> externalMethods() {
-        return Arrays.asList(HttpMethod.GET.name());
+        return List.of(HttpMethod.GET.name());
     }
 }

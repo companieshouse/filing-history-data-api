@@ -1,27 +1,24 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
-class FilingHistoryControllerCORSTest {
+class FilingHistoryControllerCORSIT {
 
     private static final String GET_FILING_HISTORY = "/company/00006400/filing-history";
     private static final String PUT_FILING_HISTORY = "/company/00006400/filing-history/1/internal";
@@ -48,11 +45,11 @@ class FilingHistoryControllerCORSTest {
                         .options(GET_FILING_HISTORY)
                         .header("Origin", "")
                         .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent())
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_MAX_AGE));
+                .andExpect(status().isNoContent())
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_MAX_AGE));
     }
 
     @Test
@@ -70,9 +67,9 @@ class FilingHistoryControllerCORSTest {
                         .header("ERIC-Authorised-Key-Privileges", ERIC_AUTH)
                         .header("items_per_page", 5)
                         .header("start_index", 2))
-            .andExpect(status().isOk())
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
-            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")));
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")));
     }
 
     @Test
@@ -90,9 +87,9 @@ class FilingHistoryControllerCORSTest {
                         .header("ERIC-Authorised-Key-Privileges", ERIC_AUTH)
                         .header("items_per_page", 5)
                         .header("start_index", 2))
-            .andExpect(status().isForbidden())
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
-            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")));
+                .andExpect(status().isForbidden())
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")));
     }
 
     @Test
@@ -110,9 +107,8 @@ class FilingHistoryControllerCORSTest {
                         .header("ERIC-Authorised-Key-Privileges", ERIC_AUTH)
                         .header("items_per_page", 5)
                         .header("start_index", 2))
-            .andExpect(status().isForbidden())
-            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
-            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")));
+                .andExpect(status().isForbidden())
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")));
     }
-
 }

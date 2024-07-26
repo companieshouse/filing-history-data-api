@@ -16,22 +16,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class MongoDbConfig implements InitializingBean {
 
-    @Bean
-    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
-        return new MongoTransactionManager(dbFactory);
-    }
-
-    @Bean
-    MongoTemplate mongoTemplate(MongoDatabaseFactory factory) {
-        MongoTemplate mongoTemplate = new MongoTemplate(factory);
-        mongoTemplate.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-        return mongoTemplate;
-    }
-
-    @Lazy
     private final MappingMongoConverter mappingMongoConverter;
 
-    public MongoDbConfig(MappingMongoConverter mappingMongoConverter) {
+    public MongoDbConfig(@Lazy MappingMongoConverter mappingMongoConverter) {
         this.mappingMongoConverter = mappingMongoConverter;
     }
 
@@ -39,5 +26,17 @@ public class MongoDbConfig implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         mappingMongoConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
+    }
+
+    @Bean
+    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
+        return new MongoTransactionManager(dbFactory);
+    }
+
+    @Bean
+    MongoTemplate mongoTemplate(MongoDatabaseFactory factory) {
+        MongoTemplate mongoTemplate = new MongoTemplate(factory, mappingMongoConverter);
+        mongoTemplate.setWriteConcern(WriteConcern.ACKNOWLEDGED);
+        return mongoTemplate;
     }
 }
