@@ -26,6 +26,7 @@ import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
 class RepositoryTest {
@@ -42,8 +43,6 @@ class RepositoryTest {
     @Mock
     private MongoTemplate mongoTemplate;
 
-    @Mock
-    private FilingHistoryDocument document;
     @Mock
     private AggregationResults<FilingHistoryListAggregate> aggregationResults;
     @Mock
@@ -128,12 +127,25 @@ class RepositoryTest {
     @Test
     void shouldCallSaveWithFilingHistoryDocument() {
         // given
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .version(0);
+
+        // when
+        repository.update(document);
+
+        // then
+        verify(mongoTemplate).save(document);
+    }
+
+    @Test
+    void shouldCallSaveWithUnversionedFilingHistoryDocumentWhenNullVersion() {
+        // given
 
         // when
         repository.update(new FilingHistoryDocument());
 
         // then
-        verify(mongoTemplate).save(new FilingHistoryDocument());
+        verify(mongoTemplate).save(new UnversionedFilingHistoryDocument());
     }
 
     @Test
@@ -142,12 +154,15 @@ class RepositoryTest {
         when(mongoTemplate.save(any(FilingHistoryDocument.class))).thenThrow(new DataAccessException("...") {
         });
 
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .version(0);
+
         // when
-        Executable executable = () -> repository.update(new FilingHistoryDocument());
+        Executable executable = () -> repository.update(document);
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(mongoTemplate).save(new FilingHistoryDocument());
+        verify(mongoTemplate).save(document);
     }
 
     @Test

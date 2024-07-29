@@ -3,18 +3,16 @@ package uk.gov.companieshouse.filinghistory.api.model.mongo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "company_filing_history")
-public class FilingHistoryDocument {
+public class UnversionedFilingHistoryDocument {
 
     @Id
     @JsonProperty("_id")
     private String transactionId;
-    @Version
-    private Long version;
+    private Long version = 0L;
     @Field("_entity_id")
     @JsonProperty("_entity_id")
     private String entityId;
@@ -43,11 +41,30 @@ public class FilingHistoryDocument {
     @JsonProperty("matched_default")
     private Integer matchedDefault;
 
+    public UnversionedFilingHistoryDocument() {
+    }
+
+    public UnversionedFilingHistoryDocument(FilingHistoryDocument copy) {
+        this.transactionId = copy.getTransactionId();
+        this.version = 0L;
+        this.entityId = copy.getEntityId();
+        this.companyNumber = copy.getCompanyNumber();
+        this.documentId = copy.getDocumentId();
+        this.barcode = copy.getBarcode();
+        this.data = copy.getData();
+        this.originalDescription = copy.getOriginalDescription();
+        this.originalValues = copy.getOriginalValues();
+        this.deltaAt = copy.getDeltaAt();
+        this.updated = copy.getUpdated();
+        this.created = copy.getCreated();
+        this.matchedDefault = copy.getMatchedDefault();
+    }
+
     public String getTransactionId() {
         return transactionId;
     }
 
-    public FilingHistoryDocument transactionId(String transactionId) {
+    public UnversionedFilingHistoryDocument transactionId(String transactionId) {
         this.transactionId = transactionId;
         return this;
     }
@@ -56,7 +73,7 @@ public class FilingHistoryDocument {
         return version;
     }
 
-    public FilingHistoryDocument version(long version) {
+    public UnversionedFilingHistoryDocument version(long version) {
         this.version = version;
         return this;
     }
@@ -65,7 +82,7 @@ public class FilingHistoryDocument {
         return entityId;
     }
 
-    public FilingHistoryDocument entityId(String entityId) {
+    public UnversionedFilingHistoryDocument entityId(String entityId) {
         this.entityId = entityId;
         return this;
     }
@@ -74,7 +91,7 @@ public class FilingHistoryDocument {
         return companyNumber;
     }
 
-    public FilingHistoryDocument companyNumber(String companyNumber) {
+    public UnversionedFilingHistoryDocument companyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
         return this;
     }
@@ -83,7 +100,7 @@ public class FilingHistoryDocument {
         return documentId;
     }
 
-    public FilingHistoryDocument documentId(String documentId) {
+    public UnversionedFilingHistoryDocument documentId(String documentId) {
         this.documentId = documentId;
         return this;
     }
@@ -92,7 +109,7 @@ public class FilingHistoryDocument {
         return barcode;
     }
 
-    public FilingHistoryDocument barcode(String barcode) {
+    public UnversionedFilingHistoryDocument barcode(String barcode) {
         this.barcode = barcode;
         return this;
     }
@@ -101,7 +118,7 @@ public class FilingHistoryDocument {
         return data;
     }
 
-    public FilingHistoryDocument data(FilingHistoryData data) {
+    public UnversionedFilingHistoryDocument data(FilingHistoryData data) {
         this.data = data;
         return this;
     }
@@ -110,7 +127,7 @@ public class FilingHistoryDocument {
         return originalDescription;
     }
 
-    public FilingHistoryDocument originalDescription(String originalDescription) {
+    public UnversionedFilingHistoryDocument originalDescription(String originalDescription) {
         this.originalDescription = originalDescription;
         return this;
     }
@@ -119,7 +136,7 @@ public class FilingHistoryDocument {
         return originalValues;
     }
 
-    public FilingHistoryDocument originalValues(FilingHistoryOriginalValues filingHistoryOriginalValues) {
+    public UnversionedFilingHistoryDocument originalValues(FilingHistoryOriginalValues filingHistoryOriginalValues) {
         this.originalValues = filingHistoryOriginalValues;
         return this;
     }
@@ -128,7 +145,7 @@ public class FilingHistoryDocument {
         return deltaAt;
     }
 
-    public FilingHistoryDocument deltaAt(String deltaAt) {
+    public UnversionedFilingHistoryDocument deltaAt(String deltaAt) {
         this.deltaAt = deltaAt;
         return this;
     }
@@ -137,7 +154,7 @@ public class FilingHistoryDocument {
         return updated;
     }
 
-    public FilingHistoryDocument updated(FilingHistoryDeltaTimestamp updated) {
+    public UnversionedFilingHistoryDocument updated(FilingHistoryDeltaTimestamp updated) {
         this.updated = updated;
         return this;
     }
@@ -146,7 +163,7 @@ public class FilingHistoryDocument {
         return created;
     }
 
-    public FilingHistoryDocument created(FilingHistoryDeltaTimestamp created) {
+    public UnversionedFilingHistoryDocument created(FilingHistoryDeltaTimestamp created) {
         this.created = created;
         return this;
     }
@@ -155,7 +172,7 @@ public class FilingHistoryDocument {
         return matchedDefault;
     }
 
-    public FilingHistoryDocument matchedDefault(Integer matchedDefault) {
+    public UnversionedFilingHistoryDocument matchedDefault(Integer matchedDefault) {
         this.matchedDefault = matchedDefault;
         return this;
     }
@@ -168,7 +185,7 @@ public class FilingHistoryDocument {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FilingHistoryDocument that = (FilingHistoryDocument) o;
+        UnversionedFilingHistoryDocument that = (UnversionedFilingHistoryDocument) o;
         return Objects.equals(transactionId, that.transactionId) && Objects.equals(version,
                 that.version) && Objects.equals(entityId, that.entityId) && Objects.equals(
                 companyNumber, that.companyNumber) && Objects.equals(documentId, that.documentId)
@@ -188,7 +205,7 @@ public class FilingHistoryDocument {
 
     @Override
     public String toString() {
-        return "FilingHistoryDocument{" +
+        return "UnversionedFilingHistoryDocument{" +
                 "transactionId='" + transactionId + '\'' +
                 ", version=" + version +
                 ", entityId='" + entityId + '\'' +
