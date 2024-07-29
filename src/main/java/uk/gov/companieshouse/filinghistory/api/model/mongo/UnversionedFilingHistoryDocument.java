@@ -205,7 +205,7 @@ public class UnversionedFilingHistoryDocument {
 
     @Override
     public String toString() {
-        return "FilingHistoryDocument{" +
+        return "UnversionedFilingHistoryDocument{" +
                 "transactionId='" + transactionId + '\'' +
                 ", version=" + version +
                 ", entityId='" + entityId + '\'' +
