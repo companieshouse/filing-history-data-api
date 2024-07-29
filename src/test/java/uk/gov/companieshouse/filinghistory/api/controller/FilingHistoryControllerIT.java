@@ -209,6 +209,67 @@ class FilingHistoryControllerIT {
     @Test
     void shouldUpdateDocumentAndReturn200OKWhenExistingDocumentInDB() throws Exception {
         // given
+        String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        Document document = Document.parse(jsonToInsert);
+        document.append("version", 0);
+        mongoTemplate.insert(document, FILING_HISTORY_COLLECTION);
+
+        final FilingHistoryDocument expectedDocument =
+                getExpectedFilingHistoryDocument(DOCUMENT_METADATA, 1,
+                        List.of(new FilingHistoryAnnotation()
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .category("annotation")
+                                .date(Instant.parse("2011-11-26T11:27:55.000Z"))
+                                .description("annotation")
+                                .descriptionValues(new FilingHistoryDescriptionValues()
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                .type("ANNOTATION")
+                                .entityId("2234567890")
+                                .deltaAt("20140815230459600643")),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(UPDATED_AT)
+                                .by(UPDATED_BY),
+                        new FilingHistoryDeltaTimestamp()
+                                .at(Instant.parse("2014-09-14T18:52:08.001Z"))
+                                .by("5419d856b6a59f32b7684dE4"));
+        expectedDocument.version(1);
+
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        result.andExpect(MockMvcResultMatchers.header().string(LOCATION, SELF_LINK));
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(2)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+    }
+
+    @Test
+    void shouldUpdateUnversionedLegacyDocumentInitialiseVersionAndReturn200OK() throws Exception {
+        // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
@@ -235,7 +296,6 @@ class FilingHistoryControllerIT {
                         new FilingHistoryDeltaTimestamp()
                                 .at(Instant.parse("2014-09-14T18:52:08.001Z"))
                                 .by("5419d856b6a59f32b7684dE4"));
-        expectedDocument.version(1);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
 
@@ -762,7 +822,9 @@ class FilingHistoryControllerIT {
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
-        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+        Document doc = Document.parse(jsonToInsert);
+        doc.append("version", 0);
+        mongoTemplate.insert(doc, FILING_HISTORY_COLLECTION);
 
         FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
@@ -894,6 +956,7 @@ class FilingHistoryControllerIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         Document doc = Document.parse(jsonToInsert);
         doc.remove("delta_at");
+        doc.append("version", 0);
         mongoTemplate.insert(doc, FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument =
@@ -1247,6 +1310,7 @@ class FilingHistoryControllerIT {
             FilingHistoryDeltaTimestamp updated, FilingHistoryDeltaTimestamp created) {
         return new FilingHistoryDocument()
                 .transactionId(TRANSACTION_ID)
+                .version(0)
                 .companyNumber(COMPANY_NUMBER)
                 .data(new FilingHistoryData()
                         .actionDate(ACTION_AND_TERMINATION_DATE_AS_INSTANT)

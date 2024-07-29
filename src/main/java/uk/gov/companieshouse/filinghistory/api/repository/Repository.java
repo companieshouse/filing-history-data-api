@@ -26,6 +26,7 @@ import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class Repository {
 
     private final MongoTemplate mongoTemplate;
 
-    public Repository(final MongoTemplate mongoTemplate) {
+    public Repository(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -61,8 +62,8 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
                     .getUniqueMappedResult();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding filing history list: %s".formatted(
-                    ex.getMessage()), DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when finding filing history list: %s".formatted(ex.getMessage()), ex,
+                    DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding filing history list", ex);
         }
     }
@@ -76,7 +77,7 @@ public class Repository {
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding the document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when finding the document: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding document", ex);
         }
@@ -116,7 +117,7 @@ public class Repository {
                             FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB error when trying to retrieve filing history delete document: %s".formatted(
-                    ex.getMessage()), DataMapHolder.getLogMap());
+                    ex.getMessage()), ex, DataMapHolder.getLogMap());
             throw new BadGatewayException(
                     "MongoDB error when trying to retrieve filing history delete document", ex);
         }
@@ -126,7 +127,7 @@ public class Repository {
         try {
             mongoTemplate.insert(document);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when inserting document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when inserting document: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when inserting document", ex);
         }
@@ -134,9 +135,15 @@ public class Repository {
 
     public void update(final FilingHistoryDocument document) {
         try {
-            mongoTemplate.save(document);
+            // Initialise version of legacy document
+            // Versioning is used to prevent lost updates during concurrent processing
+            if (document.getVersion() == null) {
+                mongoTemplate.save(new UnversionedFilingHistoryDocument(document));
+            } else {
+                mongoTemplate.save(document);
+            }
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when updating document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when updating document: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when updating document", ex);
         }
@@ -146,7 +153,7 @@ public class Repository {
         try {
             mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when deleting document: %s".formatted(ex.getMessage()),
+            LOGGER.error("MongoDB error when deleting document: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when deleting document", ex);
         }
