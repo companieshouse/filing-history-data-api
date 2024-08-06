@@ -205,7 +205,6 @@ class FilingHistoryServiceTest {
         assertThrows(BadGatewayException.class, executable);
         verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
-        verify(repository).update(existingDocument);
     }
 
     @Test

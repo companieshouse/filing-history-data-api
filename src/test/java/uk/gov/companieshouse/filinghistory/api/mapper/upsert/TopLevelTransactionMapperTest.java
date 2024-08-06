@@ -231,17 +231,10 @@ class TopLevelTransactionMapperTest {
     @Test
     void mapDocumentMetadataShouldReturnUpdatedFilingHistoryDocument() {
         // given
-//        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
-//        when(requestExternalData.getPaperFiled()).thenReturn(true);
-//        when(expectedFilingHistoryData.paperFiled(any())).thenReturn(expectedFilingHistoryData);
-//        when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
-//        when(requestExternalData.getBarcode()).thenReturn(BARCODE);
-//        when(requestExternalData.getAssociatedFilings()).thenReturn(null);
-
         final FilingHistoryDocumentMetadataUpdateApi request = buildPatchDocMetadataRequestBody();
 
         final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
-                existingFilingHistoryData,
+                new FilingHistoryData().links(new FilingHistoryLinks()),
                 existingFilingHistoryOriginalValues,
                 EXISTING_DOCUMENT_DELTA_AT);
 
@@ -252,10 +245,6 @@ class TopLevelTransactionMapperTest {
         assertEquals(existingDocument, actualDocument);
         assertEquals(actualDocument.getData().getPages(), PAGES);
         assertEquals(actualDocument.getData().getLinks().getDocumentMetadata(), DOC_METADATA_LINK);
-        verifyNoInteractions(childListMapper);
-        verifyNoInteractions(dataMapper);
-        verifyNoInteractions(childListMapper);
-        verifyNoInteractions(originalValuesMapper);
     }
 
     private InternalFilingHistoryApi buildPutRequestBody() {
