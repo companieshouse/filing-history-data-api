@@ -17,12 +17,14 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpdateApi;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
+import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AnnotationTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
@@ -34,6 +36,8 @@ class FilingHistoryUpsertProcessorTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String DOCUMENT_METADATA_LINK = "/document/12345";
+    private static final Integer PAGES = 5;
     private static final Instant INSTANT = Instant.now();
 
     @InjectMocks
@@ -57,6 +61,8 @@ class FilingHistoryUpsertProcessorTest {
     private Supplier<Instant> instantSupplier;
     @Mock
     private InternalFilingHistoryApi request;
+    @Mock
+    private FilingHistoryDocumentMetadataUpdateApi docMetadataRequest;
     @Mock
     private InternalData internalData;
     @Mock
@@ -185,5 +191,67 @@ class FilingHistoryUpsertProcessorTest {
         verifyNoInteractions(topLevelMapper);
         verifyNoInteractions(annotationTransactionMapper);
         verifyNoInteractions(filingHistoryService);
+    }
+
+    @Test
+    void shouldSuccessfullyCallUpdateDocMetadata() {
+        // given
+        when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
+        when(filingHistoryDocumentCopier.deepCopy(any())).thenReturn(existingDocumentCopy);
+        when(docMetadataRequest.getDocumentMetadata()).thenReturn(DOCUMENT_METADATA_LINK);
+        when(topLevelMapper.mapDocumentMetadata(any(), any(FilingHistoryDocument.class))).thenReturn(existingDocument);
+
+        // when
+        filingHistoryProcessor.processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, docMetadataRequest);
+
+        // then
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
+        verify(topLevelMapper).mapDocumentMetadata(docMetadataRequest, existingDocumentCopy);
+        verifyNoMoreInteractions(topLevelMapper);
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionWhenUpdateDocMetadataButMissingTransaction() {
+        // given
+        when(docMetadataRequest.getDocumentMetadata()).thenReturn(DOCUMENT_METADATA_LINK);
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
+
+        // when
+        Executable executable = () -> filingHistoryProcessor.processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, docMetadataRequest);
+
+        // then
+        assertThrows(NotFoundException.class, executable);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verifyNoMoreInteractions(filingHistoryService);
+    }
+
+    @Test
+    void shouldThrowBadGatewayWhenFindingDocumentInDBForDocMetadataPatch() {
+        // given
+        when(docMetadataRequest.getDocumentMetadata()).thenReturn(DOCUMENT_METADATA_LINK);
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(BadGatewayException.class);
+
+        // when
+        Executable executable = () -> filingHistoryProcessor.processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, docMetadataRequest);
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
+        verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verifyNoMoreInteractions(filingHistoryService);
+    }
+
+    @Test
+    void shouldThrowBadRequestWhenDocumentMetadataLinkMissing() {
+        // given
+        when(docMetadataRequest.getDocumentMetadata()).thenReturn(null);
+
+        // when
+        Executable executable = () -> filingHistoryProcessor.processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, docMetadataRequest);
+
+        // then
+        assertThrows(BadRequestException.class, executable);
     }
 }

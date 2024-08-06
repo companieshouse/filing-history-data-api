@@ -17,12 +17,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
-import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.InternalData;
-import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
-import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
-import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.api.filinghistory.*;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
@@ -46,6 +41,8 @@ class TopLevelTransactionMapperTest {
     private static final Instant INSTANT = Instant.now();
     private static final String UPDATED_BY = "84746291";
     private static final String EXPECTED_DELTA_AT = NEWEST_REQUEST_DELTA_AT;
+    private static final String DOC_METADATA_LINK = "/document/12345";
+    private static final Integer PAGES = 5;
 
     @InjectMocks
     private TopLevelTransactionMapper topLevelMapper;
@@ -231,10 +228,45 @@ class TopLevelTransactionMapperTest {
         verifyNoInteractions(originalValuesMapper);
     }
 
+    @Test
+    void mapDocumentMetadataShouldReturnUpdatedFilingHistoryDocument() {
+        // given
+//        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+//        when(requestExternalData.getPaperFiled()).thenReturn(true);
+//        when(expectedFilingHistoryData.paperFiled(any())).thenReturn(expectedFilingHistoryData);
+//        when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
+//        when(requestExternalData.getBarcode()).thenReturn(BARCODE);
+//        when(requestExternalData.getAssociatedFilings()).thenReturn(null);
+
+        final FilingHistoryDocumentMetadataUpdateApi request = buildPatchDocMetadataRequestBody();
+
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                existingFilingHistoryData,
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        // when
+        FilingHistoryDocument actualDocument = topLevelMapper.mapDocumentMetadata(request, existingDocument);
+
+        // then
+        assertEquals(existingDocument, actualDocument);
+        assertEquals(actualDocument.getData().getPages(), PAGES);
+        assertEquals(actualDocument.getData().getLinks().getDocumentMetadata(), DOC_METADATA_LINK);
+        verifyNoInteractions(childListMapper);
+        verifyNoInteractions(dataMapper);
+        verifyNoInteractions(childListMapper);
+        verifyNoInteractions(originalValuesMapper);
+    }
+
     private InternalFilingHistoryApi buildPutRequestBody() {
         return new InternalFilingHistoryApi()
                 .externalData(requestExternalData)
                 .internalData(buildInternalData());
+    }
+
+    private FilingHistoryDocumentMetadataUpdateApi buildPatchDocMetadataRequestBody() {
+        return new FilingHistoryDocumentMetadataUpdateApi().documentMetadata(DOC_METADATA_LINK)
+                .pages(PAGES);
     }
 
     private InternalData buildInternalData() {

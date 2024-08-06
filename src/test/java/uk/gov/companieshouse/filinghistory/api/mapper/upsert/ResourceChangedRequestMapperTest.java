@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ class ResourceChangedRequestMapperTest {
     private static final String RESOURCE_URI = "/company/12345678/filing-history/ABCDE54321";
     private static final String CHANGED_EVENT_TYPE = "changed";
     private static final String DELETED_EVENT_TYPE = "deleted";
+    private static final String DOC_META_DATA_LINK_FIELD = "links.document_metadata";
 
     @InjectMocks
     private ResourceChangedRequestMapper mapper;
@@ -65,7 +67,36 @@ class ResourceChangedRequestMapperTest {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
-        ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, false);
+        final ArrayList<String> fieldsChanged = new ArrayList<>();
+        fieldsChanged.add(DOC_META_DATA_LINK_FIELD);
+
+        ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(
+                filingHistoryDocument, false, fieldsChanged);
+        ChangedResource expectedChangedResource = new ChangedResource()
+                .contextId(EXPECTED_CONTEXT_ID)
+                .resourceUri(RESOURCE_URI)
+                .resourceKind(FILING_HISTORY)
+                .event(new ChangedResourceEvent()
+                        .type(CHANGED_EVENT_TYPE)
+                        .fieldsChanged(fieldsChanged)
+                        .publishedAt(UPDATED_AT.toString()));
+
+        // when
+        ChangedResource actual = mapper.mapChangedResource(upsertResourceChangedRequest);
+
+        // then
+        assertEquals(expectedChangedResource, actual);
+    }
+
+    @Test
+    void testPatchDocMetadataResourceChangedMapper() {
+        // given
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+
+
+
+        ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(
+                filingHistoryDocument, false, null);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
@@ -97,7 +128,7 @@ class ResourceChangedRequestMapperTest {
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenReturn(deletedDataAsString);
         when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenReturn(deletedDataAsObject);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true, null);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
@@ -124,7 +155,7 @@ class ResourceChangedRequestMapperTest {
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(deletedData);
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true, null);
 
         // when
         Executable executable = () -> mapper.mapChangedResource(deleteResourceChangedRequest);
@@ -144,7 +175,7 @@ class ResourceChangedRequestMapperTest {
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
         when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true, null);
 
         // when
         Executable executable = () -> mapper.mapChangedResource(deleteResourceChangedRequest);
