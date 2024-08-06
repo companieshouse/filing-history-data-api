@@ -17,10 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.companieshouse.api.filinghistory.ExternalData;
-import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
-import uk.gov.companieshouse.api.filinghistory.InternalData;
-import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.api.filinghistory.*;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
@@ -55,6 +52,8 @@ class FilingHistoryControllerTest {
     private ExternalData getSingleResponseBody;
     @Mock
     private FilingHistoryList getListResponseBody;
+    @Mock
+    private FilingHistoryDocumentMetadataUpdateApi patchDocMetadataRequestBody;
 
     @Test
     void shouldReturn200OKWhenGetCompanyFilingHistoryList() {
@@ -250,5 +249,51 @@ class FilingHistoryControllerTest {
         // then
         assertThrows(NotFoundException.class, executable);
         verify(deleteProcessor).processFilingHistoryDelete(ENTITY_ID);
+    }
+
+    @Test
+    void shouldReturn200OKWhenDocumentMetadataRequest() {
+        // given
+        final ResponseEntity<Void> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+
+        // when
+        final ResponseEntity<Void> actualResponse =
+                controller.patchFilingHistoryDocumentMetadata(COMPANY_NUMBER, TRANSACTION_ID, patchDocMetadataRequestBody);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(upsertProcessor).processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, patchDocMetadataRequestBody);
+    }
+
+    @Test
+    void shouldReturn404NotFoundWhenDocumentMetadataRequestForMissingTransaction() {
+        // given
+        doThrow(NotFoundException.class)
+                .when(upsertProcessor).processDocumentMetadata(anyString(), anyString(), any());
+
+        // when
+        Executable executable = () ->
+                controller.patchFilingHistoryDocumentMetadata(COMPANY_NUMBER, TRANSACTION_ID, patchDocMetadataRequestBody);
+
+        // then
+        assertThrows(NotFoundException.class, executable);
+        verify(upsertProcessor).processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, patchDocMetadataRequestBody);
+    }
+
+    @Test
+    void shouldReturn502ErrorCodeWhenDocumentMetadataRequestAndBadGateway() {
+        // given
+        doThrow(BadGatewayException.class)
+                .when(upsertProcessor).processDocumentMetadata(anyString(), anyString(), any());
+
+        // when
+        Executable executable = () ->
+                controller.patchFilingHistoryDocumentMetadata(COMPANY_NUMBER, TRANSACTION_ID, patchDocMetadataRequestBody);
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
+        verify(upsertProcessor).processDocumentMetadata(TRANSACTION_ID, COMPANY_NUMBER, patchDocMetadataRequestBody);
     }
 }

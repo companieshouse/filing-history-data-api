@@ -179,6 +179,35 @@ class FilingHistoryServiceTest {
     }
 
     @Test
+    void updateDocumentMetadataUpdatesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
+        // given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(200);
+
+        // when
+        service.updateDocumentMetadata(document);
+
+        // then
+        verify(repository).update(document);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void updateDocumentMetadataUpdatesDocumentButResourceChangedCallReturnsNon200() {
+        // given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(502);
+
+        // when
+        Executable executable = () -> service.updateDocumentMetadata(document);
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
+        verify(repository).update(document);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
     void deleteInsertedFilingHistoryDocumentWhenResourceChangedCallReturnsNon200AndOriginalDocumentCopyIsNull() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);

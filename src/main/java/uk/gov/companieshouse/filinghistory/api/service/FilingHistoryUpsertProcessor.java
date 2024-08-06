@@ -2,11 +2,15 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.time.Instant;
 import java.util.function.Supplier;
+
+import com.google.common.base.Strings;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpdateApi;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
+import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransactionMapperFactory;
@@ -14,6 +18,8 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 import uk.gov.companieshouse.filinghistory.api.serdes.ObjectCopier;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 @Component
 public class FilingHistoryUpsertProcessor implements UpsertProcessor {
@@ -40,8 +46,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
     @Override
     public void processFilingHistory(final String transactionId,
-            final String companyNumber,
-            final InternalFilingHistoryApi request) {
+                                     final String companyNumber, final InternalFilingHistoryApi request) {
         final TransactionKindEnum transactionKind = request.getInternalData().getTransactionKind();
 
         if (!validatorFactory.getPutRequestValidator(transactionKind).isValid(request)) {
@@ -65,6 +70,31 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                             FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request,
                                     instant);
                             filingHistoryService.insertFilingHistory(newDocument);
+                        });
+    }
+
+    @Override
+    public void processDocumentMetadata(final String transactionId, final String companyNumber,
+                                     final FilingHistoryDocumentMetadataUpdateApi request) {
+
+        if (Strings.isNullOrEmpty(request.getDocumentMetadata())) {
+            LOGGER.error("Request body missing document metadata field", DataMapHolder.getLogMap());
+            throw new BadRequestException("Required field document_metadata missing");
+        }
+
+        AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(TOP_LEVEL);
+
+        filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
+                .ifPresentOrElse(
+                        existingDoc -> {
+                            FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
+                            FilingHistoryDocument docToUpdate =
+                                    mapper.mapDocumentMetadata(request, existingDocCopy);
+
+                            filingHistoryService.updateDocumentMetadata(docToUpdate);
+                        },
+                        () -> {
+                            throw new NotFoundException("Transaction not found for document metadata patch");
                         });
     }
 }

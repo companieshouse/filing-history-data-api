@@ -64,7 +64,8 @@ public class FilingHistoryService implements Service {
     @Override
     public void insertFilingHistory(final FilingHistoryDocument docToInsert) {
         repository.insert(docToInsert);
-        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(docToInsert, false));
+        ApiResponse<Void> result = apiClient.callResourceChanged(
+                new ResourceChangedRequest(docToInsert, false, null));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             repository.deleteById(docToInsert.getTransactionId());
             LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
@@ -75,7 +76,8 @@ public class FilingHistoryService implements Service {
     @Override
     public void updateFilingHistory(FilingHistoryDocument docToUpdate, FilingHistoryDocument originalDocumentCopy) {
         repository.update(docToUpdate);
-        ApiResponse<Void> result = apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false));
+        ApiResponse<Void> result = apiClient.callResourceChanged(
+                new ResourceChangedRequest(docToUpdate, false, null));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             originalDocumentCopy.version(originalDocumentCopy.getVersion() + 1);
             repository.update(originalDocumentCopy);
@@ -84,11 +86,23 @@ public class FilingHistoryService implements Service {
         }
     }
 
+    @Override
+    public void updateDocumentMetadata(FilingHistoryDocument docToUpdate) {
+        repository.update(docToUpdate);
+        List<String> fieldsChanged = new ArrayList<>();
+        fieldsChanged.add("links.document_metadata");
+        ApiResponse<Void> result = apiClient.callResourceChanged(
+                new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
+        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
+            throwBadGatewayException();
+        }
+    }
+
     @Transactional
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
-        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true));
+        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwBadGatewayException();
         }

@@ -57,6 +57,7 @@ public class ResourceChangedRequestMapper {
         } else {
             event.setType("changed");
         }
+        event.setFieldsChanged(request.fieldsChanged());
         return changedResource;
     }
 }

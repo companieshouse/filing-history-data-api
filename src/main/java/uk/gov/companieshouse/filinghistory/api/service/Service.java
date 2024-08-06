@@ -19,5 +19,7 @@ public interface Service {
 
     void updateFilingHistory(final FilingHistoryDocument docToUpdate, FilingHistoryDocument originalDocumentCopy);
 
+    void updateDocumentMetadata(final FilingHistoryDocument docToUpdate);
+
     void deleteExistingFilingHistory(FilingHistoryDocument existingDocument);
 }
