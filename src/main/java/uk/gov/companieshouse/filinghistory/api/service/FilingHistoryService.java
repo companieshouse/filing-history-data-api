@@ -46,7 +46,14 @@ public class FilingHistoryService implements Service {
                             "gazette", "reregistration", "resolution", "restoration"));
         }
 
-        return Optional.of(repository.findCompanyFilingHistory(companyNumber, startIndex, itemsPerPage, categoryList))
+        List<String> filingHistoryIds = repository.findListOfFilingHistoryIds(companyNumber, startIndex,
+                itemsPerPage, categoryList).getIds();
+
+        List<FilingHistoryDocument> documents = repository.findFullFilingHistoryDocuments(filingHistoryIds);
+
+        Integer totalCount = repository.countTotal(companyNumber, categoryList).orElse(0);
+
+        return Optional.of(new FilingHistoryListAggregate().documentList(documents).totalCount(totalCount))
                 .filter(listAggregate -> listAggregate.getTotalCount() > 0);
     }
 

@@ -25,6 +25,7 @@ import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryIds;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
@@ -65,6 +66,63 @@ public class Repository {
             LOGGER.error("MongoDB error when finding filing history list: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding filing history list", ex);
+        }
+    }
+
+    public FilingHistoryIds findListOfFilingHistoryIds(String companyNumber,
+            int startIndex, int itemsPerPage, List<String> categoryList) {
+        try {
+            Criteria criteria = Criteria.where("company_number").is(companyNumber);
+            if (!categoryList.isEmpty()) {
+                criteria.and("data.category").in(categoryList);
+            }
+
+            Aggregation aggregation = newAggregation(
+                    match(criteria),
+                    facet(match(new Criteria()), sort(Direction.DESC, "data.date")).as("ids"),
+                    project().andExpression("$ids._id").slice(itemsPerPage, startIndex).as("ids"));
+
+            return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryIds.class)
+                    .getUniqueMappedResult();
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB error when finding filing history ids: %s".formatted(ex.getMessage()), ex,
+                    DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when finding filing history ids", ex);
+        }
+    }
+
+    public List<FilingHistoryDocument> findFullFilingHistoryDocuments(List<String> filingHistoryIds) {
+        try {
+            Criteria criteria = Criteria.where("_id").in(filingHistoryIds);
+            return mongoTemplate.find(new Query(criteria), FilingHistoryDocument.class);
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB error when finding full filing history list: %s".formatted(ex.getMessage()), ex,
+                    DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when finding full filing history list", ex);
+        }
+    }
+
+    public Optional<Integer> countTotal(String companyNumber, List<String> categoryList) {
+        try {
+        Criteria criteria = Criteria.where("company_number").is(companyNumber);
+        if (!categoryList.isEmpty()) {
+            criteria.and("data.category").in(categoryList);
+        }
+
+        Aggregation aggregation = newAggregation(
+                match(criteria),
+                facet(
+                        count().as("count")).as("total_count"),
+                unwind("$total_count", true),
+                project()
+                        .and(ifNull("$total_count.count").then(0)).as("total_count"));
+
+        return Optional.ofNullable(mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, Integer.class)
+                .getUniqueMappedResult());
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB error when calculating total count: %s".formatted(ex.getMessage()), ex,
+                    DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when calculating total count", ex);
         }
     }
 
