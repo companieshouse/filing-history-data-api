@@ -6,8 +6,8 @@ use_set_environment_files = true
 log_level = "trace"
 
 desired_task_count = 3
-required_cpus = 512
-required_memory = 1024
+required_cpus = 768
+required_memory = 1536
 
 # Scheduled scaling of tasks
 service_autoscale_enabled  = true
