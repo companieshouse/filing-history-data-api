@@ -102,7 +102,7 @@ class FilingHistoryControllerIT {
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.13");
 
     @Autowired
     private MongoTemplate mongoTemplate;
