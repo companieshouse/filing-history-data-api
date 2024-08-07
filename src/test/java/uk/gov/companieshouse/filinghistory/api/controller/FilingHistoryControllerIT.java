@@ -40,6 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -102,7 +103,8 @@ class FilingHistoryControllerIT {
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.13");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.13")
+            .waitingFor(Wait.forListeningPort());
 
     @Autowired
     private MongoTemplate mongoTemplate;
