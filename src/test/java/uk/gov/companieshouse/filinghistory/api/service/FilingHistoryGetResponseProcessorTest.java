@@ -92,7 +92,7 @@ class FilingHistoryGetResponseProcessorTest {
     @Test
     void processGetSingleFilingHistoryShouldThrowBadGatewayException() {
         // given
-        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(BadGatewayException.class);;
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> processor.processGetSingleFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);

@@ -31,6 +31,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Component
 public class Repository {
 
+    private static final String COMPANY_NUMBER = "company_number";
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final MongoTemplate mongoTemplate;
@@ -42,7 +43,7 @@ public class Repository {
     public FilingHistoryIds findListOfFilingHistoryIds(String companyNumber,
             int startIndex, int itemsPerPage, List<String> categoryList) {
         try {
-            Criteria criteria = Criteria.where("company_number").is(companyNumber);
+            Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
             if (!categoryList.isEmpty()) {
                 criteria.and("data.category").in(categoryList);
             }
@@ -79,7 +80,7 @@ public class Repository {
 
     public long countTotal(String companyNumber, List<String> categoryList) {
         try {
-        Criteria criteria = Criteria.where("company_number").is(companyNumber);
+        Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
         if (!categoryList.isEmpty()) {
             criteria.and("data.category").in(categoryList);
         }
@@ -95,7 +96,7 @@ public class Repository {
     public Optional<FilingHistoryDocument> findByIdAndCompanyNumber(final String id, final String companyNumber) {
         try {
             Criteria criteria = Criteria.where("_id").is(id)
-                    .and("company_number").is(companyNumber);
+                    .and(COMPANY_NUMBER).is(companyNumber);
 
             Query query = new Query(criteria);
 
