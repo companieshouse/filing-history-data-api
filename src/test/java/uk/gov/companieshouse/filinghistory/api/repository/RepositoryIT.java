@@ -30,6 +30,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAg
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryIds;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
@@ -115,11 +116,13 @@ class RepositoryIT {
         final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
 
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds actual = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(actual.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
 
         // then
-        assertEquals(expected, actual);
+        assertEquals(expected, new FilingHistoryListAggregate().documentList(documentList).totalCount(totalCount));
     }
 
     @Test
@@ -143,12 +146,15 @@ class RepositoryIT {
         final FilingHistoryListAggregate expected = getFilingHistoryListAggregateOneDocument();
         expected.getDocumentList().getFirst().getData().category("incorporation");
 
+
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds actual = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of("incorporation"));
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(actual.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of("incorporation"));
 
         // then
-        assertEquals(expected, actual);
+        assertEquals(expected, new FilingHistoryListAggregate().documentList(documentList).totalCount(totalCount));
     }
 
     @Test
@@ -161,8 +167,11 @@ class RepositoryIT {
         }
 
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 20, DEFAULT_ITEMS_PER_PAGE, List.of());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+        FilingHistoryListAggregate actual = new FilingHistoryListAggregate().documentList(documentList).totalCount(totalCount);
 
         // then
         assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
@@ -180,8 +189,11 @@ class RepositoryIT {
         }
 
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 60, DEFAULT_ITEMS_PER_PAGE, List.of());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+        FilingHistoryListAggregate actual = new FilingHistoryListAggregate().documentList(documentList).totalCount(totalCount);
 
         // then
         assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
@@ -193,8 +205,11 @@ class RepositoryIT {
         // given
 
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+        FilingHistoryListAggregate actual = new FilingHistoryListAggregate().documentList(documentList).totalCount(totalCount);
 
         // then
         assertEquals(0, actual.getTotalCount());
@@ -212,8 +227,11 @@ class RepositoryIT {
         }
 
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+        FilingHistoryListAggregate actual = new FilingHistoryListAggregate().documentList(documentList).totalCount(totalCount);
 
         // then
         assertEquals(TOTAL_RESULTS_NUMBER, actual.getTotalCount());
@@ -234,8 +252,11 @@ class RepositoryIT {
         mongoTemplate.insert(documentList, FILING_HISTORY_COLLECTION);
 
         // when
-        final FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 DOC_COUNT - 26, DEFAULT_ITEMS_PER_PAGE, List.of());
+        final List<FilingHistoryDocument> documentListReturned = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+        final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+        FilingHistoryListAggregate actual = new FilingHistoryListAggregate().documentList(documentListReturned).totalCount(totalCount);
 
         // then
         assertEquals(DOC_COUNT, actual.getTotalCount());

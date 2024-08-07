@@ -51,7 +51,7 @@ public class FilingHistoryService implements Service {
 
         List<FilingHistoryDocument> documents = repository.findFullFilingHistoryDocuments(filingHistoryIds);
 
-        Integer totalCount = repository.countTotal(companyNumber, categoryList).orElse(0);
+        long totalCount = repository.countTotal(companyNumber, categoryList);
 
         return Optional.of(new FilingHistoryListAggregate().documentList(documents).totalCount(totalCount))
                 .filter(listAggregate -> listAggregate.getTotalCount() > 0);

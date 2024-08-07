@@ -1,13 +1,11 @@
 package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.addFields;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.count;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.facet;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 import static org.springframework.data.mongodb.core.aggregation.ArrayOperators.IndexOfArray.arrayOf;
 import static org.springframework.data.mongodb.core.aggregation.ConditionalOperators.ifNull;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
@@ -26,7 +24,6 @@ import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryIds;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -42,33 +39,6 @@ public class Repository {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public FilingHistoryListAggregate findCompanyFilingHistory(String companyNumber,
-            int startIndex, int itemsPerPage, List<String> categories) {
-        try {
-            Criteria criteria = Criteria.where("company_number").is(companyNumber);
-            if (!categories.isEmpty()) {
-                criteria.and("data.category").in(categories);
-            }
-
-            Aggregation aggregation = newAggregation(
-                    match(criteria),
-                    facet(
-                            count().as("count")).as("total_count")
-                            .and(match(new Criteria()), sort(Direction.DESC, "data.date")).as("document_list"),
-                    unwind("$total_count", true),
-                    project()
-                            .and(ifNull("$total_count.count").then(0)).as("total_count")
-                            .andExpression("$document_list").slice(itemsPerPage, startIndex).as("document_list"));
-
-            return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryListAggregate.class)
-                    .getUniqueMappedResult();
-        } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding filing history list: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB error when finding filing history list", ex);
-        }
-    }
-
     public FilingHistoryIds findListOfFilingHistoryIds(String companyNumber,
             int startIndex, int itemsPerPage, List<String> categoryList) {
         try {
@@ -76,7 +46,6 @@ public class Repository {
             if (!categoryList.isEmpty()) {
                 criteria.and("data.category").in(categoryList);
             }
-
             Aggregation aggregation = newAggregation(
                     match(criteria),
                     facet(match(new Criteria()), sort(Direction.DESC, "data.date")).as("ids"),
@@ -94,7 +63,13 @@ public class Repository {
     public List<FilingHistoryDocument> findFullFilingHistoryDocuments(List<String> filingHistoryIds) {
         try {
             Criteria criteria = Criteria.where("_id").in(filingHistoryIds);
-            return mongoTemplate.find(new Query(criteria), FilingHistoryDocument.class);
+            Aggregation aggregation = newAggregation(
+                    match(criteria),
+                    addFields().addFieldWithValue("__sort_order__", arrayOf(filingHistoryIds).indexOf("$_id")).build(),
+                    sort(Direction.ASC, "__sort_order__")
+                    );
+            return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryDocument.class)
+                    .getMappedResults();
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB error when finding full filing history list: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
@@ -102,23 +77,14 @@ public class Repository {
         }
     }
 
-    public Optional<Integer> countTotal(String companyNumber, List<String> categoryList) {
+    public long countTotal(String companyNumber, List<String> categoryList) {
         try {
         Criteria criteria = Criteria.where("company_number").is(companyNumber);
         if (!categoryList.isEmpty()) {
             criteria.and("data.category").in(categoryList);
         }
 
-        Aggregation aggregation = newAggregation(
-                match(criteria),
-                facet(
-                        count().as("count")).as("total_count"),
-                unwind("$total_count", true),
-                project()
-                        .and(ifNull("$total_count.count").then(0)).as("total_count"));
-
-        return Optional.ofNullable(mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, Integer.class)
-                .getUniqueMappedResult());
+        return mongoTemplate.count(Query.query(criteria), FilingHistoryDocument.class);
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB error when calculating total count: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
