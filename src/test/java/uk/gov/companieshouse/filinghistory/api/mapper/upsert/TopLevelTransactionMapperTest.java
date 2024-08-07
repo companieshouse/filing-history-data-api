@@ -17,7 +17,13 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.filinghistory.*;
+import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
+import uk.gov.companieshouse.api.filinghistory.ExternalData;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpdateApi;
+import uk.gov.companieshouse.api.filinghistory.InternalData;
+import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
+import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
+import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
@@ -243,8 +249,8 @@ class TopLevelTransactionMapperTest {
 
         // then
         assertEquals(existingDocument, actualDocument);
-        assertEquals(actualDocument.getData().getPages(), PAGES);
-        assertEquals(actualDocument.getData().getLinks().getDocumentMetadata(), DOC_METADATA_LINK);
+        assertEquals(PAGES, actualDocument.getData().getPages());
+        assertEquals(DOC_METADATA_LINK, actualDocument.getData().getLinks().getDocumentMetadata());
     }
 
     private InternalFilingHistoryApi buildPutRequestBody() {
