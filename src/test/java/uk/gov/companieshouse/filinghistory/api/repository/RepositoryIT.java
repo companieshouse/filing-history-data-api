@@ -96,7 +96,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindTwoDocuments() throws IOException {
+    void testAggregationQueriesToFindTwoDocuments() throws IOException {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
@@ -116,9 +116,9 @@ class RepositoryIT {
         final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
 
         // when
-        final FilingHistoryIds actual = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
-        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(actual.getIds());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
 
         // then
@@ -126,7 +126,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindOneDocumentWhenCategoryFilter() throws IOException {
+    void testAggregationQueriesToFindOneDocumentWhenCategoryFilter() throws IOException {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
@@ -146,11 +146,10 @@ class RepositoryIT {
         final FilingHistoryListAggregate expected = getFilingHistoryListAggregateOneDocument();
         expected.getDocumentList().getFirst().getData().category("incorporation");
 
-
         // when
-        final FilingHistoryIds actual = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of("incorporation"));
-        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(actual.getIds());
+        final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of("incorporation"));
 
         // then
@@ -158,7 +157,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindDocumentsWithLargeStartIndex() {
+    void testAggregationQueriesToFindDocumentsWithLargeStartIndex() {
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
             filingHistoryDocument.transactionId(TRANSACTION_ID + i);
@@ -180,7 +179,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindDocumentsWithStartIndexHigherThanItemsPerPage() {
+    void testAggregationQueriesToFindDocumentsWithStartIndexHigherThanItemsPerPage() {
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
             filingHistoryDocument.transactionId(TRANSACTION_ID + i);
@@ -201,7 +200,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregateQueryWhenNoDocumentsInDatabase() {
+    void testAggregateQueriesWhenNoDocumentsInDatabase() {
         // given
 
         // when
@@ -217,7 +216,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindDocumentsWithSortingOnDate() {
+    void testAggregationQueriesToFindDocumentsWithSortingOnDate() {
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
             filingHistoryDocument.transactionId(TRANSACTION_ID + i);
@@ -239,7 +238,7 @@ class RepositoryIT {
     }
 
     @Test
-    void testAggregationQueryToFindDocumentsWithSortingAndPaginationOnVeryLargeDataSet() {
+    void testAggregationQueriesToFindDocumentsWithSortingAndPaginationOnVeryLargeDataSet() {
         final int DOC_COUNT = 300_000; // Reduced to 300_000 as versioning increased memory usage
         List<FilingHistoryDocument> documentList = new ArrayList<>();
         for (int i = 0; i < DOC_COUNT; i++) {

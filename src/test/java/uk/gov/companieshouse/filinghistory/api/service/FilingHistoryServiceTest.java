@@ -89,7 +89,7 @@ class FilingHistoryServiceTest {
 
     @ParameterizedTest
     @MethodSource("categoriesListCases")
-    void findCompanyFilingHistoryListShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
+    void findCompanyFilingHistoryListQueriesShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
             List<String> expectedCategories) {
         // given
         when(repository.findListOfFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
@@ -109,7 +109,7 @@ class FilingHistoryServiceTest {
     }
 
     @Test
-    void findCompanyFilingHistoryListShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
+    void findCompanyFilingHistoryListQueriesShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
         // given
         when(repository.findListOfFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
         when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
