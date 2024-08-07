@@ -75,7 +75,7 @@ class FilingHistoryControllerMongoUnavailableIT {
     private static final String CATEGORY = "officers";
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0.13");
 
     @Autowired
     private MongoTemplate mongoTemplate;
