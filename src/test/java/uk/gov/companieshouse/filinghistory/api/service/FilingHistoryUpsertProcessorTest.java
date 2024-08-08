@@ -37,7 +37,6 @@ class FilingHistoryUpsertProcessorTest {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String DOCUMENT_METADATA_LINK = "/document/12345";
-    private static final Integer PAGES = 5;
     private static final Instant INSTANT = Instant.now();
 
     @InjectMocks

@@ -31,7 +31,7 @@ class AnnotationsGetResponseMapperTest {
     @Mock
     private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
-    private DescriptionValues DescriptionValues;
+    private DescriptionValues descriptionValues;
 
     @Test
     void shouldSuccessfullyMapAnnotations() {
@@ -42,9 +42,9 @@ class AnnotationsGetResponseMapperTest {
                         .category(CATEGORY)
                         .type(TYPE)
                         .description(DESCRIPTION)
-                        .descriptionValues(DescriptionValues));
+                        .descriptionValues(descriptionValues));
 
-        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(DescriptionValues);
+        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(descriptionValues);
 
         // when
         final List<Annotation> actual = annotationsGetResponseMapper.map(buildDocumentAnnotationsList());

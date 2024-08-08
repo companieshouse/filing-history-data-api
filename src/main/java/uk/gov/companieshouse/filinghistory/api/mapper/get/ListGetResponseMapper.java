@@ -31,7 +31,7 @@ public class ListGetResponseMapper {
                 .startIndex(startIndex)
                 .itemsPerPage(itemsPerPage)
                 .filingHistoryStatus(FilingHistoryStatusEnum.fromValue(status))
-                .totalCount(listAggregate.getTotalCount())
+                .totalCount(Math.toIntExact(listAggregate.getTotalCount()))
                 .items(listAggregate.getDocumentList().stream()
                         .map(itemGetResponseMapper::mapFilingHistoryItem)
                         .map(filingHistoryItemCleanser::cleanseFilingHistoryItem)

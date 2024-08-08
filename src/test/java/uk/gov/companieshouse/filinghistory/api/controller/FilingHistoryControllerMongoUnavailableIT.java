@@ -164,7 +164,7 @@ class FilingHistoryControllerMongoUnavailableIT {
     @Test
     void shouldReturn502WhenRepositoryThrowsBadGatewayDuringFindFilingHistory() throws Exception {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
 
         // when
         ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER,

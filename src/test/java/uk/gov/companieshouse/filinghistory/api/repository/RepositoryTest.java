@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryIds;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,42 +45,90 @@ class RepositoryTest {
     private MongoTemplate mongoTemplate;
 
     @Mock
-    private AggregationResults<FilingHistoryListAggregate> aggregationResults;
+    private AggregationResults<FilingHistoryIds> aggregationResultsFilingHistoryIds;
     @Mock
-    private FilingHistoryListAggregate listAggregate;
+    private AggregationResults<FilingHistoryDocument> aggregationResultsFullDocuments;
+    @Mock
+    private FilingHistoryIds filingHistoryIds;
+    @Mock
+    private List<FilingHistoryDocument> mockFilingHistoryDocuments;
     @Mock
     private AggregationResults<FilingHistoryDeleteAggregate> deleteAggregationResults;
     @Mock
     private FilingHistoryDeleteAggregate deleteAggregate;
 
     @Test
-    void shouldCallMongoTemplateWithCompanyNumberCriteriaOnly() {
+    void shouldCallMongoTemplateSuccessfullyForListOfFilingHistoryIdsWithCompanyNumberCriteriaOnly() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
-                eq(FilingHistoryListAggregate.class))).thenReturn(aggregationResults);
-        when(aggregationResults.getUniqueMappedResult()).thenReturn(listAggregate);
+                eq(FilingHistoryIds.class))).thenReturn(aggregationResultsFilingHistoryIds);
+        when(aggregationResultsFilingHistoryIds.getUniqueMappedResult()).thenReturn(filingHistoryIds);
 
         // when
-        FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX,
+        FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of());
 
         // then
-        assertEquals(listAggregate, actual);
+        assertEquals(filingHistoryIds, listOfFilingHistoryIds);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class));
     }
 
     @Test
-    void shouldCallMongoTemplateWithCompanyNumberAndCategoryCriteria() {
+    void shouldCallMongoTemplateSuccessfullyForListOfFullDocuments() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
-                eq(FilingHistoryListAggregate.class))).thenReturn(aggregationResults);
-        when(aggregationResults.getUniqueMappedResult()).thenReturn(listAggregate);
+                eq(FilingHistoryDocument.class))).thenReturn(aggregationResultsFullDocuments);
+        when(aggregationResultsFullDocuments.getMappedResults()).thenReturn(mockFilingHistoryDocuments);
 
         // when
-        FilingHistoryListAggregate actual = repository.findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX,
+        FilingHistoryIds listOfFilingHistoryIds = new FilingHistoryIds().ids(new ArrayList<>());
+        List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+
+        // then
+        assertEquals(mockFilingHistoryDocuments, filingHistoryDocuments);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldCallMongoTemplateSuccessfullyForCalculationOfTotalCountWithCompanyNumberCriteriaOnly() {
+        // given
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
+
+        // when
+        long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+
+        // then
+        assertEquals(1L, totalCount);
+        verify(mongoTemplate).count(any(), eq(FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldCallMongoTemplateSuccessfullyForListOfFilingHistoryIdsWithCompanyNumberAndCategoryCriteria() {
+        // given
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
+                eq(FilingHistoryIds.class))).thenReturn(aggregationResultsFilingHistoryIds);
+        when(aggregationResultsFilingHistoryIds.getUniqueMappedResult()).thenReturn(filingHistoryIds);
+
+        // when
+        FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of(CATEGORY));
 
         // then
-        assertEquals(listAggregate, actual);
+        assertEquals(filingHistoryIds, listOfFilingHistoryIds);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class));
+    }
+
+    @Test
+    void shouldCallMongoTemplateSuccessfullyForCalculationOfTotalCountWithCompanyNumberAndCategoryCriteria() {
+        // given
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
+
+        // when
+        long totalCount = repository.countTotal(COMPANY_NUMBER, List.of(CATEGORY));
+
+        // then
+        assertEquals(1L, totalCount);
+        verify(mongoTemplate).count(any(), eq(FilingHistoryDocument.class));
     }
 
     @Test
@@ -210,18 +259,49 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindCompanyFilingHistory() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindCompanyFilingHistoryIds() {
         // given
-        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class)))
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class)))
                 .thenThrow(new DataAccessException("...") {
                 });
 
         // when
-        Executable executable = () -> repository.findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX,
+        Executable executable = () -> repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of(CATEGORY));
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryListAggregate.class));
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class));
     }
+
+    @Test
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindFullFilingHistoryDocuments() {
+        // given
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDocument.class)))
+                .thenThrow(new DataAccessException("...") {
+                });
+
+        // when
+        Executable executable = () -> repository.findFullFilingHistoryDocuments(List.of());
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenCalculatingCountTotal() {
+        // given
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class)))
+                .thenThrow(new DataAccessException("...") {
+                });
+
+        // when
+        Executable executable = () -> repository.countTotal(COMPANY_NUMBER, List.of(CATEGORY));
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
+        verify(mongoTemplate).count(any(), eq(FilingHistoryDocument.class));
+    }
+
 }

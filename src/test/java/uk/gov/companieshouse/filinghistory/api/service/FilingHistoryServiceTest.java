@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -26,6 +28,7 @@ import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryIds;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 
@@ -86,12 +89,12 @@ class FilingHistoryServiceTest {
 
     @ParameterizedTest
     @MethodSource("categoriesListCases")
-    void findCompanyFilingHistoryListShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
+    void findCompanyFilingHistoryListQueriesShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
             List<String> expectedCategories) {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any()))
-                .thenReturn(filingHistoryListAggregate);
-        when(filingHistoryListAggregate.getTotalCount()).thenReturn(1);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
+        when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
+        when(repository.countTotal(any(), any())).thenReturn(1L);
 
         // when
         final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
@@ -99,17 +102,18 @@ class FilingHistoryServiceTest {
 
         // then
         assertTrue(actualFilingHistoryListAggregate.isPresent());
-        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
+        assertEquals(1, actualFilingHistoryListAggregate.get().getTotalCount());
+        verify(repository).findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
                 expectedCategories);
 
     }
 
     @Test
-    void findCompanyFilingHistoryListShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
+    void findCompanyFilingHistoryListQueriesShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any()))
-                .thenReturn(filingHistoryListAggregate);
-        when(filingHistoryListAggregate.getTotalCount()).thenReturn(0);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
+        when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
+        when(repository.countTotal(any(), any())).thenReturn(0L);
 
         // when
         final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
@@ -117,13 +121,13 @@ class FilingHistoryServiceTest {
 
         // then
         assertTrue(actualFilingHistoryListAggregate.isEmpty());
-        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        verify(repository).findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
     @Test
     void findCompanyFilingHistoryThrowsBadGatewayException() {
         // given
-        when(repository.findCompanyFilingHistory(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
@@ -131,7 +135,7 @@ class FilingHistoryServiceTest {
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(repository).findCompanyFilingHistory(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        verify(repository).findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
     @Test

@@ -40,7 +40,7 @@ class ResolutionsGetResponseMapperTest {
     @Mock
     private DescriptionValuesGetResponseMapper descriptionValuesGetResponseMapper;
     @Mock
-    private DescriptionValues DescriptionValues;
+    private DescriptionValues descriptionValues;
 
     @Test
     void shouldSuccessfullyMapResolutions() {
@@ -54,9 +54,9 @@ class ResolutionsGetResponseMapperTest {
                         .type(TYPE)
                         .description(DESCRIPTION)
                         .originalDescription(ORIGINAL_DESCRIPTION)
-                        .descriptionValues(DescriptionValues));
+                        .descriptionValues(descriptionValues));
 
-        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(DescriptionValues);
+        when(descriptionValuesGetResponseMapper.map(any())).thenReturn(descriptionValues);
 
         // when
         final List<Resolution> actual = resolutionsGetResponseMapper.map(buildDocumentResolutionsList());
