@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -57,49 +58,77 @@ class RepositoryTest {
     private FilingHistoryDeleteAggregate deleteAggregate;
 
     @Test
-    void shouldCallMongoTemplateSuccessfullyWithCompanyNumberCriteriaOnly() {
+    void shouldCallMongoTemplateSuccessfullyForListOfFilingHistoryIdsWithCompanyNumberCriteriaOnly() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
                 eq(FilingHistoryIds.class))).thenReturn(aggregationResultsFilingHistoryIds);
-        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
-                eq(FilingHistoryDocument.class))).thenReturn(aggregationResultsFullDocuments);
         when(aggregationResultsFilingHistoryIds.getUniqueMappedResult()).thenReturn(filingHistoryIds);
-        when(aggregationResultsFullDocuments.getMappedResults()).thenReturn(mockFilingHistoryDocuments);
-        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
 
         // when
         FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of());
-        List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
-        long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
 
         // then
         assertEquals(filingHistoryIds, listOfFilingHistoryIds);
-        assertEquals(mockFilingHistoryDocuments, filingHistoryDocuments);
-        assertEquals(1L, totalCount);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class));
     }
 
     @Test
-    void shouldCallMongoTemplateSuccessfullyWithCompanyNumberAndCategoryCriteria() {
+    void shouldCallMongoTemplateSuccessfullyForListOfFullDocuments() {
+        // given
+        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
+                eq(FilingHistoryDocument.class))).thenReturn(aggregationResultsFullDocuments);
+        when(aggregationResultsFullDocuments.getMappedResults()).thenReturn(mockFilingHistoryDocuments);
+
+        // when
+        FilingHistoryIds listOfFilingHistoryIds = new FilingHistoryIds().ids(new ArrayList<>());
+        List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+
+        // then
+        assertEquals(mockFilingHistoryDocuments, filingHistoryDocuments);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldCallMongoTemplateSuccessfullyForCalculationOfTotalCountWithCompanyNumberCriteriaOnly() {
+        // given
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
+
+        // when
+        long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
+
+        // then
+        assertEquals(1L, totalCount);
+        verify(mongoTemplate).count(any(), eq(FilingHistoryDocument.class));
+    }
+
+    @Test
+    void shouldCallMongoTemplateSuccessfullyForListOfFilingHistoryIdsWithCompanyNumberAndCategoryCriteria() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
                 eq(FilingHistoryIds.class))).thenReturn(aggregationResultsFilingHistoryIds);
-        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
-                eq(FilingHistoryDocument.class))).thenReturn(aggregationResultsFullDocuments);
         when(aggregationResultsFilingHistoryIds.getUniqueMappedResult()).thenReturn(filingHistoryIds);
-        when(aggregationResultsFullDocuments.getMappedResults()).thenReturn(mockFilingHistoryDocuments);
-        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
 
         // when
         FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of(CATEGORY));
-        List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
-        long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
 
         // then
         assertEquals(filingHistoryIds, listOfFilingHistoryIds);
-        assertEquals(mockFilingHistoryDocuments, filingHistoryDocuments);
+        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class));
+    }
+
+    @Test
+    void shouldCallMongoTemplateSuccessfullyForCalculationOfTotalCountWithCompanyNumberAndCategoryCriteria() {
+        // given
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
+
+        // when
+        long totalCount = repository.countTotal(COMPANY_NUMBER, List.of(CATEGORY));
+
+        // then
         assertEquals(1L, totalCount);
+        verify(mongoTemplate).count(any(), eq(FilingHistoryDocument.class));
     }
 
     @Test
