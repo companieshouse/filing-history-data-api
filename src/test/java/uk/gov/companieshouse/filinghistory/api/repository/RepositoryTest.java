@@ -65,10 +65,10 @@ class RepositoryTest {
                 eq(FilingHistoryDocument.class))).thenReturn(aggregationResultsFullDocuments);
         when(aggregationResultsFilingHistoryIds.getUniqueMappedResult()).thenReturn(filingHistoryIds);
         when(aggregationResultsFullDocuments.getMappedResults()).thenReturn(mockFilingHistoryDocuments);
-        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(Long.valueOf(1));
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
 
         // when
-        FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
+        FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of());
         List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -88,10 +88,10 @@ class RepositoryTest {
                 eq(FilingHistoryDocument.class))).thenReturn(aggregationResultsFullDocuments);
         when(aggregationResultsFilingHistoryIds.getUniqueMappedResult()).thenReturn(filingHistoryIds);
         when(aggregationResultsFullDocuments.getMappedResults()).thenReturn(mockFilingHistoryDocuments);
-        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(Long.valueOf(1));
+        when(mongoTemplate.count(any(), eq(FilingHistoryDocument.class))).thenReturn(1L);
 
         // when
-        FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
+        FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of(CATEGORY));
         List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -230,14 +230,14 @@ class RepositoryTest {
     }
 
     @Test
-    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindListOfFilingHistoryIds() {
+    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindCompanyFilingHistoryIds() {
         // given
         when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryIds.class)))
                 .thenThrow(new DataAccessException("...") {
                 });
 
         // when
-        Executable executable = () -> repository.findListOfFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
+        Executable executable = () -> repository.findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX,
                 ITEMS_PER_PAGE, List.of(CATEGORY));
 
         // then

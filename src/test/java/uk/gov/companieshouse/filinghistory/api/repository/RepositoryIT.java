@@ -116,7 +116,7 @@ class RepositoryIT {
         final FilingHistoryListAggregate expected = getFilingHistoryListAggregate();
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
         final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -147,7 +147,7 @@ class RepositoryIT {
         expected.getDocumentList().getFirst().getData().category("incorporation");
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of("incorporation"));
         final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of("incorporation"));
@@ -166,7 +166,7 @@ class RepositoryIT {
         }
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 20, DEFAULT_ITEMS_PER_PAGE, List.of());
         final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -188,7 +188,7 @@ class RepositoryIT {
         }
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 60, DEFAULT_ITEMS_PER_PAGE, List.of());
         final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -204,7 +204,7 @@ class RepositoryIT {
         // given
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
         final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -226,7 +226,7 @@ class RepositoryIT {
         }
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
         final List<FilingHistoryDocument> documentList = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());
@@ -251,7 +251,7 @@ class RepositoryIT {
         mongoTemplate.insert(documentList, FILING_HISTORY_COLLECTION);
 
         // when
-        final FilingHistoryIds listOfFilingHistoryIds = repository.findListOfFilingHistoryIds(COMPANY_NUMBER,
+        final FilingHistoryIds listOfFilingHistoryIds = repository.findCompanyFilingHistoryIds(COMPANY_NUMBER,
                 DOC_COUNT - 26, DEFAULT_ITEMS_PER_PAGE, List.of());
         final List<FilingHistoryDocument> documentListReturned = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
         final long totalCount = repository.countTotal(COMPANY_NUMBER, List.of());

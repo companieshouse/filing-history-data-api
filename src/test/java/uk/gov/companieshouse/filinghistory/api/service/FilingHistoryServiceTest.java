@@ -92,9 +92,9 @@ class FilingHistoryServiceTest {
     void findCompanyFilingHistoryListQueriesShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
             List<String> expectedCategories) {
         // given
-        when(repository.findListOfFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
         when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
-        when(repository.countTotal(any(), any())).thenReturn(Long.valueOf(1));
+        when(repository.countTotal(any(), any())).thenReturn(1L);
 
         // when
         final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
@@ -103,7 +103,7 @@ class FilingHistoryServiceTest {
         // then
         assertTrue(actualFilingHistoryListAggregate.isPresent());
         assertEquals(1, actualFilingHistoryListAggregate.get().getTotalCount());
-        verify(repository).findListOfFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
+        verify(repository).findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
                 expectedCategories);
 
     }
@@ -111,9 +111,9 @@ class FilingHistoryServiceTest {
     @Test
     void findCompanyFilingHistoryListQueriesShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
         // given
-        when(repository.findListOfFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
         when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
-        when(repository.countTotal(any(), any())).thenReturn(Long.valueOf(0));
+        when(repository.countTotal(any(), any())).thenReturn(0L);
 
         // when
         final Optional<FilingHistoryListAggregate> actualFilingHistoryListAggregate = service
@@ -121,13 +121,13 @@ class FilingHistoryServiceTest {
 
         // then
         assertTrue(actualFilingHistoryListAggregate.isEmpty());
-        verify(repository).findListOfFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        verify(repository).findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
     @Test
     void findCompanyFilingHistoryThrowsBadGatewayException() {
         // given
-        when(repository.findListOfFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
@@ -135,7 +135,7 @@ class FilingHistoryServiceTest {
 
         // then
         assertThrows(BadGatewayException.class, executable);
-        verify(repository).findListOfFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
+        verify(repository).findCompanyFilingHistoryIds(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE, List.of());
     }
 
     @Test

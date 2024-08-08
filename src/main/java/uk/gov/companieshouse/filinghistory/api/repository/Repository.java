@@ -40,7 +40,7 @@ public class Repository {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public FilingHistoryIds findListOfFilingHistoryIds(String companyNumber,
+    public FilingHistoryIds findCompanyFilingHistoryIds(String companyNumber,
             int startIndex, int itemsPerPage, List<String> categoryList) {
         try {
             Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
@@ -49,7 +49,7 @@ public class Repository {
             }
             Aggregation aggregation = newAggregation(
                     match(criteria),
-                    facet(match(new Criteria()), sort(Direction.DESC, "data.date")).as("ids"),
+                    facet(sort(Direction.DESC, "data.date")).as("ids"),
                     project().andExpression("$ids._id").slice(itemsPerPage, startIndex).as("ids"));
 
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryIds.class)

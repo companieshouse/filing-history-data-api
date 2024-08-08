@@ -46,7 +46,7 @@ public class FilingHistoryService implements Service {
                             "gazette", "reregistration", "resolution", "restoration"));
         }
 
-        List<String> filingHistoryIds = repository.findListOfFilingHistoryIds(companyNumber, startIndex,
+        List<String> filingHistoryIds = repository.findCompanyFilingHistoryIds(companyNumber, startIndex,
                 itemsPerPage, categoryList).getIds();
 
         List<FilingHistoryDocument> documents = repository.findFullFilingHistoryDocuments(filingHistoryIds);
