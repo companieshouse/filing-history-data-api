@@ -49,7 +49,7 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
     @Override
     public FilingHistoryList processGetCompanyFilingHistoryList(FilingHistoryListRequestParams requestParams) {
         final String companyNumber = requestParams.companyNumber();
-        final int itemsPerPage = Math.min(requestParams.itemsPerPage(), MAX_ITEMS_PER_PAGE);
+        final int itemsPerPage = Math.min(Math.abs(requestParams.itemsPerPage()), MAX_ITEMS_PER_PAGE);
         final int startIndex = requestParams.startIndex();
 
         String status = statusService.processStatus(companyNumber);
