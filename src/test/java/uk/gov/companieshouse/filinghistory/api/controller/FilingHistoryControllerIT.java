@@ -395,34 +395,7 @@ class FilingHistoryControllerIT {
                 .startIndex(0)
                 .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .totalCount(1)
-                .items(List.of(new ExternalData()
-                        .transactionId(TRANSACTION_ID)
-                        .barcode(BARCODE)
-                        .actionDate("2014-08-29")
-                        .category(ExternalData.CategoryEnum.OFFICERS)
-                        .type(TM01_TYPE)
-                        .description(DESCRIPTION)
-                        .subcategory(SUBCATEGORY)
-                        .date("2014-09-15")
-                        .descriptionValues(new DescriptionValues()
-                                .officerName("John Tester")
-                                .terminationDate("2014-08-29"))
-                        .annotations(List.of(
-                                new Annotation()
-                                        .annotation(
-                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011")
-                                        .category("annotation")
-                                        .date("2011-11-26")
-                                        .description("annotation")
-                                        .descriptionValues(new DescriptionValues()
-                                                .description(
-                                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
-                                        .type("ANNOTATION")))
-                        .links(new Links()
-                                .self(SELF_LINK)
-                                .documentMetadata(
-                                        "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
-                        .pages(1)));
+                .items(getExpectedExternalData());
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
@@ -433,6 +406,40 @@ class FilingHistoryControllerIT {
 
         // when
         ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, COMPANY_NUMBER)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("X-Request-Id", CONTEXT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
+        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+
+        assertEquals(expectedResponseBody, actualResponseBody);
+    }
+
+    @Test
+    void shouldGetCompanyFilingHistoryListWithNegativeValueAndReturn200OK() throws Exception {
+        // given
+        final FilingHistoryList expectedResponseBody = new FilingHistoryList()
+                .itemsPerPage(25)
+                .startIndex(0)
+                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .totalCount(1)
+                .items(getExpectedExternalData());
+
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        // when
+        ResultActions result = mockMvc.perform(get(LIST_GET_REQUEST_URI, COMPANY_NUMBER)
+                .queryParam("items_per_page", "-25")
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("X-Request-Id", CONTEXT_ID)
@@ -506,34 +513,7 @@ class FilingHistoryControllerIT {
                 .startIndex(0)
                 .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
                 .totalCount(1)
-                .items(List.of(new ExternalData()
-                        .transactionId(TRANSACTION_ID)
-                        .barcode(BARCODE)
-                        .actionDate("2014-08-29")
-                        .category(ExternalData.CategoryEnum.OFFICERS)
-                        .type(TM01_TYPE)
-                        .description(DESCRIPTION)
-                        .subcategory(SUBCATEGORY)
-                        .date("2014-09-15")
-                        .descriptionValues(new DescriptionValues()
-                                .officerName("John Tester")
-                                .terminationDate("2014-08-29"))
-                        .annotations(List.of(
-                                new Annotation()
-                                        .annotation(
-                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011")
-                                        .category("annotation")
-                                        .date("2011-11-26")
-                                        .description("annotation")
-                                        .descriptionValues(new DescriptionValues()
-                                                .description(
-                                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
-                                        .type("ANNOTATION")))
-                        .links(new Links()
-                                .self(SELF_LINK)
-                                .documentMetadata(
-                                        "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
-                        .pages(1)));
+                .items(getExpectedExternalData());
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
@@ -1339,6 +1319,38 @@ class FilingHistoryControllerIT {
                 .originalDescription(ORIGINAL_DESCRIPTION)
                 .documentId(DOCUMENT_ID);
     }
+
+    private List<ExternalData> getExpectedExternalData() {
+        return List.of(new ExternalData()
+                .transactionId(TRANSACTION_ID)
+                .barcode(BARCODE)
+                .actionDate("2014-08-29")
+                .category(CategoryEnum.OFFICERS)
+                .type(TM01_TYPE)
+                .description(DESCRIPTION)
+                .subcategory(SUBCATEGORY)
+                .date("2014-09-15")
+                .descriptionValues(new DescriptionValues()
+                        .officerName("John Tester")
+                        .terminationDate("2014-08-29"))
+                .annotations(List.of(
+                        new Annotation()
+                                .annotation(
+                                        "Clarification This document was second filed with the CH04 registered on 26/11/2011")
+                                .category("annotation")
+                                .date("2011-11-26")
+                                .description("annotation")
+                                .descriptionValues(new DescriptionValues()
+                                        .description(
+                                                "Clarification This document was second filed with the CH04 registered on 26/11/2011"))
+                                .type("ANNOTATION")))
+                .links(new Links()
+                        .self(SELF_LINK)
+                        .documentMetadata(
+                                "http://localhost:8080/document/C1_z-KlM567zSgwJz8uN-UZ3_xnGfCljj3k7L69LxwA"))
+                .pages(1));
+    }
+
 
     private static String getExpectedChangedResource() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-changed.json", StandardCharsets.UTF_8)
