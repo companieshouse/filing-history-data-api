@@ -5,7 +5,7 @@ aws_profile = "live-eu-west-2"
 use_set_environment_files = true
 log_level = "trace"
 
-min_task_count = 5
-desired_task_count = 5
+min_task_count = 8
+desired_task_count = 8
 required_cpus = 768
 required_memory = 1536
