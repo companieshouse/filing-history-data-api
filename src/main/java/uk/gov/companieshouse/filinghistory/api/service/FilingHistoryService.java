@@ -86,7 +86,8 @@ public class FilingHistoryService implements Service {
         ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(docToUpdate, false, null));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            originalDocumentCopy.version(originalDocumentCopy.getVersion() + 1);
+            Long originalVersion = originalDocumentCopy.getVersion();
+            originalDocumentCopy.version(originalVersion == null ? 0 : originalVersion + 1);
             repository.update(originalDocumentCopy);
             LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
             throwBadGatewayException();
@@ -109,7 +110,8 @@ public class FilingHistoryService implements Service {
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
-        ApiResponse<Void> response = apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
+        ApiResponse<Void> response = apiClient.callResourceChanged(
+                new ResourceChangedRequest(existingDocument, true, null));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
             throwBadGatewayException();
         }
