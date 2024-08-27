@@ -36,12 +36,10 @@ public class DeleteMapperDelegator {
         final int resIndex = aggregate.getResolutionIndex();
         if (resIndex >= 0) {
             if (COMPOSITE_RES_TYPE.equals(data.getType())) {
-                LOGGER.debug("Matched composite resolution _entity_id: [%s]".formatted(entityId),
-                        DataMapHolder.getLogMap());
+                LOGGER.debug("Matched composite resolution", DataMapHolder.getLogMap());
                 return compositeResolutionDeleteMapper.removeTransaction(resIndex, document);
             } else {
-                LOGGER.debug("Matched resolution _entity_id: [%s]".formatted(entityId),
-                        DataMapHolder.getLogMap());
+                LOGGER.info("Matched resolution", DataMapHolder.getLogMap());
                 return childDeleteMapper.removeTransaction(entityId, resIndex, document, data::getResolutions,
                         data::resolutions);
             }
@@ -49,27 +47,24 @@ public class DeleteMapperDelegator {
 
         final int annotationIndex = aggregate.getAnnotationIndex();
         if (annotationIndex >= 0) {
-            LOGGER.debug("Matched annotation _entity_id: [%s]".formatted(entityId),
-                    DataMapHolder.getLogMap());
+            LOGGER.debug("Matched annotation", DataMapHolder.getLogMap());
             return childDeleteMapper.removeTransaction(entityId, annotationIndex, document, data::getAnnotations,
                     data::annotations);
         }
 
         final int associatedFilingIndex = aggregate.getAssociatedFilingIndex();
         if (associatedFilingIndex >= 0) {
-            LOGGER.debug("Matched associated filing _entity_id: [%s]".formatted(entityId),
-                    DataMapHolder.getLogMap());
+            LOGGER.debug("Matched associated filing", DataMapHolder.getLogMap());
             return childDeleteMapper.removeTransaction(entityId, associatedFilingIndex, document,
                     data::getAssociatedFilings,
                     data::associatedFilings);
         }
 
         if (entityId.equals(document.getEntityId())) {
-            LOGGER.debug("Matched top level _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
             return Optional.empty();
         } else {
-            LOGGER.debug("No match for _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
-            throw new BadRequestException("No match for _entity_id: [%s]".formatted(entityId));
+            LOGGER.error("No match on entity id", DataMapHolder.getLogMap());
+            throw new BadRequestException("No match on entity id");
         }
     }
 }

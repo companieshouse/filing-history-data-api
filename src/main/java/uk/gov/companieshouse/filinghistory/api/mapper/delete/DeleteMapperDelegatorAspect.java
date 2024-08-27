@@ -23,19 +23,16 @@ public class DeleteMapperDelegatorAspect {
 
     @Around("@annotation(DeleteChildTransactions)")
     public Optional<FilingHistoryDocument> deleteChildTransactionsDisabled(JoinPoint joinPoint) {
-        LOGGER.debug("Deletion of child transactions disabled", DataMapHolder.getLogMap());
+        LOGGER.info("Deletion of child transactions disabled", DataMapHolder.getLogMap());
         Object[] args = joinPoint.getArgs();
         String entityId = (String) args[0];
         FilingHistoryDeleteAggregate aggregate = (FilingHistoryDeleteAggregate) args[1];
 
         if (!entityId.equals(aggregate.getDocument().getEntityId())
                 || "RESOLUTIONS".equals(aggregate.getDocument().getData().getType())) {
-            LOGGER.error("Cannot delete child while child deletion disabled, _entity_id: [%s]"
-                    .formatted(entityId), DataMapHolder.getLogMap());
-            throw new BadRequestException("Cannot delete child while child deletion disabled, _entity_id: [%s]"
-                    .formatted(entityId));
+            LOGGER.error("Cannot delete child while child deletion disabled", DataMapHolder.getLogMap());
+            throw new BadRequestException("Cannot delete child while child deletion disabled");
         } else {
-            LOGGER.debug("Matched parent _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
             return Optional.empty();
         }
     }

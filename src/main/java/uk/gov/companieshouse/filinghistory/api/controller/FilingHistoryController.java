@@ -83,12 +83,12 @@ public class FilingHistoryController {
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,
             @RequestBody InternalFilingHistoryApi requestBody) {
-
+        final String entityId = requestBody.getInternalData().getEntityId();
         DataMapHolder.get()
                 .companyNumber(companyNumber)
-                .transactionId(transactionId);
-        LOGGER.info("Processing transaction upsert, _entity_id: [%s]"
-                .formatted(requestBody.getInternalData().getEntityId()), DataMapHolder.getLogMap());
+                .transactionId(transactionId)
+                .entityId(entityId);
+        LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
 
         serviceUpsertProcessor.processFilingHistory(transactionId, companyNumber, requestBody);
 
@@ -101,7 +101,7 @@ public class FilingHistoryController {
     @DeleteMapping("/filing-history/{entity_id}/internal")
     public ResponseEntity<Void> deleteFilingHistoryTransaction(@PathVariable("entity_id") final String entityId) {
 
-        DataMapHolder.get().transactionId(entityId);
+        DataMapHolder.get().entityId(entityId);
         LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
 
         serviceDeleteProcessor.processFilingHistoryDelete(entityId);

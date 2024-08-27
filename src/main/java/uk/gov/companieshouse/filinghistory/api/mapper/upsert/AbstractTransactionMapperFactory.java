@@ -4,7 +4,6 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
-import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -29,7 +28,6 @@ public class AbstractTransactionMapperFactory {
     }
 
     public AbstractTransactionMapper getTransactionMapper(TransactionKindEnum kind) {
-        LOGGER.debug("Getting mapper for [%s] transaction kind".formatted(kind.getValue()), DataMapHolder.getLogMap());
         return switch (kind) {
             case TOP_LEVEL -> topLevelTransactionMapper;
             case ANNOTATION -> annotationTransactionMapper;

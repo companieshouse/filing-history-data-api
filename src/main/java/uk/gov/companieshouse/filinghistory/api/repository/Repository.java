@@ -55,9 +55,9 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryIds.class)
                     .getUniqueMappedResult();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding filing history ids: %s".formatted(ex.getMessage()), ex,
+            LOGGER.error("MongoDB error when getting aggregate: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB error when finding filing history ids", ex);
+            throw new BadGatewayException("MongoDB error when getting aggregate", ex);
         }
     }
 
@@ -72,9 +72,9 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryDocument.class)
                     .getMappedResults();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding full filing history list: %s".formatted(ex.getMessage()), ex,
+            LOGGER.error("MongoDB error when getting aggregate: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB error when finding full filing history list", ex);
+            throw new BadGatewayException("MongoDB error when getting aggregate", ex);
         }
     }
 
@@ -102,7 +102,7 @@ public class Repository {
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding the document: %s".formatted(ex.getMessage()), ex,
+            LOGGER.error("MongoDB error when finding document: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding document", ex);
         }
@@ -141,10 +141,10 @@ public class Repository {
                     mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
                             FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when trying to retrieve filing history delete document: %s".formatted(
+            LOGGER.error("MongoDB error when getting aggregate: %s".formatted(
                     ex.getMessage()), ex, DataMapHolder.getLogMap());
             throw new BadGatewayException(
-                    "MongoDB error when trying to retrieve filing history delete document", ex);
+                    "MongoDB error when getting aggregate", ex);
         }
     }
 

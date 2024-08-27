@@ -20,7 +20,7 @@ public class ResourceChangedApiClientAspect {
 
     @Around("@annotation(CallResourceChanged)")
     public ApiResponse<Void> callResourceChangedDisabled() {
-        LOGGER.debug("Resource changed call disabled; not publishing change to chs-kafka-api",
+        LOGGER.info("Resource changed call disabled; not publishing change to chs-kafka-api",
                 DataMapHolder.getLogMap());
         return new ApiResponse<>(200, Map.of());
     }
