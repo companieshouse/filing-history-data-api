@@ -39,7 +39,7 @@ public class DeleteMapperDelegator {
                 LOGGER.debug("Matched composite resolution", DataMapHolder.getLogMap());
                 return compositeResolutionDeleteMapper.removeTransaction(resIndex, document);
             } else {
-                LOGGER.info("Matched resolution", DataMapHolder.getLogMap());
+                LOGGER.debug("Matched resolution", DataMapHolder.getLogMap());
                 return childDeleteMapper.removeTransaction(entityId, resIndex, document, data::getResolutions,
                         data::resolutions);
             }

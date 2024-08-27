@@ -23,7 +23,7 @@ public class DeleteMapperDelegatorAspect {
 
     @Around("@annotation(DeleteChildTransactions)")
     public Optional<FilingHistoryDocument> deleteChildTransactionsDisabled(JoinPoint joinPoint) {
-        LOGGER.info("Deletion of child transactions disabled", DataMapHolder.getLogMap());
+        LOGGER.debug("Deletion of child transactions disabled", DataMapHolder.getLogMap());
         Object[] args = joinPoint.getArgs();
         String entityId = (String) args[0];
         FilingHistoryDeleteAggregate aggregate = (FilingHistoryDeleteAggregate) args[1];

@@ -55,9 +55,9 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryIds.class)
                     .getUniqueMappedResult();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when getting aggregate: %s".formatted(ex.getMessage()), ex,
+            LOGGER.error("MongoDB error when finding filing history ids: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB error when getting aggregate", ex);
+            throw new BadGatewayException("MongoDB error when finding filing history ids", ex);
         }
     }
 
@@ -72,9 +72,9 @@ public class Repository {
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryDocument.class)
                     .getMappedResults();
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when getting aggregate: %s".formatted(ex.getMessage()), ex,
+            LOGGER.error("MongoDB error when finding full filing history list: %s".formatted(ex.getMessage()), ex,
                     DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB error when getting aggregate", ex);
+            throw new BadGatewayException("MongoDB error when finding full filing history list", ex);
         }
     }
 
@@ -141,10 +141,10 @@ public class Repository {
                     mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
                             FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when getting aggregate: %s".formatted(
+            LOGGER.error("MongoDB error when retrieving delete document: %s".formatted(
                     ex.getMessage()), ex, DataMapHolder.getLogMap());
             throw new BadGatewayException(
-                    "MongoDB error when getting aggregate", ex);
+                    "MongoDB error when retrieving delete document", ex);
         }
     }
 
