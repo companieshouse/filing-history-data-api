@@ -327,16 +327,17 @@ class RepositoryIT {
     }
 
     @Test
-    void shouldCatchOptimisticLockingFailureExceptionAndThrowBadGatewayExceptionWhenVersionsOfUpdateAreSame() {
+    void shouldCatchOptimisticLockingFailureExceptionAndThrowBadGatewayExceptionWhenVersionsOfUpdateAreDifferent() {
         // given
-        FilingHistoryDocument document = new FilingHistoryDocument().transactionId(TRANSACTION_ID);
-        mongoTemplate.insert(document);
+        FilingHistoryDocument existingDoc = new FilingHistoryDocument().transactionId(TRANSACTION_ID);
+        mongoTemplate.insert(existingDoc);
+
         FilingHistoryDocument updateDoc = new FilingHistoryDocument().transactionId(TRANSACTION_ID).version(0);
         repository.update(updateDoc);
 
         // when
-        FilingHistoryDocument updateDocSameVersion = new FilingHistoryDocument().transactionId(TRANSACTION_ID).version(0);
-        Executable executable = () -> repository.update(updateDocSameVersion);
+        FilingHistoryDocument updateDocDifferentVersion = new FilingHistoryDocument().transactionId(TRANSACTION_ID).version(0);
+        Executable executable = () -> repository.update(updateDocDifferentVersion);
 
         // then
         assertThrows(BadGatewayException.class, executable);
