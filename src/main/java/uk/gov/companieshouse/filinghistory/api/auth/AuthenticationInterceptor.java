@@ -33,20 +33,20 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         String ericIdentityType = request.getHeader(ERIC_IDENTITY_TYPE);
 
         if (StringUtils.isBlank(ericIdentity)) {
-            LOGGER.error("Request received without eric identity", DataMapHolder.getLogMap());
+            LOGGER.error("Eric identity is blank", DataMapHolder.getLogMap());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
 
         if (!(API_KEY_IDENTITY_TYPE.equalsIgnoreCase(ericIdentityType)
                 || (OAUTH2_IDENTITY_TYPE.equalsIgnoreCase(ericIdentityType)))) {
-            LOGGER.error("Request received without correct eric identity type", DataMapHolder.getLogMap());
+            LOGGER.error("Incorrect eric identity type", DataMapHolder.getLogMap());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
 
         if (!isKeyAuthorised(request, ericIdentityType)) {
-            LOGGER.error("Supplied key does not have sufficient privileges", DataMapHolder.getLogMap());
+            LOGGER.error("Key is not authorised", DataMapHolder.getLogMap());
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }

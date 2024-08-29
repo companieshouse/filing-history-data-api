@@ -18,18 +18,18 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.2.4</spring.boot.version>
+    <spring.boot.version>3.3.3</spring.boot.version>
     <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
-    <structured-logging.version>3.0.5</structured-logging.version>
+    <structured-logging.version>3.0.14</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
     <api-security-java.version>2.0.5</api-security-java.version>
     <private-api-sdk-java.version>4.0.133</private-api-sdk-java.version>
-    <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.4.0</maven-surefire-plugin.version>
     <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
-    <maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
+    <maven-failsafe-plugin.version>3.4.0</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <test-containers.version>1.19.7</test-containers.version>
-    <wiremock.version>3.5.2</wiremock.version>
+    <test-containers.version>1.20.1</test-containers.version>
+    <wiremock.version>3.9.1</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>

@@ -11,11 +11,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
+import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
+import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.RequestLogger;
@@ -36,6 +40,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter implements Reques
                 .orElse(UUID.randomUUID().toString()));
         try {
             filterChain.doFilter(request, response);
+        } catch (BadGatewayException | NotFoundException | InternalServerErrorException ex) {
+            LOGGER.info("Recoverable exception: %s".formatted(Arrays.toString(ex.getStackTrace())),
+                    DataMapHolder.getLogMap());
+            throw ex;
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex, DataMapHolder.getLogMap());
             throw ex;

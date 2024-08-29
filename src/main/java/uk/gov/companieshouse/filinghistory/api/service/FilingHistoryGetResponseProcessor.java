@@ -41,8 +41,8 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
         return itemGetResponseMapper.mapFilingHistoryItem(
                 filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                         .orElseGet(() -> {
-                            LOGGER.error("Record could not be found in MongoDB", DataMapHolder.getLogMap());
-                            throw new NotFoundException("Record could not be found in MongoDB");
+                            LOGGER.info("Record not found in MongoDB", DataMapHolder.getLogMap());
+                            throw new NotFoundException("Record not found in MongoDB");
                         }));
     }
 

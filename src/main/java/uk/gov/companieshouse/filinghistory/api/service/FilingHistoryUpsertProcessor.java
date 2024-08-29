@@ -1,9 +1,10 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import java.time.Instant;
-import java.util.function.Supplier;
+import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 import com.google.common.base.Strings;
+import java.time.Instant;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpdateApi;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
@@ -18,8 +19,6 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 import uk.gov.companieshouse.filinghistory.api.serdes.ObjectCopier;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-
-import static uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum.TOP_LEVEL;
 
 @Component
 public class FilingHistoryUpsertProcessor implements UpsertProcessor {
@@ -46,7 +45,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
     @Override
     public void processFilingHistory(final String transactionId,
-                                     final String companyNumber, final InternalFilingHistoryApi request) {
+            final String companyNumber, final InternalFilingHistoryApi request) {
         final TransactionKindEnum transactionKind = request.getInternalData().getTransactionKind();
 
         if (!validatorFactory.getPutRequestValidator(transactionKind).isValid(request)) {
@@ -64,18 +63,20 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                             FilingHistoryDocument docToUpdate =
                                     mapper.mapExistingFilingHistory(request, existingDoc, instant);
 
+                            LOGGER.info("Updating existing document", DataMapHolder.getLogMap());
                             filingHistoryService.updateFilingHistory(docToUpdate, existingDocCopy);
                         },
                         () -> {
                             FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request,
                                     instant);
+                            LOGGER.info("Inserting new document", DataMapHolder.getLogMap());
                             filingHistoryService.insertFilingHistory(newDocument);
                         });
     }
 
     @Override
     public void processDocumentMetadata(final String transactionId, final String companyNumber,
-                                     final FilingHistoryDocumentMetadataUpdateApi request) {
+            final FilingHistoryDocumentMetadataUpdateApi request) {
 
         if (Strings.isNullOrEmpty(request.getDocumentMetadata())) {
             LOGGER.error("Request body missing document metadata field", DataMapHolder.getLogMap());

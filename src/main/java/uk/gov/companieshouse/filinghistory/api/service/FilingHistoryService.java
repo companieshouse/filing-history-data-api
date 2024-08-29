@@ -76,7 +76,7 @@ public class FilingHistoryService implements Service {
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
             repository.deleteById(docToInsert.getTransactionId());
             LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
-            throwBadGatewayException();
+            throwBadGatewayException(result.getStatusCode());
         }
     }
 
@@ -90,7 +90,7 @@ public class FilingHistoryService implements Service {
             originalDocumentCopy.version(originalVersion == null ? 0 : originalVersion + 1);
             repository.update(originalDocumentCopy);
             LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
-            throwBadGatewayException();
+            throwBadGatewayException(result.getStatusCode());
         }
     }
 
@@ -102,7 +102,7 @@ public class FilingHistoryService implements Service {
         ApiResponse<Void> result = apiClient.callResourceChanged(
                 new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
         if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            throwBadGatewayException();
+            throwBadGatewayException(result.getStatusCode());
         }
     }
 
@@ -113,12 +113,12 @@ public class FilingHistoryService implements Service {
         ApiResponse<Void> response = apiClient.callResourceChanged(
                 new ResourceChangedRequest(existingDocument, true, null));
         if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-            throwBadGatewayException();
+            throwBadGatewayException(response.getStatusCode());
         }
     }
 
-    private void throwBadGatewayException() {
-        LOGGER.error("Error calling resource changed endpoint", DataMapHolder.getLogMap());
+    private void throwBadGatewayException(final int statusCode) {
+        LOGGER.info("Resource changed endpoint responded with: %s".formatted(statusCode), DataMapHolder.getLogMap());
         throw new BadGatewayException("Error calling resource changed endpoint");
     }
 }

@@ -30,12 +30,10 @@ public class DeleteMapperDelegatorAspect {
 
         if (!entityId.equals(aggregate.getDocument().getEntityId())
                 || "RESOLUTIONS".equals(aggregate.getDocument().getData().getType())) {
-            LOGGER.error("Cannot delete child while child deletion disabled, _entity_id: [%s]"
-                    .formatted(entityId), DataMapHolder.getLogMap());
-            throw new BadRequestException("Cannot delete child while child deletion disabled, _entity_id: [%s]"
-                    .formatted(entityId));
+            LOGGER.error("Cannot delete child while child deletion disabled", DataMapHolder.getLogMap());
+            throw new BadRequestException("Cannot delete child while child deletion disabled");
         } else {
-            LOGGER.debug("Matched parent _entity_id: [%s]".formatted(entityId), DataMapHolder.getLogMap());
+            LOGGER.info("Matched parent", DataMapHolder.getLogMap());
             return Optional.empty();
         }
     }

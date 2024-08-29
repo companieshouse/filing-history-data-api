@@ -27,19 +27,17 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
                         deleteAggregate -> deleteMapperDelegator.delegateDelete(entityId, deleteAggregate)
                                 .ifPresentOrElse(
                                         updatedDocument -> {
-                                            LOGGER.info("Removing child with _entity_id: [%s]".formatted(entityId),
-                                                    DataMapHolder.getLogMap());
+                                            LOGGER.info("Removing child", DataMapHolder.getLogMap());
                                             filingHistoryService.updateFilingHistory(updatedDocument,
                                                     deleteAggregate.getDocument());
                                         },
                                         () -> {
-                                            LOGGER.info("Deleting parent with _entity_id: [%s]".formatted(entityId),
-                                                    DataMapHolder.getLogMap());
+                                            LOGGER.info("Deleting parent", DataMapHolder.getLogMap());
                                             filingHistoryService.deleteExistingFilingHistory(
                                                     deleteAggregate.getDocument());
                                         }),
                         () -> {
-                            LOGGER.error("Document to delete not found", DataMapHolder.getLogMap());
+                            LOGGER.info("Document to delete not found", DataMapHolder.getLogMap());
                             throw new NotFoundException("Document to delete not found");
                         }
                 );

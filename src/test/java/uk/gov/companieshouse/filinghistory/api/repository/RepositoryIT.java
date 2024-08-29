@@ -3,6 +3,7 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -24,6 +26,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
@@ -294,6 +297,19 @@ class RepositoryIT {
     }
 
     @Test
+    void shouldCatchDuplicateKeyExceptionAndThrowBadGatewayExceptionWhenInsertingSameDocTwice() {
+        // given
+        FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
+        repository.insert(document);
+
+        // when
+        Executable executable = () -> repository.insert(document);
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
+    }
+
+    @Test
     void shouldSuccessfullyUpdateDocumentAndIncrementVersion() {
         // given
         FilingHistoryDocument document = getFilingHistoryDocument(TRANSACTION_ID);
@@ -308,6 +324,23 @@ class RepositoryIT {
         // then
         FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldCatchOptimisticLockingFailureExceptionAndThrowBadGatewayExceptionWhenVersionsOfUpdateAreDifferent() {
+        // given
+        FilingHistoryDocument existingDoc = new FilingHistoryDocument().transactionId(TRANSACTION_ID);
+        mongoTemplate.insert(existingDoc);
+
+        FilingHistoryDocument updateDoc = new FilingHistoryDocument().transactionId(TRANSACTION_ID).version(0);
+        repository.update(updateDoc);
+
+        // when
+        FilingHistoryDocument updateDocDifferentVersion = new FilingHistoryDocument().transactionId(TRANSACTION_ID).version(0);
+        Executable executable = () -> repository.update(updateDocDifferentVersion);
+
+        // then
+        assertThrows(BadGatewayException.class, executable);
     }
 
     @Test

@@ -17,7 +17,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class ChildListMapper<T extends FilingHistoryChild> {
 
     private static final String MISSING_ENTITY_ID_ERROR_MSG =
-            "Child found in MongoDB with no _entity_id; Possible duplicate being persisted with _entity_id: [%s]";
+            "Child found in MongoDB with no _entity_id; Possible duplicate being persisted.";
     private static final String STALE_DELTA_ERROR_MESSAGE =
             "Stale delta received; request delta_at: [%s] is not after existing child delta_at: [%s]";
 
@@ -53,8 +53,7 @@ public class ChildListMapper<T extends FilingHistoryChild> {
                                         () -> {
                                             if (childList.stream()
                                                     .anyMatch(child -> StringUtils.isBlank(child.getEntityId()))) {
-                                                LOGGER.info(MISSING_ENTITY_ID_ERROR_MSG.formatted(requestEntityId),
-                                                        DataMapHolder.getLogMap());
+                                                LOGGER.info(MISSING_ENTITY_ID_ERROR_MSG, DataMapHolder.getLogMap());
                                             }
                                             childList.add(childMapper.mapChild(request));
                                         }),
