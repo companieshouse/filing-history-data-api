@@ -13,6 +13,9 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -54,9 +57,11 @@ public class Repository {
 
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryIds.class)
                     .getUniqueMappedResult();
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when finding filing history ids", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when finding filing history ids", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding filing history ids: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when finding filing history ids", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding filing history ids", ex);
         }
     }
@@ -68,27 +73,31 @@ public class Repository {
                     match(criteria),
                     addFields().addFieldWithValue("__sort_order__", arrayOf(filingHistoryIds).indexOf("$_id")).build(),
                     sort(Direction.ASC, "__sort_order__")
-                    );
+            );
             return mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class, FilingHistoryDocument.class)
                     .getMappedResults();
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when finding full filing history list", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when finding full filing history list", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding full filing history list: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when finding full filing history list", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding full filing history list", ex);
         }
     }
 
     public long countTotal(String companyNumber, List<String> categoryList) {
         try {
-        Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
-        if (!categoryList.isEmpty()) {
-            criteria.and("data.category").in(categoryList);
-        }
+            Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
+            if (!categoryList.isEmpty()) {
+                criteria.and("data.category").in(categoryList);
+            }
 
-        return mongoTemplate.count(Query.query(criteria), FilingHistoryDocument.class);
+            return mongoTemplate.count(Query.query(criteria), FilingHistoryDocument.class);
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when calculating total count", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when calculating total count", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when calculating total count: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when calculating total count", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when calculating total count", ex);
         }
     }
@@ -101,9 +110,11 @@ public class Repository {
             Query query = new Query(criteria);
 
             return Optional.ofNullable(mongoTemplate.findOne(query, FilingHistoryDocument.class));
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when finding document", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when finding document", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when finding document: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when finding document", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding document", ex);
         }
     }
@@ -140,20 +151,26 @@ public class Repository {
             return Optional.ofNullable(
                     mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
                             FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when retrieving delete document", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when retrieving delete document", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when retrieving delete document: %s".formatted(
-                    ex.getMessage()), ex, DataMapHolder.getLogMap());
-            throw new BadGatewayException(
-                    "MongoDB error when retrieving delete document", ex);
+            LOGGER.error("MongoDB error when retrieving delete document", ex, DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when retrieving delete document", ex);
         }
     }
 
     public void insert(final FilingHistoryDocument document) {
         try {
             mongoTemplate.insert(document);
+        } catch (DuplicateKeyException ex) {
+            LOGGER.info("Failed insert: Tried inserting record with duplicate id", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Failed insert: Tried inserting record with duplicate id", ex);
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when inserting document", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when inserting document", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when inserting document: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when inserting document", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when inserting document", ex);
         }
     }
@@ -163,13 +180,19 @@ public class Repository {
             // Initialise version of legacy document
             // Versioning is used to prevent lost updates during concurrent processing
             if (document.getVersion() == null) {
+                LOGGER.info("Initialising version of legacy document", DataMapHolder.getLogMap());
                 mongoTemplate.save(new UnversionedFilingHistoryDocument(document));
             } else {
                 mongoTemplate.save(document);
             }
+        } catch (OptimisticLockingFailureException ex) {
+            LOGGER.info("Failed update: Document not most recent version", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Failed update: Document not most recent version", ex);
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when updating document", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when updating document", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when updating document: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when updating document", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when updating document", ex);
         }
     }
@@ -177,9 +200,11 @@ public class Repository {
     public void deleteById(final String id) {
         try {
             mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), FilingHistoryDocument.class);
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when deleting document", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when deleting document", ex);
         } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when deleting document: %s".formatted(ex.getMessage()), ex,
-                    DataMapHolder.getLogMap());
+            LOGGER.error("MongoDB error when deleting document", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when deleting document", ex);
         }
     }

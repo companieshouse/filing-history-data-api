@@ -1,16 +1,10 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
-import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
-
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class AbstractTransactionMapperFactory {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final TopLevelTransactionMapper topLevelTransactionMapper;
     private final AnnotationTransactionMapper annotationTransactionMapper;

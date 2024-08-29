@@ -120,8 +120,7 @@ public class FilingHistoryController {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
                 .transactionId(transactionId);
-        LOGGER.info("Processing document metadata patch, transactionId: [%s]"
-                .formatted(transactionId), DataMapHolder.getLogMap());
+        LOGGER.info("Processing document metadata patch", DataMapHolder.getLogMap());
 
         serviceUpsertProcessor.processDocumentMetadata(transactionId, companyNumber, requestBody);
 

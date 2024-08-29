@@ -13,9 +13,9 @@ public class ValidatorFactory {
     private final ResolutionPutRequestValidator resolutionPutRequestValidator;
 
     public ValidatorFactory(TopLevelPutRequestValidator topLevelPutRequestValidator,
-                            AnnotationPutRequestValidator annotationPutRequestValidator,
-                            AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator,
-                            ResolutionPutRequestValidator resolutionPutRequestValidator) {
+            AnnotationPutRequestValidator annotationPutRequestValidator,
+            AssociatedFilingPutRequestValidator associatedFilingPutRequestValidator,
+            ResolutionPutRequestValidator resolutionPutRequestValidator) {
         this.topLevelPutRequestValidator = topLevelPutRequestValidator;
         this.annotationPutRequestValidator = annotationPutRequestValidator;
         this.associatedFilingPutRequestValidator = associatedFilingPutRequestValidator;

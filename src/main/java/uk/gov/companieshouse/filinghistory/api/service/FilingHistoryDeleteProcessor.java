@@ -37,7 +37,7 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
                                                     deleteAggregate.getDocument());
                                         }),
                         () -> {
-                            LOGGER.error("Document to delete not found", DataMapHolder.getLogMap());
+                            LOGGER.info("Document to delete not found", DataMapHolder.getLogMap());
                             throw new NotFoundException("Document to delete not found");
                         }
                 );

@@ -63,7 +63,7 @@ public class DeleteMapperDelegator {
         if (entityId.equals(document.getEntityId())) {
             return Optional.empty();
         } else {
-            LOGGER.error("No match on entity id", DataMapHolder.getLogMap());
+            LOGGER.info("No match on entity id", DataMapHolder.getLogMap());
             throw new BadRequestException("No match on entity id");
         }
     }

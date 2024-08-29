@@ -118,7 +118,7 @@ public class FilingHistoryService implements Service {
     }
 
     private void throwBadGatewayException(final int statusCode) {
-        LOGGER.error("Resource changed endpoint responded with: %s".formatted(statusCode), DataMapHolder.getLogMap());
+        LOGGER.info("Resource changed endpoint responded with: %s".formatted(statusCode), DataMapHolder.getLogMap());
         throw new BadGatewayException("Error calling resource changed endpoint");
     }
 }

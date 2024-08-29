@@ -33,6 +33,7 @@ public class DeleteMapperDelegatorAspect {
             LOGGER.error("Cannot delete child while child deletion disabled", DataMapHolder.getLogMap());
             throw new BadRequestException("Cannot delete child while child deletion disabled");
         } else {
+            LOGGER.info("Matched parent", DataMapHolder.getLogMap());
             return Optional.empty();
         }
     }
