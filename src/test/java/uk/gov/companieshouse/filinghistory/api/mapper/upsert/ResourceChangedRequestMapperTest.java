@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -79,7 +81,8 @@ class ResourceChangedRequestMapperTest {
                 .event(new ChangedResourceEvent()
                         .type(CHANGED_EVENT_TYPE)
                         .fieldsChanged(fieldsChanged)
-                        .publishedAt(UPDATED_AT.toString()));
+                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"))));
 
         // when
         ChangedResource actual = mapper.mapChangedResource(upsertResourceChangedRequest);
@@ -103,7 +106,8 @@ class ResourceChangedRequestMapperTest {
                 .resourceKind(FILING_HISTORY)
                 .event(new ChangedResourceEvent()
                         .type(CHANGED_EVENT_TYPE)
-                        .publishedAt(UPDATED_AT.toString()));
+                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"))));
 
         // when
         ChangedResource actual = mapper.mapChangedResource(upsertResourceChangedRequest);
@@ -136,7 +140,8 @@ class ResourceChangedRequestMapperTest {
                 .deletedData(deletedDataAsObject)
                 .event(new ChangedResourceEvent()
                         .type(DELETED_EVENT_TYPE)
-                        .publishedAt(UPDATED_AT.toString()));
+                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"))));
 
         // when
         ChangedResource actual = mapper.mapChangedResource(deleteResourceChangedRequest);

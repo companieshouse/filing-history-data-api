@@ -23,6 +23,8 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
@@ -1209,14 +1211,16 @@ class AssociatedFilingTransactionIT {
                 .deletedData(null)
                 .event(new ChangedResourceEvent()
                         .fieldsChanged(null)
-                        .publishedAt(UPDATED_AT.toString())
+                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss")))
                         .type("changed")));
     }
 
     private static String getExpectedResourceDeleted() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-associated-filing-resource-deleted.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", UPDATED_AT.toString())
+                .replaceAll("<published_at>", UPDATED_AT.atOffset(ZoneOffset.UTC)
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss")))
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<updated_at>", EXISTING_DATE)
