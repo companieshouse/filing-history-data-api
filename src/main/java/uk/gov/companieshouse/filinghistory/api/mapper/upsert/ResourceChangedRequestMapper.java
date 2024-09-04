@@ -5,14 +5,13 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -38,9 +37,8 @@ public class ResourceChangedRequestMapper {
 
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
         FilingHistoryDocument document = request.filingHistoryDocument();
-        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(instantSupplier.get()
-                .atOffset(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss")));
+        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(
+                DateUtils.publishedAtString(instantSupplier.get()));
         ChangedResource changedResource = new ChangedResource()
                 .resourceUri("/company/%s/filing-history/%s".formatted(document.getCompanyNumber(),
                         document.getTransactionId()))

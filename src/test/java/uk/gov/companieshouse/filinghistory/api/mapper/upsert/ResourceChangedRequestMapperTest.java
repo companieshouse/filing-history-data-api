@@ -13,8 +13,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -30,6 +28,7 @@ import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -38,6 +37,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 class ResourceChangedRequestMapperTest {
 
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final String PUBLISHED_AT = DateUtils.publishedAtString(UPDATED_AT);
     private static final String FILING_HISTORY = "filing-history";
     private static final String EXPECTED_CONTEXT_ID = "35234234";
     private static final ExternalData deletedData = new ExternalData();
@@ -81,8 +81,7 @@ class ResourceChangedRequestMapperTest {
                 .event(new ChangedResourceEvent()
                         .type(CHANGED_EVENT_TYPE)
                         .fieldsChanged(fieldsChanged)
-                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"))));
+                        .publishedAt(PUBLISHED_AT));
 
         // when
         ChangedResource actual = mapper.mapChangedResource(upsertResourceChangedRequest);
@@ -106,8 +105,7 @@ class ResourceChangedRequestMapperTest {
                 .resourceKind(FILING_HISTORY)
                 .event(new ChangedResourceEvent()
                         .type(CHANGED_EVENT_TYPE)
-                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"))));
+                        .publishedAt(PUBLISHED_AT));
 
         // when
         ChangedResource actual = mapper.mapChangedResource(upsertResourceChangedRequest);
@@ -140,8 +138,7 @@ class ResourceChangedRequestMapperTest {
                 .deletedData(deletedDataAsObject)
                 .event(new ChangedResourceEvent()
                         .type(DELETED_EVENT_TYPE)
-                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"))));
+                        .publishedAt(PUBLISHED_AT));
 
         // when
         ChangedResource actual = mapper.mapChangedResource(deleteResourceChangedRequest);

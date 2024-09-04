@@ -23,8 +23,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Supplier;
@@ -54,6 +52,7 @@ import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
 import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
@@ -79,6 +78,7 @@ class AssociatedFilingTransactionIT {
     private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
     private static final String EXISTING_DELTA_AT = "20140815230459600643";
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final String PUBLISHED_AT = DateUtils.publishedAtString(UPDATED_AT);
     private static final String CONTEXT_ID = "ABCD1234";
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
     private static final String EXISTING_DATE = "2012-06-08T11:57:11Z";
@@ -1211,16 +1211,14 @@ class AssociatedFilingTransactionIT {
                 .deletedData(null)
                 .event(new ChangedResourceEvent()
                         .fieldsChanged(null)
-                        .publishedAt(UPDATED_AT.atOffset(ZoneOffset.UTC)
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss")))
+                        .publishedAt(PUBLISHED_AT)
                         .type("changed")));
     }
 
     private static String getExpectedResourceDeleted() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-associated-filing-resource-deleted.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", UPDATED_AT.atOffset(ZoneOffset.UTC)
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss")))
+                .replaceAll("<published_at>", PUBLISHED_AT)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<updated_at>", EXISTING_DATE)
