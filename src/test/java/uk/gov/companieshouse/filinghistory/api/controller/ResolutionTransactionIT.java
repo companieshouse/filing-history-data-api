@@ -54,6 +54,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistorySt
 import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.api.filinghistory.Resolution;
 import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 
@@ -82,6 +83,7 @@ class ResolutionTransactionIT {
     private static final String NEWEST_REQUEST_DELTA_AT = "20140916230459600643";
     private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final String PUBLISHED_AT = DateUtils.publishedAtString(UPDATED_AT);
     private static final Instant CREATED_AT = Instant.parse("2014-09-15T23:21:18.000Z");
     private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
     private static final String EXISTING_DATE = "2012-06-08T11:57:11Z";
@@ -1657,14 +1659,14 @@ class ResolutionTransactionIT {
                 .deletedData(null)
                 .event(new ChangedResourceEvent()
                         .fieldsChanged(null)
-                        .publishedAt(UPDATED_AT.toString())
+                        .publishedAt(PUBLISHED_AT)
                         .type("changed")));
     }
 
     private static String getExpectedResourceDeleted(String filename) throws IOException {
         return IOUtils.resourceToString(filename,
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", UPDATED_AT.toString())
+                .replaceAll("<published_at>", PUBLISHED_AT)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)

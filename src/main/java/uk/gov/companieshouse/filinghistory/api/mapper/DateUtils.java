@@ -30,6 +30,11 @@ public final class DateUtils {
                 .orElse(null);
     }
 
+    public static String publishedAtString(final Instant source) {
+        return source.atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss"));
+    }
+
     public static boolean isDeltaStale(final String requestDeltaAt, final String existingDeltaAt) {
         return StringUtils.isNotBlank(existingDeltaAt) && !OffsetDateTime.parse(requestDeltaAt, FORMATTER)
                 .isAfter(OffsetDateTime.parse(existingDeltaAt, FORMATTER));

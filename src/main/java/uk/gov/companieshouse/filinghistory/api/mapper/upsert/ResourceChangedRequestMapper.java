@@ -11,6 +11,7 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.mapper.get.ItemGetResponseMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
@@ -36,7 +37,8 @@ public class ResourceChangedRequestMapper {
 
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
         FilingHistoryDocument document = request.filingHistoryDocument();
-        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(instantSupplier.get().toString());
+        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(
+                DateUtils.publishedAtString(instantSupplier.get()));
         ChangedResource changedResource = new ChangedResource()
                 .resourceUri("/company/%s/filing-history/%s".formatted(document.getCompanyNumber(),
                         document.getTransactionId()))

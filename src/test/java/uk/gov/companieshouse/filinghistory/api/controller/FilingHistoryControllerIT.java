@@ -54,6 +54,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalData.TransactionKindEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalDataOriginalValues;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.api.filinghistory.Links;
+import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
@@ -84,6 +85,7 @@ class FilingHistoryControllerIT {
     private static final String STALE_REQUEST_DELTA_AT = "20130615185208001000";
     private static final String EXISTING_DELTA_AT = "20140815230459600643";
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final String PUBLISHED_AT = DateUtils.publishedAtString(UPDATED_AT);
     private static final String UPDATED_BY = "5419d856b6a59f32b7684d0e";
     private static final String TM01_TYPE = "TM01";
     private static final String DATE = "2014-09-15T23:21:18.000Z";
@@ -1396,12 +1398,12 @@ class FilingHistoryControllerIT {
 
     private static String getExpectedChangedResource() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-changed.json", StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", UPDATED_AT.toString());
+                .replaceAll("<published_at>", PUBLISHED_AT);
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-deleted.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", UPDATED_AT.toString());
+                .replaceAll("<published_at>", PUBLISHED_AT);
     }
 }
