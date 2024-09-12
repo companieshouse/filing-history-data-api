@@ -64,7 +64,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                                     mapper.mapExistingFilingHistory(request, existingDoc, instant);
 
                             LOGGER.info("Updating existing document", DataMapHolder.getLogMap());
-                            filingHistoryService.updateFilingHistory(docToUpdate, existingDocCopy);
+                            filingHistoryService.updateFilingHistory(docToUpdate);
                         },
                         () -> {
                             FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request,

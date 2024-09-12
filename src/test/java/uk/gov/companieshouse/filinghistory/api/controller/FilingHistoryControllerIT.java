@@ -767,7 +767,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseAndNoDocumentShouldBeInDB()
+    void shouldProcessRequestIntoDBEvenWhenChsKafkaAPIReturns502()
             throws Exception {
         // given
         final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
@@ -789,93 +789,8 @@ class FilingHistoryControllerIT {
         // then
         result.andExpect(MockMvcResultMatchers.status().isBadGateway());
 
-        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
-
-        verify(instantSupplier, times(2)).get();
-        WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
-    }
-
-    @Test
-    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseOnUpsertAndDocumentShouldBeRolledBackToPreviousState()
-            throws Exception {
-        // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
-                        StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
-        Document doc = Document.parse(jsonToInsert);
-        doc.append("version", 0);
-        mongoTemplate.insert(doc, FILING_HISTORY_COLLECTION);
-
-        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(expectedDocument);
-        expectedDocument.version(expectedDocument.getVersion() + 2);
-
-        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
-
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
-                .willReturn(aResponse()
-                        .withStatus(502)));
-
-        // when
-        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app")
-                .header("X-Request-Id", CONTEXT_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
-
-        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertEquals(expectedDocument, actual);
-
-        verify(instantSupplier, times(2)).get();
-        WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
-    }
-
-    @Test
-    void shouldReturn502BadGatewayWhenChsKafkaApiReturnsA502ResponseOnUpsertAndUnversionedLegacyDocumentShouldBeRolledBackToPreviousState()
-            throws Exception {
-        // given
-        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
-                        StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
-        Document doc = Document.parse(jsonToInsert);
-        mongoTemplate.insert(doc, FILING_HISTORY_COLLECTION);
-
-        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(expectedDocument);
-        expectedDocument.version(1);
-
-        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
-
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
-                .willReturn(aResponse()
-                        .withStatus(502)));
-
-        // when
-        ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app")
-                .header("X-Request-Id", CONTEXT_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
-
-        FilingHistoryDocument actual = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertEquals(expectedDocument, actual);
-
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
         verify(instantSupplier, times(2)).get();
         WireMock.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +23,7 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
@@ -82,7 +85,7 @@ class ResourceChangedApiClientTest {
     }
 
     @Test
-    void shouldCallPostChangedResourceAndReturnBadGatewayWhenApiErrorResponse502()
+    void shouldCallPostChangedResourceAndReturnBadGatewayExceptionOn502()
             throws ApiErrorResponseException {
         // given
         HttpResponseException.Builder builder = new HttpResponseException.Builder(502, "Bad Gateway",
@@ -96,10 +99,11 @@ class ResourceChangedApiClientTest {
         when(changedResourcePost.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        ApiResponse<Void> result = resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
+        Executable actual = () -> resourceChangedApiClient.callResourceChanged(resourceChangedRequest);
 
         // then
-        assertEquals(502, result.getStatusCode());
+        BadGatewayException ex = assertThrows(BadGatewayException.class, actual);
+        assertEquals("Error calling resource changed endpoint", ex.getMessage());
         verify(apiClientSupplier).get();
         verify(internalApiClient).privateChangedResourceHandler();
         verify(privateChangedResourceHandler).postChangedResource("/private/resource-changed", changedResource);

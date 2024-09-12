@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
@@ -38,8 +39,8 @@ public class ResourceChangedApiClient {
                     .postChangedResource(CHANGED_RESOURCE_URI, mapper.mapChangedResource(resourceChangedRequest))
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            LOGGER.error("Unsuccessful call to /resource-changed endpoint", ex, DataMapHolder.getLogMap());
-            return new ApiResponse<>(ex.getStatusCode(), ex.getHeaders());
+                LOGGER.info("Resource changed call failed: %s".formatted(ex.getStatusCode()), DataMapHolder.getLogMap());
+                throw new BadGatewayException("Error calling resource changed endpoint");
         }
     }
 }

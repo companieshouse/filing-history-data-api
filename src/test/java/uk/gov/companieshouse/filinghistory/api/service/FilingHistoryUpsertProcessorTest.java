@@ -120,7 +120,7 @@ class FilingHistoryUpsertProcessorTest {
         verify(instantSupplier).get();
         verify(topLevelMapper).mapExistingFilingHistory(request, existingDocument, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).updateFilingHistory(documentToUpsert, existingDocumentCopy);
+        verify(filingHistoryService).updateFilingHistory(documentToUpsert);
     }
 
     @Test
