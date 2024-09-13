@@ -13,6 +13,7 @@ import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequ
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.logging.util.DataMap;
 
 @Component
 public class ResourceChangedApiClient {
@@ -39,8 +40,10 @@ public class ResourceChangedApiClient {
                     .postChangedResource(CHANGED_RESOURCE_URI, mapper.mapChangedResource(resourceChangedRequest))
                     .execute();
         } catch (ApiErrorResponseException ex) {
-                LOGGER.info("Resource changed call failed: %s".formatted(ex.getStatusCode()), DataMapHolder.getLogMap());
-                throw new BadGatewayException("Error calling resource changed endpoint");
+            DataMap.Builder logMapBuilder = DataMapHolder.get();
+            logMapBuilder.status(Integer.toString(ex.getStatusCode()));
+            LOGGER.info("Resource changed call failed: %s".formatted(ex.getStatusCode()), DataMapHolder.getLogMap());
+            throw new BadGatewayException("Error calling resource changed endpoint");
         }
     }
 }
