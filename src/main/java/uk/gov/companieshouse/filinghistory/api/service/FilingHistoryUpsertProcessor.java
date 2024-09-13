@@ -24,22 +24,18 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class FilingHistoryUpsertProcessor implements UpsertProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
-
     private final Service filingHistoryService;
     private final AbstractTransactionMapperFactory mapperFactory;
     private final ValidatorFactory validatorFactory;
-    private final ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier;
     private final Supplier<Instant> instantSupplier;
 
     public FilingHistoryUpsertProcessor(Service filingHistoryService,
             AbstractTransactionMapperFactory mapperFactory,
             ValidatorFactory validatorFactory,
-            ObjectCopier<FilingHistoryDocument> filingHistoryDocumentCopier,
             Supplier<Instant> instantSupplier) {
         this.filingHistoryService = filingHistoryService;
         this.mapperFactory = mapperFactory;
         this.validatorFactory = validatorFactory;
-        this.filingHistoryDocumentCopier = filingHistoryDocumentCopier;
         this.instantSupplier = instantSupplier;
     }
 
@@ -87,9 +83,8 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
         filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                 .ifPresentOrElse(
                         existingDoc -> {
-                            FilingHistoryDocument existingDocCopy = filingHistoryDocumentCopier.deepCopy(existingDoc);
                             FilingHistoryDocument docToUpdate =
-                                    mapper.mapDocumentMetadata(request, existingDocCopy);
+                                    mapper.mapDocumentMetadata(request, existingDoc);
 
                             filingHistoryService.updateDocumentMetadata(docToUpdate);
                         },

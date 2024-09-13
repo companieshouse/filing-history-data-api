@@ -29,7 +29,6 @@ import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AbstractTransaction
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.AnnotationTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.TopLevelTransactionMapper;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
-import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryUpsertProcessorTest {
@@ -55,8 +54,6 @@ class FilingHistoryUpsertProcessorTest {
     @Mock
     private Validator<InternalFilingHistoryApi> topLevelPutRequestValidator;
     @Mock
-    private FilingHistoryDocumentCopier filingHistoryDocumentCopier;
-    @Mock
     private Supplier<Instant> instantSupplier;
     @Mock
     private InternalFilingHistoryApi request;
@@ -69,8 +66,6 @@ class FilingHistoryUpsertProcessorTest {
 
     @Mock
     private FilingHistoryDocument existingDocument;
-    @Mock
-    private FilingHistoryDocument existingDocumentCopy;
 
     @Test
     void shouldSuccessfullyCallInsert() {
@@ -90,7 +85,6 @@ class FilingHistoryUpsertProcessorTest {
         // then
         verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
-        verifyNoInteractions(filingHistoryDocumentCopier);
         verify(instantSupplier).get();
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
@@ -163,7 +157,6 @@ class FilingHistoryUpsertProcessorTest {
         assertThrows(BadGatewayException.class, executable);
         verify(mapperFactory).getTransactionMapper(TransactionKindEnum.TOP_LEVEL);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
-        verifyNoInteractions(filingHistoryDocumentCopier);
         verifyNoInteractions(topLevelMapper);
         verifyNoMoreInteractions(filingHistoryService);
     }
@@ -183,7 +176,6 @@ class FilingHistoryUpsertProcessorTest {
         assertThrows(BadRequestException.class, executable);
         verifyNoInteractions(mapperFactory);
         verifyNoInteractions(filingHistoryService);
-        verifyNoInteractions(filingHistoryDocumentCopier);
         verifyNoInteractions(topLevelMapper);
         verifyNoInteractions(annotationTransactionMapper);
         verifyNoInteractions(filingHistoryService);
@@ -194,7 +186,6 @@ class FilingHistoryUpsertProcessorTest {
         // given
         when(mapperFactory.getTransactionMapper(any())).thenReturn(topLevelMapper);
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
-        when(filingHistoryDocumentCopier.deepCopy(any())).thenReturn(existingDocumentCopy);
         when(docMetadataRequest.getDocumentMetadata()).thenReturn(DOCUMENT_METADATA_LINK);
         when(topLevelMapper.mapDocumentMetadata(any(), any(FilingHistoryDocument.class))).thenReturn(existingDocument);
 
@@ -203,8 +194,7 @@ class FilingHistoryUpsertProcessorTest {
 
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
-        verify(filingHistoryDocumentCopier).deepCopy(existingDocument);
-        verify(topLevelMapper).mapDocumentMetadata(docMetadataRequest, existingDocumentCopy);
+        verify(topLevelMapper).mapDocumentMetadata(docMetadataRequest, existingDocument);
         verifyNoMoreInteractions(topLevelMapper);
     }
 
