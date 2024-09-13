@@ -40,8 +40,7 @@ public class ResourceChangedApiClient {
                     .postChangedResource(CHANGED_RESOURCE_URI, mapper.mapChangedResource(resourceChangedRequest))
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            DataMap.Builder logMapBuilder = DataMapHolder.get();
-            logMapBuilder.status(Integer.toString(ex.getStatusCode()));
+            DataMapHolder.get().status(Integer.toString(ex.getStatusCode()));
             LOGGER.info("Resource changed call failed: %s".formatted(ex.getStatusCode()), DataMapHolder.getLogMap());
             throw new BadGatewayException("Error calling resource changed endpoint");
         }
