@@ -3,7 +3,6 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 import static java.lang.Boolean.TRUE;
 
 import java.time.Instant;
-
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpdateApi;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;

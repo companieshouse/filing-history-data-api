@@ -13,7 +13,6 @@ import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequ
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.logging.util.DataMap;
 
 @Component
 public class ResourceChangedApiClient {
