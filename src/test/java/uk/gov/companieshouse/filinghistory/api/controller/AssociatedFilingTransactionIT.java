@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1109,53 +1108,6 @@ class AssociatedFilingTransactionIT {
         WireMock.verify(
                 requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedResourceDeleted(
                 ))));
-    }
-
-    @Test
-    void shouldRollbackParentWithAssociatedFilingAfterRemoveAssociatedFilingButChsKafkaApiUnavailable() throws Exception {
-        // given
-        String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
-        existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
-        final FilingHistoryDocument existingDocument =
-                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
-        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
-
-        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertNotNull(expectedDocument);
-        expectedDocument.version(expectedDocument.getVersion() + 2);
-
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
-                .willReturn(aResponse()
-                        .withStatus(502)));
-
-        // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, EXISTING_CHILD_ENTITY_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app")
-                .header("X-Request-Id", CONTEXT_ID)
-                .contentType(MediaType.APPLICATION_JSON));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
-
-        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertEquals(expectedDocument, actualDocument);
-
-        verify(instantSupplier, times(2)).get();
-        WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test

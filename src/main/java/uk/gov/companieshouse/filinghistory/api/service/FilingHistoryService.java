@@ -5,10 +5,8 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
@@ -71,27 +69,13 @@ public class FilingHistoryService implements Service {
     @Override
     public void insertFilingHistory(final FilingHistoryDocument docToInsert) {
         repository.insert(docToInsert);
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(docToInsert, false, null));
-        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            repository.deleteById(docToInsert.getTransactionId());
-            LOGGER.info("Deleting previously inserted document", DataMapHolder.getLogMap());
-            throwBadGatewayException(result.getStatusCode());
-        }
+        apiClient.callResourceChanged(new ResourceChangedRequest(docToInsert, false, null));
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument docToUpdate, FilingHistoryDocument originalDocumentCopy) {
+    public void updateFilingHistory(FilingHistoryDocument docToUpdate) {
         repository.update(docToUpdate);
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(docToUpdate, false, null));
-        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            Long originalVersion = originalDocumentCopy.getVersion();
-            originalDocumentCopy.version(originalVersion == null ? 0 : originalVersion + 1);
-            repository.update(originalDocumentCopy);
-            LOGGER.info("Reverting previously updated document", DataMapHolder.getLogMap());
-            throwBadGatewayException(result.getStatusCode());
-        }
+        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, null));
     }
 
     @Override
@@ -99,22 +83,14 @@ public class FilingHistoryService implements Service {
         repository.update(docToUpdate);
         List<String> fieldsChanged = new ArrayList<>();
         fieldsChanged.add("links.document_metadata");
-        ApiResponse<Void> result = apiClient.callResourceChanged(
-                new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
-        if (!HttpStatus.valueOf(result.getStatusCode()).is2xxSuccessful()) {
-            throwBadGatewayException(result.getStatusCode());
-        }
+        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
     }
 
     @Transactional
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
-        ApiResponse<Void> response = apiClient.callResourceChanged(
-                new ResourceChangedRequest(existingDocument, true, null));
-        if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-            throwBadGatewayException(response.getStatusCode());
-        }
+        apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
     }
 
     private void throwBadGatewayException(final int statusCode) {

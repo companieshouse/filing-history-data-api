@@ -142,7 +142,6 @@ class FilingHistoryServiceTest {
     void insertFilingHistoryInsertsDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(200);
 
         // when
         service.insertFilingHistory(document);
@@ -156,10 +155,9 @@ class FilingHistoryServiceTest {
     void updateFilingHistoryUpdatesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(200);
 
         // when
-        service.updateFilingHistory(document, existingDocument);
+        service.updateFilingHistory(document);
 
         // then
         verify(repository).update(document);
@@ -169,24 +167,21 @@ class FilingHistoryServiceTest {
     @Test
     void updateFilingHistoryUpdatesDocumentButResourceChangedCallReturnsNon200() {
         // given
-        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(502);
+        when(resourceChangedApiClient.callResourceChanged(any())).thenThrow(BadGatewayException.class);
 
         // when
-        Executable executable = () -> service.updateFilingHistory(document, existingDocument);
+        Executable executable = () -> service.updateFilingHistory(document);
 
         // then
         assertThrows(BadGatewayException.class, executable);
         verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
-        verify(repository).update(existingDocument);
     }
 
     @Test
     void updateDocumentMetadataUpdatesDocumentAndCallsKafkaApiThenReturnsUpsertSuccessful() {
         // given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(200);
 
         // when
         service.updateDocumentMetadata(document);
@@ -199,8 +194,7 @@ class FilingHistoryServiceTest {
     @Test
     void updateDocumentMetadataUpdatesDocumentButResourceChangedCallReturnsNon200() {
         // given
-        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(502);
+        when(resourceChangedApiClient.callResourceChanged(any())).thenThrow(BadGatewayException.class);
 
         // when
         Executable executable = () -> service.updateDocumentMetadata(document);
@@ -209,23 +203,6 @@ class FilingHistoryServiceTest {
         assertThrows(BadGatewayException.class, executable);
         verify(repository).update(document);
         verify(resourceChangedApiClient).callResourceChanged(any());
-    }
-
-    @Test
-    void deleteInsertedFilingHistoryDocumentWhenResourceChangedCallReturnsNon200AndOriginalDocumentCopyIsNull() {
-        // given
-        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(502);
-        when(document.getTransactionId()).thenReturn(TRANSACTION_ID);
-
-        // when
-        Executable executable = () -> service.insertFilingHistory(document);
-
-        // then
-        assertThrows(BadGatewayException.class, executable);
-        verify(repository).insert(document);
-        verify(resourceChangedApiClient).callResourceChanged(any());
-        verify(repository).deleteById(TRANSACTION_ID);
     }
 
     @Test
@@ -260,7 +237,6 @@ class FilingHistoryServiceTest {
     void deleteExistingFilingHistoryDocumentDeletesDocumentAndCallsChsKafkaApiReturningSuccessful() {
         //given
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(200);
         when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
@@ -274,8 +250,7 @@ class FilingHistoryServiceTest {
     @Test
     void deleteFilingHistoryDeletesDocumentButResourceChangedCallReturnsNon200() {
         // given
-        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
-        when(response.getStatusCode()).thenReturn(502);
+        when(resourceChangedApiClient.callResourceChanged(any())).thenThrow(BadGatewayException.class);
         when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when

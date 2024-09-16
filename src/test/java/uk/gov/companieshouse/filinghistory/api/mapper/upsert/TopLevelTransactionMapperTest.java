@@ -92,7 +92,7 @@ class TopLevelTransactionMapperTest {
         when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
 
-        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
                 expectedFilingHistoryData,
                 expectedFilingHistoryOriginalValues,
@@ -121,7 +121,7 @@ class TopLevelTransactionMapperTest {
         when(requestExternalData.getBarcode()).thenReturn(BARCODE);
         when(requestExternalData.getAssociatedFilings()).thenReturn(null);
 
-        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
                 expectedFilingHistoryData,
                 expectedFilingHistoryOriginalValues,
@@ -152,7 +152,7 @@ class TopLevelTransactionMapperTest {
         FilingHistoryData expectedData = new FilingHistoryData()
                 .associatedFilings(List.of(new FilingHistoryAssociatedFiling()));
 
-        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
                 expectedData,
                 expectedFilingHistoryOriginalValues,
@@ -186,7 +186,7 @@ class TopLevelTransactionMapperTest {
         FilingHistoryData expectedData = new FilingHistoryData()
                 .associatedFilings(List.of(new FilingHistoryAssociatedFiling()));
 
-        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
         final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
                 expectedData,
                 expectedFilingHistoryOriginalValues,
@@ -214,9 +214,43 @@ class TopLevelTransactionMapperTest {
     }
 
     @Test
+    void shouldUpdateDocumentWhenRequestDeltaAtIsTheSame() {
+        // given
+        when(dataMapper.map(any(), any())).thenReturn(expectedFilingHistoryData);
+        when(requestExternalData.getPaperFiled()).thenReturn(true);
+        when(expectedFilingHistoryData.paperFiled(any())).thenReturn(expectedFilingHistoryData);
+        when(originalValuesMapper.map(any())).thenReturn(expectedFilingHistoryOriginalValues);
+        when(requestExternalData.getBarcode()).thenReturn(BARCODE);
+        when(requestExternalData.getAssociatedFilings()).thenReturn(null);
+
+        final InternalFilingHistoryApi request = buildPutRequestBody(EXISTING_DOCUMENT_DELTA_AT);
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
+                expectedFilingHistoryData,
+                expectedFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                existingFilingHistoryData,
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        // when
+        FilingHistoryDocument actualDocument = topLevelMapper.mapExistingFilingHistory(request, existingDocument,
+                INSTANT);
+
+        // then
+        assertEquals(expectedDocument, actualDocument);
+        verifyNoInteractions(childListMapper);
+        verify(expectedFilingHistoryData).paperFiled(true);
+        verify(dataMapper).map(requestExternalData, existingFilingHistoryData);
+        verifyNoInteractions(childListMapper);
+        verify(originalValuesMapper).map(requestOriginalValues);
+    }
+
+    @Test
     void shouldThrowConflictExceptionWhenRequestDeltaAtIsStale() {
         // given
-        final InternalFilingHistoryApi request = buildPutRequestBody();
+        final InternalFilingHistoryApi request = buildPutRequestBody(NEWEST_REQUEST_DELTA_AT);
         request.getInternalData().deltaAt(STALE_REQUEST_DELTA_AT);
 
         final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
@@ -253,10 +287,10 @@ class TopLevelTransactionMapperTest {
         assertEquals(DOC_METADATA_LINK, actualDocument.getData().getLinks().getDocumentMetadata());
     }
 
-    private InternalFilingHistoryApi buildPutRequestBody() {
+    private InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .externalData(requestExternalData)
-                .internalData(buildInternalData());
+                .internalData(buildInternalData(deltaAt));
     }
 
     private FilingHistoryDocumentMetadataUpdateApi buildPatchDocMetadataRequestBody() {
@@ -264,12 +298,12 @@ class TopLevelTransactionMapperTest {
                 .pages(PAGES);
     }
 
-    private InternalData buildInternalData() {
+    private InternalData buildInternalData(String deltaAt) {
         return new InternalData()
                 .entityId(ENTITY_ID)
                 .companyNumber(COMPANY_NUMBER)
                 .documentId(DOCUMENT_ID)
-                .deltaAt(NEWEST_REQUEST_DELTA_AT)
+                .deltaAt(deltaAt)
                 .originalDescription("original description")
                 .originalValues(requestOriginalValues)
                 .parentEntityId("parent_entity_id")

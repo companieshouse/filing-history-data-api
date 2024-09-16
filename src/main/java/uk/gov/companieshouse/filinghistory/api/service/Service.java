@@ -17,7 +17,7 @@ public interface Service {
 
     void insertFilingHistory(final FilingHistoryDocument docToInsert);
 
-    void updateFilingHistory(final FilingHistoryDocument docToUpdate, FilingHistoryDocument originalDocumentCopy);
+    void updateFilingHistory(final FilingHistoryDocument docToUpdate);
 
     void updateDocumentMetadata(final FilingHistoryDocument docToUpdate);
 

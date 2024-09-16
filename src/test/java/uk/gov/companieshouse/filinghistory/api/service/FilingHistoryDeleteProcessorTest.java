@@ -59,7 +59,6 @@ class FilingHistoryDeleteProcessorTest {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
         when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.of(updatedDocument));
-        when(deleteAggregate.getDocument()).thenReturn(existingDocument);
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(ENTITY_ID);
@@ -67,7 +66,7 @@ class FilingHistoryDeleteProcessorTest {
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
         verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate);
-        verify(filingHistoryService).updateFilingHistory(updatedDocument, existingDocument);
+        verify(filingHistoryService).updateFilingHistory(updatedDocument);
     }
 
     @Test

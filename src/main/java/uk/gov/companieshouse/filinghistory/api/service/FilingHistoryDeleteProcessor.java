@@ -28,8 +28,8 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
                                 .ifPresentOrElse(
                                         updatedDocument -> {
                                             LOGGER.info("Removing child", DataMapHolder.getLogMap());
-                                            filingHistoryService.updateFilingHistory(updatedDocument,
-                                                    deleteAggregate.getDocument());
+                                            filingHistoryService.updateFilingHistory(updatedDocument
+                                            );
                                         },
                                         () -> {
                                             LOGGER.info("Deleting parent", DataMapHolder.getLogMap());
