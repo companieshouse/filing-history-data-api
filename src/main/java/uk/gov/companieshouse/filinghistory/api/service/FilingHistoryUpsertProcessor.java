@@ -76,6 +76,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
             LOGGER.error("Request body missing document metadata field", DataMapHolder.getLogMap());
             throw new BadRequestException("Required field document_metadata missing");
         }
+        DataMapHolder.get().filingHistoryDocumentMetadata(request.getDocumentMetadata());
 
         AbstractTransactionMapper mapper = mapperFactory.getTransactionMapper(TOP_LEVEL);
 
