@@ -18,18 +18,18 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.3.3</spring.boot.version>
-    <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
-    <structured-logging.version>3.0.14</structured-logging.version>
-    <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
-    <api-security-java.version>2.0.5</api-security-java.version>
-    <private-api-sdk-java.version>4.0.133</private-api-sdk-java.version>
-    <maven-surefire-plugin.version>3.4.0</maven-surefire-plugin.version>
-    <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
-    <maven-failsafe-plugin.version>3.4.0</maven-failsafe-plugin.version>
+    <spring.boot.version>3.3.4</spring.boot.version>
+    <jib-maven-plugin.version>3.4.3</jib-maven-plugin.version>
+    <structured-logging.version>3.0.20</structured-logging.version>
+    <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
+    <api-security-java.version>2.0.8</api-security-java.version>
+    <private-api-sdk-java.version>4.0.221</private-api-sdk-java.version>
+    <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+    <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+    <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <test-containers.version>1.20.1</test-containers.version>
-    <wiremock.version>3.9.1</wiremock.version>
+    <test-containers.version>1.20.3</test-containers.version>
+    <wiremock.version>3.9.2</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
@@ -70,6 +70,12 @@
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
       <version>${json-path.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xmlunit</groupId>
+      <artifactId>xmlunit-core</artifactId>
+      <version>2.10.0</version>
+      <scope>test</scope>
     </dependency>
     <!--end transitive dependencies-->
 
