@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +49,7 @@ import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
+import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpdateApi;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
 import uk.gov.companieshouse.api.filinghistory.InternalData;
@@ -70,6 +73,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginal
 class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
+    private static final String PATCH_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/document-metadata";
     private static final String DELETE_REQUEST_URI = "/filing-history/{entity_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}";
     private static final String LIST_GET_REQUEST_URI = "/company/{company_number}/filing-history";
@@ -1204,6 +1208,98 @@ class FilingHistoryControllerIT {
         assertNull(actualDocument);
     }
 
+    @Test
+    void shouldSuccessfullyPatchDocumentMetadataLink() throws Exception {
+        // given
+        String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document-no-document-metadata.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        Document document = Document.parse(jsonToInsert);
+        document.append("version", 0);
+        mongoTemplate.insert(document, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        Objects.requireNonNull(expectedDocument).getData().links(new FilingHistoryLinks()
+                .documentMetadata(DOCUMENT_METADATA)
+                .self(SELF_LINK));
+        expectedDocument.version(1);
+
+        final FilingHistoryDocumentMetadataUpdateApi request = new FilingHistoryDocumentMetadataUpdateApi()
+                .documentMetadata(DOCUMENT_METADATA)
+                .pages(1);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(patch(PATCH_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(1)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDocumentMetadata())));
+    }
+
+    @Test
+    void shouldSuccessfullyPatchDocumentMetadataLinkWhenExistingDocumentHasNullLinksObject() throws Exception {
+        // given
+        String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document-null-links.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER);
+        Document document = Document.parse(jsonToInsert);
+        document.append("version", 0);
+        mongoTemplate.insert(document, FILING_HISTORY_COLLECTION);
+
+        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        Objects.requireNonNull(expectedDocument).getData().links(new FilingHistoryLinks()
+                .documentMetadata(DOCUMENT_METADATA)
+                .self(SELF_LINK));
+        expectedDocument.version(1);
+
+        final FilingHistoryDocumentMetadataUpdateApi request = new FilingHistoryDocumentMetadataUpdateApi()
+                .documentMetadata(DOCUMENT_METADATA)
+                .pages(1);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(patch(PATCH_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+
+        verify(instantSupplier, times(1)).get();
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDocumentMetadata())));
+    }
+
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .internalData(buildInternalData(deltaAt))
@@ -1313,6 +1409,11 @@ class FilingHistoryControllerIT {
 
     private static String getExpectedChangedResource() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-changed.json", StandardCharsets.UTF_8)
+                .replaceAll("<published_at>", PUBLISHED_AT);
+    }
+
+    private static String getExpectedChangedResourceDocumentMetadata() throws IOException {
+        return IOUtils.resourceToString("/resource_changed/expected-resource-changed-document-metadata.json", StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", PUBLISHED_AT);
     }
 
