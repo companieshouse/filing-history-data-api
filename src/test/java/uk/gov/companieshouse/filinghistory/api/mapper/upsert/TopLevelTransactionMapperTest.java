@@ -287,6 +287,33 @@ class TopLevelTransactionMapperTest {
         assertEquals(DOC_METADATA_LINK, actualDocument.getData().getLinks().getDocumentMetadata());
     }
 
+    @Test
+    void mapDocumentMetadataShouldReturnUpdatedFilingHistoryDocumentWhenExistingDocumentLinksObjectIsNull() {
+        // given
+        final FilingHistoryDocumentMetadataUpdateApi request = buildPatchDocMetadataRequestBody();
+
+        final FilingHistoryDocument existingDocument = getFilingHistoryDocument(
+                new FilingHistoryData()
+                        .links(null),
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        final FilingHistoryDocument expectedDocument = getFilingHistoryDocument(
+                new FilingHistoryData()
+                        .links(new FilingHistoryLinks()
+                                .self("/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID))
+                                .documentMetadata(DOC_METADATA_LINK))
+                        .pages(5),
+                existingFilingHistoryOriginalValues,
+                EXISTING_DOCUMENT_DELTA_AT);
+
+        // when
+        FilingHistoryDocument actualDocument = topLevelMapper.mapDocumentMetadata(request, existingDocument);
+
+        // then
+        assertEquals(expectedDocument, actualDocument);
+    }
+
     private InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
         return new InternalFilingHistoryApi()
                 .externalData(requestExternalData)
@@ -311,7 +338,7 @@ class TopLevelTransactionMapperTest {
     }
 
     private FilingHistoryDocument getFilingHistoryDocument(FilingHistoryData data,
-                                                           FilingHistoryOriginalValues originalValues, String deltaAt) {
+            FilingHistoryOriginalValues originalValues, String deltaAt) {
         FilingHistoryDeltaTimestamp timestamp = new FilingHistoryDeltaTimestamp()
                 .at(INSTANT)
                 .by(UPDATED_BY);

@@ -1,27 +1,20 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
-import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
-import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
-import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.repository.Repository;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class FilingHistoryService implements Service {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final ResourceChangedApiClient apiClient;
     private final Repository repository;
 
@@ -91,10 +84,5 @@ public class FilingHistoryService implements Service {
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
         apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
-    }
-
-    private void throwBadGatewayException(final int statusCode) {
-        LOGGER.info("Resource changed endpoint responded with: %s".formatted(statusCode), DataMapHolder.getLogMap());
-        throw new BadGatewayException("Error calling resource changed endpoint");
     }
 }
