@@ -21,6 +21,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 class DeleteMapperDelegatorAspectFeatureEnabledIT {
 
     private static final String ENTITY_ID = "entity ID";
+    private static final String DELTA_AT = "20151025185208001000";
     private static final String COMPOSITE_RES_TYPE = "RESOLUTIONS";
 
     @Autowired
@@ -42,14 +43,14 @@ class DeleteMapperDelegatorAspectFeatureEnabledIT {
                                         new FilingHistoryResolution()
                                                 .entityId(ENTITY_ID)))));
 
-        when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any())).thenReturn(
+        when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate, DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
-        verify(compositeResolutionDeleteMapper).removeTransaction(1, aggregate.getDocument());
+        verify(compositeResolutionDeleteMapper).removeTransaction(1, DELTA_AT, aggregate.getDocument());
     }
 }

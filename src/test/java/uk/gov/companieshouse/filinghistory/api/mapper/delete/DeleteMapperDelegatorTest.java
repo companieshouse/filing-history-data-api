@@ -30,6 +30,8 @@ import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopie
 class DeleteMapperDelegatorTest {
 
     private static final String ENTITY_ID = "entity ID";
+    private static final String DELTA_AT = "20151025185208001000";
+
     private static final String COMPOSITE_RES_TYPE = "RESOLUTIONS";
     private static final String CHILD_ENTITY_ID = "child entity ID";
     private static final String PARENT_TYPE = "CERTNM";
@@ -63,16 +65,16 @@ class DeleteMapperDelegatorTest {
                 .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
-        when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any())).thenReturn(
+        when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate, DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
         verify(documentCopier).deepCopy(document);
-        verify(compositeResolutionDeleteMapper).removeTransaction(1, documentCopy);
+        verify(compositeResolutionDeleteMapper).removeTransaction(1, DELTA_AT, documentCopy);
     }
 
     @Test
@@ -91,16 +93,17 @@ class DeleteMapperDelegatorTest {
                 .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
-        when(childDeleteMapper.removeTransaction(any(), anyInt(), any(), any(), any())).thenReturn(
+        when(childDeleteMapper.removeTransaction(any(), any(), anyInt(), any(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
+                aggregate, DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
         verify(documentCopier).deepCopy(document);
-        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(0), eq(documentCopy),
+        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(DELTA_AT), eq(0), eq(documentCopy),
                 argThat(supplier -> supplier.get().equals(resolutions)), any());
     }
 
@@ -119,16 +122,17 @@ class DeleteMapperDelegatorTest {
                 .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
-        when(childDeleteMapper.removeTransaction(any(), anyInt(), any(), any(), any())).thenReturn(
+        when(childDeleteMapper.removeTransaction(any(), any(), anyInt(), any(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
+                aggregate, DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
         verify(documentCopier).deepCopy(document);
-        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(0), eq(documentCopy),
+        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(DELTA_AT), eq(0), eq(documentCopy),
                 argThat(supplier -> supplier.get().equals(annotations)), any());
     }
 
@@ -147,16 +151,17 @@ class DeleteMapperDelegatorTest {
                 .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
-        when(childDeleteMapper.removeTransaction(any(), anyInt(), any(), any(), any())).thenReturn(
+        when(childDeleteMapper.removeTransaction(any(), any(), anyInt(), any(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
+                aggregate, DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
         verify(documentCopier).deepCopy(document);
-        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(0), eq(documentCopy),
+        verify(childDeleteMapper).removeTransaction(eq(CHILD_ENTITY_ID), eq(DELTA_AT), eq(0), eq(documentCopy),
                 argThat(supplier -> supplier.get().equals(associatedFilings)), any());
     }
 
@@ -172,7 +177,7 @@ class DeleteMapperDelegatorTest {
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate, DELTA_AT);
 
         // then
         assertTrue(actual.isEmpty());
@@ -190,7 +195,7 @@ class DeleteMapperDelegatorTest {
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate);
+        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate, DELTA_AT);
 
         // then
         assertThrows(BadRequestException.class, actual);

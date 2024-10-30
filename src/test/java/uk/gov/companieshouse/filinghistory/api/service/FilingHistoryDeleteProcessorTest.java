@@ -45,7 +45,7 @@ class FilingHistoryDeleteProcessorTest {
     void shouldCallDeleteWhenParentDocumentRemoved() {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
-        when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.empty());
+        when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.empty());
         when(deleteAggregate.getDocument()).thenReturn(existingDocument);
 
         // when
@@ -53,7 +53,7 @@ class FilingHistoryDeleteProcessorTest {
 
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, DELTA_AT);
         verify(filingHistoryService).deleteExistingFilingHistory(existingDocument);
     }
 
@@ -61,14 +61,14 @@ class FilingHistoryDeleteProcessorTest {
     void shouldCallUpdateWhenResolutionRemovedFromComposite() {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
-        when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.of(updatedDocument));
+        when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.of(updatedDocument));
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(ENTITY_ID, DELTA_AT);
 
         // then
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, DELTA_AT);
         verify(filingHistoryService).updateFilingHistory(updatedDocument);
     }
 
@@ -90,7 +90,7 @@ class FilingHistoryDeleteProcessorTest {
     void shouldThrowConflictExceptionWhenDeltaAtStale() {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
-        when(deleteMapperDelegator.delegateDelete(any(), any())).thenReturn(Optional.empty());
+        when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.empty());
         when(deleteAggregate.getDocument()).thenReturn(existingDocument);
         when(existingDocument.getDeltaAt()).thenReturn(DELTA_AT);
 
@@ -100,6 +100,6 @@ class FilingHistoryDeleteProcessorTest {
         // then
         assertThrows(ConflictException.class, executable);
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, STALE_DELTA_AT);
     }
 }

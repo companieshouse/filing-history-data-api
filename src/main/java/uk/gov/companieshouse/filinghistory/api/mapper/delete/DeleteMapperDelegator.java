@@ -29,7 +29,8 @@ public class DeleteMapperDelegator {
     }
 
     @DeleteChildTransactions
-    public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDeleteAggregate aggregate) {
+    public Optional<FilingHistoryDocument> delegateDelete(String entityId, FilingHistoryDeleteAggregate aggregate,
+            String requestDeltaAt) {
         FilingHistoryDocument document = documentCopier.deepCopy(aggregate.getDocument());
         FilingHistoryData data = document.getData();
 
@@ -37,27 +38,26 @@ public class DeleteMapperDelegator {
         if (resIndex >= 0) {
             if (COMPOSITE_RES_TYPE.equals(data.getType())) {
                 LOGGER.debug("Matched composite resolution", DataMapHolder.getLogMap());
-                return compositeResolutionDeleteMapper.removeTransaction(resIndex, document);
+                return compositeResolutionDeleteMapper.removeTransaction(resIndex, requestDeltaAt, document);
             } else {
                 LOGGER.debug("Matched resolution", DataMapHolder.getLogMap());
-                return childDeleteMapper.removeTransaction(entityId, resIndex, document, data::getResolutions,
-                        data::resolutions);
+                return childDeleteMapper.removeTransaction(entityId, requestDeltaAt, resIndex, document,
+                        data::getResolutions, data::resolutions);
             }
         }
 
         final int annotationIndex = aggregate.getAnnotationIndex();
         if (annotationIndex >= 0) {
             LOGGER.debug("Matched annotation", DataMapHolder.getLogMap());
-            return childDeleteMapper.removeTransaction(entityId, annotationIndex, document, data::getAnnotations,
-                    data::annotations);
+            return childDeleteMapper.removeTransaction(entityId, requestDeltaAt, annotationIndex, document,
+                    data::getAnnotations, data::annotations);
         }
 
         final int associatedFilingIndex = aggregate.getAssociatedFilingIndex();
         if (associatedFilingIndex >= 0) {
             LOGGER.debug("Matched associated filing", DataMapHolder.getLogMap());
-            return childDeleteMapper.removeTransaction(entityId, associatedFilingIndex, document,
-                    data::getAssociatedFilings,
-                    data::associatedFilings);
+            return childDeleteMapper.removeTransaction(entityId, requestDeltaAt, associatedFilingIndex, document,
+                    data::getAssociatedFilings, data::associatedFilings);
         }
 
         if (entityId.equals(document.getEntityId())) {

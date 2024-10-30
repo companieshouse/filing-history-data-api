@@ -79,10 +79,17 @@ public class FilingHistoryService implements Service {
         apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
     }
 
+    // Remove and check tests
     @Transactional
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
         apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
+    }
+
+    // TODO: Requires transactionId and companyNumber
+    public void callResourceChangedForAbsentDeletedData() {
+
+
     }
 }

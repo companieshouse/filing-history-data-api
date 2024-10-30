@@ -25,33 +25,34 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
     }
 
     @Override
-    public void processFilingHistoryDelete(String entityId, String deltaAt) {
+    public void processFilingHistoryDelete(String entityId, String requestDeltaAt) {
         filingHistoryService.findFilingHistoryByEntityId(entityId)
                 .ifPresentOrElse(
-                        deleteAggregate -> deleteMapperDelegator.delegateDelete(entityId, deleteAggregate)
+                        deleteAggregate -> deleteMapperDelegator.delegateDelete(entityId,
+                                        deleteAggregate, requestDeltaAt)
                                 .ifPresentOrElse(
                                         updatedDocument -> {
-                                            deltaAtCheck(deltaAt, updatedDocument);
                                             LOGGER.info("Removing child", DataMapHolder.getLogMap());
                                             filingHistoryService.updateFilingHistory(updatedDocument);
                                         },
                                         () -> {
                                             FilingHistoryDocument parentDocument = deleteAggregate.getDocument();
-                                            deltaAtCheck(deltaAt, parentDocument);
+                                            deltaAtCheck(requestDeltaAt, parentDocument);
                                             LOGGER.info("Deleting parent", DataMapHolder.getLogMap());
                                             filingHistoryService.deleteExistingFilingHistory(parentDocument);
                                         }),
                         () -> {
+                            // TODO: pass in companyNumber and transactionId (new record!)
                             LOGGER.info("Document to delete not found", DataMapHolder.getLogMap());
                             throw new NotFoundException("Document to delete not found");
                         }
                 );
     }
 
-    private void deltaAtCheck(String deltaAt, FilingHistoryDocument document) {
-        if (isDeltaStale(deltaAt, document.getDeltaAt())) {
+    private void deltaAtCheck(String requestDeltaAt, FilingHistoryDocument document) {
+        if (isDeltaStale(requestDeltaAt, document.getDeltaAt())) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
-                    deltaAt, document.getDeltaAt()), DataMapHolder.getLogMap());
+                    requestDeltaAt, document.getDeltaAt()), DataMapHolder.getLogMap());
             throw new ConflictException("Stale delta for delete");
         }
     }

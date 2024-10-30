@@ -35,10 +35,12 @@ public class ResourceChangedRequestMapper {
         this.objectMapper = objectMapper;
     }
 
+    // TODO: modify record for ResourceChangedRequest
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
         FilingHistoryDocument document = request.filingHistoryDocument();
         ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(
                 DateUtils.publishedAtString(instantSupplier.get()));
+        // TODO: get company number and transaction id from ResourceChangedRequest
         ChangedResource changedResource = new ChangedResource()
                 .resourceUri("/company/%s/filing-history/%s".formatted(document.getCompanyNumber(),
                         document.getTransactionId()))
@@ -49,6 +51,7 @@ public class ResourceChangedRequestMapper {
         if (request.isDelete()) {
             event.setType("deleted");
             try {
+                // TODO: alternate path if document is null
                 final String serialisedDeletedData =
                         objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
                 changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -14,9 +15,11 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeltaTimestamp;
@@ -25,8 +28,10 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 
 @ExtendWith(MockitoExtension.class)
 class CompositeResolutionDeleteMapperTest {
-
     private static final Instant INSTANT = Instant.now();
+    private static final String ENTITY_ID = "entity ID";
+    private static final String DELTA_AT = "20151025185208001000";
+    private static final String STALE_DELTA_AT = "20141025185208001000";
 
     @InjectMocks
     private CompositeResolutionDeleteMapper deleteMapper;
@@ -59,7 +64,7 @@ class CompositeResolutionDeleteMapperTest {
         when(instantSupplier.get()).thenReturn(INSTANT);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(0, document);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(0, DELTA_AT, document);
 
         // then
         assertTrue(actual.isPresent());
@@ -75,10 +80,31 @@ class CompositeResolutionDeleteMapperTest {
                         .resolutions(new ArrayList<>(List.of(new FilingHistoryResolution()))));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(0, document);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(0, DELTA_AT, document);
 
         // then
         assertTrue(actual.isEmpty());
         verifyNoInteractions(instantSupplier);
+    }
+
+    @Test
+    void shouldNotRemoveResolutionAtIndexWhenDeltaStaleAndReturn409() {
+        // given
+        FilingHistoryDocument document = new FilingHistoryDocument()
+                .data(new FilingHistoryData()
+                        .resolutions(new ArrayList<>(
+                                List.of(
+                                        new FilingHistoryResolution()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(DELTA_AT),
+                                        new FilingHistoryResolution()
+                                                .entityId(ENTITY_ID)
+                                                .deltaAt(DELTA_AT)))));
+
+        // when
+        Executable actual = () -> deleteMapper.removeTransaction(0, STALE_DELTA_AT, document);
+
+        // then
+        assertThrows(ConflictException.class, actual);
     }
 }

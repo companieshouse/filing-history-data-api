@@ -83,6 +83,7 @@ class RepositoryIT {
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -105,12 +106,14 @@ class RepositoryIT {
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         final String jsonToInsertTwo = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID_TWO)
                 .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", OFFICERS_CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
@@ -141,6 +144,7 @@ class RepositoryIT {
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID_TWO)
                 .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<category>", "incorporation");
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);

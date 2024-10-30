@@ -1245,6 +1245,50 @@ class AnnotationTransactionIT {
     }
 
     @Test
+    void shouldNotDeleteSingularAnnotationFromParentWhenDeltaStaleAndReturn409() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/annotations/existing_parent_doc_with_two_annotations.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<parent_entity_id>", ENTITY_ID)
+                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
+                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<barcode>", BARCODE)
+                .replaceAll("<updated_at>", EXISTING_DATE)
+                .replaceAll("<created_at>", EXISTING_DATE);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", STALE_REQUEST_DELTA_AT)
+                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isConflict());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertEquals(existingDocument, actualDocument);
+        assertEquals(NEWEST_REQUEST_DELTA_AT, actualDocument.getData().getAnnotations().get(1).getDeltaAt());
+    }
+
+    @Test
     void shouldDeleteLastAnnotationAndArrayFromParent() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(

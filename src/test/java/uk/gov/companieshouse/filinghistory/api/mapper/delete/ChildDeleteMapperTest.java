@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -14,9 +15,11 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
@@ -30,6 +33,8 @@ class ChildDeleteMapperTest {
 
     private static final Instant INSTANT = Instant.now();
     private static final String ENTITY_ID = "entity ID";
+    private static final String DELTA_AT = "20151025185208001000";
+    private static final String STALE_DELTA_AT = "20141025185208001000";
     private static final String PARENT_TYPE = "parent type";
 
     @InjectMocks
@@ -53,8 +58,8 @@ class ChildDeleteMapperTest {
                 .entityId(ENTITY_ID)
                 .data(data);
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, 0, documentCopy,
-                data::getResolutions, data::resolutions);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, DELTA_AT, 0,
+                documentCopy, data::getResolutions, data::resolutions);
 
         // then
         assertTrue(actual.isEmpty());
@@ -71,8 +76,8 @@ class ChildDeleteMapperTest {
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
                 .data(data);
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, 0, documentCopy,
-                data::getResolutions, data::resolutions);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, DELTA_AT, 0,
+                documentCopy, data::getResolutions, data::resolutions);
 
         // then
         assertTrue(actual.isEmpty());
@@ -100,8 +105,8 @@ class ChildDeleteMapperTest {
         when(instantSupplier.get()).thenReturn(INSTANT);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, 0, documentCopy,
-                data::getResolutions, data::resolutions);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, DELTA_AT, 0,
+                documentCopy, data::getResolutions, data::resolutions);
 
         // then
         assertTrue(actual.isPresent());
@@ -130,8 +135,8 @@ class ChildDeleteMapperTest {
         when(instantSupplier.get()).thenReturn(INSTANT);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, 0, documentCopy,
-                data::getAnnotations, data::annotations);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, DELTA_AT, 0,
+                documentCopy, data::getAnnotations, data::annotations);
 
         // then
         assertTrue(actual.isPresent());
@@ -160,8 +165,8 @@ class ChildDeleteMapperTest {
         when(instantSupplier.get()).thenReturn(INSTANT);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, 0, documentCopy,
-                data::getAssociatedFilings, data::associatedFilings);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, DELTA_AT, 0,
+                documentCopy, data::getAssociatedFilings, data::associatedFilings);
 
         // then
         assertTrue(actual.isPresent());
@@ -192,12 +197,36 @@ class ChildDeleteMapperTest {
         when(instantSupplier.get()).thenReturn(INSTANT);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, 0, documentCopy,
-                data::getResolutions, data::resolutions);
+        Optional<FilingHistoryDocument> actual = deleteMapper.removeTransaction(ENTITY_ID, DELTA_AT, 0,
+                documentCopy, data::getResolutions, data::resolutions);
 
         // then
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
         verify(instantSupplier).get();
+    }
+
+    @Test
+    void shouldReturn409AndNotAlterDataWhenDeltaStale() {
+        // given
+        FilingHistoryData data = new FilingHistoryData()
+                .resolutions(new ArrayList<>(
+                        List.of(
+                                new FilingHistoryResolution()
+                                        .entityId(ENTITY_ID)
+                                        .deltaAt(DELTA_AT),
+                                new FilingHistoryResolution()
+                                        .entityId(ENTITY_ID)
+                                        .deltaAt(DELTA_AT))));
+
+        FilingHistoryDocument documentCopy = new FilingHistoryDocument()
+                .data(data);
+
+        // when
+        Executable actual = () -> deleteMapper.removeTransaction(ENTITY_ID, STALE_DELTA_AT, 0,
+                documentCopy, data::getResolutions, data::resolutions);
+
+        // then
+        assertThrows(ConflictException.class, actual);
     }
 }
