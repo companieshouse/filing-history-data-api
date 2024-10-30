@@ -2,5 +2,5 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 public interface DeleteProcessor {
 
-    void processFilingHistoryDelete(String entityId);
+    void processFilingHistoryDelete(String entityId, String deltaAt);
 }

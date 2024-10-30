@@ -74,7 +74,7 @@ class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String PATCH_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/document-metadata";
-    private static final String DELETE_REQUEST_URI = "/filing-history/{entity_id}/internal";
+    private static final String DELETE_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}";
     private static final String LIST_GET_REQUEST_URI = "/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
@@ -82,6 +82,7 @@ class FilingHistoryControllerIT {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final String ENTITY_ID = "1234567890";
+    private static final String DELTA_AT = "20151025185208001000";
     private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
@@ -817,11 +818,13 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -856,11 +859,13 @@ class FilingHistoryControllerIT {
                         .withStatus(502)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -879,11 +884,13 @@ class FilingHistoryControllerIT {
         // given
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1156,11 +1163,13 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1194,11 +1203,13 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then

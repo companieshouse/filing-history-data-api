@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -98,13 +99,19 @@ public class FilingHistoryController {
                 .build();
     }
 
-    @DeleteMapping("/filing-history/{entity_id}/internal")
-    public ResponseEntity<Void> deleteFilingHistoryTransaction(@PathVariable("entity_id") final String entityId) {
+    @DeleteMapping("/company/{company_number}/filing-history/{transaction_id}/internal")
+    public ResponseEntity<Void> deleteFilingHistoryTransaction(
+            @PathVariable("company_number") final String companyNumber,
+            @PathVariable("transaction_id") final String transactionId,
+            @RequestHeader("X-DELTA-AT") String deltaAt, @RequestHeader("X-ENTITY-ID") String entityId) {
 
-        DataMapHolder.get().entityId(entityId);
+        DataMapHolder.get()
+                .companyNumber(companyNumber)
+                .entityId(entityId)
+                .transactionId(transactionId);
         LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
 
-        serviceDeleteProcessor.processFilingHistoryDelete(entityId);
+        serviceDeleteProcessor.processFilingHistoryDelete(entityId, deltaAt);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

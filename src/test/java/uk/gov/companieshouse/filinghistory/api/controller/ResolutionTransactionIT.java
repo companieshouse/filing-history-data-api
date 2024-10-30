@@ -66,11 +66,12 @@ class ResolutionTransactionIT {
     private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String GET_SINGLE_TRANSACTION_URI = "/company/{company_number}/filing-history/{transaction_id}";
     private static final String GET_FILING_HISTORY_URI = "/company/{company_number}/filing-history";
-    private static final String DELETE_REQUEST_URI = "/filing-history/{entity_id}/internal";
+    private static final String DELETE_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENTITY_ID = "1234567890";
+    private static final String DELTA_AT = "20151025185208001000";
     private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String EXISTING_CHILD_ENTITY_ID = "3234567890";
     private static final String CONTEXT_ID = "ABCD1234";
@@ -1155,11 +1156,13 @@ class ResolutionTransactionIT {
                         .withStatus(200)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1195,13 +1198,14 @@ class ResolutionTransactionIT {
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
                         .withStatus(200)));
-
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1242,11 +1246,13 @@ class ResolutionTransactionIT {
                         .withStatus(502)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1305,11 +1311,13 @@ class ResolutionTransactionIT {
                         .withStatus(200)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1334,8 +1342,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
                 .replaceAll("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", EXISTING_DATE)
                 .replaceAll("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
@@ -1349,7 +1356,7 @@ class ResolutionTransactionIT {
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
                 .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
                 .replaceAll("<context_id>", CONTEXT_ID)
                 .replaceAll("<created_at>", EXISTING_DATE);
@@ -1362,11 +1369,13 @@ class ResolutionTransactionIT {
                         .withStatus(200)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, EXISTING_CHILD_ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", EXISTING_CHILD_ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1404,11 +1413,13 @@ class ResolutionTransactionIT {
                         .withStatus(200)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1447,11 +1458,13 @@ class ResolutionTransactionIT {
                         .withStatus(200)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1492,11 +1505,13 @@ class ResolutionTransactionIT {
                         .withStatus(502)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, CHILD_ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1536,11 +1551,13 @@ class ResolutionTransactionIT {
                         .withStatus(502)));
 
         // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", CONTEXT_ID)
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
