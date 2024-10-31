@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
@@ -60,35 +59,41 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void insertFilingHistory(final FilingHistoryDocument docToInsert) {
+    public void insertFilingHistory(final FilingHistoryDocument docToInsert, String companyNumber,
+            String transactionId) {
         repository.insert(docToInsert);
-        apiClient.callResourceChanged(new ResourceChangedRequest(docToInsert, false, null));
+        apiClient.callResourceChanged(new ResourceChangedRequest(docToInsert, companyNumber, transactionId,
+                false, null));
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument docToUpdate) {
+    public void updateFilingHistory(FilingHistoryDocument docToUpdate, String companyNumber, String transactionId) {
         repository.update(docToUpdate);
-        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, null));
+        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, companyNumber, transactionId,
+                false, null));
     }
 
     @Override
-    public void updateDocumentMetadata(FilingHistoryDocument docToUpdate) {
+    public void updateDocumentMetadata(FilingHistoryDocument docToUpdate, String companyNumber, String transactionId) {
         repository.update(docToUpdate);
         List<String> fieldsChanged = new ArrayList<>();
         fieldsChanged.add("links.document_metadata");
-        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
+        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, companyNumber, transactionId,
+                false, fieldsChanged));
     }
 
     // Remove and check tests
     @Override
-    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
+    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument, String companyNumber,
+            String transactionId ) {
         repository.deleteById(existingDocument.getTransactionId());
-        apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
+        apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, companyNumber, transactionId,
+                true, null));
     }
 
-    // TODO: Requires transactionId and companyNumber
-    public void callResourceChangedForAbsentDeletedData() {
-
-
+    @Override
+    public void callResourceChangedForAbsentDeletedData(String companyNumber, String transactionId) {
+        apiClient.callResourceChanged(new ResourceChangedRequest(null, companyNumber, transactionId,
+                true, null));
     }
 }

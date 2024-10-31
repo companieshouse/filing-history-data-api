@@ -35,15 +35,13 @@ public class ResourceChangedRequestMapper {
         this.objectMapper = objectMapper;
     }
 
-    // TODO: modify record for ResourceChangedRequest
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
         FilingHistoryDocument document = request.filingHistoryDocument();
         ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(
                 DateUtils.publishedAtString(instantSupplier.get()));
-        // TODO: get company number and transaction id from ResourceChangedRequest
         ChangedResource changedResource = new ChangedResource()
-                .resourceUri("/company/%s/filing-history/%s".formatted(document.getCompanyNumber(),
-                        document.getTransactionId()))
+                .resourceUri("/company/%s/filing-history/%s".formatted(request.companyNumber(),
+                        request.transactionId()))
                 .resourceKind("filing-history")
                 .event(event)
                 .contextId(DataMapHolder.getRequestId());
@@ -51,10 +49,13 @@ public class ResourceChangedRequestMapper {
         if (request.isDelete()) {
             event.setType("deleted");
             try {
-                // TODO: alternate path if document is null
-                final String serialisedDeletedData =
-                        objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
-                changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));
+                if (document == null) {
+                    changedResource.setDeletedData(null);
+                } else {
+                    final String serialisedDeletedData =
+                            objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
+                    changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));
+                }
             } catch (JsonProcessingException ex) {
                 LOGGER.error(SERDES_ERROR_MSG, ex, DataMapHolder.getLogMap());
                 throw new InternalServerErrorException(SERDES_ERROR_MSG);

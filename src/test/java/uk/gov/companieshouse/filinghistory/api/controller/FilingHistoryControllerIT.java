@@ -876,9 +876,12 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn404NotFoundWhenDocumentNotFound() throws Exception {
+    void shouldReturn200OnDeleteWhereDocumentDoesNotExist() throws Exception {
         // given
-
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
         // when
         final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
@@ -890,7 +893,7 @@ class FilingHistoryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isNotFound());
+        result.andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test

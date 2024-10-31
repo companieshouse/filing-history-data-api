@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -38,13 +39,15 @@ class ResourceChangedRequestMapperTest {
 
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     private static final String PUBLISHED_AT = DateUtils.publishedAtString(UPDATED_AT);
+    private static final String COMPANY_NUMBER = "12345678";
+    private static final String TRANSACTION_ID = "AB123CD567";
     private static final String FILING_HISTORY = "filing-history";
     private static final String EXPECTED_CONTEXT_ID = "35234234";
     private static final ExternalData deletedData = new ExternalData();
     private static final FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument()
             .companyNumber("12345678")
             .transactionId("ABCDE54321");
-    private static final String RESOURCE_URI = "/company/12345678/filing-history/ABCDE54321";
+    private static final String RESOURCE_URI = "/company/12345678/filing-history/AB123CD567";
     private static final String CHANGED_EVENT_TYPE = "changed";
     private static final String DELETED_EVENT_TYPE = "deleted";
     private static final String DOC_META_DATA_LINK_FIELD = "links.document_metadata";
@@ -73,7 +76,7 @@ class ResourceChangedRequestMapperTest {
         fieldsChanged.add(DOC_META_DATA_LINK_FIELD);
 
         ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(
-                filingHistoryDocument, false, fieldsChanged);
+                filingHistoryDocument, COMPANY_NUMBER, TRANSACTION_ID, false, fieldsChanged);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
@@ -95,10 +98,8 @@ class ResourceChangedRequestMapperTest {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
-
-
         ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(
-                filingHistoryDocument, false, null);
+                filingHistoryDocument, COMPANY_NUMBER, TRANSACTION_ID, false, null);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
@@ -130,7 +131,8 @@ class ResourceChangedRequestMapperTest {
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenReturn(deletedDataAsString);
         when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenReturn(deletedDataAsObject);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true, null);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument,
+                COMPANY_NUMBER, TRANSACTION_ID, true, null);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
@@ -151,13 +153,39 @@ class ResourceChangedRequestMapperTest {
     }
 
     @Test
+    void testDeletedResourceChangedMapperWithEmptyDocument() throws Exception {
+        // given
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(null,
+                COMPANY_NUMBER, TRANSACTION_ID, true, null);
+        ChangedResource expectedChangedResource = new ChangedResource()
+                .contextId(EXPECTED_CONTEXT_ID)
+                .resourceUri(RESOURCE_URI)
+                .resourceKind(FILING_HISTORY)
+                .deletedData(null)
+                .event(new ChangedResourceEvent()
+                        .type(DELETED_EVENT_TYPE)
+                        .publishedAt(PUBLISHED_AT));
+
+        // when
+        ChangedResource actual = mapper.mapChangedResource(deleteResourceChangedRequest);
+
+        // then
+        assertEquals(expectedChangedResource, actual);
+        verifyNoInteractions(itemGetResponseMapper);
+        verifyNoInteractions(nullCleaningObjectMapper);
+    }
+
+    @Test
     void shouldThrowInternalServerErrorForDeletedResourceChangedMapperOnSerialisation() throws Exception {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(deletedData);
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true, null);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument,
+                COMPANY_NUMBER, TRANSACTION_ID, true, null);
 
         // when
         Executable executable = () -> mapper.mapChangedResource(deleteResourceChangedRequest);
@@ -177,7 +205,8 @@ class ResourceChangedRequestMapperTest {
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
         when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
 
-        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument, true, null);
+        ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument,
+                COMPANY_NUMBER, TRANSACTION_ID, true, null);
 
         // when
         Executable executable = () -> mapper.mapChangedResource(deleteResourceChangedRequest);

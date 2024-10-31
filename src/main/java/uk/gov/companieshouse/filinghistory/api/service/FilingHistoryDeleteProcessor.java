@@ -5,9 +5,9 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.isDeltaSt
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
-import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -25,26 +25,28 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
     }
 
     @Override
-    public void processFilingHistoryDelete(String entityId, String requestDeltaAt) {
-        filingHistoryService.findFilingHistoryByEntityId(entityId)
+    public void processFilingHistoryDelete(FilingHistoryDeleteRequest request) {
+        filingHistoryService.findFilingHistoryByEntityId(request.entityId())
                 .ifPresentOrElse(
-                        deleteAggregate -> deleteMapperDelegator.delegateDelete(entityId,
-                                        deleteAggregate, requestDeltaAt)
+                        deleteAggregate -> deleteMapperDelegator.delegateDelete(request.entityId(),
+                                        deleteAggregate, request.deltaAt())
                                 .ifPresentOrElse(
                                         updatedDocument -> {
                                             LOGGER.info("Removing child", DataMapHolder.getLogMap());
-                                            filingHistoryService.updateFilingHistory(updatedDocument);
+                                            filingHistoryService.updateFilingHistory(updatedDocument,
+                                                    request.companyNumber(), request.transactionId());
                                         },
                                         () -> {
                                             FilingHistoryDocument parentDocument = deleteAggregate.getDocument();
-                                            deltaAtCheck(requestDeltaAt, parentDocument);
+                                            deltaAtCheck(request.deltaAt(), parentDocument);
                                             LOGGER.info("Deleting parent", DataMapHolder.getLogMap());
-                                            filingHistoryService.deleteExistingFilingHistory(parentDocument);
+                                            filingHistoryService.deleteExistingFilingHistory(parentDocument,
+                                                    request.companyNumber(), request.transactionId());
                                         }),
                         () -> {
-                            // TODO: pass in companyNumber and transactionId (new record!)
-                            LOGGER.info("Document to delete not found", DataMapHolder.getLogMap());
-                            throw new NotFoundException("Document to delete not found");
+                            LOGGER.info("Delete for non-existent document", DataMapHolder.getLogMap());
+                            filingHistoryService.callResourceChangedForAbsentDeletedData(request.companyNumber(),
+                                    request.transactionId());
                         }
                 );
     }

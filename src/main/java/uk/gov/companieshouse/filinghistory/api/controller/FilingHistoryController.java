@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.filinghistory.FilingHistoryDocumentMetadataUpda
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 import uk.gov.companieshouse.filinghistory.api.service.DeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.GetResponseProcessor;
@@ -111,7 +112,8 @@ public class FilingHistoryController {
                 .transactionId(transactionId);
         LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
 
-        serviceDeleteProcessor.processFilingHistoryDelete(entityId, deltaAt);
+        serviceDeleteProcessor.processFilingHistoryDelete(new FilingHistoryDeleteRequest(companyNumber, transactionId,
+                entityId, deltaAt));
 
         return ResponseEntity
                 .status(HttpStatus.OK)

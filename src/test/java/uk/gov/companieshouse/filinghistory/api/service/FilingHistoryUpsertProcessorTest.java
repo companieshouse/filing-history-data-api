@@ -88,7 +88,7 @@ class FilingHistoryUpsertProcessorTest {
         verify(instantSupplier).get();
         verify(topLevelMapper).mapNewFilingHistory(TRANSACTION_ID, request, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).insertFilingHistory(documentToUpsert);
+        verify(filingHistoryService).insertFilingHistory(documentToUpsert, COMPANY_NUMBER, TRANSACTION_ID);
     }
 
     @Test
@@ -112,7 +112,7 @@ class FilingHistoryUpsertProcessorTest {
         verify(instantSupplier).get();
         verify(topLevelMapper).mapExistingFilingHistory(request, existingDocument, INSTANT);
         verifyNoMoreInteractions(topLevelMapper);
-        verify(filingHistoryService).updateFilingHistory(documentToUpsert);
+        verify(filingHistoryService).updateFilingHistory(documentToUpsert, COMPANY_NUMBER, TRANSACTION_ID);
     }
 
     @Test
