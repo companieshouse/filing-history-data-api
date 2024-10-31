@@ -1156,53 +1156,6 @@ class AssociatedFilingTransactionIT {
                 ))));
     }
 
-    @Test
-    void shouldRollbackNoParentAssociatedFilingAfterDeleteButChsKafkaApiUnavailable() throws Exception {
-        // given
-        String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json", StandardCharsets.UTF_8);
-        existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
-        final FilingHistoryDocument existingDocument =
-                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
-        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
-
-        FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-
-        when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
-                .willReturn(aResponse()
-                        .withStatus(502)));
-
-        // when
-        ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
-                .header("ERIC-Identity", "123")
-                .header("ERIC-Identity-Type", "key")
-                .header("ERIC-Authorised-Key-Privileges", "internal-app")
-                .header("X-Request-Id", CONTEXT_ID)
-                .header("X-DELTA-AT", DELTA_AT)
-                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
-                .contentType(MediaType.APPLICATION_JSON));
-
-        // then
-        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
-
-        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertEquals(expectedDocument, actualDocument);
-
-        verify(instantSupplier).get();
-        WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedResourceDeleted(
-                ))));
-    }
-
     private String getExpectedChangedResource() throws JsonProcessingException {
         return objectMapper.writeValueAsString(new ChangedResource()
                 .resourceUri("/company/12345678/filing-history/transactionId")

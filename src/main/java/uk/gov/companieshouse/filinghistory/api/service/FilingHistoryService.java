@@ -80,7 +80,6 @@ public class FilingHistoryService implements Service {
     }
 
     // Remove and check tests
-    @Transactional
     @Override
     public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
         repository.deleteById(existingDocument.getTransactionId());
