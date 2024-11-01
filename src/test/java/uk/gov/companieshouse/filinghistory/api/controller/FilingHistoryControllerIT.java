@@ -876,6 +876,39 @@ class FilingHistoryControllerIT {
     }
 
     @Test
+    void deleteShouldNotProcessWhenDeltaAtIsMissingAndReturns400() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .header("X-ENTITY-ID", ENTITY_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+    }
+
+    @Test
     void shouldReturn200OnDeleteWhereDocumentDoesNotExist() throws Exception {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);

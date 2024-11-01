@@ -2,8 +2,10 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.isDeltaStale;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
+import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
@@ -26,6 +28,10 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
 
     @Override
     public void processFilingHistoryDelete(FilingHistoryDeleteRequest request) {
+        if (StringUtils.isBlank(request.deltaAt())) {
+            LOGGER.error("deltaAt missing from delete request", DataMapHolder.getLogMap());
+            throw new BadRequestException("deltaAt is null or empty");
+        }
         filingHistoryService.findFilingHistoryByEntityId(request.entityId())
                 .ifPresentOrElse(
                         deleteAggregate -> deleteMapperDelegator.delegateDelete(request.entityId(),

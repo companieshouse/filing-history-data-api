@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
@@ -104,5 +107,22 @@ class FilingHistoryDeleteProcessorTest {
         assertThrows(ConflictException.class, executable);
         verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
         verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, STALE_DELTA_AT);
+    }
+
+    @Test
+    void shouldThrowBadRequestExceptionWhenDeltaAtIsMissing() {
+        FilingHistoryDeleteRequest missingDeltaAtRequest =
+                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, null);
+
+        // given
+
+        // when
+        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(missingDeltaAtRequest);
+
+        // then
+        BadRequestException exception = assertThrows(BadRequestException.class, executable);
+        assertEquals("deltaAt is null or empty", exception.getMessage());
+        verifyNoInteractions(deleteMapperDelegator);
+        verifyNoInteractions(filingHistoryService);
     }
 }
