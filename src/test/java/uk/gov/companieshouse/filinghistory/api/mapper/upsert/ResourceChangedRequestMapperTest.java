@@ -72,18 +72,14 @@ class ResourceChangedRequestMapperTest {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
-        final ArrayList<String> fieldsChanged = new ArrayList<>();
-        fieldsChanged.add(DOC_META_DATA_LINK_FIELD);
-
         ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(
-                filingHistoryDocument, COMPANY_NUMBER, TRANSACTION_ID, false, fieldsChanged);
+                filingHistoryDocument, COMPANY_NUMBER, TRANSACTION_ID, false, null);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
                 .resourceKind(FILING_HISTORY)
                 .event(new ChangedResourceEvent()
                         .type(CHANGED_EVENT_TYPE)
-                        .fieldsChanged(fieldsChanged)
                         .publishedAt(PUBLISHED_AT));
 
         // when
@@ -98,14 +94,18 @@ class ResourceChangedRequestMapperTest {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
+        final ArrayList<String> fieldsChanged = new ArrayList<>();
+        fieldsChanged.add(DOC_META_DATA_LINK_FIELD);
+
         ResourceChangedRequest upsertResourceChangedRequest = new ResourceChangedRequest(
-                filingHistoryDocument, COMPANY_NUMBER, TRANSACTION_ID, false, null);
+                filingHistoryDocument, COMPANY_NUMBER, TRANSACTION_ID, false, fieldsChanged);
         ChangedResource expectedChangedResource = new ChangedResource()
                 .contextId(EXPECTED_CONTEXT_ID)
                 .resourceUri(RESOURCE_URI)
                 .resourceKind(FILING_HISTORY)
                 .event(new ChangedResourceEvent()
                         .type(CHANGED_EVENT_TYPE)
+                        .fieldsChanged(fieldsChanged)
                         .publishedAt(PUBLISHED_AT));
 
         // when
@@ -153,7 +153,7 @@ class ResourceChangedRequestMapperTest {
     }
 
     @Test
-    void testDeletedResourceChangedMapperWithEmptyDocument() throws Exception {
+    void testDeletedResourceChangedMapperWithEmptyDocument() {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
 
@@ -203,7 +203,8 @@ class ResourceChangedRequestMapperTest {
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(deletedData);
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
-        when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
+        when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenThrow(
+                JsonProcessingException.class);
 
         ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument,
                 COMPANY_NUMBER, TRANSACTION_ID, true, null);
