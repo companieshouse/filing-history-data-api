@@ -18,7 +18,7 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.3.4</spring.boot.version>
+    <spring.boot.version>3.3.5</spring.boot.version>
     <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version> <!-- Version 3.4.3 does not work -->
     <structured-logging.version>3.0.20</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
