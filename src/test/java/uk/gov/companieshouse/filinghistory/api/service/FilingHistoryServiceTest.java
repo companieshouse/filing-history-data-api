@@ -144,7 +144,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
 
         // when
-        service.insertFilingHistory(document);
+        service.insertFilingHistory(document, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         verify(repository).insert(document);
@@ -157,7 +157,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
 
         // when
-        service.updateFilingHistory(document);
+        service.updateFilingHistory(document, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         verify(repository).update(document);
@@ -170,7 +170,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenThrow(BadGatewayException.class);
 
         // when
-        Executable executable = () -> service.updateFilingHistory(document);
+        Executable executable = () -> service.updateFilingHistory(document, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         assertThrows(BadGatewayException.class, executable);
@@ -184,7 +184,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
 
         // when
-        service.updateDocumentMetadata(document);
+        service.updateDocumentMetadata(document, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         verify(repository).update(document);
@@ -197,7 +197,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenThrow(BadGatewayException.class);
 
         // when
-        Executable executable = () -> service.updateDocumentMetadata(document);
+        Executable executable = () -> service.updateDocumentMetadata(document, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         assertThrows(BadGatewayException.class, executable);
@@ -225,7 +225,7 @@ class FilingHistoryServiceTest {
                 .when(repository).insert(any());
 
         // when
-        Executable executable = () -> service.insertFilingHistory(document);
+        Executable executable = () -> service.insertFilingHistory(document, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         assertThrows(BadGatewayException.class, executable);
@@ -240,10 +240,22 @@ class FilingHistoryServiceTest {
         when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
-        service.deleteExistingFilingHistory(existingDocument);
+        service.deleteExistingFilingHistory(existingDocument, COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         verify(repository).deleteById(TRANSACTION_ID);
+        verify(resourceChangedApiClient).callResourceChanged(any());
+    }
+
+    @Test
+    void deleteWhenDocumentAlreadyDeletedCallsResourceChanged() {
+        //given
+        when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
+
+        // when
+        service.callResourceChangedForAbsentDeletedData(COMPANY_NUMBER, TRANSACTION_ID);
+
+        // then
         verify(resourceChangedApiClient).callResourceChanged(any());
     }
 
@@ -254,7 +266,8 @@ class FilingHistoryServiceTest {
         when(existingDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
-        Executable executable = () -> service.deleteExistingFilingHistory(existingDocument);
+        Executable executable = () -> service.deleteExistingFilingHistory(existingDocument,
+                COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         assertThrows(BadGatewayException.class, executable);

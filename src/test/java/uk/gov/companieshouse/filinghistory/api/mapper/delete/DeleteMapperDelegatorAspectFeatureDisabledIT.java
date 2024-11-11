@@ -21,6 +21,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 class DeleteMapperDelegatorAspectFeatureDisabledIT {
 
     private static final String ENTITY_ID = "entity ID";
+    private static final String DELTA_AT = "20151025185208001000";
     private static final String CHILD_ENTITY_ID = "child entity ID";
 
     @Autowired
@@ -41,7 +42,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
                 new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
                                 .entityId(ENTITY_ID)
-                                .data(new FilingHistoryData())));
+                                .data(new FilingHistoryData())), DELTA_AT);
 
         // then
         assertTrue(actual.isEmpty());
@@ -57,7 +58,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
                 new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
                                 .entityId(ENTITY_ID))
-                        .resolutionIndex(0));
+                        .resolutionIndex(0),  DELTA_AT);
 
         // then
         assertThrows(BadRequestException.class, actual);
@@ -73,7 +74,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
                 new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
                                 .entityId(ENTITY_ID))
-                        .annotationIndex(0));
+                        .annotationIndex(0), DELTA_AT);
 
         // then
         assertThrows(BadRequestException.class, actual);
@@ -89,7 +90,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
                 new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
                                 .entityId(ENTITY_ID))
-                        .associatedFilingIndex(0));
+                        .associatedFilingIndex(0), DELTA_AT);
 
         // then
         assertThrows(BadRequestException.class, actual);
@@ -106,7 +107,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
                         .document(new FilingHistoryDocument()
                                 .entityId(ENTITY_ID)
                                 .data(new FilingHistoryData()
-                                        .type("RESOLUTIONS"))));
+                                        .type("RESOLUTIONS"))), DELTA_AT);
 
         // then
         assertThrows(BadRequestException.class, actual);

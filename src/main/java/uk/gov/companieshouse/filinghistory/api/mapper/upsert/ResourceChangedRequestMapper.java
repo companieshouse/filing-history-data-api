@@ -29,25 +29,27 @@ public class ResourceChangedRequestMapper {
     private final ObjectMapper objectMapper;
 
     public ResourceChangedRequestMapper(ItemGetResponseMapper itemGetResponseMapper,
-                                        Supplier<Instant> instantSupplier, ObjectMapper objectMapper) {
+            Supplier<Instant> instantSupplier, ObjectMapper objectMapper) {
         this.itemGetResponseMapper = itemGetResponseMapper;
         this.instantSupplier = instantSupplier;
         this.objectMapper = objectMapper;
     }
 
     public ChangedResource mapChangedResource(ResourceChangedRequest request) {
-        FilingHistoryDocument document = request.filingHistoryDocument();
-        ChangedResourceEvent event = new ChangedResourceEvent().publishedAt(
-                DateUtils.publishedAtString(instantSupplier.get()));
+        boolean isDelete = request.isDelete();
+        ChangedResourceEvent event = new ChangedResourceEvent()
+                .publishedAt(DateUtils.publishedAtString(instantSupplier.get()))
+                .type(isDelete ? "deleted" : "changed")
+                .fieldsChanged(request.fieldsChanged());
         ChangedResource changedResource = new ChangedResource()
-                .resourceUri("/company/%s/filing-history/%s".formatted(document.getCompanyNumber(),
-                        document.getTransactionId()))
+                .resourceUri("/company/%s/filing-history/%s".formatted(request.companyNumber(),
+                        request.transactionId()))
                 .resourceKind("filing-history")
                 .event(event)
                 .contextId(DataMapHolder.getRequestId());
 
-        if (request.isDelete()) {
-            event.setType("deleted");
+        FilingHistoryDocument document = request.document();
+        if (isDelete && document != null) {
             try {
                 final String serialisedDeletedData =
                         objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
@@ -56,10 +58,7 @@ public class ResourceChangedRequestMapper {
                 LOGGER.error(SERDES_ERROR_MSG, ex, DataMapHolder.getLogMap());
                 throw new InternalServerErrorException(SERDES_ERROR_MSG);
             }
-        } else {
-            event.setType("changed");
         }
-        event.setFieldsChanged(request.fieldsChanged());
         return changedResource;
     }
 }

@@ -58,13 +58,13 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                                     mapper.mapExistingFilingHistory(request, existingDoc, instant);
 
                             LOGGER.info("Updating existing document", DataMapHolder.getLogMap());
-                            filingHistoryService.updateFilingHistory(docToUpdate);
+                            filingHistoryService.updateFilingHistory(docToUpdate, companyNumber, transactionId);
                         },
                         () -> {
                             FilingHistoryDocument newDocument = mapper.mapNewFilingHistory(transactionId, request,
                                     instant);
                             LOGGER.info("Inserting new document", DataMapHolder.getLogMap());
-                            filingHistoryService.insertFilingHistory(newDocument);
+                            filingHistoryService.insertFilingHistory(newDocument, companyNumber, transactionId);
                         });
     }
 
@@ -86,7 +86,7 @@ public class FilingHistoryUpsertProcessor implements UpsertProcessor {
                             FilingHistoryDocument docToUpdate =
                                     mapper.mapDocumentMetadata(request, existingDoc);
 
-                            filingHistoryService.updateDocumentMetadata(docToUpdate);
+                            filingHistoryService.updateDocumentMetadata(docToUpdate, companyNumber, transactionId);
                         },
                         () -> {
                             throw new NotFoundException("Transaction not found for document metadata patch");

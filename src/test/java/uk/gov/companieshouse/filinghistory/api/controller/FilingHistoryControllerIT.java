@@ -74,7 +74,7 @@ class FilingHistoryControllerIT {
 
     private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String PATCH_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/document-metadata";
-    private static final String DELETE_REQUEST_URI = "/filing-history/{entity_id}/internal";
+    private static final String DELETE_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";
     private static final String SINGLE_GET_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}";
     private static final String LIST_GET_REQUEST_URI = "/company/{company_number}/filing-history";
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
@@ -82,6 +82,7 @@ class FilingHistoryControllerIT {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String SELF_LINK = "/company/%s/filing-history/%s".formatted(COMPANY_NUMBER, TRANSACTION_ID);
     private static final String ENTITY_ID = "1234567890";
+    private static final String DELTA_AT = "20151025185208001000";
     private static final String CHILD_ENTITY_ID = "2234567890";
     private static final String DOCUMENT_ID = "000X4BI89B65846";
     private static final String BARCODE = "X4BI89B6";
@@ -218,6 +219,7 @@ class FilingHistoryControllerIT {
         String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
                 .replaceAll("<company_number>", COMPANY_NUMBER);
         Document document = Document.parse(jsonToInsert);
         document.append("version", 0);
@@ -279,7 +281,8 @@ class FilingHistoryControllerIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument =
@@ -817,11 +820,13 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -836,58 +841,92 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn502GivenDeleteAndChsKafkaApiUnavailableAndDocumentShouldBeRolledBackToPreviousState()
-            throws Exception {
+    void shouldNotDeleteExistingDocumentWhenStaleDeltaAndReturn409() throws Exception {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
                 .replaceAll("<entity_id>", ENTITY_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replaceAll("<category>", CATEGORY)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
-
-        final FilingHistoryDocument expectedDocument = mongoTemplate.findById(TRANSACTION_ID,
-                FilingHistoryDocument.class);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
-                        .withStatus(502)));
+                        .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", STALE_REQUEST_DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isBadGateway());
+        result.andExpect(MockMvcResultMatchers.status().isConflict());
 
-        assertEquals(expectedDocument, mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
-
-        verify(instantSupplier).get();
-        WireMock.verify(
-                requestMadeFor(
-                        new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDelete())));
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(EXISTING_DELTA_AT, actualDocument.getDeltaAt());
     }
 
     @Test
-    void shouldReturn404NotFoundWhenDocumentNotFound() throws Exception {
+    void deleteShouldNotProcessWhenDeltaAtIsMissingAndReturns400() throws Exception {
         // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isNotFound());
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+    }
+
+    @Test
+    void shouldReturn200OnDeleteWhereDocumentDoesNotExist() throws Exception {
+        // given
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -896,7 +935,8 @@ class FilingHistoryControllerIT {
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
         Document doc = Document.parse(jsonToInsert);
         doc.remove("delta_at");
         doc.append("version", 0);
@@ -1156,11 +1196,13 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1168,6 +1210,45 @@ class FilingHistoryControllerIT {
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
         assertNull(actualDocument);
+    }
+
+    @Test
+    void shouldNotDeleteNewIncWithEmbeddedChildWhenDeltaIsStaleAndReturns409() throws Exception {
+        // given
+        String existingDocumentJson = IOUtils.resourceToString(
+                "/mongo_docs/newinc/existing_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
+        existingDocumentJson = existingDocumentJson
+                .replaceAll("<transaction_id>", TRANSACTION_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
+                .replaceAll("<updated_at>", DATE)
+                .replaceAll("<created_at>", DATE);
+        final FilingHistoryDocument existingDocument =
+                objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
+        mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", STALE_REQUEST_DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isConflict());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+        assertEquals(EXISTING_DELTA_AT, actualDocument.getDeltaAt());
     }
 
     @Test
@@ -1194,11 +1275,13 @@ class FilingHistoryControllerIT {
                         .withStatus(200)));
 
         // when
-        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, ENTITY_ID)
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
                 .header("ERIC-Identity", "123")
                 .header("ERIC-Identity-Type", "key")
                 .header("ERIC-Authorised-Key-Privileges", "internal-app")
                 .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then

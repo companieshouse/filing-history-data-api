@@ -15,11 +15,13 @@ public interface Service {
 
     Optional<FilingHistoryDeleteAggregate> findFilingHistoryByEntityId(String entityId);
 
-    void insertFilingHistory(final FilingHistoryDocument docToInsert);
+    void insertFilingHistory(final FilingHistoryDocument docToInsert, String companyNumber, String transactionId);
 
-    void updateFilingHistory(final FilingHistoryDocument docToUpdate);
+    void updateFilingHistory(final FilingHistoryDocument docToUpdate, String companyNumber, String transactionId);
 
-    void updateDocumentMetadata(final FilingHistoryDocument docToUpdate);
+    void updateDocumentMetadata(final FilingHistoryDocument docToUpdate, String companyNumber, String transactionId);
 
-    void deleteExistingFilingHistory(FilingHistoryDocument existingDocument);
+    void deleteExistingFilingHistory(FilingHistoryDocument existingDocument, String companyNumber, String transactionId);
+
+    void callResourceChangedForAbsentDeletedData(String companyNumber, String transactionId);
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.filinghistory.api.client.ResourceChangedApiClient;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
@@ -49,8 +48,7 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public Optional<FilingHistoryDocument> findExistingFilingHistory(final String transactionId,
-            final String companyNumber) {
+    public Optional<FilingHistoryDocument> findExistingFilingHistory(String transactionId, String companyNumber) {
         return repository.findByIdAndCompanyNumber(transactionId, companyNumber);
     }
 
@@ -60,29 +58,53 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void insertFilingHistory(final FilingHistoryDocument docToInsert) {
+    public void insertFilingHistory(FilingHistoryDocument docToInsert, String companyNumber, String transactionId) {
         repository.insert(docToInsert);
-        apiClient.callResourceChanged(new ResourceChangedRequest(docToInsert, false, null));
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
+                .build());
     }
 
     @Override
-    public void updateFilingHistory(FilingHistoryDocument docToUpdate) {
+    public void updateFilingHistory(FilingHistoryDocument docToUpdate, String companyNumber, String transactionId) {
         repository.update(docToUpdate);
-        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, null));
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
+                .build());
     }
 
     @Override
-    public void updateDocumentMetadata(FilingHistoryDocument docToUpdate) {
+    public void updateDocumentMetadata(FilingHistoryDocument docToUpdate, String companyNumber, String transactionId) {
         repository.update(docToUpdate);
         List<String> fieldsChanged = new ArrayList<>();
         fieldsChanged.add("links.document_metadata");
-        apiClient.callResourceChanged(new ResourceChangedRequest(docToUpdate, false, fieldsChanged));
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
+                .fieldsChanged(fieldsChanged)
+                .build());
     }
 
-    @Transactional
     @Override
-    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument) {
+    public void deleteExistingFilingHistory(FilingHistoryDocument existingDocument, String companyNumber,
+            String transactionId) {
         repository.deleteById(existingDocument.getTransactionId());
-        apiClient.callResourceChanged(new ResourceChangedRequest(existingDocument, true, null));
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .document(existingDocument)
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
+                .isDelete(true)
+                .build());
+    }
+
+    @Override
+    public void callResourceChangedForAbsentDeletedData(String companyNumber, String transactionId) {
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
+                .isDelete(true)
+                .build());
     }
 }

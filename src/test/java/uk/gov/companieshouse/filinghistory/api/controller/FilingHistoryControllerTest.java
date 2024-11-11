@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.exception.NotFoundException;
+import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryListRequestParams;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryDeleteProcessor;
 import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryGetResponseProcessor;
@@ -35,7 +36,10 @@ class FilingHistoryControllerTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String ENTITY_ID = "entity_id";
+    private static final String DELTA_AT = "20151025185208001000";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final FilingHistoryDeleteRequest DELETE_REQUEST =
+            new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT);
     private static final int START_INDEX = 0;
     private static final int DEFAULT_ITEMS_PER_PAGE = 25;
 
@@ -47,7 +51,8 @@ class FilingHistoryControllerTest {
     private FilingHistoryGetResponseProcessor getResponseProcessor;
     @Mock
     private FilingHistoryDeleteProcessor deleteProcessor;
-
+    @Mock
+    private FilingHistoryDeleteRequest deleteRequest;
     @Mock
     private InternalFilingHistoryApi requestBody;
     @Mock
@@ -234,25 +239,27 @@ class FilingHistoryControllerTest {
                 .build();
 
         // when
-        final ResponseEntity<Void> actualResponse = controller.deleteFilingHistoryTransaction(ENTITY_ID);
+        final ResponseEntity<Void> actualResponse = controller.deleteFilingHistoryTransaction(COMPANY_NUMBER,
+                TRANSACTION_ID, DELTA_AT, ENTITY_ID);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(deleteProcessor).processFilingHistoryDelete(ENTITY_ID);
+        verify(deleteProcessor).processFilingHistoryDelete(DELETE_REQUEST);
     }
 
     @Test
     void shouldReturn404WhenDeleteAndNotFoundException() {
         // given
         doThrow(NotFoundException.class)
-                .when(deleteProcessor).processFilingHistoryDelete(anyString());
+                .when(deleteProcessor).processFilingHistoryDelete(any());
 
         // when
-        Executable executable = () -> controller.deleteFilingHistoryTransaction(ENTITY_ID);
+        Executable executable = () -> controller.deleteFilingHistoryTransaction(COMPANY_NUMBER,
+                TRANSACTION_ID, DELTA_AT, ENTITY_ID);
 
         // then
         assertThrows(NotFoundException.class, executable);
-        verify(deleteProcessor).processFilingHistoryDelete(ENTITY_ID);
+        verify(deleteProcessor).processFilingHistoryDelete(DELETE_REQUEST);
     }
 
     @Test
