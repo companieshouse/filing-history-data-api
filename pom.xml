@@ -12,7 +12,7 @@
   <name>filing-history-data-api</name>
 
   <artifactId>filing-history-data-api</artifactId>
-  <version>latest</version>
+  <version>unversioned</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -29,7 +29,7 @@
     <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <test-containers.version>1.20.3</test-containers.version>
-    <wiremock.version>3.9.2</wiremock.version>
+    <wiremock.version>3.9.1</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
@@ -236,7 +236,7 @@
           <from>
             <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-runtime-21:latest</image>
           </from>
-          <to>
+          <to>c
             <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/filing-history-data-api:latest</image>
           </to>
         </configuration>
