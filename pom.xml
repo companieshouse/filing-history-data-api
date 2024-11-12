@@ -18,8 +18,7 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <!-- bumped down from 3.3.5 to ensure the passes works on Concourse -->
-    <spring.boot.version>3.3.4</spring.boot.version>
+    <spring.boot.version>3.3.5</spring.boot.version>
     <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version> <!-- Version 3.4.3 does not work -->
     <structured-logging.version>3.0.20</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
@@ -27,11 +26,9 @@
     <private-api-sdk-java.version>4.0.224</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
     <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-    <!-- bumped down from 3.5.1 to ensure the build passes on Concourse -->
-    <maven-failsafe-plugin.version>3.4.0</maven-failsafe-plugin.version>
+    <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <!-- bumped down from 1.20.3 to ensure the build passes on Concourse -->
-    <test-containers.version>1.20.1</test-containers.version>
+    <test-containers.version>1.20.3</test-containers.version>
     <wiremock.version>3.9.2</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
