@@ -40,7 +40,7 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
                                         updatedDocument -> {
                                             LOGGER.info("Removing child", DataMapHolder.getLogMap());
                                             filingHistoryService.updateFilingHistory(updatedDocument,
-                                                    request.companyNumber(), request.transactionId());
+                                                    request.companyNumber(), updatedDocument.getTransactionId());
                                         },
                                         () -> {
                                             FilingHistoryDocument parentDocument = deleteAggregate.getDocument();

@@ -66,6 +66,7 @@ class FilingHistoryDeleteProcessorTest {
         // given
         when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.of(updatedDocument));
+        when(updatedDocument.getTransactionId()).thenReturn(TRANSACTION_ID);
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(DELETE_REQUEST);
