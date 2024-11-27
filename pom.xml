@@ -25,16 +25,11 @@
     <api-security-java.version>2.0.8</api-security-java.version>
     <private-api-sdk-java.version>4.0.241</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
-    <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
     <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
-    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <wiremock.version>3.9.2</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
-
-    <!--explicit versions of transitive dependencies with vulnerabilities in previous versions-->
-    <json-path.version>2.9.0</json-path.version>
 
     <!--sonar configuration-->
     <sonar.coverage.jacoco.xmlReportPaths>
@@ -58,17 +53,6 @@
 
   <dependencies>
     <!--the following transitive dependencies are added specifically to avoid vulnerabilities-->
-    <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path</artifactId>
-      <version>${json-path.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xmlunit</groupId>
-      <artifactId>xmlunit-core</artifactId>
-      <version>2.10.0</version>
-      <scope>test</scope>
-    </dependency>
     <!--end transitive dependencies-->
 
     <dependency>
@@ -76,14 +60,14 @@
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-security</artifactId>
-        <exclusions>
-            <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-to-slf4j</artifactId>
-            </exclusion>
-        </exclusions>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-to-slf4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -132,9 +116,9 @@
       </exclusions>
     </dependency>
     <dependency>
-        <groupId>uk.gov.companieshouse</groupId>
-        <artifactId>api-security-java</artifactId>
-        <version>${api-security-java.version}</version>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>api-security-java</artifactId>
+      <version>${api-security-java.version}</version>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
@@ -234,42 +218,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${maven-build-helper-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>add-test-source</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>src/itest/java</source>
-              </sources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>add-test-resources</id>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>add-test-resource</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>src/itest/resources</directory>
-                  <includes>
-                    <include>**/*</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>${jacoco-maven-plugin.version}</version>
@@ -353,32 +301,6 @@
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
           <skipITs>${skip.integration.tests}</skipITs>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>${maven-resources-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/test-classes</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/src/itest/resources</directory>
-                  <includes>
-                    <include>**/*.*</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
