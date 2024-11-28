@@ -60,8 +60,7 @@ sonar:
 
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
-	mvn verify -Dskip.unit.tests=true -Dskip.integration.tests=true
-	#mvn sonar:sonar -P sonar-pr-analysis #temporary until sonar available for Java 21
+	mvn sonar:sonar -P sonar-pr-analysis # will report some false code smells until java 21 is supported
 
 .PHONY: security-check
 security-check:
