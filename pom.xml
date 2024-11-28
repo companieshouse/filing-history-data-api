@@ -52,7 +52,7 @@
   </dependencyManagement>
 
   <dependencies>
-    <!--the following transitive dependencies are added specifically to avoid vulnerabilities-->
+    <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
     <!--end transitive dependencies-->
 
     <dependency>
