@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequestMapper;
@@ -21,9 +21,9 @@ class ResourceChangedApiClientAspectFeatureDisabledIT {
 
     @Autowired
     private ResourceChangedApiClient client;
-    @MockBean
+    @MockitoBean
     private Supplier<InternalApiClient> apiClientSupplier;
-    @MockBean
+    @MockitoBean
     private ResourceChangedRequestMapper mapper;
     @Mock
     private ResourceChangedRequest resourceChangedRequest;

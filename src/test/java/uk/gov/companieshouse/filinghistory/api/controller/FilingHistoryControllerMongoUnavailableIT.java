@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -84,9 +84,9 @@ class FilingHistoryControllerMongoUnavailableIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private Supplier<Instant> instantSupplier;
-    @MockBean
+    @MockitoBean
     private Repository repository;
 
     @DynamicPropertySource
@@ -164,7 +164,8 @@ class FilingHistoryControllerMongoUnavailableIT {
     @Test
     void shouldReturn502WhenRepositoryThrowsBadGatewayDuringFindFilingHistory() throws Exception {
         // given
-        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(
+                BadGatewayException.class);
 
         // when
         ResultActions result = mockMvc.perform(get(GET_FILING_HISTORY_URI, COMPANY_NUMBER,

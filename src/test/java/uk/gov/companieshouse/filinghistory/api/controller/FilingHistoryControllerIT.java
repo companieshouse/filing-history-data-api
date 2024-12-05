@@ -33,11 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -118,7 +118,7 @@ class FilingHistoryControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private Supplier<Instant> instantSupplier;
 
     @DynamicPropertySource
@@ -909,7 +909,7 @@ class FilingHistoryControllerIT {
     }
 
     @Test
-    void shouldReturn200OnDeleteWhereDocumentDoesNotExist() throws Exception {
+    void shouldCallResourceChangedWithNullDeletedDataAndReturn200OkWhenDocumentDoesNotExist() throws Exception {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -927,6 +927,50 @@ class FilingHistoryControllerIT {
 
         // then
         result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNull(actualDocument);
+
+        verify(instantSupplier).get();
+        WireMock.verify(requestMadeFor(
+                new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDeleteAbsentData())));
+    }
+
+    @Test
+    void shouldCallResourceChangedAndReturn200OkWhenChildDoesNotExistButParentDoes() throws Exception {
+        // given
+        final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", TRANSACTION_ID)
+                .replaceAll("<entity_id>", ENTITY_ID)
+                .replaceAll("<company_number>", COMPANY_NUMBER)
+                .replaceAll("<category>", CATEGORY)
+                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+        mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
+
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", "missingChildEntityId")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
+
+        verify(instantSupplier).get();
+        WireMock.verify(requestMadeFor(
+                new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
@@ -1334,7 +1378,8 @@ class FilingHistoryControllerIT {
 
         verify(instantSupplier, times(1)).get();
         WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDocumentMetadata())));
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI,
+                        getExpectedChangedResourceDocumentMetadata())));
     }
 
     @Test
@@ -1380,7 +1425,8 @@ class FilingHistoryControllerIT {
 
         verify(instantSupplier, times(1)).get();
         WireMock.verify(
-                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDocumentMetadata())));
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI,
+                        getExpectedChangedResourceDocumentMetadata())));
     }
 
     private static InternalFilingHistoryApi buildPutRequestBody(String deltaAt) {
@@ -1496,12 +1542,19 @@ class FilingHistoryControllerIT {
     }
 
     private static String getExpectedChangedResourceDocumentMetadata() throws IOException {
-        return IOUtils.resourceToString("/resource_changed/expected-resource-changed-document-metadata.json", StandardCharsets.UTF_8)
+        return IOUtils.resourceToString("/resource_changed/expected-resource-changed-document-metadata.json",
+                        StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", PUBLISHED_AT);
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-deleted.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<published_at>", PUBLISHED_AT);
+    }
+
+    private static String getExpectedChangedResourceDeleteAbsentData() throws IOException {
+        return IOUtils.resourceToString("/resource_changed/expected-resource-deleted-absent-data.json",
                         StandardCharsets.UTF_8)
                 .replaceAll("<published_at>", PUBLISHED_AT);
     }

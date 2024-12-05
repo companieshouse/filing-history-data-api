@@ -253,7 +253,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
 
         // when
-        service.callResourceChangedForAbsentDeletedData(COMPANY_NUMBER, TRANSACTION_ID);
+        service.callResourceChangedAbsentParent(COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         verify(resourceChangedApiClient).callResourceChanged(any());

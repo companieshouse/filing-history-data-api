@@ -100,11 +100,19 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void callResourceChangedForAbsentDeletedData(String companyNumber, String transactionId) {
+    public void callResourceChangedAbsentParent(String companyNumber, String transactionId) {
         apiClient.callResourceChanged(ResourceChangedRequest.builder()
                 .companyNumber(companyNumber)
                 .transactionId(transactionId)
                 .isDelete(true)
+                .build());
+    }
+
+    @Override
+    public void callResourceChangedAbsentChild(String companyNumber, String transactionId) {
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
                 .build());
     }
 }

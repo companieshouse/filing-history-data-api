@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
@@ -26,7 +26,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
 
     @Autowired
     private DeleteMapperDelegator deleteMapperDelegator;
-    @MockBean
+    @MockitoBean
     private CompositeResolutionDeleteMapper compositeResolutionDeleteMapper;
 
     @DynamicPropertySource
@@ -58,7 +58,7 @@ class DeleteMapperDelegatorAspectFeatureDisabledIT {
                 new FilingHistoryDeleteAggregate()
                         .document(new FilingHistoryDocument()
                                 .entityId(ENTITY_ID))
-                        .resolutionIndex(0),  DELTA_AT);
+                        .resolutionIndex(0), DELTA_AT);
 
         // then
         assertThrows(BadRequestException.class, actual);
