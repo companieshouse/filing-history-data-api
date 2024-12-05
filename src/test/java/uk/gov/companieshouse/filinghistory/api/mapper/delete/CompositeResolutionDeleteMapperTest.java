@@ -28,6 +28,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 
 @ExtendWith(MockitoExtension.class)
 class CompositeResolutionDeleteMapperTest {
+
     private static final Instant INSTANT = Instant.now();
     private static final String ENTITY_ID = "entity ID";
     private static final String DELTA_AT = "20151025185208001000";

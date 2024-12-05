@@ -18,6 +18,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class CompositeResolutionDeleteMapper {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
 
     private final Supplier<Instant> instantSupplier;
