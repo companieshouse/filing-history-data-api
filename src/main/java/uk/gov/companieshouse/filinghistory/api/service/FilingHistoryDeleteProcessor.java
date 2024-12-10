@@ -10,7 +10,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -38,35 +37,32 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
         final String companyNumber = request.companyNumber();
         final String transactionId = request.transactionId();
 
-        filingHistoryService.findFilingHistoryByEntityId(entityId)
+        filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                 .ifPresentOrElse(
-                        deleteAggregate -> deleteMapperDelegator.delegateDelete(entityId, deleteAggregate, deltaAt)
+                        existingDocument -> deleteMapperDelegator.delegateDelete(entityId, existingDocument, deltaAt)
                                 .ifPresentOrElse(
                                         updatedDocument -> {
-                                            LOGGER.info("Removing child", DataMapHolder.getLogMap());
-                                            filingHistoryService.updateFilingHistory(updatedDocument, companyNumber,
-                                                    transactionId);
+                                            if (existingDocument.equals(updatedDocument)) {
+                                                LOGGER.info("Streaming delete for non-existent/legacy child",
+                                                        DataMapHolder.getLogMap());
+                                                filingHistoryService.callResourceChangedAbsentChild(companyNumber,
+                                                        transactionId);
+                                            } else {
+                                                LOGGER.info("Removing child", DataMapHolder.getLogMap());
+                                                filingHistoryService.updateFilingHistory(updatedDocument, companyNumber,
+                                                        transactionId);
+                                            }
                                         },
                                         () -> {
-                                            FilingHistoryDocument parentDocument = deleteAggregate.getDocument();
-                                            deltaAtCheck(deltaAt, parentDocument.getDeltaAt());
+                                            deltaAtCheck(deltaAt, existingDocument.getDeltaAt());
                                             LOGGER.info("Deleting parent", DataMapHolder.getLogMap());
-                                            filingHistoryService.deleteExistingFilingHistory(parentDocument,
+                                            filingHistoryService.deleteExistingFilingHistory(existingDocument,
                                                     companyNumber, transactionId);
                                         }),
-                        () -> filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
-                                .ifPresentOrElse(
-                                        parentDocument -> {
-                                            LOGGER.info("Delete for non-existent child", DataMapHolder.getLogMap());
-                                            filingHistoryService.callResourceChangedAbsentChild(companyNumber,
-                                                    transactionId);
-                                        },
-                                        () -> {
-                                            LOGGER.info("Delete for non-existent document", DataMapHolder.getLogMap());
-                                            filingHistoryService.callResourceChangedAbsentParent(companyNumber,
-                                                    transactionId);
-                                        })
-                );
+                        () -> {
+                            LOGGER.info("Streaming delete for non-existent document", DataMapHolder.getLogMap());
+                            filingHistoryService.callResourceChangedAbsentParent(companyNumber, transactionId);
+                        });
     }
 
     private void deltaAtCheck(String requestDeltaAt, String existingDeltaAt) {

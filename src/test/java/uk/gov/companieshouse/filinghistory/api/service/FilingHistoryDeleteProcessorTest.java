@@ -19,7 +19,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,8 +38,6 @@ class FilingHistoryDeleteProcessorTest {
     private DeleteMapperDelegator deleteMapperDelegator;
 
     @Mock
-    private FilingHistoryDeleteAggregate deleteAggregate;
-    @Mock
     private FilingHistoryDocument existingDocument;
     @Mock
     private FilingHistoryDocument updatedDocument;
@@ -48,24 +45,23 @@ class FilingHistoryDeleteProcessorTest {
     @Test
     void shouldCallDeleteWhenDocumentFoundAndDelegatorReturnsEmpty() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.empty());
-        when(deleteAggregate.getDocument()).thenReturn(existingDocument);
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(
                 new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
 
         // then
-        verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, DELTA_AT);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument, DELTA_AT);
         verify(filingHistoryService).deleteExistingFilingHistory(existingDocument, COMPANY_NUMBER, TRANSACTION_ID);
     }
 
     @Test
     void shouldCallUpdateWhenDocumentFoundAndDelegatorReturnsUpdatedDocument() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.of(updatedDocument));
 
         // when
@@ -73,50 +69,47 @@ class FilingHistoryDeleteProcessorTest {
                 new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
 
         // then
-        verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, DELTA_AT);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument, DELTA_AT);
         verify(filingHistoryService).updateFilingHistory(updatedDocument, COMPANY_NUMBER, TRANSACTION_ID);
     }
 
     @Test
     void shouldCallResourceChangedWhenChildNotFoundButParentExists() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.empty());
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
+        when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.of(existingDocument));
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(
                 new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
 
         // then
-        verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verifyNoInteractions(deleteMapperDelegator);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument, DELTA_AT);
         verify(filingHistoryService).callResourceChangedAbsentChild(COMPANY_NUMBER, TRANSACTION_ID);
     }
 
     @Test
     void shouldCallResourceChangedWhenParentNorChildExists() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.empty());
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
 
         // when
         filingHistoryDeleteProcessor.processFilingHistoryDelete(
                 new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
 
         // then
-        verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verifyNoInteractions(deleteMapperDelegator);
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verifyNoInteractions(deleteMapperDelegator);
         verify(filingHistoryService).callResourceChangedAbsentParent(COMPANY_NUMBER, TRANSACTION_ID);
     }
 
     @Test
     void shouldThrowConflictExceptionWhenDeltaAtStale() {
         // given
-        when(filingHistoryService.findFilingHistoryByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.empty());
-        when(deleteAggregate.getDocument()).thenReturn(existingDocument);
         when(existingDocument.getDeltaAt()).thenReturn(DELTA_AT);
 
         // when
@@ -125,8 +118,8 @@ class FilingHistoryDeleteProcessorTest {
 
         // then
         assertThrows(ConflictException.class, executable);
-        verify(filingHistoryService).findFilingHistoryByEntityId(ENTITY_ID);
-        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, deleteAggregate, STALE_DELTA_AT);
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verify(deleteMapperDelegator).delegateDelete(ENTITY_ID, existingDocument, STALE_DELTA_AT);
         verifyNoMoreInteractions(filingHistoryService);
     }
 

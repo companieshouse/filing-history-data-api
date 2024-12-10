@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -406,8 +407,8 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(
-                existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
+        // This is a shared doc between insert and update operations
+        expectedDocument.version(existingDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -657,8 +658,8 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(
-                existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
+        // This is a shared doc between insert and update operations
+        expectedDocument.version(existingDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -1212,6 +1213,7 @@ class ResolutionTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
         assertEquals(existingDocument, actualDocument);
         assertEquals(EXISTING_DELTA_AT, actualDocument.getData().getResolutions().get(1).getDeltaAt());
     }
@@ -1359,8 +1361,8 @@ class ResolutionTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
         assertEquals(existingDocument, actualDocument);
-        ;
         assertEquals(NEWEST_REQUEST_DELTA_AT, actualDocument.getData().getResolutions().get(1).getDeltaAt());
     }
 

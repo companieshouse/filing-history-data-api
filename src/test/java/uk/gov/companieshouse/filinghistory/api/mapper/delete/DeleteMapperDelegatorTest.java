@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.delete;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -13,15 +13,12 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
 import uk.gov.companieshouse.filinghistory.api.serdes.FilingHistoryDocumentCopier;
@@ -60,16 +57,13 @@ class DeleteMapperDelegatorTest {
                                         .entityId("first ID"),
                                 new FilingHistoryResolution()
                                         .entityId(ENTITY_ID))));
-        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .resolutionIndex(1)
-                .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
         when(compositeResolutionDeleteMapper.removeTransaction(anyInt(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate, DELTA_AT);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document, DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
@@ -88,17 +82,14 @@ class DeleteMapperDelegatorTest {
                 .data(new FilingHistoryData()
                         .type(PARENT_TYPE)
                         .resolutions(resolutions));
-        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .resolutionIndex(0)
-                .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
         when(childDeleteMapper.removeTransaction(any(), any(), anyInt(), any(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
-                aggregate, DELTA_AT);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document,
+                DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
@@ -117,17 +108,14 @@ class DeleteMapperDelegatorTest {
                 .entityId(ENTITY_ID)
                 .data(new FilingHistoryData()
                         .annotations(annotations));
-        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .annotationIndex(0)
-                .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
         when(childDeleteMapper.removeTransaction(any(), any(), anyInt(), any(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
-                aggregate, DELTA_AT);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document,
+                DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
@@ -146,17 +134,13 @@ class DeleteMapperDelegatorTest {
                 .data(new FilingHistoryData()
                         .associatedFilings(associatedFilings));
 
-        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .associatedFilingIndex(0)
-                .document(document);
-
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
         when(childDeleteMapper.removeTransaction(any(), any(), anyInt(), any(), any(), any())).thenReturn(
                 Optional.of(new FilingHistoryDocument()));
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID,
-                aggregate, DELTA_AT);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document,
+                DELTA_AT);
 
         // then
         assertTrue(actual.isPresent());
@@ -171,13 +155,11 @@ class DeleteMapperDelegatorTest {
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
                 .entityId(ENTITY_ID)
                 .data(new FilingHistoryData());
-        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .document(document);
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
 
         // when
-        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, aggregate, DELTA_AT);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(ENTITY_ID, document, DELTA_AT);
 
         // then
         assertTrue(actual.isEmpty());
@@ -185,20 +167,21 @@ class DeleteMapperDelegatorTest {
     }
 
     @Test
-    void shouldThrowBadRequestExceptionWhenNoEntityIdMatchesAndNoChildIndexes() {
+    void shouldReturnUnchangedDocumentWhenNoMatchFound() {
         // given
         FilingHistoryDocument documentCopy = new FilingHistoryDocument()
-                .entityId(ENTITY_ID);
-        FilingHistoryDeleteAggregate aggregate = new FilingHistoryDeleteAggregate()
-                .document(document);
+                .entityId(ENTITY_ID)
+                .data(new FilingHistoryData());
 
         when(documentCopier.deepCopy(any())).thenReturn(documentCopy);
 
         // when
-        Executable actual = () -> deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, aggregate, DELTA_AT);
+        Optional<FilingHistoryDocument> actual = deleteMapperDelegator.delegateDelete(CHILD_ENTITY_ID, document,
+                DELTA_AT);
 
         // then
-        assertThrows(BadRequestException.class, actual);
+        assertTrue(actual.isPresent());
+        assertEquals(documentCopy, actual.get());
         verify(documentCopier).deepCopy(document);
     }
 }

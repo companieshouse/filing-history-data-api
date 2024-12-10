@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1087,6 +1088,7 @@ class AssociatedFilingTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
         assertEquals(existingDocument, actualDocument);
         assertEquals(NEWEST_REQUEST_DELTA_AT, actualDocument.getData().getAssociatedFilings().get(1).getDeltaAt());
     }

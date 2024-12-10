@@ -53,11 +53,6 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public Optional<FilingHistoryDeleteAggregate> findFilingHistoryByEntityId(String entityId) {
-        return repository.findByEntityId(entityId);
-    }
-
-    @Override
     public void insertFilingHistory(FilingHistoryDocument docToInsert, String companyNumber, String transactionId) {
         repository.insert(docToInsert);
         apiClient.callResourceChanged(ResourceChangedRequest.builder()
