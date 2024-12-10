@@ -53,11 +53,6 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public Optional<FilingHistoryDeleteAggregate> findFilingHistoryByEntityId(String entityId) {
-        return repository.findByEntityId(entityId);
-    }
-
-    @Override
     public void insertFilingHistory(FilingHistoryDocument docToInsert, String companyNumber, String transactionId) {
         repository.insert(docToInsert);
         apiClient.callResourceChanged(ResourceChangedRequest.builder()
@@ -100,11 +95,19 @@ public class FilingHistoryService implements Service {
     }
 
     @Override
-    public void callResourceChangedForAbsentDeletedData(String companyNumber, String transactionId) {
+    public void callResourceChangedAbsentParent(String companyNumber, String transactionId) {
         apiClient.callResourceChanged(ResourceChangedRequest.builder()
                 .companyNumber(companyNumber)
                 .transactionId(transactionId)
                 .isDelete(true)
+                .build());
+    }
+
+    @Override
+    public void callResourceChangedAbsentChild(String companyNumber, String transactionId) {
+        apiClient.callResourceChanged(ResourceChangedRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
                 .build());
     }
 }

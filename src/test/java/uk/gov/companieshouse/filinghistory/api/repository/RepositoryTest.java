@@ -2,7 +2,6 @@ package uk.gov.companieshouse.filinghistory.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -11,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -33,7 +31,6 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHist
 class RepositoryTest {
 
     private static final String TRANSACTION_ID = "transactionId";
-    private static final String ENTITY_ID = "entityId";
     private static final String COMPANY_NUMBER = "12345678";
     private static final int START_INDEX = 0;
     private static final int ITEMS_PER_PAGE = 25;
@@ -82,7 +79,8 @@ class RepositoryTest {
 
         // when
         FilingHistoryIds listOfFilingHistoryIds = new FilingHistoryIds().ids(new ArrayList<>());
-        List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(listOfFilingHistoryIds.getIds());
+        List<FilingHistoryDocument> filingHistoryDocuments = repository.findFullFilingHistoryDocuments(
+                listOfFilingHistoryIds.getIds());
 
         // then
         assertEquals(mockFilingHistoryDocuments, filingHistoryDocuments);
@@ -226,36 +224,6 @@ class RepositoryTest {
         // then
         assertThrows(BadGatewayException.class, executable);
         verifyNoMoreInteractions(mongoTemplate);
-    }
-
-    @Test
-    void shouldCallMongoTemplateWithEntityIdCriteria() {
-        // given
-        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class),
-                eq(FilingHistoryDeleteAggregate.class))).thenReturn(deleteAggregationResults);
-        when(deleteAggregationResults.getUniqueMappedResult()).thenReturn(deleteAggregate);
-
-        // when
-        Optional<FilingHistoryDeleteAggregate> actual = repository.findByEntityId(ENTITY_ID);
-
-        // then
-        assertTrue(actual.isPresent());
-        assertEquals(deleteAggregate, actual.get());
-    }
-
-    @Test
-    void shouldCatchDataAccessExceptionAndThrowBadGatewayWhenFindByEntityId() {
-        // given
-        when(mongoTemplate.aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class)))
-                .thenThrow(new DataAccessException("...") {
-                });
-
-        // when
-        Executable executable = () -> repository.findByEntityId(ENTITY_ID);
-
-        // then
-        assertThrows(BadGatewayException.class, executable);
-        verify(mongoTemplate).aggregate(any(), eq(FilingHistoryDocument.class), eq(FilingHistoryDeleteAggregate.class));
     }
 
     @Test

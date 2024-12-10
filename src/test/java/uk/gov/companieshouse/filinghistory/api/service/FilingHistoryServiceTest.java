@@ -35,10 +35,10 @@ import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryServiceTest {
 
-    public static final int DEFAULT_ITEMS_PER_PAGE = 25;
+    private static final int DEFAULT_ITEMS_PER_PAGE = 25;
     private static final String TRANSACTION_ID = "transactionId";
     private static final String COMPANY_NUMBER = "12345678";
-    public static final int START_INDEX = 0;
+    private static final int START_INDEX = 0;
 
     @InjectMocks
     private FilingHistoryService service;
@@ -92,7 +92,8 @@ class FilingHistoryServiceTest {
     void findCompanyFilingHistoryListQueriesShouldCallRepositoryWithCorrectCategories(List<String> actualCategories,
             List<String> expectedCategories) {
         // given
-        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(
+                new FilingHistoryIds());
         when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
         when(repository.countTotal(any(), any())).thenReturn(1L);
 
@@ -111,7 +112,8 @@ class FilingHistoryServiceTest {
     @Test
     void findCompanyFilingHistoryListQueriesShouldCallRepositoryAndReturnEmptyWhenTotalCountZero() {
         // given
-        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(new FilingHistoryIds());
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenReturn(
+                new FilingHistoryIds());
         when(repository.findFullFilingHistoryDocuments(any())).thenReturn(new ArrayList<>());
         when(repository.countTotal(any(), any())).thenReturn(0L);
 
@@ -127,7 +129,8 @@ class FilingHistoryServiceTest {
     @Test
     void findCompanyFilingHistoryThrowsBadGatewayException() {
         // given
-        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(BadGatewayException.class);
+        when(repository.findCompanyFilingHistoryIds(any(), anyInt(), anyInt(), any())).thenThrow(
+                BadGatewayException.class);
 
         // when
         Executable executable = () -> service.findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX,
@@ -253,7 +256,7 @@ class FilingHistoryServiceTest {
         when(resourceChangedApiClient.callResourceChanged(any())).thenReturn(response);
 
         // when
-        service.callResourceChangedForAbsentDeletedData(COMPANY_NUMBER, TRANSACTION_ID);
+        service.callResourceChangedAbsentParent(COMPANY_NUMBER, TRANSACTION_ID);
 
         // then
         verify(resourceChangedApiClient).callResourceChanged(any());
@@ -272,32 +275,6 @@ class FilingHistoryServiceTest {
         // then
         assertThrows(BadGatewayException.class, executable);
         verify(resourceChangedApiClient).callResourceChanged(any());
-    }
-
-    @Test
-    void findFilingHistoryByEntityIdShouldReturnDocument() {
-        // given
-        when(repository.findByEntityId(any())).thenReturn(Optional.of(deleteAggregate));
-
-        // when
-        final Optional<FilingHistoryDeleteAggregate> actualDocument = service.findFilingHistoryByEntityId(TRANSACTION_ID);
-
-        // then
-        assertTrue(actualDocument.isPresent());
-        verify(repository).findByEntityId(TRANSACTION_ID);
-    }
-
-    @Test
-    void findFilingHistoryByEntityIdShouldReturnEmptyWhenNoDocumentExists() {
-        // given
-        when(repository.findByEntityId(any())).thenReturn(Optional.empty());
-
-        // when
-        final Optional<FilingHistoryDeleteAggregate> actualDocument = service.findFilingHistoryByEntityId(TRANSACTION_ID);
-
-        // then
-        assertTrue(actualDocument.isEmpty());
-        verify(repository).findByEntityId(TRANSACTION_ID);
     }
 
     private static Stream<Object> categoriesListCases() {

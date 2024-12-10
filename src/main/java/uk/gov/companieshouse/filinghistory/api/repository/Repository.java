@@ -7,7 +7,6 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 import static org.springframework.data.mongodb.core.aggregation.ArrayOperators.IndexOfArray.arrayOf;
-import static org.springframework.data.mongodb.core.aggregation.ConditionalOperators.ifNull;
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
 import java.util.List;
@@ -24,7 +23,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDeleteAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryIds;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.UnversionedFilingHistoryDocument;
@@ -116,47 +114,6 @@ public class Repository {
         } catch (DataAccessException ex) {
             LOGGER.error("MongoDB error when finding document", ex, DataMapHolder.getLogMap());
             throw new BadGatewayException("MongoDB error when finding document", ex);
-        }
-    }
-
-    public Optional<FilingHistoryDeleteAggregate> findByEntityId(final String entityId) {
-        try {
-            Aggregation aggregation = newAggregation(
-                    match(new Criteria()
-                            .orOperator(
-                                    Criteria.where("_entity_id").is(entityId),
-                                    Criteria.where("data.resolutions._entity_id").is(entityId),
-                                    Criteria.where("data.annotations._entity_id").is(entityId),
-                                    Criteria.where("data.associated_filings._entity_id").is(entityId))),
-                    addFields().build()
-                            .addField("resolutionIndex",
-                                    ifNull(arrayOf("$data.resolutions._entity_id")
-                                            .indexOf(entityId))
-                                            .then(-1))
-                            .addField("annotationIndex",
-                                    ifNull(arrayOf("$data.annotations._entity_id")
-                                            .indexOf(entityId))
-                                            .then(-1))
-                            .addField("associatedFilingIndex",
-                                    ifNull(arrayOf("$data.associated_filings._entity_id")
-                                            .indexOf(entityId))
-                                            .then(-1)),
-                    project()
-                            .andExclude("_id")
-                            .andExpression("$resolutionIndex").as("resolution_index")
-                            .andExpression("$annotationIndex").as("annotation_index")
-                            .andExpression("$associatedFilingIndex").as("associated_filing_index")
-                            .andExpression("$$ROOT").as("document"));
-
-            return Optional.ofNullable(
-                    mongoTemplate.aggregate(aggregation, FilingHistoryDocument.class,
-                            FilingHistoryDeleteAggregate.class).getUniqueMappedResult());
-        } catch (TransientDataAccessException ex) {
-            LOGGER.info("Recoverable MongoDB error when retrieving delete document", DataMapHolder.getLogMap());
-            throw new BadGatewayException("Recoverable MongoDB error when retrieving delete document", ex);
-        } catch (DataAccessException ex) {
-            LOGGER.error("MongoDB error when retrieving delete document", ex, DataMapHolder.getLogMap());
-            throw new BadGatewayException("MongoDB error when retrieving delete document", ex);
         }
     }
 

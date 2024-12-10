@@ -10,7 +10,6 @@ import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;
 import uk.gov.companieshouse.filinghistory.api.mapper.delete.DeleteMapperDelegator;
 import uk.gov.companieshouse.filinghistory.api.model.FilingHistoryDeleteRequest;
-import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -18,6 +17,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class FilingHistoryDeleteProcessor implements DeleteProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilingHistoryApplication.NAMESPACE);
+
     private final Service filingHistoryService;
     private final DeleteMapperDelegator deleteMapperDelegator;
 
@@ -28,40 +28,48 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
 
     @Override
     public void processFilingHistoryDelete(FilingHistoryDeleteRequest request) {
-        if (StringUtils.isBlank(request.deltaAt())) {
+        final String deltaAt = request.deltaAt();
+        if (StringUtils.isBlank(deltaAt)) {
             LOGGER.error("deltaAt missing from delete request", DataMapHolder.getLogMap());
             throw new BadRequestException("deltaAt is null or empty");
         }
-        filingHistoryService.findFilingHistoryByEntityId(request.entityId())
+        final String entityId = request.entityId();
+        final String companyNumber = request.companyNumber();
+        final String transactionId = request.transactionId();
+
+        filingHistoryService.findExistingFilingHistory(transactionId, companyNumber)
                 .ifPresentOrElse(
-                        deleteAggregate -> deleteMapperDelegator.delegateDelete(request.entityId(),
-                                        deleteAggregate, request.deltaAt())
+                        existingDocument -> deleteMapperDelegator.delegateDelete(entityId, existingDocument, deltaAt)
                                 .ifPresentOrElse(
                                         updatedDocument -> {
-                                            LOGGER.info("Removing child", DataMapHolder.getLogMap());
-                                            filingHistoryService.updateFilingHistory(updatedDocument,
-                                                    request.companyNumber(), request.transactionId());
+                                            if (existingDocument.equals(updatedDocument)) {
+                                                LOGGER.info("Streaming delete for non-existent/legacy child",
+                                                        DataMapHolder.getLogMap());
+                                                filingHistoryService.callResourceChangedAbsentChild(companyNumber,
+                                                        transactionId);
+                                            } else {
+                                                LOGGER.info("Removing child", DataMapHolder.getLogMap());
+                                                filingHistoryService.updateFilingHistory(updatedDocument, companyNumber,
+                                                        transactionId);
+                                            }
                                         },
                                         () -> {
-                                            FilingHistoryDocument parentDocument = deleteAggregate.getDocument();
-                                            deltaAtCheck(request.deltaAt(), parentDocument);
+                                            deltaAtCheck(deltaAt, existingDocument.getDeltaAt());
                                             LOGGER.info("Deleting parent", DataMapHolder.getLogMap());
-                                            filingHistoryService.deleteExistingFilingHistory(parentDocument,
-                                                    request.companyNumber(), request.transactionId());
+                                            filingHistoryService.deleteExistingFilingHistory(existingDocument,
+                                                    companyNumber, transactionId);
                                         }),
                         () -> {
-                            LOGGER.info("Delete for non-existent document", DataMapHolder.getLogMap());
-                            filingHistoryService.callResourceChangedForAbsentDeletedData(request.companyNumber(),
-                                    request.transactionId());
-                        }
-                );
+                            LOGGER.info("Streaming delete for non-existent document", DataMapHolder.getLogMap());
+                            filingHistoryService.callResourceChangedAbsentParent(companyNumber, transactionId);
+                        });
     }
 
-    private void deltaAtCheck(String requestDeltaAt, FilingHistoryDocument document) {
-        if (isDeltaStale(requestDeltaAt, document.getDeltaAt())) {
+    private void deltaAtCheck(String requestDeltaAt, String existingDeltaAt) {
+        if (isDeltaStale(requestDeltaAt, existingDeltaAt)) {
             LOGGER.error("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]".formatted(
-                    requestDeltaAt, document.getDeltaAt()), DataMapHolder.getLogMap());
-            throw new ConflictException("Stale delta for delete");
+                    requestDeltaAt, existingDeltaAt), DataMapHolder.getLogMap());
+            throw new ConflictException("Stale delete delta");
         }
     }
 }

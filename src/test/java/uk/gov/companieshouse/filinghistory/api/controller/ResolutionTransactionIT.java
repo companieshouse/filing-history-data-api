@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,11 +33,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -100,7 +101,7 @@ class ResolutionTransactionIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private Supplier<Instant> instantSupplier;
 
     @DynamicPropertySource
@@ -406,7 +407,8 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
+        // This is a shared doc between insert and update operations
+        expectedDocument.version(existingDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -656,7 +658,8 @@ class ResolutionTransactionIT {
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
-        expectedDocument.version(existingDocument.getVersion() + 1); // This is a shared doc between insert and update operations
+        // This is a shared doc between insert and update operations
+        expectedDocument.version(existingDocument.getVersion() + 1);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
@@ -1210,6 +1213,7 @@ class ResolutionTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
         assertEquals(existingDocument, actualDocument);
         assertEquals(EXISTING_DELTA_AT, actualDocument.getData().getResolutions().get(1).getDeltaAt());
     }
@@ -1357,7 +1361,8 @@ class ResolutionTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
-        assertEquals(existingDocument, actualDocument);;
+        assertNotNull(actualDocument);
+        assertEquals(existingDocument, actualDocument);
         assertEquals(NEWEST_REQUEST_DELTA_AT, actualDocument.getData().getResolutions().get(1).getDeltaAt());
     }
 

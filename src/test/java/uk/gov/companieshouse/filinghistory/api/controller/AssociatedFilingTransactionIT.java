@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,11 +31,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -93,7 +94,7 @@ class AssociatedFilingTransactionIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private Supplier<Instant> instantSupplier;
 
     @DynamicPropertySource
@@ -111,7 +112,8 @@ class AssociatedFilingTransactionIT {
     void shouldAddAssociatedFilingToExistingDocumentAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_zero_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_zero_associated_filings.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -124,7 +126,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -170,14 +173,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldAddAssociatedFilingToExistingAssociatedFilingListAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -192,7 +197,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -240,14 +246,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldInsertNoParentAssociatedFilingDocumentAndReturn200OK() throws Exception {
         // given
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_associated_filing_doc_with_no_parent.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_associated_filing_doc_with_no_parent.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -293,14 +301,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldUpdateNoParentDocumentWithParentFieldsAndNotChangeAssociatedFilingAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -315,7 +325,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<updated_at>", UPDATED_AT.toString())
@@ -365,14 +376,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldUpdateExistingAssociatedFilingAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -388,7 +401,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -435,14 +449,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldUpdateParentDocumentAndNotChangeAssociatedFilingAndReturn200OK() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -458,7 +474,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -507,14 +524,17 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
-    void shouldThrowConflictExceptionWhenUpdatingChildAssociatedFilingWithStaleDeltaAtAndReturn409Conflict() throws Exception {
+    void shouldThrowConflictExceptionWhenUpdatingChildAssociatedFilingWithStaleDeltaAtAndReturn409Conflict()
+            throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -563,7 +583,8 @@ class AssociatedFilingTransactionIT {
     void shouldSuccessfullyReturnSingleGetResponse() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_action_date_and_document_metadata.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_action_date_and_document_metadata.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<barcode>", "")
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -610,7 +631,8 @@ class AssociatedFilingTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                ExternalData.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -619,7 +641,8 @@ class AssociatedFilingTransactionIT {
     void shouldReturnListGetResponseWithNoOriginalDescriptionFieldOnChildObject() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<barcode>", "")
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -654,7 +677,8 @@ class AssociatedFilingTransactionIT {
                                         .date("2005-05-10")
                                         .description("legacy")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("Secretary's particulars changed;director's particulars changed"))
+                                                .description(
+                                                        "Secretary's particulars changed;director's particulars changed"))
                                         .type("363(288)")
                         ))
                 ))
@@ -670,7 +694,8 @@ class AssociatedFilingTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class);
+        FilingHistoryList actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                FilingHistoryList.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -679,7 +704,8 @@ class AssociatedFilingTransactionIT {
     void shouldUpdateExistingAssociatedFilingWhenChildHasNoDeltaAt() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -698,7 +724,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -745,14 +772,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldAddChildToListWhenExistingListContainsChildWithNoEntityId() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -771,7 +800,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -822,14 +852,16 @@ class AssociatedFilingTransactionIT {
         assertEquals(expectedDocument, actualDocument);
 
         verify(instantSupplier, times(2)).get();
-        WireMock.verify(requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
+        WireMock.verify(
+                requestMadeFor(new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResource())));
     }
 
     @Test
     void shouldSuccessfullyHandleSingleGetWhenDealingWithLegacyData() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<barcode>", "")
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -843,7 +875,8 @@ class AssociatedFilingTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        FilingHistoryAssociatedFiling firstAssociatedFiling = existingDocument.getData().getAssociatedFilings().getFirst();
+        FilingHistoryAssociatedFiling firstAssociatedFiling = existingDocument.getData().getAssociatedFilings()
+                .getFirst();
         firstAssociatedFiling.deltaAt(null);
         firstAssociatedFiling.entityId(null);
 
@@ -879,7 +912,8 @@ class AssociatedFilingTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), ExternalData.class);
+        ExternalData actualResponse = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(),
+                ExternalData.class);
 
         assertEquals(expectedResponse, actualResponse);
     }
@@ -888,7 +922,8 @@ class AssociatedFilingTransactionIT {
     void shouldSuccessfullyHandleListGetWhenDealingWithLegacyData() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<barcode>", "")
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -902,7 +937,8 @@ class AssociatedFilingTransactionIT {
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
-        FilingHistoryAssociatedFiling firstAssociatedFiling = existingDocument.getData().getAssociatedFilings().getFirst();
+        FilingHistoryAssociatedFiling firstAssociatedFiling = existingDocument.getData().getAssociatedFilings()
+                .getFirst();
         firstAssociatedFiling.deltaAt(null);
         firstAssociatedFiling.entityId(null);
 
@@ -928,7 +964,8 @@ class AssociatedFilingTransactionIT {
                                         .date("2005-05-10")
                                         .description("legacy")
                                         .descriptionValues(new DescriptionValues()
-                                                .description("Secretary's particulars changed;director's particulars changed"))
+                                                .description(
+                                                        "Secretary's particulars changed;director's particulars changed"))
                                         .type("363(288)")
                         ))))
                 .itemsPerPage(25)
@@ -953,7 +990,8 @@ class AssociatedFilingTransactionIT {
     void shouldDeleteSingularAssociatedFilingFromParentWithTwoAssociatedFilings() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_two_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_two_associated_filings.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -971,7 +1009,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -1017,7 +1056,8 @@ class AssociatedFilingTransactionIT {
     void shouldNotDeleteSingularAssociatedFilingFromParentWhenDeltaStaleAndReturn409() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_two_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_two_associated_filings.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
@@ -1048,6 +1088,7 @@ class AssociatedFilingTransactionIT {
         result.andExpect(MockMvcResultMatchers.status().isConflict());
 
         FilingHistoryDocument actualDocument = mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class);
+        assertNotNull(actualDocument);
         assertEquals(existingDocument, actualDocument);
         assertEquals(NEWEST_REQUEST_DELTA_AT, actualDocument.getData().getAssociatedFilings().get(1).getDeltaAt());
     }
@@ -1056,7 +1097,8 @@ class AssociatedFilingTransactionIT {
     void shouldDeleteLastAssociatedFilingAndArrayFromParent() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<barcode>", BARCODE)
@@ -1072,7 +1114,8 @@ class AssociatedFilingTransactionIT {
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/expected_parent_doc_with_zero_associated_filings.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/expected_parent_doc_with_zero_associated_filings.json",
+                StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
                 .replaceAll("<barcode>", BARCODE)
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
@@ -1115,7 +1158,8 @@ class AssociatedFilingTransactionIT {
     void shouldDeleteWholeDocumentForNoParentAssociatedFiling() throws Exception {
         // given
         String existingDocumentJson = IOUtils.resourceToString(
-                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json", StandardCharsets.UTF_8);
+                "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json",
+                StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
                 .replaceAll("<transaction_id>", TRANSACTION_ID)
                 .replaceAll("<company_number>", COMPANY_NUMBER)
