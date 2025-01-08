@@ -15,15 +15,18 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mongodb.MongoDBAtlasLocalContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
@@ -51,8 +54,12 @@ class RepositoryIT {
     private static final String OFFICERS_CATEGORY = "officers";
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
+    private static Logger logger = LoggerFactory.getLogger(RepositoryIT.class);
+
     @Container
-    private static final MongoDBAtlasLocalContainer mongoDBContainer = new MongoDBAtlasLocalContainer("mongodb/mongodb-atlas-local:7.0.8");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
+            .withCommand("/usr/bin/mongod", "--bind_ip_all", "--replSet", "test-rs")
+            .withLogConsumer(new Slf4jLogConsumer(logger));
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -61,11 +68,7 @@ class RepositoryIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        mongoDBContainer.start();
-        registry.add("spring.data.mongodb.uri", () ->
-                "mongodb://%s:%d/%s?directConnection=true".formatted(mongoDBContainer.getHost(),
-                        mongoDBContainer.getMappedPort(27017), "company_filing_history")
-        );
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
