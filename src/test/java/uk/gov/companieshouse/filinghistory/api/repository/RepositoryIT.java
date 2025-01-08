@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -55,7 +57,10 @@ class RepositoryIT {
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
             .withCommand("--replSet rs0 --bind_ip_all")
-            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(RepositoryIT.class)));
+            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(RepositoryIT.class)))
+            .waitingFor(new LogMessageWaitStrategy()
+                .withRegEx("(?i).*mongod startup complete.*")
+                .withStartupTimeout(Duration.ofSeconds(60)));
 
     @Autowired
     private MongoTemplate mongoTemplate;
