@@ -55,8 +55,8 @@ class RepositoryIT {
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8");
-//            .withCommand("--replSet rs0 --bind_ip_all")
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
+            .withCommand("--replSet rs0 --bind_ip_all");
 //            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(RepositoryIT.class)))
 //            .waitingFor(new LogMessageWaitStrategy()
 //                .withRegEx("(?i).*mongod startup complete.*")
