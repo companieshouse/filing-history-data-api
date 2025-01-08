@@ -23,6 +23,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBAtlasLocalContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
@@ -51,7 +52,7 @@ class RepositoryIT {
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8");
+    private static final MongoDBAtlasLocalContainer mongoDBContainer = new MongoDBAtlasLocalContainer("mongodb/mongodb-atlas-local:7.0.8");
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -60,7 +61,11 @@ class RepositoryIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        mongoDBContainer.start();
+        registry.add("spring.data.mongodb.uri", () ->
+                "mongodb://%s:%d/%s?directConnection=true".formatted(mongoDBContainer.getHost(),
+                        mongoDBContainer.getMappedPort(27017), "company_filing_history")
+        );
     }
 
     @BeforeEach
