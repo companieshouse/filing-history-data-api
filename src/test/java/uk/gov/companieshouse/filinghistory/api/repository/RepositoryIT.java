@@ -58,8 +58,11 @@ class RepositoryIT {
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         atlasLocalContainer.start();
+        System.out.println("mongodb://%s:%d/test?directConnection=true"
+                .formatted(atlasLocalContainer.getHost(), atlasLocalContainer.getMappedPort(27017)));
         registry.add("spring.data.mongodb.uri",
-                () -> "mongodb://%s:%d/test".formatted(atlasLocalContainer.getHost(), atlasLocalContainer.getMappedPort(27017)));
+                () -> "mongodb://%s:%d/test?directConnection=true"
+                        .formatted(atlasLocalContainer.getHost(), atlasLocalContainer.getFirstMappedPort()));
     }
 
     @BeforeEach
