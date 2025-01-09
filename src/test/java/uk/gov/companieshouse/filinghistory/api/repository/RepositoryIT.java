@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,15 +15,13 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -56,11 +53,8 @@ class RepositoryIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
-            .withCommand("--replSet rs0 --bind_ip_all");
-//            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(RepositoryIT.class)))
-//            .waitingFor(new LogMessageWaitStrategy()
-//                .withRegEx("(?i).*mongod startup complete.*")
-//                .withStartupTimeout(Duration.ofSeconds(60)));
+            .withCommand("--replSet rs0 --bind_ip_all")
+            .waitingFor(Wait.forLogMessage(".*Waiting for connections.*", 1));
 
     @Autowired
     private MongoTemplate mongoTemplate;
