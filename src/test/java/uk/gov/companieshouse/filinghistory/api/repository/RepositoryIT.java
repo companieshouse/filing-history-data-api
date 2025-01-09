@@ -48,7 +48,7 @@ class RepositoryIT {
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
     private static MongoDBAtlasLocalContainer atlasLocalContainer = new MongoDBAtlasLocalContainer(
-            "mongodb/mongodb-atlas-local:7.0.9" );
+            "mongodb/mongodb-atlas-local:7.0.8" );
 
     @Autowired
     private MongoTemplate mongoTemplate;
