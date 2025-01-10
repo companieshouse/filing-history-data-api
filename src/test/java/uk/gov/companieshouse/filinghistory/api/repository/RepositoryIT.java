@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.mongodb.MongoDBAtlasLocalContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
@@ -33,6 +38,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryListAggregate;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
 
+@Testcontainers
 @SpringBootTest
 class RepositoryIT {
 
@@ -47,8 +53,11 @@ class RepositoryIT {
     private static final String OFFICERS_CATEGORY = "officers";
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
-    private static MongoDBAtlasLocalContainer atlasLocalContainer = new MongoDBAtlasLocalContainer(
-            "mongodb/mongodb-atlas-local:7.0.8" );
+    @Container
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongodb/mongodb-community-server:7.0.8-ubi9");
+//            .withCommand("--replSet rs0 --bind_ip_all")
+//            .withStartupTimeout(Duration.ofSeconds(30))
+//            .waitingFor(Wait.forLogMessage(".*Waiting for connections.*", 1));
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -57,12 +66,7 @@ class RepositoryIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        atlasLocalContainer.start();
-        System.out.println("mongodb://%s:%d/test?directConnection=true"
-                .formatted(atlasLocalContainer.getHost(), atlasLocalContainer.getMappedPort(27017)));
-        registry.add("spring.data.mongodb.uri",
-                () -> "mongodb://%s:%d/test?directConnection=true"
-                        .formatted(atlasLocalContainer.getHost(), atlasLocalContainer.getFirstMappedPort()));
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
