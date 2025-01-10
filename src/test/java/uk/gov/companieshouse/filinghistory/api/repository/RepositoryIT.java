@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -54,10 +52,10 @@ class RepositoryIT {
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongodb/mongodb-community-server:7.0.8-ubi9");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
 //            .withCommand("--replSet rs0 --bind_ip_all")
 //            .withStartupTimeout(Duration.ofSeconds(30))
-//            .waitingFor(Wait.forLogMessage(".*Waiting for connections.*", 1));
+           .waitingFor(Wait.forListeningPort());
 
     @Autowired
     private MongoTemplate mongoTemplate;
