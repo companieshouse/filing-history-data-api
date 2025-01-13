@@ -18,12 +18,12 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.4.0</spring.boot.version>
-    <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version> <!-- Version 3.4.3 does not work -->
-    <structured-logging.version>3.0.20</structured-logging.version>
+    <spring.boot.version>3.4.1</spring.boot.version>
+    <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version> <!-- Version 3.4.3 does not work -->
+    <structured-logging.version>3.0.24</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
     <api-security-java.version>2.0.8</api-security-java.version>
-    <private-api-sdk-java.version>4.0.241</private-api-sdk-java.version>
+    <private-api-sdk-java.version>4.0.258</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
     <wiremock.version>3.9.2</wiremock.version>
@@ -53,6 +53,17 @@
 
   <dependencies>
     <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.5.16</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.16</version>
+      <scope>test</scope>
+    </dependency>
     <!--end transitive dependencies-->
 
     <dependency>
