@@ -55,6 +55,7 @@ class RepositoryIT {
 
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
+        .withCommand("--verbose")
         .waitingFor(Wait.forLogMessage("(?i).*waiting for connections on port.*", 1)
         .withStartupTimeout(Duration.ofSeconds(30)));
 
