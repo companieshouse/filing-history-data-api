@@ -54,7 +54,9 @@ class RepositoryIT {
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8")
+        .waitingFor(Wait.forLogMessage("(?i).*waiting for connections on port.*", 1)
+        .withStartupTimeout(Duration.ofSeconds(30)));
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -68,15 +70,8 @@ class RepositoryIT {
 
     @BeforeEach
     void setUp() {
-        mongoDBContainer.waitingFor(Wait.forLogMessage("(?i).*waiting for connections on port.*", 1)
-                .withStartupTimeout(Duration.ofSeconds(30)));
         mongoTemplate.dropCollection(FILING_HISTORY_COLLECTION);
         mongoTemplate.createCollection(FILING_HISTORY_COLLECTION);
-    }
-
-    @AfterEach
-    public static void tearDown() {
-        mongoDBContainer.stop();
     }
 
     @Test
