@@ -51,7 +51,7 @@ class RepositoryIT {
     private static final int TOTAL_RESULTS_NUMBER = 55;
 
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:5.0.12");
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.8");
 
     @Autowired
     private MongoTemplate mongoTemplate;
