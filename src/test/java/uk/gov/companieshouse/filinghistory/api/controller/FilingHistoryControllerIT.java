@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -827,6 +828,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -865,6 +867,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", STALE_REQUEST_DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -923,6 +926,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -933,6 +937,32 @@ class FilingHistoryControllerIT {
 
         verify(instantSupplier).get();
         WireMock.verify(requestMadeFor(
+                new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDeleteAbsentData())));
+    }
+
+    @Test
+    void shouldNotCallResourceChangeAndReturn200OkWhenDocumentDoesNotExistForChildDelete() throws Exception {
+        // given
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+
+        // when
+        final ResultActions result = mockMvc.perform(delete(DELETE_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
+                .header("ERIC-Identity", "123")
+                .header("ERIC-Identity-Type", "key")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header("X-Request-Id", "ABCD1234")
+                .header("X-DELTA-AT", DELTA_AT)
+                .header("X-ENTITY-ID", CHILD_ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", ENTITY_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        assertNull(mongoTemplate.findById(TRANSACTION_ID, FilingHistoryDocument.class));
+
+        verifyNoInteractions(instantSupplier);
+        WireMock.verify(0, requestMadeFor(
                 new ResourceChangedRequestMatcher(RESOURCE_CHANGED_URI, getExpectedChangedResourceDeleteAbsentData())));
     }
 
@@ -960,6 +990,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", "missingChildEntityId")
+                .header("X-PARENT-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1247,6 +1278,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1285,6 +1317,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", STALE_REQUEST_DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1326,6 +1359,7 @@ class FilingHistoryControllerIT {
                 .header("X-Request-Id", "ABCD1234")
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then

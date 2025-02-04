@@ -104,7 +104,9 @@ public class FilingHistoryController {
     public ResponseEntity<Void> deleteFilingHistoryTransaction(
             @PathVariable("company_number") final String companyNumber,
             @PathVariable("transaction_id") final String transactionId,
-            @RequestHeader("X-DELTA-AT") String deltaAt, @RequestHeader("X-ENTITY-ID") String entityId) {
+            @RequestHeader("X-DELTA-AT") final String deltaAt,
+            @RequestHeader("X-ENTITY-ID") final String entityId,
+            @RequestHeader("X-PARENT-ENTITY-ID") final String parentEntityId) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber)
@@ -112,8 +114,15 @@ public class FilingHistoryController {
                 .transactionId(transactionId);
         LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
 
-        serviceDeleteProcessor.processFilingHistoryDelete(new FilingHistoryDeleteRequest(companyNumber, transactionId,
-                entityId, deltaAt));
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(companyNumber)
+                .transactionId(transactionId)
+                .entityId(entityId)
+                .deltaAt(deltaAt)
+                .parentEntityId(parentEntityId)
+                .build();
+
+        serviceDeleteProcessor.processFilingHistoryDelete(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
