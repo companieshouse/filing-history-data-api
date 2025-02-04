@@ -27,6 +27,10 @@ coverage:
 .PHONY: verify
 verify: test-unit test-integration
 
+.PHONY: docker-image
+docker-image: clean
+	mvn package -Dskip.unit.tests=true -Dskip.integration.tests=true jib:dockerBuild
+
 .PHONY: package
 package:
 ifndef version
