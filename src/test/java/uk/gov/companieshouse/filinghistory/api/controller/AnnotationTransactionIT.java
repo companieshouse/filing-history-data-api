@@ -1231,6 +1231,7 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID)
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", CHILD_ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1278,6 +1279,7 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID)
                 .header("X-DELTA-AT", STALE_REQUEST_DELTA_AT)
                 .header("X-ENTITY-ID", CHILD_ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1334,6 +1336,7 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID)
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", EXISTING_CHILD_ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1378,6 +1381,7 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID)
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", CHILD_ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", ENTITY_ID)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -1422,6 +1426,7 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID)
                 .header("X-DELTA-AT", DELTA_AT)
                 .header("X-ENTITY-ID", ENTITY_ID)
+                .header("X-PARENT-ENTITY-ID", "")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then

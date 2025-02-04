@@ -27,6 +27,7 @@ class FilingHistoryDeleteProcessorTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String TRANSACTION_ID = "transactionId";
     private static final String ENTITY_ID = "entity_id";
+    private static final String PARENT_ENTITY_ID = "parent_entity_id";
     private static final String DELTA_AT = "20151025185208001000";
     private static final String STALE_DELTA_AT = "20141025185208001000";
 
@@ -48,9 +49,15 @@ class FilingHistoryDeleteProcessorTest {
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.empty());
 
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(DELTA_AT)
+                .build();
+
         // when
-        filingHistoryDeleteProcessor.processFilingHistoryDelete(
-                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
+        filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
 
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
@@ -64,9 +71,15 @@ class FilingHistoryDeleteProcessorTest {
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.of(updatedDocument));
 
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(DELTA_AT)
+                .build();
+
         // when
-        filingHistoryDeleteProcessor.processFilingHistoryDelete(
-                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
+        filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
 
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
@@ -80,9 +93,15 @@ class FilingHistoryDeleteProcessorTest {
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.of(existingDocument));
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.of(existingDocument));
 
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(DELTA_AT)
+                .build();
+
         // when
-        filingHistoryDeleteProcessor.processFilingHistoryDelete(
-                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
+        filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
 
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
@@ -91,18 +110,46 @@ class FilingHistoryDeleteProcessorTest {
     }
 
     @Test
-    void shouldCallResourceChangedWhenParentNorChildExists() {
+    void shouldCallResourceChangedWhenParentDoesNotExistAndNotAChildDelete() {
         // given
         when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
 
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(DELTA_AT)
+                .build();
+
         // when
-        filingHistoryDeleteProcessor.processFilingHistoryDelete(
-                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT));
+        filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
 
         // then
         verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
         verifyNoInteractions(deleteMapperDelegator);
         verify(filingHistoryService).callResourceChangedAbsentParent(COMPANY_NUMBER, TRANSACTION_ID);
+    }
+
+    @Test
+    void shouldNotCallResourceChangedWhenParentDoesNotExistAndIsAChildDelete() {
+        // given
+        when(filingHistoryService.findExistingFilingHistory(any(), any())).thenReturn(Optional.empty());
+
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(DELTA_AT)
+                .parentEntityId(PARENT_ENTITY_ID)
+                .build();
+
+        // when
+        filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
+
+        // then
+        verify(filingHistoryService).findExistingFilingHistory(TRANSACTION_ID, COMPANY_NUMBER);
+        verifyNoInteractions(deleteMapperDelegator);
+        verifyNoMoreInteractions(filingHistoryService);
     }
 
     @Test
@@ -112,9 +159,15 @@ class FilingHistoryDeleteProcessorTest {
         when(deleteMapperDelegator.delegateDelete(any(), any(), any())).thenReturn(Optional.empty());
         when(existingDocument.getDeltaAt()).thenReturn(DELTA_AT);
 
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(STALE_DELTA_AT)
+                .build();
+
         // when
-        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(
-                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, STALE_DELTA_AT));
+        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
 
         // then
         assertThrows(ConflictException.class, executable);
@@ -126,9 +179,15 @@ class FilingHistoryDeleteProcessorTest {
     @Test
     void shouldThrowBadRequestExceptionWhenDeltaAtIsMissing() {
         // given
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(null)
+                .build();
+
         // when
-        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(
-                new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, null));
+        Executable executable = () -> filingHistoryDeleteProcessor.processFilingHistoryDelete(request);
 
         // then
         BadRequestException exception = assertThrows(BadRequestException.class, executable);

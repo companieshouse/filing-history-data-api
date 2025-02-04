@@ -12,6 +12,8 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,8 +40,6 @@ class FilingHistoryControllerTest {
     private static final String ENTITY_ID = "entity_id";
     private static final String DELTA_AT = "20151025185208001000";
     private static final String COMPANY_NUMBER = "12345678";
-    private static final FilingHistoryDeleteRequest DELETE_REQUEST =
-            new FilingHistoryDeleteRequest(COMPANY_NUMBER, TRANSACTION_ID, ENTITY_ID, DELTA_AT);
     private static final int START_INDEX = 0;
     private static final int DEFAULT_ITEMS_PER_PAGE = 25;
 
@@ -51,8 +51,6 @@ class FilingHistoryControllerTest {
     private FilingHistoryGetResponseProcessor getResponseProcessor;
     @Mock
     private FilingHistoryDeleteProcessor deleteProcessor;
-    @Mock
-    private FilingHistoryDeleteRequest deleteRequest;
     @Mock
     private InternalFilingHistoryApi requestBody;
     @Mock
@@ -231,35 +229,33 @@ class FilingHistoryControllerTest {
         verify(upsertProcessor).processFilingHistory(TRANSACTION_ID, COMPANY_NUMBER, requestBody);
     }
 
-    @Test
-    void shouldReturn200WhenDeleteSingleTransaction() {
+    @ParameterizedTest
+    @CsvSource(value = {
+            "parent_entity_id",
+            "null",
+            "''"
+    }, nullValues = "null")
+    void shouldReturn200WhenDeleteSingleTransaction(final String parentEntityId) {
         // given
         final ResponseEntity<Void> expectedResponse = ResponseEntity
                 .status(HttpStatus.OK)
                 .build();
 
+        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .transactionId(TRANSACTION_ID)
+                .entityId(ENTITY_ID)
+                .deltaAt(DELTA_AT)
+                .parentEntityId(parentEntityId)
+                .build();
+
         // when
         final ResponseEntity<Void> actualResponse = controller.deleteFilingHistoryTransaction(COMPANY_NUMBER,
-                TRANSACTION_ID, DELTA_AT, ENTITY_ID);
+                TRANSACTION_ID, DELTA_AT, ENTITY_ID, parentEntityId);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(deleteProcessor).processFilingHistoryDelete(DELETE_REQUEST);
-    }
-
-    @Test
-    void shouldReturn404WhenDeleteAndNotFoundException() {
-        // given
-        doThrow(NotFoundException.class)
-                .when(deleteProcessor).processFilingHistoryDelete(any());
-
-        // when
-        Executable executable = () -> controller.deleteFilingHistoryTransaction(COMPANY_NUMBER,
-                TRANSACTION_ID, DELTA_AT, ENTITY_ID);
-
-        // then
-        assertThrows(NotFoundException.class, executable);
-        verify(deleteProcessor).processFilingHistoryDelete(DELETE_REQUEST);
+        verify(deleteProcessor).processFilingHistoryDelete(request);
     }
 
     @Test

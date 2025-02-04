@@ -60,8 +60,14 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
                                                     companyNumber, transactionId);
                                         }),
                         () -> {
-                            LOGGER.info("Streaming delete for non-existent document", DataMapHolder.getLogMap());
-                            filingHistoryService.callResourceChangedAbsentParent(companyNumber, transactionId);
+                            if (StringUtils.isNotBlank(request.parentEntityId())) {
+                                LOGGER.info(
+                                        "Child delete for non existent document - stopping processing",
+                                        DataMapHolder.getLogMap());
+                            } else {
+                                LOGGER.info("Streaming delete for non-existent document", DataMapHolder.getLogMap());
+                                filingHistoryService.callResourceChangedAbsentParent(companyNumber, transactionId);
+                            }
                         });
     }
 
