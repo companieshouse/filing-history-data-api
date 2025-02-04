@@ -62,7 +62,7 @@ public class FilingHistoryDeleteProcessor implements DeleteProcessor {
                         () -> {
                             if (StringUtils.isNotBlank(request.parentEntityId())) {
                                 LOGGER.info(
-                                        "Child delete requested for document without parent - process will terminate and no stream event sent",
+                                        "Child delete for non existent document - stopping processing",
                                         DataMapHolder.getLogMap());
                             } else {
                                 LOGGER.info("Streaming delete for non-existent document", DataMapHolder.getLogMap());
