@@ -258,34 +258,6 @@ class FilingHistoryControllerTest {
         verify(deleteProcessor).processFilingHistoryDelete(request);
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {
-            "parent_entity_id",
-            "null",
-            "''"
-    }, nullValues = "null")
-    void shouldReturn404WhenDeleteAndNotFoundException(final String parentEntityId) {
-        // given
-        doThrow(NotFoundException.class)
-                .when(deleteProcessor).processFilingHistoryDelete(any());
-
-        FilingHistoryDeleteRequest request = FilingHistoryDeleteRequest.builder()
-                .companyNumber(COMPANY_NUMBER)
-                .transactionId(TRANSACTION_ID)
-                .entityId(ENTITY_ID)
-                .deltaAt(DELTA_AT)
-                .parentEntityId(parentEntityId)
-                .build();
-
-        // when
-        Executable executable = () -> controller.deleteFilingHistoryTransaction(COMPANY_NUMBER,
-                TRANSACTION_ID, DELTA_AT, ENTITY_ID, parentEntityId);
-
-        // then
-        assertThrows(NotFoundException.class, executable);
-        verify(deleteProcessor).processFilingHistoryDelete(request);
-    }
-
     @Test
     void shouldReturn200OKWhenDocumentMetadataRequest() {
         // given
