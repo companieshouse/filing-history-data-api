@@ -34,7 +34,7 @@ public class WebSecurityConfig {
      */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/filing-history-data-api/healthcheck");
+        return web -> web.ignoring().requestMatchers("/healthcheck");
     }
 
     @Bean
