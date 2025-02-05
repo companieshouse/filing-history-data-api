@@ -106,7 +106,7 @@ public class FilingHistoryController {
             @PathVariable("transaction_id") final String transactionId,
             @RequestHeader("X-DELTA-AT") final String deltaAt,
             @RequestHeader("X-ENTITY-ID") final String entityId,
-            @RequestHeader("X-PARENT-ENTITY-ID") final String parentEntityId) {
+            @RequestHeader(value = "X-PARENT-ENTITY-ID", defaultValue = "") final String parentEntityId) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber)
