@@ -8,7 +8,7 @@ locals {
   eric_port                   = "10000"
   docker_repo                 = "filing-history-data-api"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
-  lb_listener_rule_priority   = 2
+  lb_listener_rule_priority   = 3
   lb_listener_paths           = [
     "/company/*/filing-history*", "/filing-history/*/internal"
   ]
