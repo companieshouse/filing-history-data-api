@@ -131,63 +131,6 @@ class FilingHistoryGetResponseProcessorTest {
     }
 
     @Test
-    void shouldSuccessfullyReturnCompanyFilingHistoryListWithItemsPerPageNegativeValue() {
-        // given
-        when(statusService.processStatus(any())).thenReturn(STATUS);
-        when(filingHistoryService.findCompanyFilingHistoryList(any(), anyInt(), anyInt(), any()))
-                .thenReturn(Optional.of(listAggregate));
-        when(listGetResponseMapper.mapFilingHistoryList(anyInt(), anyInt(), any(), any())).thenReturn(
-                filingHistoryList);
-
-        FilingHistoryListRequestParams requestParams = FilingHistoryListRequestParams.builder()
-                .companyNumber(COMPANY_NUMBER)
-                .startIndex(START_INDEX)
-                .itemsPerPage(-25)
-                .categories(CATEGORIES)
-                .build();
-
-        // when
-        final FilingHistoryList actual = processor.processGetCompanyFilingHistoryList(requestParams);
-
-        // then
-        assertEquals(filingHistoryList, actual);
-        verify(statusService).processStatus(COMPANY_NUMBER);
-        verify(filingHistoryService).findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX, DEFAULT_ITEMS_PER_PAGE,
-                CATEGORIES);
-        verify(listGetResponseMapper).mapFilingHistoryList(START_INDEX, DEFAULT_ITEMS_PER_PAGE, STATUS, listAggregate);
-    }
-
-
-    @Test
-    void shouldSuccessfullyReturnCompanyFilingHistoryListWhenItemsPerPageHigherThanMax() {
-        // given
-
-        int highItemsPerPage = 150;
-        when(statusService.processStatus(any())).thenReturn(STATUS);
-        when(filingHistoryService.findCompanyFilingHistoryList(any(), anyInt(), anyInt(), any()))
-                .thenReturn(Optional.of(listAggregate));
-        when(listGetResponseMapper.mapFilingHistoryList(anyInt(), anyInt(), any(), any())).thenReturn(
-                filingHistoryList);
-
-        FilingHistoryListRequestParams requestParams = FilingHistoryListRequestParams.builder()
-                .companyNumber(COMPANY_NUMBER)
-                .startIndex(START_INDEX)
-                .itemsPerPage(highItemsPerPage)
-                .categories(CATEGORIES)
-                .build();
-
-        // when
-        final FilingHistoryList actual = processor.processGetCompanyFilingHistoryList(requestParams);
-
-        // then
-        assertEquals(filingHistoryList, actual);
-        verify(statusService).processStatus(COMPANY_NUMBER);
-        verify(filingHistoryService).findCompanyFilingHistoryList(COMPANY_NUMBER, START_INDEX, MAX_ITEMS_PER_PAGE,
-                CATEGORIES);
-        verify(listGetResponseMapper).mapFilingHistoryList(START_INDEX, MAX_ITEMS_PER_PAGE, STATUS, listAggregate);
-    }
-
-    @Test
     void shouldSuccessfullyReturnBaseCompanyFilingHistoryListWhenStatusNotAvailable() {
         // given
         when(statusService.processStatus(any())).thenReturn(NOT_AVAILABLE_STATUS);

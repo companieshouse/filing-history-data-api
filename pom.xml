@@ -18,7 +18,7 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.4.2</spring.boot.version>
+    <spring.boot.version>3.4.3</spring.boot.version>
     <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
     <structured-logging.version>3.0.24</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
@@ -53,6 +53,16 @@
 
   <dependencies>
     <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+      <version>6.4.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+      <version>6.4.4</version>
+    </dependency>
     <!--end transitive dependencies-->
 
     <dependency>

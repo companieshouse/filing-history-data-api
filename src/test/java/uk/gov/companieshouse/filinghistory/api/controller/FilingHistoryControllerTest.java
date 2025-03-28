@@ -87,6 +87,78 @@ class FilingHistoryControllerTest {
     }
 
     @Test
+    void shouldReturn200OKWhenGetCompanyFilingHistoryListWithItemsPerPageNegative() {
+        // given
+        final ResponseEntity<FilingHistoryList> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .body(getListResponseBody);
+
+        final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .startIndex(START_INDEX)
+                .itemsPerPage(DEFAULT_ITEMS_PER_PAGE)
+                .build();
+
+        when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenReturn(getListResponseBody);
+
+        // when
+        final ResponseEntity<FilingHistoryList> actualResponse = controller.getCompanyFilingHistoryList(COMPANY_NUMBER,
+                START_INDEX, -25, null);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
+    }
+
+    @Test
+    void shouldReturn200OKWhenGetCompanyFilingHistoryListWhenItemsPerPageHigherThanMax() {
+        // given
+        final ResponseEntity<FilingHistoryList> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .body(getListResponseBody);
+
+        final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .startIndex(START_INDEX)
+                .itemsPerPage(100)
+                .build();
+
+        when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenReturn(getListResponseBody);
+
+        // when
+        final ResponseEntity<FilingHistoryList> actualResponse = controller.getCompanyFilingHistoryList(COMPANY_NUMBER,
+                START_INDEX, 150, null);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
+    }
+
+    @Test
+    void shouldReturn200OKWhenGetCompanyFilingHistoryListWhenItemsPerPageZero() {
+        // given
+        final ResponseEntity<FilingHistoryList> expectedResponse = ResponseEntity
+                .status(HttpStatus.OK)
+                .body(getListResponseBody);
+
+        final FilingHistoryListRequestParams params = FilingHistoryListRequestParams.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .startIndex(START_INDEX)
+                .itemsPerPage(DEFAULT_ITEMS_PER_PAGE)
+                .build();
+
+        when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenReturn(getListResponseBody);
+
+        // when
+        final ResponseEntity<FilingHistoryList> actualResponse = controller.getCompanyFilingHistoryList(COMPANY_NUMBER,
+                START_INDEX, 0, null);
+
+        // then
+        assertEquals(expectedResponse, actualResponse);
+        verify(getResponseProcessor).processGetCompanyFilingHistoryList(params);
+    }
+
+    @Test
     void shouldReturn404NotFoundWhenGetCompanyFilingHistoryList() {
         // given
         when(getResponseProcessor.processGetCompanyFilingHistoryList(any())).thenThrow(NotFoundException.class);

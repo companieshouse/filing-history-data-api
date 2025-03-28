@@ -19,7 +19,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-    private static final int MAX_ITEMS_PER_PAGE = 100;
     private static final Pattern STATUS_NOT_AVAILABLE_PATTERN =
             Pattern.compile("^filing-history-not-available(?!.*before)");
 
@@ -49,7 +48,7 @@ public class FilingHistoryGetResponseProcessor implements GetResponseProcessor {
     @Override
     public FilingHistoryList processGetCompanyFilingHistoryList(FilingHistoryListRequestParams requestParams) {
         final String companyNumber = requestParams.companyNumber();
-        final int itemsPerPage = Math.min(Math.abs(requestParams.itemsPerPage()), MAX_ITEMS_PER_PAGE);
+        final int itemsPerPage = requestParams.itemsPerPage();
         final int startIndex = requestParams.startIndex();
 
         String status = statusService.processStatus(companyNumber);
