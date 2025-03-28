@@ -32,6 +32,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class FilingHistoryController {
 
     private static final String DEFAULT_ITEMS_PER_PAGE = "25";
+    private static final int MAX_ITEMS_PER_PAGE = 100;
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final GetResponseProcessor filingHistoryGetResponseProcessor;
     private final UpsertProcessor serviceUpsertProcessor;
@@ -51,7 +52,8 @@ public class FilingHistoryController {
             @RequestParam(defaultValue = DEFAULT_ITEMS_PER_PAGE, name = "items_per_page") Integer itemsPerPage,
             @RequestParam(required = false, name = "category") List<String> categories) {
 
-        itemsPerPage = itemsPerPage == 0 ? Integer.parseInt(DEFAULT_ITEMS_PER_PAGE) : itemsPerPage;
+        itemsPerPage = itemsPerPage == 0 ? Integer.parseInt(DEFAULT_ITEMS_PER_PAGE)
+                : Math.min(Math.abs(itemsPerPage), MAX_ITEMS_PER_PAGE);
 
         DataMapHolder.get().companyNumber(companyNumber);
         LOGGER.info("Processing GET company filing history list", DataMapHolder.getLogMap());
