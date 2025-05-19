@@ -57,6 +57,7 @@ public class FilingHistoryController {
 
         DataMapHolder.get().companyNumber(companyNumber);
         LOGGER.info("Processing GET company filing history list", DataMapHolder.getLogMap());
+LOGGER.info("TEST");
 
         FilingHistoryListRequestParams requestParams = FilingHistoryListRequestParams.builder()
                 .companyNumber(companyNumber)
