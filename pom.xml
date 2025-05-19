@@ -37,6 +37,11 @@
     </sonar.coverage.jacoco.xmlReportPaths>
     <sonar.jacoco.reports>${project.build.directory}/site</sonar.jacoco.reports>
     <sonar.coverage.exclusions>**/model/*</sonar.coverage.exclusions>
+    <sonar.projectName>filing-history-data-api</sonar.projectName>
+    <sonar.projectKey>uk.gov.companieshouse:filing-history-data-api</sonar.projectKey>
+    <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
+    <sonar.login></sonar.login>
+    <sonar.password></sonar.password>
   </properties>
 
   <dependencyManagement>
