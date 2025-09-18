@@ -1,6 +1,6 @@
-## Describe the changes
+# Describe the changes
 
-### Related Jira tickets
+## Related Jira tickets
 
 [<Jira Ticket ID>](<Jira URL>)
 
@@ -18,7 +18,7 @@
 ### Testing
 
 - [ ] Do the code changes have unit and integration tests with code coverage > 80%?
-- [ ] Has the code been tested locally and/or passed the API Karate tests on Tilt?
+- [ ] Has the code been tested locally and/or passed the API Karate tests on docker-chs-development?
 - [ ] Have mandatory manual test cases been run?
 - [ ] Are extra Karate tests required?
 - [ ] Are all the test data resources up to date?
