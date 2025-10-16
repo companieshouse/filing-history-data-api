@@ -25,7 +25,7 @@ The service is implemented in Java 21 using Spring Boot 3.2
 2. Enable the following services using the command `./bin/chs-dev services enable <service>`.
     * `filing-history-data-api`
 
-3. Boot up the services' containers on docker using tilt `tilt up`.
+3. Boot up the services' containers on docker using docker-chs-development `chs-dev up`.
 
 ## Environment variables
 
