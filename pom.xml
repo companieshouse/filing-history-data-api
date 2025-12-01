@@ -19,7 +19,8 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.4.3</spring.boot.version>
+    <spring.boot.version>3.5.8</spring.boot.version>
+    <spring.security.version>6.5.7</spring.security.version>
     <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
     <structured-logging.version>3.0.24</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
@@ -54,6 +55,23 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <!-- Override vulnerable transitive dependencies -->
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.11.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.18.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -62,12 +80,12 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
-      <version>6.4.4</version>
+      <version>${spring.security.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
-      <version>6.4.4</version>
+      <version>${spring.security.version}</version>
     </dependency>
     <!--end transitive dependencies-->
 
