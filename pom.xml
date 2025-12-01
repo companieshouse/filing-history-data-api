@@ -56,17 +56,21 @@
         <scope>import</scope>
       </dependency>
 
-      <!-- Override vulnerable transitive dependencies -->
+      <!-- Pinning version to address CVE-2025-48734 commons-beanutils pulled transitively-->
       <dependency>
         <groupId>commons-beanutils</groupId>
         <artifactId>commons-beanutils</artifactId>
         <version>1.11.0</version>
       </dependency>
+
+      <!-- Pinning version to address CVE-2022-25647 gson pulled transitively-->
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
         <version>2.12.1</version>
       </dependency>
+
+      <!-- Pinning version to address CVE-2025-48924 commons-lang3 pulled transitively-->
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
