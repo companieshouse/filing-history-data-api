@@ -76,6 +76,13 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.18.0</version>
       </dependency>
+
+      <!-- Pinning version to address CVE-2024-11407, CVE-2024-7246 grpc-api pulled transitively-->
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-api</artifactId>
+        <version>1.60.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
