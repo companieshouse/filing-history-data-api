@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!-- CVE-2024-11407: Only affects gRPC-C++, not grpc-java -->
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/io\.grpc/.*$</packageUrl>
+        <cve>CVE-2024-11407</cve>
+    </suppress>
+
+    <!-- CVE-2024-7246: grpc-context 1.60.1 is vulnerable, fix requires 1.60.2+
+         Cannot upgrade: pulled transitively, newer versions unavailable in internal repo -->
+    <suppress>
+        <packageUrl regex="true">^pkg:maven/io\.grpc/grpc-context@1\.60\.1$</packageUrl>
+        <cve>CVE-2024-7246</cve>
+    </suppress>
+</suppressions>
