@@ -6,7 +6,7 @@ import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.isDeltaSt
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.companieshouse.api.filinghistory.InternalFilingHistoryApi;
 import uk.gov.companieshouse.filinghistory.api.exception.ConflictException;
 import uk.gov.companieshouse.filinghistory.api.logging.DataMapHolder;

@@ -2,7 +2,7 @@ package uk.gov.companieshouse.filinghistory.api.service;
 
 import static uk.gov.companieshouse.filinghistory.api.mapper.DateUtils.isDeltaStale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.BadRequestException;
