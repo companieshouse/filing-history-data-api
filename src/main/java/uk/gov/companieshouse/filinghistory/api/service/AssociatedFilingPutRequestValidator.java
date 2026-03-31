@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.service;
 
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
