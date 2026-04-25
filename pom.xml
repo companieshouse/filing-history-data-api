@@ -20,7 +20,7 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <spring.boot.version>3.5.13</spring.boot.version>
-    <spring.security.version>6.5.9</spring.security.version>
+    <spring.security.version>6.5.10</spring.security.version>
     <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
     <structured-logging.version>3.0.52</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.18</api-sdk-manager-java-library.version>
