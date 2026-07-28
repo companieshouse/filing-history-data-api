@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -32,7 +33,7 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
@@ -45,7 +46,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.filinghistory.Annotation;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData;
@@ -66,6 +66,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDescript
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryLinks;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginalValues;
+import wiremock.org.apache.commons.io.IOUtils;
 
 @Testcontainers
 @AutoConfigureMockMvc
@@ -124,7 +125,7 @@ class FilingHistoryControllerIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -219,9 +220,9 @@ class FilingHistoryControllerIT {
         // given
         String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER);
         Document document = Document.parse(jsonToInsert);
         document.append("version", 0);
         mongoTemplate.insert(document, FILING_HISTORY_COLLECTION);
@@ -281,9 +282,9 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<delta_at>", EXISTING_DELTA_AT);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final FilingHistoryDocument expectedDocument =
@@ -341,35 +342,35 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/existing-legacy-original-values-document.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID);
         mongoTemplate.insert(Document.parse(existingDocumentJson), FILING_HISTORY_COLLECTION);
 
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/expected-legacy-original-values-document.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/mr01s/put_request_MR01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -403,15 +404,15 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .items(getExpectedExternalData());
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -436,15 +437,15 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .items(getExpectedExternalData());
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -469,8 +470,8 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/top_level_annotation_doc.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -483,11 +484,11 @@ class FilingHistoryControllerIT {
         // then
         result.andExpect(MockMvcResultMatchers.status().isOk());
 
-        final String responseBodyAsString = result.andReturn().getResponse().getContentAsString();
-        FilingHistoryList actualResponseBody = objectMapper.readValue(responseBodyAsString, FilingHistoryList.class);
+        FilingHistoryList actualResponseBody = objectMapper.readValue(
+                result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class
+        );
 
-        assertNull(actualResponseBody.getItems().getFirst().getAnnotations());
-    }
+        assertTrue(actualResponseBody.getItems().getFirst().getAnnotations().isEmpty());    }
 
     @Test
     void shouldGetBaseCompanyFilingHistoryListWhenStatusNotAvailableAndReturn200OK() throws Exception {
@@ -495,7 +496,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.NOT_AVAILABLE_PROTECTED_CELL_COMPANY)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_NOT_AVAILABLE_PROTECTED_CELL_COMPANY)
                 .totalCount(0)
                 .items(List.of());
 
@@ -521,15 +522,15 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(100)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .items(getExpectedExternalData());
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -582,9 +583,9 @@ class FilingHistoryControllerIT {
 
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -623,8 +624,8 @@ class FilingHistoryControllerIT {
         final String jsonToInsert = IOUtils.resourceToString(
                         "/mongo_docs/filing-history-document-list-subcategory.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         // when
@@ -710,8 +711,8 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         final InternalFilingHistoryApi request = buildPutRequestBody(STALE_REQUEST_DELTA_AT);
@@ -754,7 +755,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(0)
                 .items(List.of());
 
@@ -809,10 +810,10 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -847,10 +848,10 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -884,11 +885,11 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY)
+                .replace("<delta_at>", EXISTING_DELTA_AT);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -920,11 +921,11 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY)
+                .replace("<delta_at>", EXISTING_DELTA_AT);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -1008,11 +1009,11 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<category>", CATEGORY)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<category>", CATEGORY)
+                .replace("<delta_at>", EXISTING_DELTA_AT);
         mongoTemplate.insert(Document.parse(jsonToInsert), FILING_HISTORY_COLLECTION);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
@@ -1046,9 +1047,9 @@ class FilingHistoryControllerIT {
         // given
         final String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<delta_at>", EXISTING_DELTA_AT);
         Document doc = Document.parse(jsonToInsert);
         doc.remove("delta_at");
         doc.append("version", 0);
@@ -1110,23 +1111,23 @@ class FilingHistoryControllerIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/expected_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1160,12 +1161,12 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/existing_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", DATE)
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", DATE)
+                .replace("<created_at>", DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1173,13 +1174,13 @@ class FilingHistoryControllerIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/expected_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", DATE);
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
         assertNotNull(expectedDocument);
@@ -1188,10 +1189,10 @@ class FilingHistoryControllerIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1225,14 +1226,14 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/existing_new_inc_with_SH01_and_MODEL_ARTICLES_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", DATE)
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<model_articles_entity_id>", CHILD_ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<model_articles_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", DATE)
+                .replace("<created_at>", DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1240,25 +1241,25 @@ class FilingHistoryControllerIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/expected_new_inc_with_SH01_and_MODEL_ARTICLES_doc.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<model_articles_entity_id>", CHILD_ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<model_articles_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/newinc/put_request_body_new_inc_with_SH01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1292,12 +1293,12 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/existing_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", DATE)
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", DATE)
+                .replace("<created_at>", DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1331,12 +1332,12 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/existing_new_inc_with_SH01_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", DATE)
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", DATE)
+                .replace("<created_at>", DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1371,14 +1372,14 @@ class FilingHistoryControllerIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/newinc/existing_new_inc_with_SH01_and_MODEL_ARTICLES_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<model_articles_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<model_articles_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", DATE)
-                .replaceAll("<created_at>", DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<model_articles_entity_id>", CHILD_ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<model_articles_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", DATE)
+                .replace("<created_at>", DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1411,8 +1412,8 @@ class FilingHistoryControllerIT {
         // given
         String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document-no-document-metadata.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER);
         Document document = Document.parse(jsonToInsert);
         document.append("version", 0);
         mongoTemplate.insert(document, FILING_HISTORY_COLLECTION);
@@ -1458,8 +1459,8 @@ class FilingHistoryControllerIT {
         // given
         String jsonToInsert = IOUtils.resourceToString("/mongo_docs/filing-history-document-null-links.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER);
+                .replace("<id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER);
         Document document = Document.parse(jsonToInsert);
         document.append("version", 0);
         mongoTemplate.insert(document, FILING_HISTORY_COLLECTION);
@@ -1609,24 +1610,24 @@ class FilingHistoryControllerIT {
 
     private static String getExpectedChangedResource() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-changed.json", StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT);
+                .replace("<published_at>", PUBLISHED_AT);
     }
 
     private static String getExpectedChangedResourceDocumentMetadata() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-changed-document-metadata.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT);
+                .replace("<published_at>", PUBLISHED_AT);
     }
 
     private static String getExpectedChangedResourceDelete() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-deleted.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT);
+                .replace("<published_at>", PUBLISHED_AT);
     }
 
     private static String getExpectedChangedResourceDeleteAbsentData() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-resource-deleted-absent-data.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT);
+                .replace("<published_at>", PUBLISHED_AT);
     }
 }

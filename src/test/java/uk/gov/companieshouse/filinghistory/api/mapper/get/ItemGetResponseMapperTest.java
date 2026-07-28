@@ -79,6 +79,8 @@ class ItemGetResponseMapperTest {
                 .date("2014-09-15")
                 .descriptionValues(itemDescriptionValues)
                 .annotations(itemAnnotations)
+                .resolutions(null)
+                .associatedFilings(null)
                 .links(itemLinks)
                 .pages(1);
 
@@ -111,6 +113,8 @@ class ItemGetResponseMapperTest {
                 .subcategory(SUBCATEGORY)
                 .date("2014-09-15")
                 .annotations(itemAnnotations)
+                .resolutions(null)
+                .associatedFilings(null)
                 .links(itemLinks)
                 .pages(1);
 
@@ -166,6 +170,8 @@ class ItemGetResponseMapperTest {
                 .date("2014-09-15")
                 .descriptionValues(itemDescriptionValues)
                 .annotations(itemAnnotations)
+                .resolutions(null)
+                .associatedFilings(null)
                 .links(itemLinks)
                 .pages(1);
 
@@ -200,6 +206,8 @@ class ItemGetResponseMapperTest {
                 .date("2014-09-15")
                 .descriptionValues(itemDescriptionValues)
                 .annotations(null)
+                .resolutions(null)
+                .associatedFilings(null)
                 .links(itemLinks)
                 .pages(1);
 

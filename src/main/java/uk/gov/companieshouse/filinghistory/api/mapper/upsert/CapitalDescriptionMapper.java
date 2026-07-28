@@ -14,7 +14,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryCapital;
 public class CapitalDescriptionMapper {
 
     public List<FilingHistoryCapital> mapCapitalDescriptionValueList(List<CapitalDescriptionValue> capital) {
-        return capital != null ? capital.stream()
+        return capital != null && !capital.isEmpty() ? capital.stream()
                 .map(value -> new FilingHistoryCapital()
                         .currency(value.getCurrency())
                         .date(stringToInstant(value.getDate()))
@@ -23,7 +23,7 @@ public class CapitalDescriptionMapper {
     }
 
     public List<FilingHistoryAltCapital> mapAltCapitalDescriptionValueList(List<AltCapitalDescriptionValue> capital) {
-        return capital != null ? capital.stream()
+        return capital != null && !capital.isEmpty() ? capital.stream()
                 .map(value -> new FilingHistoryAltCapital()
                         .currency(value.getCurrency())
                         .date(stringToInstant(value.getDate()))

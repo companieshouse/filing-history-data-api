@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
@@ -44,7 +44,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
@@ -57,6 +56,7 @@ import uk.gov.companieshouse.api.filinghistory.Resolution.CategoryEnum;
 import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResolution;
+import wiremock.org.apache.commons.io.IOUtils;
 
 @Testcontainers
 @AutoConfigureMockMvc
@@ -106,7 +106,7 @@ class ResolutionTransactionIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -120,12 +120,12 @@ class ResolutionTransactionIT {
         // given
         final String existingDocumentJson = IOUtils.resourceToString(
                         "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -183,19 +183,19 @@ class ResolutionTransactionIT {
         // given
         final String existingDocumentJson = IOUtils.resourceToString(
                         "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
 
         FilingHistoryList expectedResponse = new FilingHistoryList()
                 .itemsPerPage(25)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .startIndex(0)
                 .items(List.of(new ExternalData()
@@ -253,28 +253,28 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<resolution_date>", FIRST_RES_DATE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<updated_by>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<resolution_date>", FIRST_RES_DATE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<updated_by>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString())
+                .replace("<created_by>", CONTEXT_ID);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -309,14 +309,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_resolution_entity_id>", "3333333333")
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<existing_resolution_entity_id>", "3333333333")
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -324,26 +324,26 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", "3333333333")
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<second_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", "3333333333")
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<second_resolution_entity_id>", ENTITY_ID)
+                .replace("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_second_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<second_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT);
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<second_resolution_entity_id>", ENTITY_ID)
+                .replace("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -378,14 +378,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", CREATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<existing_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", CREATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -393,17 +393,17 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("liquidation", "insolvency")
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<resolution_date>", FIRST_RES_DATE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<updated_by>", CONTEXT_ID)
-                .replaceAll("<created_at>", CREATED_AT.toString())
-                .replaceAll("<created_by>", EXISTING_CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("liquidation", "insolvency")
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<resolution_date>", FIRST_RES_DATE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<updated_by>", CONTEXT_ID)
+                .replace("<created_at>", CREATED_AT.toString())
+                .replace("<created_by>", EXISTING_CONTEXT_ID);
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -413,13 +413,13 @@ class ResolutionTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("liquidation", "insolvency")
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("liquidation", "insolvency")
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -453,16 +453,16 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", "3333333333")
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<second_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<second_resolution_delta_at>", EXISTING_DELTA_AT_TWO)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", "3333333333")
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<second_resolution_entity_id>", ENTITY_ID)
+                .replace("<second_resolution_delta_at>", EXISTING_DELTA_AT_TWO)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -470,29 +470,29 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", "3333333333")
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<second_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("legacy", "current different description")
-                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<resolution_date>", SECOND_RES_DATE)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", "3333333333")
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<second_resolution_entity_id>", ENTITY_ID)
+                .replace("legacy", "current different description")
+                .replace("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<resolution_date>", SECOND_RES_DATE)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_second_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("legacy", "current different description")
-                .replaceAll("<second_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT);
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("legacy", "current different description")
+                .replace("<second_resolution_entity_id>", ENTITY_ID)
+                .replace("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -527,13 +527,13 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<existing_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -541,13 +541,13 @@ class ResolutionTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", STALE_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("liquidation", "insolvency")
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", STALE_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("liquidation", "insolvency")
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -574,22 +574,22 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_no_barcode.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution_no_barcode.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -624,15 +624,15 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<existing_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -643,18 +643,18 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<resolution_date>", FIRST_RES_DATE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<updated_by>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<created_by>", EXISTING_CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_entity_id>", CHILD_ENTITY_ID)
+                .replace("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<first_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<resolution_date>", FIRST_RES_DATE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<updated_by>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString())
+                .replace("<created_by>", EXISTING_CONTEXT_ID);
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -664,12 +664,12 @@ class ResolutionTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -703,13 +703,13 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<existing_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -720,15 +720,15 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<second_resolution_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<second_resolution_entity_id>", CHILD_ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -737,11 +737,11 @@ class ResolutionTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_second_resolution.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<second_resolution_entity_id>", CHILD_ENTITY_ID);
+                .replace("<second_resolution_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<second_resolution_entity_id>", CHILD_ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -774,13 +774,13 @@ class ResolutionTransactionIT {
         // given
         final String existingDocumentJson = IOUtils.resourceToString(
                         "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -842,12 +842,12 @@ class ResolutionTransactionIT {
         // given
         final String existingDocumentJson = IOUtils.resourceToString(
                         "/mongo_docs/resolutions/existing_resolution_doc.json", StandardCharsets.UTF_8)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -859,7 +859,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryList expectedResponse = new FilingHistoryList()
                 .itemsPerPage(25)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .startIndex(0)
                 .items(List.of(new ExternalData()
@@ -923,14 +923,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/%s.json".formatted(existingDoc), StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<delta_at>", EXISTING_DELTA_AT);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -938,30 +938,30 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/%s.json".formatted(expectedDoc), StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<res_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<res_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_res15.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<parent_entity_id>", ENTITY_ID);
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
@@ -994,28 +994,28 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_res15_doc_with_no_parent.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/resolutions/put_request_body_res15.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<parent_entity_id>", ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1049,13 +1049,13 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_res15_doc_with_no_parent.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1063,31 +1063,31 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_certnm_doc_with_res15.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/certnms/put_request_body_certnm.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<parent_entity_id>", "")
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<parent_entity_id>", "")
+                .replace("<barcode>", BARCODE)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1121,16 +1121,16 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<second_resolution_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<second_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<second_resolution_entity_id>", CHILD_ENTITY_ID)
+                .replace("<second_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1138,16 +1138,16 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<updated_by>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<created_by>", EXISTING_CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<updated_by>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<created_by>", EXISTING_CONTEXT_ID);
 
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -1186,16 +1186,16 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_two_resolutions.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<second_resolution_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<second_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<second_resolution_entity_id>", CHILD_ENTITY_ID)
+                .replace("<second_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1226,14 +1226,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_resolution_doc_with_one_resolution.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<existing_resolution_entity_id>", ENTITY_ID)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<existing_resolution_entity_id>", ENTITY_ID)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1271,17 +1271,17 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_certnm_doc_with_two_res15s.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1289,16 +1289,16 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_certnm_doc_with_res15.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<context_id>", CONTEXT_ID);
 
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -1336,17 +1336,17 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_certnm_doc_with_two_res15s.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1377,14 +1377,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_certnm_doc_with_res15.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1392,14 +1392,14 @@ class ResolutionTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/expected_certnm_doc_with_zero_child_resolutions.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -1436,14 +1436,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_res15_doc_with_no_parent.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1482,14 +1482,14 @@ class ResolutionTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/resolutions/existing_top_level_resolution_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<barcode>", BARCODE)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1529,7 +1529,7 @@ class ResolutionTransactionIT {
                 .contextId(CONTEXT_ID)
                 .deletedData(null)
                 .event(new ChangedResourceEvent()
-                        .fieldsChanged(null)
+                        .fieldsChanged(List.of())
                         .publishedAt(PUBLISHED_AT)
                         .type("changed")));
     }
@@ -1537,14 +1537,14 @@ class ResolutionTransactionIT {
     private static String getExpectedResourceDeleted(String filename) throws IOException {
         return IOUtils.resourceToString(filename,
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<first_resolution_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<resolution_date>", EXISTING_DATE)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<published_at>", PUBLISHED_AT)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<first_resolution_delta_at>", EXISTING_DELTA_AT)
+                .replace("<resolution_date>", EXISTING_DATE)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<context_id>", CONTEXT_ID);
     }
 }

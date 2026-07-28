@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
@@ -42,7 +42,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.AssociatedFiling;
@@ -55,6 +54,7 @@ import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAssociatedFiling;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import wiremock.org.apache.commons.io.IOUtils;
 
 @Testcontainers
 @AutoConfigureMockMvc
@@ -99,7 +99,7 @@ class AssociatedFilingTransactionIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -115,12 +115,12 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_zero_associated_filings.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -129,27 +129,27 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -184,14 +184,14 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<existing_child_entity_id>", "3333333333")
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -200,29 +200,29 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", "3333333333")
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -257,27 +257,27 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_associated_filing_doc_with_no_parent.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -312,14 +312,14 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -328,31 +328,31 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/tm01s/put_request_TM01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<parent_entity_id>", "")
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<barcode>", BARCODE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<parent_entity_id>", "")
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<barcode>", BARCODE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -387,15 +387,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -404,28 +404,28 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -460,15 +460,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -477,30 +477,30 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/tm01s/put_request_TM01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<parent_entity_id>", "")
-                .replaceAll("<barcode>", BARCODE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<parent_entity_id>", "")
+                .replace("<barcode>", BARCODE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -536,15 +536,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -552,12 +552,12 @@ class AssociatedFilingTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", STALE_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", STALE_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -586,15 +586,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_associated_filing_doc_with_action_date_and_document_metadata.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<barcode>", "")
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", "")
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<existing_child_entity_id>", "3333333333")
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -644,15 +644,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<barcode>", "")
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", "")
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<existing_child_entity_id>", "3333333333")
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -684,7 +684,7 @@ class AssociatedFilingTransactionIT {
                 ))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
@@ -707,15 +707,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -727,28 +727,28 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -783,15 +783,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -803,18 +803,18 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_two_associated_filings.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -823,12 +823,12 @@ class AssociatedFilingTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/associated_filings/put_request_body_associated_filing.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -863,15 +863,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<barcode>", "")
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", "")
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -925,15 +925,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<barcode>", "")
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", "")
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -970,7 +970,7 @@ class AssociatedFilingTransactionIT {
                         ))))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryList.FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
@@ -980,10 +980,11 @@ class AssociatedFilingTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        final String actualResponse = result.andReturn().getResponse().getContentAsString();
-        final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
+        FilingHistoryList actualResponse = objectMapper.readValue(
+                result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class
+        );
+        assertEquals(expectedObject, actualResponse);
 
-        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
@@ -993,17 +994,17 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_two_associated_filings.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1012,16 +1013,16 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_one_associated_filing.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<context_id>", CONTEXT_ID);
 
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -1060,17 +1061,17 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_two_associated_filings.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1102,15 +1103,15 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_parent_doc_with_associated_filing.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1119,14 +1120,14 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/expected_parent_doc_with_zero_associated_filings.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -1164,14 +1165,14 @@ class AssociatedFilingTransactionIT {
                 "/mongo_docs/associated_filings/existing_associated_filing_doc_with_no_parent.json",
                 StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1219,11 +1220,11 @@ class AssociatedFilingTransactionIT {
     private static String getExpectedResourceDeleted() throws IOException {
         return IOUtils.resourceToString("/resource_changed/expected-associated-filing-resource-deleted.json",
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<published_at>", PUBLISHED_AT)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<context_id>", CONTEXT_ID);
     }
 }

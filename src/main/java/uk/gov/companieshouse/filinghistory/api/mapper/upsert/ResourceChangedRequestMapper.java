@@ -5,6 +5,7 @@ import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.N
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
@@ -40,7 +41,7 @@ public class ResourceChangedRequestMapper {
         ChangedResourceEvent event = new ChangedResourceEvent()
                 .publishedAt(DateUtils.publishedAtString(instantSupplier.get()))
                 .type(isDelete ? "deleted" : "changed")
-                .fieldsChanged(request.fieldsChanged());
+                .fieldsChanged(request.fieldsChanged() != null ? request.fieldsChanged() : List.of());
         ChangedResource changedResource = new ChangedResource()
                 .resourceUri("/company/%s/filing-history/%s".formatted(request.companyNumber(),
                         request.transactionId()))

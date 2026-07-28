@@ -19,13 +19,13 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.5.13</spring.boot.version>
-    <spring.security.version>6.5.9</spring.security.version>
+    <spring.boot.version>4.1.0</spring.boot.version>
+    <spring.security.version>7.1.0</spring.security.version>
     <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
     <structured-logging.version>3.0.52</structured-logging.version>
-    <api-sdk-manager-java-library.version>3.0.18</api-sdk-manager-java-library.version>
+    <api-sdk-manager-java-library.version>3.0.28</api-sdk-manager-java-library.version>
     <api-security-java.version>2.0.8</api-security-java.version>
-    <private-api-sdk-java.version>4.0.258</private-api-sdk-java.version>
+    <private-api-sdk-java.version>7.1.4</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
     <wiremock.version>3.11.0</wiremock.version>
@@ -56,33 +56,14 @@
         <scope>import</scope>
       </dependency>
 
-      <!-- Pinning version to address CVE-2025-48924 commons-lang3 pulled transitively-->
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.20.0</version>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-    <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-core</artifactId>
-      <version>${spring.security.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-crypto</artifactId>
-      <version>${spring.security.version}</version>
-    </dependency>
-    <!--end transitive dependencies-->
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
+      <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -110,7 +91,8 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-aop</artifactId>
+      <artifactId>spring-boot-starter-aspectj</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -174,13 +156,21 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.22.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mongodb</artifactId>
+      <version>1.21.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <version>1.21.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -211,6 +201,26 @@
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-commons</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-resttestclient</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-restclient</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test-autoconfigure</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

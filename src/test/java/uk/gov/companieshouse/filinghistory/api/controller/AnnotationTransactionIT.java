@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
@@ -41,7 +41,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.Annotation;
@@ -54,6 +53,7 @@ import uk.gov.companieshouse.api.filinghistory.Links;
 import uk.gov.companieshouse.filinghistory.api.mapper.DateUtils;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument;
+import wiremock.org.apache.commons.io.IOUtils;
 
 @Testcontainers
 @AutoConfigureMockMvc
@@ -99,7 +99,7 @@ class AnnotationTransactionIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -114,12 +114,12 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_zero_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -127,29 +127,29 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
                 .willReturn(aResponse()
@@ -182,15 +182,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", "3333333333")
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -198,31 +198,31 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_two_annotations.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", "3333333333")
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_entity_id>", "3333333333")
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -256,28 +256,28 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_annotation_doc_with_no_parent.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -311,14 +311,14 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_annotation_doc_with_no_parent.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -326,30 +326,30 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/tm01s/put_request_TM01_electronic.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<parent_entity_id>", "")
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<parent_entity_id>", "")
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -383,15 +383,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -399,27 +399,27 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -453,15 +453,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -469,30 +469,30 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/tm01s/put_request_TM01.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -527,15 +527,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -543,12 +543,12 @@ class AnnotationTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", STALE_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", STALE_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -576,14 +576,14 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -594,27 +594,27 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -648,15 +648,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -667,17 +667,17 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_two_annotations.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -686,12 +686,12 @@ class AnnotationTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString());
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<updated_at>", UPDATED_AT.toString());
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -725,15 +725,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -789,15 +789,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
 
@@ -836,7 +836,7 @@ class AnnotationTransactionIT {
                         ))))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
@@ -846,10 +846,10 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        final String actualResponse = result.andReturn().getResponse().getContentAsString();
-        final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
-
-        assertEquals(expectedResponse, actualResponse);
+        FilingHistoryList actualResponse = objectMapper.readValue(
+                result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class
+        );
+        assertEquals(expectedObject, actualResponse);
     }
 
     @Test
@@ -858,26 +858,26 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<parent_date>", NEW_DATE)
-                .replaceAll("<child_date>", NEW_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString())
+                .replace("<parent_date>", NEW_DATE)
+                .replace("<child_date>", NEW_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<date>", NEW_DATE);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<date>", NEW_DATE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -911,13 +911,13 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -925,15 +925,15 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<parent_date>", NEW_DATE)
-                .replaceAll("<child_date>", NEW_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<parent_date>", NEW_DATE)
+                .replace("<child_date>", NEW_DATE);
         FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
         expectedDocument.version(expectedDocument.getVersion() + 1);
@@ -941,11 +941,11 @@ class AnnotationTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<date>", NEW_DATE);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<date>", NEW_DATE);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -979,13 +979,13 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -994,29 +994,29 @@ class AnnotationTransactionIT {
                 "/mongo_docs/annotations/expected_top_level_annotation_doc_with_child_annotation.json",
                 StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<parent_date>", EXISTING_DATE)
-                .replaceAll("<child_date>", NEW_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<parent_date>", EXISTING_DATE)
+                .replace("<child_date>", NEW_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<parent_entity_id>", ENTITY_ID);
+                .replace("<delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", CHILD_ENTITY_ID)
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<parent_entity_id>", ENTITY_ID);
 
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         stubFor(post(urlEqualTo(RESOURCE_CHANGED_URI))
@@ -1051,13 +1051,13 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString())
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1065,11 +1065,11 @@ class AnnotationTransactionIT {
         String requestBody = IOUtils.resourceToString(
                 "/put_requests/annotation/put_request_body_top_level_annotation.json", StandardCharsets.UTF_8);
         requestBody = requestBody
-                .replaceAll("<delta_at>", STALE_REQUEST_DELTA_AT)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<delta_at>", STALE_REQUEST_DELTA_AT)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<date>", EXISTING_DATE);
 
         // when
         ResultActions result = mockMvc.perform(put(PUT_REQUEST_URI, COMPANY_NUMBER, TRANSACTION_ID)
@@ -1097,13 +1097,13 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString())
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1139,13 +1139,13 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString())
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString())
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1164,7 +1164,7 @@ class AnnotationTransactionIT {
                         .paperFiled(true)))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
@@ -1174,10 +1174,10 @@ class AnnotationTransactionIT {
                 .header("X-Request-Id", CONTEXT_ID));
 
         // then
-        final String actualResponse = result.andReturn().getResponse().getContentAsString();
-        final String expectedResponse = objectMapper.writeValueAsString(expectedObject);
-
-        assertEquals(expectedResponse, actualResponse);
+        FilingHistoryList actualResponse = objectMapper.readValue(
+                result.andReturn().getResponse().getContentAsString(), FilingHistoryList.class
+        );
+        assertEquals(expectedObject, actualResponse);
     }
 
     @Test
@@ -1186,17 +1186,17 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_two_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1204,16 +1204,16 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_one_annotation.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<context_id>", CONTEXT_ID);
 
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
@@ -1251,17 +1251,17 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_two_annotations.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<existing_child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<existing_child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<barcode>", BARCODE)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1296,15 +1296,15 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_parent_doc_with_annotation.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<barcode>", BARCODE)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<existing_child_entity_id>", EXISTING_CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1312,14 +1312,14 @@ class AnnotationTransactionIT {
         String expectedDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/expected_parent_doc_with_zero_annotations.json", StandardCharsets.UTF_8);
         expectedDocumentJson = expectedDocumentJson
-                .replaceAll("<barcode>", BARCODE)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<parent_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<context_id>", CONTEXT_ID)
-                .replaceAll("<created_at>", EXISTING_DATE);
+                .replace("<barcode>", BARCODE)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<parent_delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<context_id>", CONTEXT_ID)
+                .replace("<created_at>", EXISTING_DATE);
         final FilingHistoryDocument expectedDocument =
                 objectMapper.readValue(expectedDocumentJson, FilingHistoryDocument.class);
 
@@ -1356,14 +1356,14 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_annotation_doc_with_no_parent.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<parent_entity_id>", ENTITY_ID)
-                .replaceAll("<child_entity_id>", CHILD_ENTITY_ID)
-                .replaceAll("<child_delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
-                .replaceAll("<updated_at>", UPDATED_AT.toString())
-                .replaceAll("<created_at>", UPDATED_AT.toString());
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<parent_entity_id>", ENTITY_ID)
+                .replace("<child_entity_id>", CHILD_ENTITY_ID)
+                .replace("<child_delta_at>", EXISTING_DELTA_AT)
+                .replace("<parent_delta_at>", NEWEST_REQUEST_DELTA_AT)
+                .replace("<updated_at>", UPDATED_AT.toString())
+                .replace("<created_at>", UPDATED_AT.toString());
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1402,13 +1402,13 @@ class AnnotationTransactionIT {
         String existingDocumentJson = IOUtils.resourceToString(
                 "/mongo_docs/annotations/existing_top_level_annotation_doc.json", StandardCharsets.UTF_8);
         existingDocumentJson = existingDocumentJson
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<entity_id>", ENTITY_ID)
-                .replaceAll("<delta_at>", EXISTING_DELTA_AT)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<date>", EXISTING_DATE);
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<entity_id>", ENTITY_ID)
+                .replace("<delta_at>", EXISTING_DELTA_AT)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<date>", EXISTING_DATE);
         final FilingHistoryDocument existingDocument =
                 objectMapper.readValue(existingDocumentJson, FilingHistoryDocument.class);
         mongoTemplate.insert(existingDocument, FILING_HISTORY_COLLECTION);
@@ -1456,11 +1456,11 @@ class AnnotationTransactionIT {
     private static String getExpectedResourceDeleted(String filename) throws IOException {
         return IOUtils.resourceToString(filename,
                         StandardCharsets.UTF_8)
-                .replaceAll("<published_at>", PUBLISHED_AT)
-                .replaceAll("<transaction_id>", TRANSACTION_ID)
-                .replaceAll("<company_number>", COMPANY_NUMBER)
-                .replaceAll("<updated_at>", EXISTING_DATE)
-                .replaceAll("<created_at>", EXISTING_DATE)
-                .replaceAll("<context_id>", CONTEXT_ID);
+                .replace("<published_at>", PUBLISHED_AT)
+                .replace("<transaction_id>", TRANSACTION_ID)
+                .replace("<company_number>", COMPANY_NUMBER)
+                .replace("<updated_at>", EXISTING_DATE)
+                .replace("<created_at>", EXISTING_DATE)
+                .replace("<context_id>", CONTEXT_ID);
     }
 }
