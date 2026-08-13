@@ -684,7 +684,7 @@ class AssociatedFilingTransactionIT {
                 ))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
@@ -970,7 +970,7 @@ class AssociatedFilingTransactionIT {
                         ))))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryList.FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryList.FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when

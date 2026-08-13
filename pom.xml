@@ -23,9 +23,9 @@
 <!--    <spring.security.version>7.1.0</spring.security.version>-->
     <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
     <structured-logging.version>3.0.52</structured-logging.version>
-    <api-sdk-manager-java-library.version>3.0.18</api-sdk-manager-java-library.version>
+    <api-sdk-manager-java-library.version>3.0.28</api-sdk-manager-java-library.version>
     <api-security-java.version>2.0.8</api-security-java.version>
-    <private-api-sdk-java.version>4.0.258</private-api-sdk-java.version>
+    <private-api-sdk-java.version>UNVERSIONED</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
     <wiremock.version>3.11.0</wiremock.version>

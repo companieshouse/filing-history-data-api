@@ -39,8 +39,10 @@ public class ResourceChangedRequestMapper {
         boolean isDelete = request.isDelete();
         ChangedResourceEvent event = new ChangedResourceEvent()
                 .publishedAt(DateUtils.publishedAtString(instantSupplier.get()))
-                .type(isDelete ? "deleted" : "changed")
-                .fieldsChanged(request.fieldsChanged());
+                .type(isDelete ? "deleted" : "changed");
+        if (request.fieldsChanged() != null) {
+            event.fieldsChanged(request.fieldsChanged());
+        }
         ChangedResource changedResource = new ChangedResource()
                 .resourceUri("/company/%s/filing-history/%s".formatted(request.companyNumber(),
                         request.transactionId()))

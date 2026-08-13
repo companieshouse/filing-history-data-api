@@ -403,7 +403,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .items(getExpectedExternalData());
 
@@ -436,7 +436,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .items(getExpectedExternalData());
 
@@ -495,7 +495,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.NOT_AVAILABLE_PROTECTED_CELL_COMPANY)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_NOT_AVAILABLE_PROTECTED_CELL_COMPANY)
                 .totalCount(0)
                 .items(List.of());
 
@@ -521,7 +521,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(100)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .items(getExpectedExternalData());
 
@@ -754,7 +754,7 @@ class FilingHistoryControllerIT {
         final FilingHistoryList expectedResponseBody = new FilingHistoryList()
                 .itemsPerPage(25)
                 .startIndex(0)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(0)
                 .items(List.of());
 

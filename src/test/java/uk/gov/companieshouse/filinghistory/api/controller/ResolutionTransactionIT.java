@@ -195,7 +195,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryList expectedResponse = new FilingHistoryList()
                 .itemsPerPage(25)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .startIndex(0)
                 .items(List.of(new ExternalData()
@@ -859,7 +859,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryList expectedResponse = new FilingHistoryList()
                 .itemsPerPage(25)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .startIndex(0)
                 .items(List.of(new ExternalData()
