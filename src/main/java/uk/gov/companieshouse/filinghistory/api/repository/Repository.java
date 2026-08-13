@@ -46,7 +46,7 @@ public class Repository {
         try {
             Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
             if (!categoryList.isEmpty()) {
-                criteria.and("data.category").in(categoryList);
+                criteria = criteria.and("data.category").in(categoryList);
             }
             Aggregation aggregation = newAggregation(
                     match(criteria),
@@ -87,7 +87,7 @@ public class Repository {
         try {
             Criteria criteria = Criteria.where(COMPANY_NUMBER).is(companyNumber);
             if (!categoryList.isEmpty()) {
-                criteria.and("data.category").in(categoryList);
+                criteria = criteria.and("data.category").in(categoryList);
             }
 
             return mongoTemplate.count(Query.query(criteria), FilingHistoryDocument.class);
