@@ -2,8 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
@@ -56,7 +56,7 @@ public class ResourceChangedRequestMapper {
                 final String serialisedDeletedData =
                         objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
                 changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 LOGGER.error(SERDES_ERROR_MSG, ex, DataMapHolder.getLogMap());
                 throw new InternalServerErrorException(SERDES_ERROR_MSG);
             }

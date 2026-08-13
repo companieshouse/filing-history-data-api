@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.filinghistory.api.serdes;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication;
 import uk.gov.companieshouse.filinghistory.api.exception.InternalServerErrorException;
@@ -25,7 +25,7 @@ public class FilingHistoryDocumentCopier implements ObjectCopier<FilingHistoryDo
         try {
             return objectMapper.readValue(
                     objectMapper.writeValueAsString(originalDocument), FilingHistoryDocument.class);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to serialise/deserialise Filing History document", ex, DataMapHolder.getLogMap());
             throw new InternalServerErrorException("Failed to serialise/deserialise Filing History document");
         }

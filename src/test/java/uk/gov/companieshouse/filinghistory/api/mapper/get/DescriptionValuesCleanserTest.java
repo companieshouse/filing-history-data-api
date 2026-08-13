@@ -2,14 +2,14 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
 import uk.gov.companieshouse.api.filinghistory.ExternalData.CategoryEnum;
 
 class DescriptionValuesCleanserTest {
 
-    private final DescriptionValuesCleanser cleanser = new DescriptionValuesCleanser(new ObjectMapper());
+    private final DescriptionValuesCleanser cleanser = new DescriptionValuesCleanser(JsonMapper.builder().build());
 
     @Test
     void shouldReplaceBackslashesWithWhitespace() {

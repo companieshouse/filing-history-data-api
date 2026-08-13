@@ -9,8 +9,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -52,7 +52,7 @@ class FilingHistoryDocumentCopierTest {
     @Test
     void shouldThrowInternalServerErrorWhenJsonProcessingExceptionThrownOnWrite() throws Exception {
         // given
-        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+        when(objectMapper.writeValueAsString(any())).thenThrow(JacksonException.class);
 
         // when
         Executable executable = () -> copier.deepCopy(inputDocument);
@@ -65,7 +65,7 @@ class FilingHistoryDocumentCopierTest {
     void shouldThrowInternalServerErrorWhenJsonProcessingExceptionThrownOnRead() throws Exception {
         // given
         when(objectMapper.writeValueAsString(any())).thenReturn("object_as_string");
-        when(objectMapper.readValue(anyString(), eq(FilingHistoryDocument.class))).thenThrow(JsonProcessingException.class);
+        when(objectMapper.readValue(anyString(), eq(FilingHistoryDocument.class))).thenThrow(JacksonException.class);
 
         // when
         Executable executable = () -> copier.deepCopy(inputDocument);
