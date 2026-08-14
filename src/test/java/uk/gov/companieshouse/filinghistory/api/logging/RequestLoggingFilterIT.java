@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
+import org.springframework.test.context.ActiveProfiles;
 import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import uk.gov.companieshouse.filinghistory.api.service.FilingHistoryUpsertProces
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@ActiveProfiles("test")
 class RequestLoggingFilterIT {
 
     private static final String PUT_REQUEST_URI = "/company/{company_number}/filing-history/{transaction_id}/internal";

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
+import org.springframework.test.context.ActiveProfiles;
 import tools.jackson.databind.ObjectMapper;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -46,6 +47,7 @@ import uk.gov.companieshouse.filinghistory.api.repository.Repository;
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@ActiveProfiles("test")
 @WireMockTest(httpPort = 8889)
 class FilingHistoryControllerMongoUnavailableIT {
 

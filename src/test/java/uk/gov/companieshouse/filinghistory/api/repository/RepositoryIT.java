@@ -18,6 +18,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
@@ -37,6 +38,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginal
 
 @Testcontainers
 @SpringBootTest
+@ActiveProfiles("test")
 class RepositoryIT {
 
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
