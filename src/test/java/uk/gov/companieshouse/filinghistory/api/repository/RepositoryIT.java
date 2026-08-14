@@ -225,11 +225,12 @@ class RepositoryIT {
 
     @Test
     void testAggregationQueriesToFindDocumentsWithSortingOnDate() {
+        Instant base = Instant.parse("2026-01-01T00:00:00Z");
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
             filingHistoryDocument.transactionId(TRANSACTION_ID + i);
             filingHistoryDocument.companyNumber(COMPANY_NUMBER);
-            filingHistoryDocument.data(new FilingHistoryData().date(Instant.now()));
+            filingHistoryDocument.data(new FilingHistoryData().date(base.plusMillis(i)));
             mongoTemplate.insert(filingHistoryDocument);
         }
 
