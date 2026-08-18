@@ -70,36 +70,46 @@
         <scope>import</scope>
       </dependency>
 
+      <!-- OVERRIDE -->
+
+      <!-- override kotlin-stdlib to fix CVE-2026-53914(9.8)  - transitive dependency from com.squareup.okhttp3:okhttp-jvm:jar:5.4.0 -->
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>2.4.20-RC</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- override jackson-databind to fix  CVE-2026-54515(5.3)  - transitive dependency from private-api-sdk-java -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.22.1</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- override tomcat-embed-core to fix CVE-2026-50229(6.1), CVE-2026-66299(7.5), CVE-2026-55276(9.1), CVE-2026-53434(9.1), CVE-2026-55956(6.5), CVE-2026-59083(9.1), CVE-2026-53404(7.3), CVE-2026-55955(6.5), CVE-2026-59084(9.1)  - transitive dependency from org.springframework.boot:spring-boot-starter-web:jar:4.1.0 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>11.0.24</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- override tomcat-embed-websocket to fix CVE-2026-50229(6.1), CVE-2026-66299(7.5), CVE-2026-55276(9.1), CVE-2026-53434(9.1), CVE-2026-55956(6.5), CVE-2026-59083(9.1), CVE-2026-53404(7.3), CVE-2026-55955(6.5), CVE-2026-59084(9.1)   - transitive dependency from tomcat-embed-core 11.0.24 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
+        <version>11.0.24</version>
+        <scope>compile</scope>
+      </dependency>
+      <!-- END OF OVERRIDE -->
+
+
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-    <!-- OVERRIDE -->
-
-    <!-- override jackson-databind to fix  CVE-2026-54515(5.3)  - transitive dependency from private-api-sdk-java -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.22.1</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- override tomcat-embed-core to fix CVE-2026-50229(6.1), CVE-2026-66299(7.5), CVE-2026-55276(9.1), CVE-2026-53434(9.1), CVE-2026-55956(6.5), CVE-2026-59083(9.1), CVE-2026-53404(7.3), CVE-2026-55955(6.5), CVE-2026-59084(9.1)  - transitive dependency from org.springframework.boot:spring-boot-starter-web:jar:4.1.0 -->
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-core</artifactId>
-      <version>11.0.24</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- override tomcat-embed-websocket to fix CVE-2026-50229(6.1), CVE-2026-66299(7.5), CVE-2026-55276(9.1), CVE-2026-53434(9.1), CVE-2026-55956(6.5), CVE-2026-59083(9.1), CVE-2026-53404(7.3), CVE-2026-55955(6.5), CVE-2026-59084(9.1)   - transitive dependency from tomcat-embed-core 11.0.24 -->
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-websocket</artifactId>
-      <version>11.0.24</version>
-      <scope>compile</scope>
-    </dependency>
-    <!-- END OF OVERRIDE -->
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
