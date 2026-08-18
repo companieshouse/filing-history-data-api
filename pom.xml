@@ -20,7 +20,6 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <spring.boot.version>4.1.0</spring.boot.version>
-<!--    <spring.security.version>7.1.0</spring.security.version>-->
     <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
     <structured-logging.version>4.0.2</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.28</api-sdk-manager-java-library.version>
@@ -70,15 +69,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
-
-
-<!--      &lt;!&ndash; Pinning version to address CVE-2025-48924 commons-lang3 pulled transitively&ndash;&gt;-->
-<!--      <dependency>-->
-<!--        <groupId>org.apache.commons</groupId>-->
-<!--        <artifactId>commons-lang3</artifactId>-->
-<!--        <version>3.20.0</version>-->
-<!--      </dependency>-->
 
     </dependencies>
   </dependencyManagement>
