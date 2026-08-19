@@ -24,7 +24,7 @@
     <structured-logging.version>4.0.2</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.28</api-sdk-manager-java-library.version>
     <api-security-java.version>2.0.28</api-security-java.version>
-    <private-api-sdk-java.version>UNVERSIONED</private-api-sdk-java.version>
+    <private-api-sdk-java.version>7.2.16</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
     <wiremock.version>3.13.2</wiremock.version>
