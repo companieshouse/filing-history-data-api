@@ -10,9 +10,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -118,8 +118,7 @@ class ResourceChangedRequestMapperTest {
     @Test
     void testDeletedResourceChangedMapper() throws Exception {
         // given
-        ObjectMapper objectMapper = new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ObjectMapper objectMapper = JsonMapper.builder().build();
 
         final String deletedDataAsString = objectMapper.writeValueAsString(
                 new ExternalData()
@@ -182,7 +181,7 @@ class ResourceChangedRequestMapperTest {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(deletedData);
-        when(nullCleaningObjectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+        when(nullCleaningObjectMapper.writeValueAsString(any())).thenThrow(JacksonException.class);
 
         ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument,
                 COMPANY_NUMBER, TRANSACTION_ID, true, null);
@@ -204,7 +203,7 @@ class ResourceChangedRequestMapperTest {
         when(itemGetResponseMapper.mapFilingHistoryItem(any())).thenReturn(deletedData);
         when(nullCleaningObjectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
         when(nullCleaningObjectMapper.readValue(anyString(), eq(Object.class))).thenThrow(
-                JsonProcessingException.class);
+                JacksonException.class);
 
         ResourceChangedRequest deleteResourceChangedRequest = new ResourceChangedRequest(filingHistoryDocument,
                 COMPANY_NUMBER, TRANSACTION_ID, true, null);

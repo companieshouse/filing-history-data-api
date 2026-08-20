@@ -8,9 +8,12 @@ import static org.mockito.Mockito.when;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
@@ -22,7 +25,9 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest
+@ActiveProfiles("test")
 class ResourceChangedApiClientAspectFeatureEnabledIT {
 
     @Autowired

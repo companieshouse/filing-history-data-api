@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.IOException;
@@ -31,10 +30,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -44,7 +44,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import org.apache.commons.io.IOUtils;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.DescriptionValues;
@@ -61,6 +62,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryResoluti
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@ActiveProfiles("test")
 @WireMockTest(httpPort = 8889)
 class ResolutionTransactionIT {
 
@@ -106,7 +108,7 @@ class ResolutionTransactionIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -195,7 +197,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryList expectedResponse = new FilingHistoryList()
                 .itemsPerPage(25)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .startIndex(0)
                 .items(List.of(new ExternalData()
@@ -859,7 +861,7 @@ class ResolutionTransactionIT {
 
         FilingHistoryList expectedResponse = new FilingHistoryList()
                 .itemsPerPage(25)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .totalCount(1)
                 .startIndex(0)
                 .items(List.of(new ExternalData()

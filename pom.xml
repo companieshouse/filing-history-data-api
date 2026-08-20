@@ -6,7 +6,7 @@
   <parent>
     <groupId>uk.gov.companieshouse</groupId>
     <artifactId>companies-house-parent</artifactId>
-    <version>2.1.12</version>
+    <version>2.1.18</version>
     <relativePath/>
   </parent>
 
@@ -19,16 +19,15 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <spring.boot.version>3.5.13</spring.boot.version>
-    <spring.security.version>6.5.9</spring.security.version>
-    <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
-    <structured-logging.version>3.0.52</structured-logging.version>
-    <api-sdk-manager-java-library.version>3.0.18</api-sdk-manager-java-library.version>
-    <api-security-java.version>2.0.8</api-security-java.version>
-    <private-api-sdk-java.version>4.0.258</private-api-sdk-java.version>
-    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-    <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
-    <wiremock.version>3.11.0</wiremock.version>
+    <spring.boot.version>4.1.0</spring.boot.version>
+    <jib-maven-plugin.version>3.5.2</jib-maven-plugin.version>
+    <structured-logging.version>4.0.2</structured-logging.version>
+    <api-sdk-manager-java-library.version>3.0.28</api-sdk-manager-java-library.version>
+    <api-security-java.version>2.0.28</api-security-java.version>
+    <private-api-sdk-java.version>7.2.16</private-api-sdk-java.version>
+    <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
+    <wiremock.version>3.13.2</wiremock.version>
 
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
@@ -49,6 +48,21 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom</artifactId>
+        <version>2.30.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+        <version>2.30.0-alpha</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring.boot.version}</version>
@@ -56,29 +70,38 @@
         <scope>import</scope>
       </dependency>
 
-      <!-- Pinning version to address CVE-2025-48924 commons-lang3 pulled transitively-->
+      <!-- OVERRIDE -->
+
+      <!-- override jackson-databind to fix  CVE-2026-54515(5.3)  - transitive dependency from private-api-sdk-java -->
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.20.0</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.22.1</version>
+        <scope>compile</scope>
       </dependency>
+
+      <!-- override tomcat-embed-core to fix CVE-2026-50229(6.1), CVE-2026-66299(7.5), CVE-2026-55276(9.1), CVE-2026-53434(9.1), CVE-2026-55956(6.5), CVE-2026-59083(9.1), CVE-2026-53404(7.3), CVE-2026-55955(6.5), CVE-2026-59084(9.1)  - transitive dependency from org.springframework.boot:spring-boot-starter-web:jar:4.1.0 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>11.0.24</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <!-- override tomcat-embed-websocket to fix CVE-2026-50229(6.1), CVE-2026-66299(7.5), CVE-2026-55276(9.1), CVE-2026-53434(9.1), CVE-2026-55956(6.5), CVE-2026-59083(9.1), CVE-2026-53404(7.3), CVE-2026-55955(6.5), CVE-2026-59084(9.1)   - transitive dependency from tomcat-embed-core 11.0.24 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
+        <version>11.0.24</version>
+        <scope>compile</scope>
+      </dependency>
+      <!-- END OF OVERRIDE -->
+
 
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-    <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-core</artifactId>
-      <version>${spring.security.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-crypto</artifactId>
-      <version>${spring.security.version}</version>
-    </dependency>
-    <!--end transitive dependencies-->
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -110,7 +133,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-aop</artifactId>
+      <artifactId>spring-boot-starter-aspectj</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -123,6 +146,24 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-opentelemetry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-instrumentation-api-incubator</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
@@ -175,12 +216,12 @@
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>mongodb</artifactId>
+      <artifactId>testcontainers-mongodb</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
+      <artifactId>testcontainers-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -211,6 +252,17 @@
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-commons</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-webmvc-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.22.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

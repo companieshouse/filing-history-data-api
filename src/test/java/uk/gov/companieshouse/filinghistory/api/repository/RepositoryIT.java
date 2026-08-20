@@ -18,12 +18,13 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.filinghistory.api.exception.BadGatewayException;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryAnnotation;
 import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryData;
@@ -37,6 +38,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryOriginal
 
 @Testcontainers
 @SpringBootTest
+@ActiveProfiles("test")
 class RepositoryIT {
 
     private static final String FILING_HISTORY_COLLECTION = "company_filing_history";
@@ -60,7 +62,7 @@ class RepositoryIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -225,11 +227,12 @@ class RepositoryIT {
 
     @Test
     void testAggregationQueriesToFindDocumentsWithSortingOnDate() {
+        Instant base = Instant.parse("2026-01-01T00:00:00Z");
         for (int i = 0; i < TOTAL_RESULTS_NUMBER; i++) {
             FilingHistoryDocument filingHistoryDocument = new FilingHistoryDocument();
             filingHistoryDocument.transactionId(TRANSACTION_ID + i);
             filingHistoryDocument.companyNumber(COMPANY_NUMBER);
-            filingHistoryDocument.data(new FilingHistoryData().date(Instant.now()));
+            filingHistoryDocument.data(new FilingHistoryData().date(base.plusMillis(i)));
             mongoTemplate.insert(filingHistoryDocument);
         }
 

@@ -2,8 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.mapper.upsert;
 
 import static uk.gov.companieshouse.filinghistory.api.FilingHistoryApplication.NAMESPACE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
@@ -39,8 +39,10 @@ public class ResourceChangedRequestMapper {
         boolean isDelete = request.isDelete();
         ChangedResourceEvent event = new ChangedResourceEvent()
                 .publishedAt(DateUtils.publishedAtString(instantSupplier.get()))
-                .type(isDelete ? "deleted" : "changed")
-                .fieldsChanged(request.fieldsChanged());
+                .type(isDelete ? "deleted" : "changed");
+        if (request.fieldsChanged() != null) {
+            event.fieldsChanged(request.fieldsChanged());
+        }
         ChangedResource changedResource = new ChangedResource()
                 .resourceUri("/company/%s/filing-history/%s".formatted(request.companyNumber(),
                         request.transactionId()))
@@ -54,7 +56,7 @@ public class ResourceChangedRequestMapper {
                 final String serialisedDeletedData =
                         objectMapper.writeValueAsString(itemGetResponseMapper.mapFilingHistoryItem(document));
                 changedResource.setDeletedData(objectMapper.readValue(serialisedDeletedData, Object.class));
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 LOGGER.error(SERDES_ERROR_MSG, ex, DataMapHolder.getLogMap());
                 throw new InternalServerErrorException(SERDES_ERROR_MSG);
             }

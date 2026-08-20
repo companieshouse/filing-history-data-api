@@ -22,7 +22,7 @@ public class WebSecurityConfig {
      * Configure Http Security.
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new CustomCorsFilter(externalMethods()), CsrfFilter.class);

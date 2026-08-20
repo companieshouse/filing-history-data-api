@@ -1,18 +1,13 @@
 package uk.gov.companieshouse.filinghistory.api.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.module.SimpleModule;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ChildListMapper;
@@ -43,16 +38,10 @@ public class AppConfig {
     }
 
     @Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
-                .registerModule(new SimpleModule().addDeserializer(String.class,
-                        new EmptyFieldDeserializer()))
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    public JsonMapperBuilderCustomizer jacksonCustomizer() {
+        return builder -> builder
+                .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+                .addModule(new SimpleModule().addDeserializer(String.class, new EmptyFieldDeserializer()));
     }
 
     @Bean

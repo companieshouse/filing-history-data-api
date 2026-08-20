@@ -2,8 +2,8 @@ package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
 import static java.util.regex.Matcher.quoteReplacement;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;

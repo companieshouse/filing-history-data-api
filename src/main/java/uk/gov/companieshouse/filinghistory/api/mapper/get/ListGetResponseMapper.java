@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.mapper.get;
 
+import java.util.List;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList;
 import uk.gov.companieshouse.api.filinghistory.FilingHistoryList.FilingHistoryStatusEnum;
@@ -22,6 +23,7 @@ public class ListGetResponseMapper {
                 .startIndex(startIndex)
                 .itemsPerPage(itemsPerPage)
                 .totalCount(0)
+                .items(List.of())
                 .filingHistoryStatus(FilingHistoryStatusEnum.fromValue(status));
     }
 

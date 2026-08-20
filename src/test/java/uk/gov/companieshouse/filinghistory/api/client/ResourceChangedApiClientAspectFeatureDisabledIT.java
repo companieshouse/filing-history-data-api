@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -17,6 +18,7 @@ import uk.gov.companieshouse.filinghistory.api.mapper.upsert.ResourceChangedRequ
 import uk.gov.companieshouse.filinghistory.api.model.ResourceChangedRequest;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class ResourceChangedApiClientAspectFeatureDisabledIT {
 
     @Autowired

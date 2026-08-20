@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.IOException;
@@ -28,10 +27,11 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -41,7 +41,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import org.apache.commons.io.IOUtils;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.filinghistory.Annotation;
@@ -58,6 +59,7 @@ import uk.gov.companieshouse.filinghistory.api.model.mongo.FilingHistoryDocument
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@ActiveProfiles("test")
 @WireMockTest(httpPort = 8889)
 class AnnotationTransactionIT {
 
@@ -99,7 +101,7 @@ class AnnotationTransactionIT {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -836,7 +838,7 @@ class AnnotationTransactionIT {
                         ))))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
@@ -1164,7 +1166,7 @@ class AnnotationTransactionIT {
                         .paperFiled(true)))
                 .itemsPerPage(25)
                 .totalCount(1)
-                .filingHistoryStatus(FilingHistoryStatusEnum.AVAILABLE)
+                .filingHistoryStatus(FilingHistoryStatusEnum.FILING_HISTORY_AVAILABLE)
                 .startIndex(0);
 
         // when
