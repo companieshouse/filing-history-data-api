@@ -15,10 +15,6 @@ public class StatusConfig {
         YAMLMapper mapper = new YAMLMapper();
         InputStream stream = getClass().getResourceAsStream("/%s".formatted(rulesFile));
 
-        if (stream == null) {
-            throw new IllegalArgumentException("Rules file not found in classpath: " + rulesFile);
-        }
-
         return mapper.readValue(stream, StatusRuleProperties.class);
     }
 }
