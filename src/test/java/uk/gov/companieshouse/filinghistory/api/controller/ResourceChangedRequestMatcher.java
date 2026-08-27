@@ -1,20 +1,21 @@
 package uk.gov.companieshouse.filinghistory.api.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 
 public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
 
-    private static final ObjectMapper mapper = new ObjectMapper()
-            .setSerializationInclusion(Include.NON_EMPTY)
-            .registerModule(new JavaTimeModule());
+    private static final JsonMapper mapper = JsonMapper.builder()
+            .changeDefaultPropertyInclusion(incl -> incl
+                    .withValueInclusion(JsonInclude.Include.NON_EMPTY)
+                    .withContentInclusion(JsonInclude.Include.NON_EMPTY))
+            .build();
     private final String expectedUrl;
     private final String expectedBody;
 
@@ -55,7 +56,7 @@ public class ResourceChangedRequestMatcher implements ValueMatcher<Request> {
                 System.out.printf("%nActual: [%s]", actual);
             }
             return result;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return MatchResult.of(false);
         }
     }
