@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.filinghistory.api.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.io.IOException;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,9 +11,13 @@ import uk.gov.companieshouse.filinghistory.api.model.statusrules.StatusRulePrope
 public class StatusConfig {
 
     @Bean
-    public StatusRuleProperties statusRules(@Value("${status.rules}") String rulesFile) throws IOException {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    public StatusRuleProperties statusRules(@Value("${status.rules}") String rulesFile) {
+        YAMLMapper mapper = new YAMLMapper();
         InputStream stream = getClass().getResourceAsStream("/%s".formatted(rulesFile));
+
+        if (stream == null) {
+            throw new IllegalArgumentException("Rules file not found in classpath: " + rulesFile);
+        }
 
         return mapper.readValue(stream, StatusRuleProperties.class);
     }
