@@ -80,6 +80,7 @@
 
       <!-- OVERRIDE -->
 
+      <!-- CVE-2026-53914(9.8) replace kotlin-stdlib in org.springframework.boot:spring-boot-starter-opentelemetry:jar:4.1.1:compile -->
       <dependency>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-stdlib</artifactId>
