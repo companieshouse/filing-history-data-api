@@ -150,10 +150,12 @@
     <dependency>
       <groupId>io.opentelemetry.instrumentation</groupId>
       <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.opentelemetry.instrumentation</groupId>
       <artifactId>opentelemetry-instrumentation-api-incubator</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
