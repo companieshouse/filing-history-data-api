@@ -17,7 +17,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <ch-dependency-bom.version>0.1.25</ch-dependency-bom.version>
+    <ch-dependency-bom.version>0.1.27</ch-dependency-bom.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <spring.boot.version>4.1.1</spring.boot.version>
@@ -25,7 +25,7 @@
     <structured-logging.version>4.0.4</structured-logging.version>
     <api-sdk-manager-java-library.version>3.0.31</api-sdk-manager-java-library.version>
     <api-security-java.version>2.0.29</api-security-java.version>
-    <private-api-sdk-java.version>7.2.29</private-api-sdk-java.version>
+    <private-api-sdk-java.version>7.2.31</private-api-sdk-java.version>
     <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
     <wiremock.version>3.13.2</wiremock.version>
